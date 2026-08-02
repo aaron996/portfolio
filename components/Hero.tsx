@@ -2,6 +2,7 @@ import Link from "next/link";
 import { content } from "@/content/content.vi";
 import { Reveal } from "./ui/Reveal";
 import { Marquee } from "./ui/Marquee";
+import { Hero3DCanvas } from "./ui/Hero3DCanvas";
 
 export function Hero() {
   const { hero } = content;
@@ -45,7 +46,8 @@ export function Hero() {
           </Reveal>
         </div>
 
-        {/* Thẻ bằng chứng — thay cho ảnh 3D. Số thật, không phải trang trí. */}
+        {/* Vật thể 3D + thẻ bằng chứng. Vật thể để tạo chiều sâu thị giác;
+            số liệu bên dưới mới là thứ chứng minh, không phải hình trang trí. */}
         <Reveal delay={0.24}>
           <div className="relative">
             <div
@@ -56,6 +58,17 @@ export function Hero() {
               aria-hidden="true"
               className="absolute -right-6 -top-6 h-40 w-40 rounded-full bg-lime/5 blur-2xl"
             />
+
+            <div
+              aria-hidden="true"
+              className="relative mb-4 h-64 overflow-hidden rounded-2xl border border-ink-700 bg-ink-900 sm:h-72"
+            >
+              <Hero3DCanvas />
+              <span className="pointer-events-none absolute bottom-3 right-4 text-[11px] text-mute-3">
+                Kéo để xoay
+              </span>
+            </div>
+
             <div className="relative rounded-2xl border border-ink-700 bg-ink-900 p-6">
               <p className="eyebrow text-lime">{hero.liveCard.label}</p>
               <dl className="mt-6 grid grid-cols-2 gap-6">
