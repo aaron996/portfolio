@@ -257,15 +257,6 @@ export const content: SiteContent = {
           alt: "Bản xem trước tác động của việc điều chỉnh chỉ tiêu",
           isDemoData: true,
         },
-        {
-          id: "demo-video",
-          kind: "video",
-          brief:
-            "Video 60–90 giây: import một file lỗi → hệ thống báo lỗi → sửa → import lại → số lên dashboard → xuất báo cáo. Kể đúng một mạch, không cần voiceover.",
-          src: null,
-          alt: "Video demo luồng sử dụng chính",
-          isDemoData: true,
-        },
       ],
     },
 
