@@ -1,0 +1,82 @@
+import Link from "next/link";
+import { content } from "@/content/content.vi";
+import { Reveal } from "./ui/Reveal";
+import { Marquee } from "./ui/Marquee";
+
+export function Hero() {
+  const { hero } = content;
+  return (
+    <header className="relative overflow-hidden border-b border-ink-800 pt-28">
+      <div className="mx-auto grid w-full max-w-6xl gap-12 px-5 pb-14 sm:px-8 md:pb-20 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:items-center">
+        <div>
+          <Reveal>
+            <p className="eyebrow text-lime">{hero.eyebrow}</p>
+          </Reveal>
+
+          <Reveal delay={0.06}>
+            <h1 className="display mt-6 text-[clamp(2.6rem,8vw,5.5rem)]">
+              {hero.headline.map((line) => (
+                <span key={line} className="block">
+                  {line}
+                </span>
+              ))}
+            </h1>
+          </Reveal>
+
+          <Reveal delay={0.12}>
+            <p className="prose-lede mt-7 text-base text-mute md:text-lg">{hero.subline}</p>
+          </Reveal>
+
+          <Reveal delay={0.18}>
+            <div className="mt-9 flex flex-wrap gap-3">
+              <Link
+                href={hero.primaryCta.href}
+                className="min-h-11 rounded-lg bg-lime px-6 py-3 text-sm font-semibold text-ink-950 transition-transform hover:scale-[1.03]"
+              >
+                {hero.primaryCta.label}
+              </Link>
+              <a
+                href={hero.secondaryCta.href}
+                className="min-h-11 rounded-lg border border-ink-700 px-6 py-3 text-sm font-semibold text-paper transition-colors hover:border-lime hover:text-lime"
+              >
+                {hero.secondaryCta.label}
+              </a>
+            </div>
+          </Reveal>
+        </div>
+
+        {/* Thẻ bằng chứng — thay cho ảnh 3D. Số thật, không phải trang trí. */}
+        <Reveal delay={0.24}>
+          <div className="relative">
+            <div
+              aria-hidden="true"
+              className="absolute -right-16 -top-16 h-64 w-64 rounded-full border border-lime/25"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute -right-6 -top-6 h-40 w-40 rounded-full bg-lime/5 blur-2xl"
+            />
+            <div className="relative rounded-2xl border border-ink-700 bg-ink-900 p-6">
+              <p className="eyebrow text-lime">{hero.liveCard.label}</p>
+              <dl className="mt-6 grid grid-cols-2 gap-6">
+                {hero.liveCard.figures.map((f) => (
+                  <div key={f.label}>
+                    <dd className="font-display text-4xl font-extrabold text-paper">{f.value}</dd>
+                    <dt className="mt-1 text-xs text-mute-2">{f.label}</dt>
+                  </div>
+                ))}
+              </dl>
+              <p className="mt-6 border-t border-ink-700 pt-4 text-xs leading-relaxed text-mute-3">
+                Số liệu từ hệ thống P&amp;G Sales Operations đang vận hành tại Interdist.
+              </p>
+            </div>
+          </div>
+        </Reveal>
+      </div>
+
+      <div className="border-t border-ink-800 py-4">
+        <Marquee items={hero.ticker} />
+      </div>
+    </header>
+  );
+}
