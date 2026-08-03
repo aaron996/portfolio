@@ -1,10 +1,22 @@
 "use client";
 import { Suspense, useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
-import { useGLTF, OrbitControls, Center, Bounds } from "@react-three/drei";
+import { useGLTF, useAnimations, OrbitControls, Center, Bounds } from "@react-three/drei";
 
-function Model() {
-  const { scene } = useGLTF("/models/hero-object.glb");
+const MODEL_PATH = "/models/hero-object.glb";
+
+function Model({ reducedMotion }: { reducedMotion: boolean }) {
+  const { scene, animations } = useGLTF(MODEL_PATH);
+  const { actions, names } = useAnimations(animations, scene);
+
+  useEffect(() => {
+    const name = names[0];
+    const action = name ? actions[name] : undefined;
+    if (!action) return;
+    action.reset().play();
+    action.paused = reducedMotion;
+  }, [actions, names, reducedMotion]);
+
   return <primitive object={scene} />;
 }
 
@@ -28,7 +40,7 @@ export function Hero3D() {
       <Suspense fallback={null}>
         <Bounds fit margin={1.4}>
           <Center>
-            <Model />
+            <Model reducedMotion={reducedMotion} />
           </Center>
         </Bounds>
       </Suspense>
@@ -44,4 +56,4 @@ export function Hero3D() {
   );
 }
 
-useGLTF.preload("/models/hero-object.glb");
+useGLTF.preload(MODEL_PATH);
