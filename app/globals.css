@@ -74,6 +74,12 @@ body {
 }
 .marquee-wrap:hover .marquee-track { animation-play-state: paused; }
 
+@keyframes hero-word-in {
+  from { filter: blur(7px); transform: translateY(0.12em); }
+  to { filter: blur(0); transform: translateY(0); }
+}
+.hero-word-in { animation: hero-word-in 0.45s cubic-bezier(.22, 1, .36, 1); }
+
 :focus-visible {
   outline: 2px solid var(--color-lime);
   outline-offset: 3px;

@@ -3,6 +3,9 @@ import { content } from "@/content/content.vi";
 import { Reveal } from "./ui/Reveal";
 import { Marquee } from "./ui/Marquee";
 import { Hero3DCanvas } from "./ui/Hero3DCanvas";
+import { RotatingHeadline } from "./ui/RotatingHeadline";
+
+const HERO_PRODUCTS = ["sản phẩm dữ liệu", "dashboard vận hành", "pipeline tin cậy"];
 
 export function Hero() {
   const { hero } = content;
@@ -15,12 +18,12 @@ export function Hero() {
           </Reveal>
 
           <Reveal delay={0.06}>
-            <h1 className="display mt-6 text-[clamp(2.6rem,8vw,5.5rem)]">
-              {hero.headline.map((line) => (
-                <span key={line} className="block">
-                  {line}
-                </span>
-              ))}
+            <h1
+              className="display mt-6 text-[clamp(2.6rem,8vw,5.5rem)]"
+              aria-label={hero.headline.join(" ")}
+            >
+              <span className="block" aria-hidden="true">{hero.headline[0]}</span>
+              <RotatingHeadline words={HERO_PRODUCTS} className="text-lime" />
             </h1>
           </Reveal>
 

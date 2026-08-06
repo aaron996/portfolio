@@ -1,5 +1,6 @@
 import { content } from "@/content/content.vi";
 import { Reveal } from "./ui/Reveal";
+import { CountUp } from "./ui/CountUp";
 
 export function StatBand() {
   return (
@@ -9,8 +10,7 @@ export function StatBand() {
           <Reveal key={s.label} delay={i * 0.06}>
             <div>
               <dd className="font-display text-[clamp(2rem,5vw,3rem)] font-extrabold leading-none text-paper">
-                {s.value}
-                {s.suffix ? <span className="text-lime">{s.suffix}</span> : null}
+                <CountUp value={Number(s.value)} suffix={s.suffix} />
               </dd>
               <dt className="mt-3 text-xs leading-relaxed text-mute-2">{s.label}</dt>
             </div>

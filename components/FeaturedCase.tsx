@@ -3,6 +3,7 @@ import { content } from "@/content/content.vi";
 import { Reveal } from "./ui/Reveal";
 import { DraftBadge } from "./ui/DraftBadge";
 import { MediaPlaceholder } from "./ui/MediaPlaceholder";
+import { DecisionStepper } from "./ui/DecisionStepper";
 
 export function FeaturedCase() {
   const c = content.cases.find((x) => x.slug === content.featuredSlug);
@@ -28,22 +29,7 @@ export function FeaturedCase() {
           </Reveal>
         ) : null}
 
-        <div className="mt-12 grid gap-4 md:grid-cols-2">
-          {c.decisions.map((d, i) => (
-            <Reveal key={d.problem} delay={i * 0.05}>
-              <article className="h-full rounded-2xl border border-ink-700 bg-ink-900 p-6 transition-colors hover:border-lime/50">
-                <p className="eyebrow text-lime">
-                  {String(i + 1).padStart(2, "0")}
-                  {d.term ? ` · ${d.term.split("—")[0].trim()}` : ""}
-                </p>
-                <h3 className="mt-3 font-display text-lg font-bold uppercase leading-tight text-paper">
-                  {d.decision.split(".")[0]}.
-                </h3>
-                <p className="mt-3 text-sm leading-relaxed text-mute">{d.why}</p>
-              </article>
-            </Reveal>
-          ))}
-        </div>
+        <DecisionStepper decisions={c.decisions} />
 
         {c.results.length > 0 ? (
           <Reveal>
