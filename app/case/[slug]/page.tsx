@@ -34,6 +34,8 @@ export default async function CasePage({ params }: Params) {
   const c = content.cases.find((x) => x.slug === slug);
   if (!c) notFound();
 
+  const others = content.cases.filter((x) => x.slug !== c.slug);
+
   return (
     <>
       <ScrollProgress />
@@ -41,17 +43,27 @@ export default async function CasePage({ params }: Params) {
       <main id="main">
         <header className="border-b border-ink-800 bg-ink-950">
           <div className="mx-auto w-full max-w-6xl px-5 pb-16 pt-28 sm:px-8 md:pb-20 md:pt-32">
-            <Link href="/#projects" className="text-sm text-mute-2 transition-colors hover:text-lime">
-              ← Tất cả dự án
+            <Link href="/#cases" className="text-sm text-mute-2 transition-colors hover:text-lime">
+              ← Tất cả case
             </Link>
-            <p className="eyebrow mt-8 text-lime">{c.kindLabel}</p>
+            <p className="eyebrow mt-8 text-lime">{c.scopeLabel}</p>
             <h1 className="display mt-4 text-[clamp(2.1rem,6vw,4.2rem)]">{c.title}</h1>
-            <p className="prose-lede mt-6 text-mute md:text-lg">{c.oneLiner}</p>
+            <p className="mt-4 max-w-2xl text-base font-semibold text-paper md:text-lg">{c.proves}</p>
+            <p className="prose-lede mt-4 text-mute md:text-lg">{c.oneLiner}</p>
+
+            <div className="mt-10 inline-flex flex-col rounded-2xl border border-lime/40 bg-lime/5 px-6 py-5">
+              <span className="font-display text-2xl font-extrabold text-paper md:text-3xl">
+                {c.keyResult.value}
+                <DraftBadge verified={c.keyResult.verified} />
+              </span>
+              <span className="mt-2 text-sm text-mute-2">{c.keyResult.label}</span>
+            </div>
 
             <dl className="mt-12 grid gap-6 border-t border-ink-800 pt-8 sm:grid-cols-3">
               <div>
                 <dt className="eyebrow text-mute-3">Khách hàng</dt>
                 <dd className="mt-2 text-sm text-paper">{c.client}</dd>
+                {c.clientNote ? <dd className="mt-1 text-xs text-mute-3">{c.clientNote}</dd> : null}
               </div>
               <div>
                 <dt className="eyebrow text-mute-3">Vai trò</dt>
@@ -77,36 +89,11 @@ export default async function CasePage({ params }: Params) {
                 ))}
               </div>
             </div>
-
-            {c.problems.length > 0 && (
-              <div className="mt-14 grid gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] md:gap-16">
-                <h2 className="display text-[clamp(1.6rem,3.5vw,2.2rem)]">Vấn đề</h2>
-                <ul className="space-y-3">
-                  {c.problems.map((p) => (
-                    <li
-                      key={p.slice(0, 24)}
-                      className="rounded-lg border border-ink-700 bg-ink-900 p-4 text-sm leading-relaxed text-mute"
-                    >
-                      {p}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </Section>
-        )}
-
-        {c.flow && (
-          <Section tone="darker">
-            <SectionHeading eyebrow="Luồng dữ liệu">
-              Từ file rời rạc tới một nguồn sự thật
-            </SectionHeading>
-            <FlowDiagram nodes={c.flow.nodes} />
           </Section>
         )}
 
         {c.decisions.length > 0 && (
-          <Section className="border-b border-ink-800">
+          <Section tone="darker" className="border-b border-ink-800">
             <SectionHeading eyebrow="Phần khó">
               Những quyết định đứng sau con số
             </SectionHeading>
@@ -137,7 +124,7 @@ export default async function CasePage({ params }: Params) {
           </Section>
         )}
 
-        {c.features.length > 0 && (
+        {c.features && c.features.length > 0 && (
           <Section className="border-b border-ink-800">
             <SectionHeading eyebrow="Sản phẩm">Những gì đã ship</SectionHeading>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -153,7 +140,16 @@ export default async function CasePage({ params }: Params) {
           </Section>
         )}
 
-        {c.media.length > 0 && (
+        {c.flow && (
+          <Section tone="darker" className="border-b border-ink-800">
+            <SectionHeading eyebrow="Luồng dữ liệu">
+              {c.flowHeading || "Từ dữ liệu thô tới một nguồn sự thật"}
+            </SectionHeading>
+            <FlowDiagram nodes={c.flow.nodes} />
+          </Section>
+        )}
+
+        {c.media && c.media.length > 0 && (
           <Section className="border-b border-ink-800">
             <SectionHeading eyebrow="Demo">Hệ thống trông như thế nào</SectionHeading>
             <div className="grid gap-5 md:grid-cols-2">
@@ -177,8 +173,8 @@ export default async function CasePage({ params }: Params) {
                       <dt className="text-sm text-mute-3">{r.label}</dt>
                       <dd>
                         <p className="mt-1 font-display text-xl font-bold text-paper">
-                          {r.value.value}
-                          <DraftBadge todo={r.value.todo} />
+                          {r.value}
+                          <DraftBadge verified={r.verified} title={r.method} />
                         </p>
                         <p className="mt-2 text-xs leading-relaxed text-mute-3">{r.method}</p>
                       </dd>
@@ -244,6 +240,29 @@ export default async function CasePage({ params }: Params) {
                   </p>
                 ))}
               </div>
+            </div>
+          </Section>
+        )}
+
+        {others.length > 0 && (
+          <Section tone="darker" className="border-b border-ink-800">
+            <SectionHeading eyebrow="Case khác">Xem tiếp</SectionHeading>
+            <div className="grid gap-4 sm:grid-cols-3">
+              {others.map((o) => (
+                <Link
+                  key={o.slug}
+                  href={`/case/${o.slug}`}
+                  className="group flex h-full flex-col rounded-xl border border-ink-700 bg-ink-900 p-5 transition-colors hover:border-lime/50"
+                >
+                  <p className="eyebrow text-lime">{o.scopeLabel}</p>
+                  <h3 className="mt-2 font-display text-sm font-bold uppercase leading-tight text-paper">
+                    {o.title}
+                  </h3>
+                  <span className="mt-3 text-xs font-semibold text-lime group-hover:underline">
+                    Xem chi tiết →
+                  </span>
+                </Link>
+              ))}
             </div>
           </Section>
         )}

@@ -3,6 +3,7 @@ import { content } from "@/content/content.vi";
 import { Reveal } from "./ui/Reveal";
 import { Marquee } from "./ui/Marquee";
 import { Hero3DCanvas } from "./ui/Hero3DCanvas";
+import { RotatingWord } from "./ui/RotatingWord";
 
 export function Hero() {
   const { hero } = content;
@@ -21,6 +22,11 @@ export function Hero() {
                   {line}
                 </span>
               ))}
+              {hero.headlineRotating && hero.headlineRotating.length > 0 ? (
+                <span className="block">
+                  <RotatingWord words={hero.headlineRotating} />
+                </span>
+              ) : null}
             </h1>
           </Reveal>
 
@@ -71,17 +77,21 @@ export function Hero() {
 
             <div className="relative rounded-2xl border border-ink-700 bg-ink-900 p-6">
               <p className="eyebrow text-lime">{hero.liveCard.label}</p>
-              <dl className="mt-6 grid grid-cols-2 gap-6">
+              <dl className="mt-6 space-y-5">
                 {hero.liveCard.figures.map((f) => (
-                  <div key={f.label}>
-                    <dd className="font-display text-4xl font-extrabold text-paper">{f.value}</dd>
+                  <div key={f.label} className="border-t border-ink-800 pt-4 first:border-t-0 first:pt-0">
+                    <dd className="break-words font-display text-3xl font-extrabold leading-tight text-paper">
+                      {f.value}
+                    </dd>
                     <dt className="mt-1 text-xs text-mute-2">{f.label}</dt>
                   </div>
                 ))}
               </dl>
-              <p className="mt-6 border-t border-ink-700 pt-4 text-xs leading-relaxed text-mute-3">
-                Số liệu từ hệ thống P&amp;G Sales Operations đang vận hành tại Interdist.
-              </p>
+              {hero.liveCard.caption ? (
+                <p className="mt-6 border-t border-ink-700 pt-4 text-xs leading-relaxed text-mute-3">
+                  {hero.liveCard.caption}
+                </p>
+              ) : null}
             </div>
           </div>
         </Reveal>

@@ -7,17 +7,31 @@ import { MediaPlaceholder } from "./ui/MediaPlaceholder";
 export function FeaturedCase() {
   const c = content.cases.find((x) => x.slug === content.featuredSlug);
   if (!c) return null;
-  const hero = c.media[0];
+  const hero = c.media?.[0];
+  const decisionCount = c.homepageDecisionCount ?? c.decisions.length;
+  const homepageDecisions = c.decisions.slice(0, decisionCount);
 
   return (
-    <section id="featured" className="border-b border-ink-800 bg-ink-950">
+    <section id="cases" className="border-b border-ink-800 bg-ink-950">
       <div className="mx-auto w-full max-w-6xl px-5 py-20 sm:px-8 md:py-28">
         <Reveal>
           <p className="eyebrow text-lime">
-            Case study · {c.client}
+            {content.sectionLabels.featuredEyebrow} {c.client}
+            {c.clientNote ? <span className="text-mute-3"> · {c.clientNote}</span> : null}
           </p>
           <h2 className="display mt-4 text-[clamp(2rem,5.5vw,3.75rem)]">{c.title}</h2>
-          <p className="prose-lede mt-6 text-mute md:text-lg">{c.oneLiner}</p>
+          <p className="mt-4 max-w-2xl text-base font-semibold text-paper md:text-lg">{c.proves}</p>
+          <p className="prose-lede mt-4 text-mute md:text-lg">{c.oneLiner}</p>
+        </Reveal>
+
+        <Reveal delay={0.06}>
+          <div className="mt-10 inline-flex flex-col rounded-2xl border border-lime/40 bg-lime/5 px-6 py-5">
+            <span className="font-display text-2xl font-extrabold text-paper md:text-3xl">
+              {c.keyResult.value}
+              <DraftBadge verified={c.keyResult.verified} />
+            </span>
+            <span className="mt-2 text-sm text-mute-2">{c.keyResult.label}</span>
+          </div>
         </Reveal>
 
         {hero ? (
@@ -29,7 +43,7 @@ export function FeaturedCase() {
         ) : null}
 
         <div className="mt-12 grid gap-4 md:grid-cols-2">
-          {c.decisions.map((d, i) => (
+          {homepageDecisions.map((d, i) => (
             <Reveal key={d.problem} delay={i * 0.05}>
               <article className="h-full rounded-2xl border border-ink-700 bg-ink-900 p-6 transition-colors hover:border-lime/50">
                 <p className="eyebrow text-lime">
@@ -45,31 +59,12 @@ export function FeaturedCase() {
           ))}
         </div>
 
-        {c.results.length > 0 ? (
-          <Reveal>
-            <div className="mt-10 rounded-2xl border border-lime/40 bg-lime/5 p-6 md:p-8">
-              <p className="eyebrow text-lime">Kết quả</p>
-              <dl className="mt-5 grid gap-6 md:grid-cols-3">
-                {c.results.map((r) => (
-                  <div key={r.label}>
-                    <dd className="font-display text-xl font-bold text-paper">
-                      {r.value.value}
-                      <DraftBadge todo={r.value.todo} />
-                    </dd>
-                    <dt className="mt-2 text-xs leading-relaxed text-mute-2">{r.method}</dt>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          </Reveal>
-        ) : null}
-
         <Reveal>
           <Link
             href={`/case/${c.slug}`}
             className="mt-10 inline-flex min-h-11 items-center rounded-lg border border-ink-700 px-6 py-3 text-sm font-semibold text-paper transition-colors hover:border-lime hover:text-lime"
           >
-            Đọc case study đầy đủ →
+            Đọc case study đầy đủ ({c.decisions.length - decisionCount > 0 ? `+${c.decisions.length - decisionCount} quyết định, ` : ""}kết quả, ownership) →
           </Link>
         </Reveal>
       </div>

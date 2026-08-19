@@ -9,11 +9,9 @@ export function ValueProp() {
     <section className="border-b border-ink-800 bg-lime text-ink-950">
       <div className="mx-auto w-full max-w-6xl px-5 py-20 sm:px-8 md:py-28">
         <Reveal>
-          <h2 className="display text-[clamp(2rem,6.5vw,4.5rem)]">
-            Tôi biến dữ liệu phức tạp thành hành động rõ ràng
-          </h2>
+          <h2 className="display text-[clamp(2rem,6.5vw,4.5rem)]">{content.sectionLabels.ctaHeading}</h2>
           <p className="prose-lede mt-8 text-base leading-relaxed text-ink-950/80 md:text-lg">
-            {content.intro.body[2]}
+            {content.sectionLabels.ctaBody}
           </p>
         </Reveal>
       </div>

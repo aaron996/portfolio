@@ -1,43 +1,74 @@
 import type { SiteContent } from "./types";
 
+/**
+ * ⚠️ Chỗ cần Vinh điền trước khi deploy.
+ * Cố tình render ra chữ chói mắt để KHÔNG lỡ ship như chuỗi "TODO:" ở bản cũ.
+ * Tìm hết bằng: grep -n "NEEDS_INPUT" content_vi.ts
+ */
+const NEEDS_INPUT = (hint: string) => `⚠️ NEEDS_INPUT: ${hint}`;
+
 export const content: SiteContent = {
   meta: {
     name: "Lương Thế Vinh",
-    roleLabel: "Data & Business Analytics",
+    roleLabel: "BI & Data Analyst",
     title: "Lương Thế Vinh — BI & Data Analyst",
     description:
-      "Tôi biến quy trình báo cáo thủ công thành hệ thống dữ liệu chạy đúng mỗi tuần. 6 năm trong logistics và thương mại điện tử: Shopee, GHN, J&T Express, Maersk.",
+      "Tôi chốt định nghĩa chỉ tiêu, dựng data model, rồi tự ship hệ thống sinh ra con số đó. Sáu năm vận hành logistics và thương mại điện tử: Shopee, GHN, J&T Express, Maersk.",
     ogImage: "/og.png",
-    url: "https://TODO-thay-domain.com",
+    url: "https://REPLACE-ME.com", // ⚠️ thay domain thật trước khi deploy (ảnh hưởng OG tag)
     locale: "vi_VN",
   },
 
+  /* Nav cũ có cả "Case study" (#featured) và "Dự án" (#projects) — người đọc không
+     biết hai cái đó khác gì nhau. Giờ chỉ còn một mục #cases, hierarchy nằm trong
+     chính danh sách case. */
   nav: [
-    { label: "Case study", href: "#featured" },
-    { label: "AI", href: "#ai" },
-    { label: "Dự án", href: "#projects" },
+    { label: "Case", href: "#cases" },
+    { label: "Cách làm việc", href: "#pipeline" },
     { label: "Năng lực", href: "#skills" },
     { label: "Kinh nghiệm", href: "#experience" },
+    { label: "Liên hệ", href: "#contact" },
   ],
 
   hero: {
-    eyebrow: "BI / DATA ANALYST · AI-ASSISTED BUILDER · HỒ CHÍ MINH",
-    headline: ["Analyst tự build được", "sản phẩm dữ liệu"],
+    /* Bỏ "AI-ASSISTED BUILDER" khỏi eyebrow: AI là phương tiện, không phải danh tính,
+       và nó đã được nói ở process.aiNote. Thêm domain vì đó mới là thứ khiến bạn
+       khác biệt với một BI analyst chung chung. */
+    eyebrow: "BI / DATA ANALYST · LOGISTICS & E-COMMERCE · HỒ CHÍ MINH",
+    headline: ["Analyst tự build được"],
+    /* Bản render đang luân phiên "dashboard vận hành" ⇄ "sản phẩm dữ liệu".
+       Mình bỏ "dashboard vận hành" — nó tự hạ cấp bạn xuống người làm dashboard,
+       đúng cái định vị bạn đang cố thoát ra. Ba từ thay thế đều leo thang về quyền
+       sở hữu: sản phẩm → hệ thống → con số có người chịu trách nhiệm. */
+    headlineRotating: ["sản phẩm dữ liệu", "hệ thống báo cáo", "con số dám bảo vệ"],
     subline:
-      "Tôi dùng AI để đi từ nghiệp vụ tới hệ thống chạy thật — nhưng con số thì tôi tự định nghĩa, tự đối chiếu và tự chịu trách nhiệm khi nó sai. Sáu năm trong vận hành logistics và thương mại điện tử.",
-    primaryCta: { label: "Xem case study", href: "#featured" },
+      "Sáu năm trong vận hành logistics và thương mại điện tử. Tôi chốt định nghĩa chỉ tiêu, dựng data model, rồi tự ship hệ thống sinh ra con số — và chịu trách nhiệm khi nó sai.",
+    primaryCta: { label: "Xem case", href: "#cases" },
     secondaryCta: { label: "Tải CV", href: "/cv.pdf" },
-    stats: [],
+
+    /* SỬA QUAN TRỌNG: liveCard cũ hiển thị 41 cửa hàng · 176 SKU (Interdist).
+       Đó là con số ĐẦU TIÊN người đọc thấy, và nó là scale nhỏ nhất trong CV bạn.
+       Con số nhận diện phải đến từ GHN — job chính, quy mô lớn nhất.
+       Số Interdist đã chuyển xuống cases[0].keyResult, nơi nó đúng ngữ cảnh. */
     liveCard: {
-      label: "Sản phẩm đang chạy production",
+      label: "Đang phụ trách",
       figures: [
-        { value: "41", label: "cửa hàng" },
-        { value: "176", label: "SKU đang quản lý" },
+        {
+          value: NEEDS_INPUT("sản lượng/tháng bạn đang phụ trách ở GHN"),
+          label: "đơn/tháng — tài khoản Shopee Express & Bulky",
+        },
+        { value: "4", label: "hệ thống dữ liệu đang chạy thật" },
       ],
+      /* Caption cũ ghi "Số liệu từ hệ thống P&G Sales Operations đang vận hành tại
+         Interdist" — tức dòng chú thích ngay dưới màn hình đầu tiên nói với người đọc
+         rằng thành tựu tiêu biểu của bạn thuộc về một engagement bán thời gian 3 tháng. */
+      caption: "Phạm vi công việc chính tại GHN. Chi tiết từng hệ thống ở phần case bên dưới.",
     },
+
     ticker: [
       "SQL / Trino",
       "Iceberg lakehouse",
+      "StarRocks",
       "PostgreSQL",
       "Python",
       "Metabase",
@@ -49,86 +80,93 @@ export const content: SiteContent = {
     ],
   },
 
+  /* statBand cũ trộn 3 mốc thời gian mà không nói ra: 97.5% là Shopee 2021,
+     300k đơn/ngày là J&T 2020, đứng cạnh "4 hệ thống đã ship" (hiện tại).
+     Người đọc gộp hết thành một khối mơ hồ. `note` làm rõ từng số thuộc về đâu —
+     và nghịch lý là ghi rõ "2021–2025" lại làm con số đáng tin hơn, không kém hơn. */
   statBand: [
-    { value: "6", suffix: "+", label: "năm vận hành & phân tích" },
-    { value: "97.5", suffix: "%", label: "pickup on-time, từ 90.1% (VTP)" },
-    { value: "4", label: "hệ thống dữ liệu đã ship" },
-    { value: "300", suffix: "k", label: "đơn/ngày từng vận hành" },
+    { value: "6", suffix: "+", label: "năm vận hành & phân tích dữ liệu" },
+    {
+      value: "97.5",
+      suffix: "%",
+      label: "pickup on-time, từ 90.1%",
+      note: "Shopee × Viettel Post · 2021–2025 · đã xác nhận",
+    },
+    { value: "4", label: "hệ thống dữ liệu đang chạy production", note: "GHN · Interdist · hiện tại" },
+    { value: "300", suffix: "k", label: "đơn/ngày từng vận hành", note: "J&T Express × Shopee · 2020–2021" },
   ],
 
   intro: {
     heading: "Tôi đứng giữa nghiệp vụ và dữ liệu",
     body: [
       "Tôi bắt đầu từ vận hành, không phải từ kỹ thuật. Sáu năm ngồi trong logistics và thương mại điện tử dạy tôi một thứ mà không khoá học nào dạy được: biết khi nào một con số trông thì đúng nhưng thật ra sai, và sai ở khâu nào.",
-      "Công việc của tôi là dịch vấn đề vận hành thành định nghĩa dữ liệu rõ ràng — chỉ tiêu này tính trên grain nào, đơn nào được tính, ngoại lệ xử lý ra sao — rồi biến định nghĩa đó thành pipeline và báo cáo chạy đều đặn mà người dùng tin được.",
-      "Tôi dùng AI để viết code nhanh hơn. Nhưng phần khó không nằm ở code: nó nằm ở việc quyết định business rule nào đúng, kiểm chứng đầu ra với dữ liệu thật, và chịu trách nhiệm khi báo cáo lệch.",
+      "Công việc của tôi là dịch vấn đề vận hành thành định nghĩa dữ liệu rõ ràng — chỉ tiêu này tính trên grain nào, đơn nào được tính, ngoại lệ xử lý ra sao — rồi biến định nghĩa đó thành pipeline và báo cáo mà người dùng dám tin.",
+      /* Câu này là "bản đồ cho người đọc". Nó là thứ bản cũ thiếu: 4 case trước đây
+         là 4 dự án na ná nhau; giờ chúng được khai báo thẳng là 4 luận điểm khác nhau,
+         nên người đọc biết vì sao phải đọc cả bốn. */
+      "Bốn case dưới đây chứng minh bốn điều khác nhau: một sản phẩm tôi ship end-to-end một mình, một hệ thống tôi chuẩn hoá cho cả team, một rule engine tôi dựng ra từ tranh chấp giữa các bộ phận, và một con số kết quả đã được đối tác xác nhận.",
     ],
     boundary:
       "Tôi không định vị mình là software engineer. Tôi là người xây hệ thống dữ liệu cho bài toán vận hành mình hiểu rõ.",
   },
 
+  /* Bốn chuỗi này trước đây hardcode trong component. Thay đổi quan trọng nhất là
+     "Dự án khác" → công việc chính của bạn không phải "khác". */
+  sectionLabels: {
+    featuredEyebrow: "Case tiêu biểu ·",
+    otherCasesEyebrow: "Ba case còn lại",
+    otherCasesHeading: "Ba bài toán, ba loại bằng chứng",
+    ctaHeading: "Tôi biến dữ liệu phức tạp thành hành động rõ ràng",
+    /* Field mới, không có trong bản gốc gửi qua — bản gốc dùng intro.body[2] cho
+       chỗ này, nhưng body[2] mới mang nghĩa khác (dẫn nhập 4 case). Câu dưới đây
+       ghép lại từ boundary + tinh thần "chịu trách nhiệm khi số sai" lặp lại xuyên
+       suốt các decision, không phải claim mới. */
+    ctaBody:
+      "Tôi không chỉ viết được query nhanh. Tôi biết chỉ tiêu nào đúng, số nào sai ở đâu, và đứng sau con số đó khi có người hỏi lại.",
+  },
+
   featuredSlug: "pg-sales-operations",
 
   cases: [
-    /* ─────────────────────────────────────────────────────────────
-       CASE 1 — Trụ chính. Đây là case duy nhất bạn sở hữu end-to-end.
-       ───────────────────────────────────────────────────────────── */
+    /* ═══════════════════════════════════════════════════════════════════════
+       FLAGSHIP — Interdist. Đọc đầu tiên vì đây là case duy nhất trả lời được
+       "thuê anh thì anh làm được gì cho tôi" (quan trọng với nửa client consulting").
+       Nhưng `clientNote` nói rõ đây là engagement bán thời gian, để nó KHÔNG bị
+       đọc thành job chính của bạn.
+       ═══════════════════════════════════════════════════════════════════════ */
     {
       slug: "pg-sales-operations",
-      kind: "product",
-      kindLabel: "Sản phẩm",
+      tier: "flagship",
+      scopeLabel: "Sản phẩm end-to-end · 1 người",
+      proves: "Tôi ship được một sản phẩm dữ liệu chạy thật — từ phỏng vấn nghiệp vụ tới production — một mình.",
       title: "P&G Sales Operations Dashboard",
       client: "Interdist",
-      role: "Data Product Owner — sở hữu từ nghiệp vụ, data model, đến sản phẩm vận hành thật",
+      clientNote: "Bán thời gian, làm từ xa, song song với công việc chính ở GHN",
+      role: "Sở hữu toàn bộ phần dữ liệu và sản phẩm: nghiệp vụ → data model → ứng dụng → vận hành",
       period: "T5/2026 – nay",
       oneLiner:
         "Hệ thống nội bộ gom doanh số từ các file Excel rời rạc thành một nguồn dữ liệu duy nhất, có phân quyền, có audit trail, và tự sinh báo cáo cho quản lý.",
       accent: "navy",
 
+      /* Số lấy trực tiếp từ Postgres production (xem note cuối file).
+         "85.563 giao dịch" mạnh hơn "41 cửa hàng" rất nhiều: nó nói lên khối lượng
+         dữ liệu hệ thống đang gánh, không chỉ phạm vi master data. */
+      keyResult: {
+        value: "85.563 giao dịch doanh số",
+        label: "41 cửa hàng · 176 SKU · 8 tài khoản người dùng · đang chạy production",
+        verified: true,
+      },
+
+      /* Rút từ 3 đoạn xuống 2. Đoạn "tôi tham gia ban đầu ở mảng dashboard, sau đó
+         nhận trọn phần dữ liệu" đã chuyển vào `role` — nó là thông tin về vai trò,
+         không phải về bối cảnh. */
       context: [
-        "Interdist phụ trách hoạt động phân phối cho P&G qua nhiều kênh và vùng. Số liệu doanh số về dưới dạng file Excel rời rạc, mỗi nguồn một định dạng.",
-        "Việc tổng hợp theo vùng, kênh, sản phẩm và chỉ tiêu là công việc tay lặp lại mỗi kỳ. Quản lý cần xem tiến độ target nhanh, nhưng lại không dám tin số nếu không có người kiểm lại.",
-        "Tôi tham gia ban đầu ở mảng dashboard, sau đó nhận trọn phần dữ liệu: từ định nghĩa chỉ tiêu, thiết kế bảng, đến xây và vận hành hệ thống.",
+        "Interdist phụ trách phân phối cho P&G qua nhiều kênh và vùng. Số liệu doanh số về dưới dạng file Excel rời rạc, mỗi nguồn một định dạng, và việc tổng hợp theo vùng / kênh / sản phẩm là công việc tay lặp lại mỗi kỳ.",
+        "Quản lý cần xem tiến độ target nhanh, nhưng không dám tin số nếu chưa có người kiểm lại — vì mỗi người tổng hợp một kiểu và không ai truy được số nào đúng.",
       ],
 
-      problems: [
-        "Dữ liệu đầu vào không đồng nhất: ngày tháng, định dạng số, mã SKU và cấu trúc file đều khác nhau giữa các nguồn.",
-        "Không có một nguồn sự thật duy nhất — mỗi người tổng hợp một kiểu, ra số khác nhau, và không ai truy được số nào đúng.",
-        "Chỉ tiêu tháng không thể chia đều cho số ngày; cửa hàng có lịch hoạt động khác nhau và có ngoại lệ theo ngày.",
-        "Giá bán thay đổi theo kênh, theo cửa hàng và theo khoảng thời gian hiệu lực — dùng sai giá là sai doanh thu.",
-        "Cần kiểm soát ai được sửa gì, và lưu vết mọi thay đổi ảnh hưởng tới con số báo cáo.",
-      ],
-
-      ownership: {
-        owned: [
-          "Phỏng vấn nghiệp vụ và chốt định nghĩa chỉ tiêu",
-          "Thiết kế lược đồ dữ liệu (fact doanh số, các bảng dimension cửa hàng / sản phẩm / giá / target)",
-          "Business rule: tách SKU, phân bổ target, chọn giá hiệu lực",
-          "Xây toàn bộ ứng dụng (AI-assisted): frontend, backend, cơ sở dữ liệu, phân quyền",
-          "Kiểm chứng đầu ra bằng dữ liệu thật trước khi phát hành",
-          "Vận hành và xử lý phản hồi người dùng sau khi lên production",
-        ],
-        notOwned: [],
-      },
-
-      flow: {
-        nodes: [
-          { id: "excel", label: "Excel doanh số", sublabel: "nhiều nguồn, nhiều định dạng" },
-          { id: "validate", label: "Kiểm tra & chuẩn hoá", sublabel: "chặn số sai ở biên" },
-          { id: "db", label: "Cơ sở dữ liệu trung tâm", sublabel: "Supabase / Postgres" },
-          { id: "master", label: "Target, giá, cửa hàng", sublabel: "master data có hiệu lực theo thời gian" },
-          { id: "kpi", label: "KPI · biểu đồ · bảng chi tiết" },
-          { id: "report", label: "Báo cáo HTML / PNG / Telegram" },
-        ],
-        edges: [
-          { from: "excel", to: "validate" },
-          { from: "validate", to: "db" },
-          { from: "master", to: "db" },
-          { from: "db", to: "kpi" },
-          { from: "kpi", to: "report" },
-        ],
-      },
-
+      /* `problems[]` cũ đã bỏ: 5 gạch đầu dòng ở đó trùng gần hết với
+         decisions[].problem bên dưới. Người đọc phải đọc cùng một vấn đề 2 lần. */
       decisions: [
         {
           problem: "Tách category và SKU từ tiêu đề cột dạng CATEGORY.SKU",
@@ -141,22 +179,33 @@ export const content: SiteContent = {
           problem: "Dữ liệu Excel bẩn: định dạng số, ngày tháng, ô thiếu",
           why: "Cám dỗ lớn nhất là 'tự sửa cho xong'. Nhưng sửa im lặng nghĩa là một hôm nào đó báo cáo lệch mà không ai biết bắt đầu tìm từ đâu.",
           decision:
-            "Chuẩn hoá những gì có quy tắc chắc chắn; còn lại thì từ chối import và báo lỗi cụ thể tới dòng, tới cột. Số sai bị chặn ở biên, không cho chảy vào cơ sở dữ liệu.",
-          term: "Validation ở biên (data contract) thay vì sửa ngầm",
+            "File lên trước vào bảng staging riêng, kiểm tra từng dòng ở đó, rồi mới được đẩy sang bảng giao dịch thật. Cái gì có quy tắc chắc chắn thì chuẩn hoá; còn lại từ chối import và báo lỗi cụ thể tới dòng, tới cột. Số sai bị chặn ở biên, không bao giờ chạm tới bảng fact.",
+          term: "Staging rồi mới promote — data contract thay vì sửa ngầm",
         },
         {
           problem: "Giá khác nhau theo kênh, cửa hàng và khoảng thời gian",
           why: "Nếu tính doanh thu bằng giá hiện tại, thì mỗi lần đổi giá là toàn bộ lịch sử doanh thu tự thay đổi theo. Báo cáo tháng trước in ra hôm nay sẽ khác báo cáo in tháng trước.",
           decision:
-            "Lưu giá kèm khoảng hiệu lực. Doanh thu luôn tính theo giá đúng tại thời điểm phát sinh giao dịch, không phải giá hiện hành.",
-          term: "Effective-dated dimension (tương đương SCD Type 2)",
+            "Lưu giá kèm khoảng hiệu lực, và định nghĩa rõ thứ tự ưu tiên: dòng giá riêng của cửa hàng ghi đè dòng giá mặc định toàn hệ thống. Doanh thu luôn tính theo giá đúng tại thời điểm phát sinh giao dịch, không phải giá hiện hành.",
+          term: "Effective-dated dimension (tương đương SCD Type 2), có precedence rõ ràng",
         },
         {
           problem: "Phân bổ chỉ tiêu tháng thành chỉ tiêu ngày",
           why: "Chia đều cho 30 ngày là sai. Cửa hàng có lịch hoạt động riêng, có ngày nghỉ, có ngoại lệ. Chia sai thì tiến độ hằng ngày trở nên vô nghĩa và quản lý mất niềm tin vào dashboard.",
           decision:
-            "Phân bổ theo lịch hoạt động thực của từng cửa hàng, cho phép ghi đè ngoại lệ theo ngày. Mọi điều chỉnh đều có bản xem trước tác động, ghi audit trail, và hoàn tác được.",
-          term: "Target allocation theo calendar dimension",
+            "Hai tầng: trọng số theo thứ trong tuần cho từng cửa hàng từng tháng, và ngoại lệ theo đúng một ngày cụ thể ghi đè lên trọng số đó. Mọi điều chỉnh đi theo lô — có bản xem trước tác động, có audit trail, và hoàn tác được cả lô.",
+          term: "Target allocation hai tầng: weekday weight + date override",
+        },
+        {
+          /* Quyết định này đọc ra được từ chính comment bạn viết trong schema
+             (`monthly_targets`: "Actuals should be computed from fact, not stored here").
+             Nó là kỷ luật mô hình hoá, và là thứ phân biệt người thiết kế data model
+             với người dựng bảng cho xong. */
+          problem: "Có nên lưu số thực đạt cạnh chỉ tiêu cho tiện truy vấn không",
+          why: "Lưu số dẫn xuất cạnh số gốc nghĩa là tạo ra hai nguồn sự thật cho cùng một con số. Chỉ cần một lần import muộn hoặc một lần sửa lịch sử là hai nơi lệch nhau — và lúc đó không ai biết nơi nào đúng.",
+          decision:
+            "Bảng chỉ tiêu chỉ lưu chỉ tiêu. Số thực đạt luôn được tính từ bảng giao dịch tại thời điểm đọc, không bao giờ lưu song song. Chậm hơn một chút, nhưng không bao giờ lệch.",
+          term: "Không lưu số dẫn xuất — derived metric tính tại thời điểm đọc",
         },
         {
           problem: "Ai được sửa gì, và làm sao truy lại khi số lệch",
@@ -167,21 +216,76 @@ export const content: SiteContent = {
         },
       ],
 
+      ownership: {
+        owned: [
+          "Phỏng vấn nghiệp vụ và chốt định nghĩa chỉ tiêu",
+          "Thiết kế lược đồ dữ liệu (fact doanh số, dimension cửa hàng / sản phẩm / giá / target)",
+          "Business rule: tách SKU, phân bổ target, chọn giá hiệu lực",
+          "Xây toàn bộ ứng dụng (AI-assisted): frontend, backend, cơ sở dữ liệu, phân quyền",
+          "Kiểm chứng đầu ra bằng dữ liệu thật trước khi phát hành",
+          "Vận hành và xử lý phản hồi người dùng sau khi lên production",
+        ],
+        notOwned: [
+          "Hạ tầng và bảo mật cấp doanh nghiệp của Interdist — tôi làm việc trong khuôn khổ có sẵn",
+        ],
+      },
+
+      results: [
+        {
+          label: "Thời gian tổng hợp một kỳ báo cáo",
+          value: "~40–60 giờ / tháng được giải phóng",
+          method:
+            "Ước tính thận trọng dựa trên quy trình của 3–4 PIC: thay thế thao tác tổng hợp Excel thủ công, giảm phụ thuộc công thức lặp lại, tập trung dữ liệu giá / chỉ tiêu / mapping cửa hàng. Sẽ được xác thực thêm bằng theo dõi thời gian sử dụng thực tế.",
+          verified: false,
+        },
+        {
+          label: "Khối lượng dữ liệu đang gánh",
+          value: "85.563 giao dịch · 12.476 bản tổng hợp ngày · 569 dòng chỉ tiêu tháng",
+          method: "Đếm trực tiếp từ Postgres production. Bảng tổng hợp ngày được dẫn xuất từ bảng giao dịch, không nhập tay.",
+          verified: true,
+        },
+        {
+          label: "Người dùng",
+          value: "8 tài khoản",
+          method: "Số profile đang hoạt động trên hệ thống, phân ba cấp quyền",
+          verified: true,
+        },
+        {
+          label: "Phạm vi master data",
+          value: "41 cửa hàng · 176 SKU · 6 vùng · 2 kênh",
+          method: "Hệ thống đang được mở rộng cho các khách hàng khác của Interdist.",
+          verified: true,
+        },
+        {
+          label: "Kiểm soát truy cập",
+          value: "Row Level Security bật trên toàn bộ 22 bảng",
+          method: "Phân quyền được thực thi ở tầng cơ sở dữ liệu, không chỉ ở tầng giao diện — người dùng không thể lách qua API để đọc dữ liệu ngoài phạm vi.",
+          verified: true,
+        },
+      ],
+
+      /* Đã XOÁ chuỗi "TODO: thêm một điều bạn sẽ làm khác đi..." — nó nằm trong
+         mảng render ra UI và sẽ ship thẳng lên production.
+         Vẫn nên có reflection thứ hai, nhưng phải là chuyện thật của bạn: xem note
+         mình gửi kèm. */
+      reflection: [
+        "Sai lầm lớn nhất ở giai đoạn đầu là tôi build dashboard trước khi chốt xong định nghĩa chỉ tiêu. Kết quả là phải làm lại phần tính toán khi nghiệp vụ nói lại cho rõ. Từ đó tôi luôn viết định nghĩa ra giấy và cho người dùng xác nhận trước khi động vào code.",
+      ],
+
       features: [
         {
           title: "Import & chuẩn hoá Excel",
-          description:
-            "Tải file lên, hệ thống kiểm tra và báo lỗi cụ thể trước khi ghi. Không có dữ liệu nào vào DB mà chưa qua kiểm tra.",
+          description: "Kiểm tra và báo lỗi cụ thể trước khi ghi. Không dữ liệu nào vào DB mà chưa qua kiểm tra.",
           icon: "file-spreadsheet",
         },
         {
           title: "Dashboard KPI",
-          description: "Chỉ tiêu, tiến độ target, xu hướng theo thời gian, bảng chi tiết theo vùng và kênh.",
+          description: "Tiến độ target, xu hướng theo thời gian, bảng chi tiết theo vùng và kênh.",
           icon: "chart-bar",
         },
         {
           title: "Quản lý master data",
-          description: "Cửa hàng, sản phẩm/SKU, bảng giá theo khoảng hiệu lực, supervisor và chỉ tiêu.",
+          description: "Cửa hàng, SKU, bảng giá theo khoảng hiệu lực, supervisor và chỉ tiêu.",
           icon: "database",
         },
         {
@@ -201,35 +305,33 @@ export const content: SiteContent = {
         },
       ],
 
+      /* Trang chủ chỉ in 2 decision mạnh nhất; 3 cái còn lại nằm ở trang chi tiết.
+         Bản cũ in cả 5 (thực tế render 2-3 lần) ngay trang chủ. */
+      homepageDecisionCount: 2,
+      flowHeading: "Từ file Excel rời rạc tới một nguồn sự thật",
+      flow: {
+        nodes: [
+          { id: "excel", label: "Excel doanh số", sublabel: "nhiều nguồn, nhiều định dạng" },
+          { id: "validate", label: "Kiểm tra & chuẩn hoá", sublabel: "chặn số sai ở biên" },
+          { id: "db", label: "Cơ sở dữ liệu trung tâm", sublabel: "Supabase / Postgres" },
+          { id: "master", label: "Target, giá, cửa hàng", sublabel: "master data có hiệu lực theo thời gian" },
+          { id: "kpi", label: "KPI · biểu đồ · bảng chi tiết" },
+          { id: "report", label: "Báo cáo HTML / PNG / Telegram" },
+        ],
+        edges: [
+          { from: "excel", to: "validate" },
+          { from: "validate", to: "db" },
+          { from: "master", to: "db" },
+          { from: "db", to: "kpi" },
+          { from: "kpi", to: "report" },
+        ],
+      },
+
       stack: [
         { group: "Dữ liệu", items: ["PostgreSQL (Supabase)", "SQL", "Thiết kế lược đồ fact/dimension"] },
         { group: "Ứng dụng", items: ["React 19", "TypeScript", "Vite", "Tailwind CSS", "Express"] },
         { group: "Xử lý & hiển thị", items: ["XLSX parsing", "Recharts"] },
         { group: "Nền tảng", items: ["Google OAuth", "Vercel", "Automated tests cho business rules"] },
-      ],
-
-      results: [
-        {
-          label: "Thời gian tổng hợp một kỳ báo cáo",
-          value: { value: "~40–60 giờ / tháng", todo: "" },
-          method:
-            "Ước tính thận trọng dựa trên quy trình của 3–4 PIC: thay thế thao tác tổng hợp Excel thủ công, giảm phụ thuộc vào công thức lặp lại, và tập trung dữ liệu giá / chỉ tiêu / mapping cửa hàng. Đây là ước tính vận hành, sẽ được xác thực thêm bằng theo dõi thời gian sử dụng thực tế.",
-        },
-        {
-          label: "Người dùng thường xuyên",
-          value: { value: "6–10 người", todo: "" },
-          method: "Tài khoản đang hoạt động thường xuyên trên hệ thống",
-        },
-        {
-          label: "Phạm vi dữ liệu đang quản lý",
-          value: { value: "41 cửa hàng · 176 SKU · 6 vùng · 2 kênh", todo: "" },
-          method: "Thống kê từ master data. Hệ thống đang được mở rộng cho các khách hàng khác của Interdist.",
-        },
-      ],
-
-      reflection: [
-        "Sai lầm lớn nhất ở giai đoạn đầu là tôi build dashboard trước khi chốt xong định nghĩa chỉ tiêu. Kết quả là phải làm lại phần tính toán khi nghiệp vụ nói lại cho rõ. Từ đó tôi luôn viết định nghĩa ra giấy và cho người dùng xác nhận trước khi động vào code.",
-        "TODO: thêm một điều bạn sẽ làm khác đi nếu làm lại. Mục này khiến người phỏng vấn tin bạn hơn là một danh sách toàn thành tựu.",
       ],
 
       media: [
@@ -245,7 +347,7 @@ export const content: SiteContent = {
           id: "import-flow",
           kind: "image",
           brief:
-            "Màn hình xem trước khi import/replace dữ liệu — hệ thống hiện rõ số dòng sẽ thay, số dòng giữ nguyên, số dòng thêm mới trước khi người dùng xác nhận, và cho chọn giữa cập nhật phần trùng khớp hoặc thay thế toàn bộ theo ngày.",
+            "Màn hình xem trước khi import/replace — hệ thống hiện rõ số dòng sẽ thay, giữ nguyên, thêm mới trước khi người dùng xác nhận.",
           src: "/case-pg-import-preview.png",
           alt: "Modal xem trước batch replace: so sánh dữ liệu hiện có và sau khi import, kèm lựa chọn cách xử lý dòng trùng",
           isDemoData: true,
@@ -261,35 +363,137 @@ export const content: SiteContent = {
       ],
     },
 
+    /* ═══════════════════════════════════════════════════════════════════════
+       DEEP #1 — GHN. Bản cũ để case này mỏng hơn Interdist rất nhiều, dù nó là
+       job chính. Đã dồn thêm sức nặng: thêm decision thứ 3 (lấy từ section `ai`
+       đã bỏ), và bỏ `features` để toàn bộ chú ý dồn vào `decisions`.
+       ═══════════════════════════════════════════════════════════════════════ */
     {
       slug: "kas-reporting-automation",
-      kind: "system",
-      kindLabel: "Hệ thống",
-      title: "Báo cáo tự động cho Key Account",
+      tier: "deep",
+      scopeLabel: "Hệ thống dùng chung · toàn team Key Account",
+      proves: "Tôi chuẩn hoá được định nghĩa KPI cho cả một team — không chỉ cho báo cáo của riêng mình.",
+      title: "Chuẩn hoá & tự động hoá báo cáo Key Account",
       client: "Giao Hàng Nhanh (GHN)",
-      role: "Thiết kế và xây dựng — từ SQL model tới pipeline sinh báo cáo",
+      clientNote: "Công việc chính, toàn thời gian",
+      role: "Thiết kế và xây dựng — từ định nghĩa KPI, SQL model, tới pipeline sinh và phân phối báo cáo",
       period: "2025 – nay",
       oneLiner:
-        "Chuẩn hoá định nghĩa KPI cho toàn team và tự sinh báo cáo tuần từ dữ liệu thô, thay cho quy trình soạn tay từng file.",
+        "Một nguồn định nghĩa KPI duy nhất cho toàn team, và pipeline tự sinh báo cáo tuần từ dữ liệu thô — thay cho việc mỗi người tự viết query, tự dựng bảng, tự soạn file.",
       accent: "blue",
+
+      /* Không dùng số nữa vì bạn chưa có số cứng. Thay bằng ĐỘ RỘNG stakeholder —
+         thứ này verify được từ chính log task của bạn, và với người tuyển BI thì
+         "báo cáo của tôi được giám đốc vùng và team KA của khách hàng dùng" mạnh hơn
+         một con số giờ tiết kiệm không ai kiểm được. */
+      keyResult: {
+        value: "Giám đốc vùng · team KA khách hàng · vận hành hub",
+        label: "cùng một nguồn định nghĩa KPI phục vụ cả ba nhóm, mỗi nhóm một định dạng",
+        verified: true,
+      },
+
       context: [
-        "Team Key Account phục vụ các tài khoản lớn (Shopee, TikTok Shop) với báo cáo hiệu suất định kỳ hằng tuần và hằng tháng.",
-        "Mỗi người trong team tự viết query, tự dựng bảng, tự soạn file. Kết quả là cùng một chỉ tiêu nhưng mỗi báo cáo ra một con số, và không ai truy được vì sao lệch.",
+        "Team Key Account phục vụ các tài khoản lớn (Shopee Express, Shopee Bulky, TikTok Shop) với báo cáo hiệu suất định kỳ hằng tuần và hằng tháng.",
+        "Mỗi người tự viết query, tự dựng bảng, tự soạn file. Kết quả là cùng một chỉ tiêu nhưng mỗi báo cáo ra một con số, và không ai truy được vì sao lệch.",
       ],
-      problems: [
-        "Định nghĩa KPI không thống nhất: cùng tên chỉ tiêu nhưng khác điều kiện lọc, khác mốc thời gian, khác cách xử lý đơn ngoại lệ.",
-        "Soạn báo cáo thủ công tốn nhiều giờ mỗi tuần và chất lượng phụ thuộc vào người làm.",
-        "Không có cách nào kiểm tra nhanh xem một con số bất thường là do dữ liệu hay do người viết query.",
+
+      decisions: [
+        {
+          problem: "Cùng tên chỉ tiêu, khác điều kiện lọc, khác mốc thời gian, khác cách xử lý đơn ngoại lệ",
+          why: "Khi định nghĩa KPI sống trong đầu từng người thay vì trong một nơi, thì mọi cuộc họp đều bắt đầu bằng việc đối chiếu số chứ không phải bàn hành động. Và không ai sai — vì không có bản gốc để so.",
+          decision:
+            "Xây SQL model trên Trino / Iceberg làm nguồn định nghĩa duy nhất: một chỉ tiêu, một điều kiện lọc, một mốc thời gian. Báo cáo của cả team đọc từ đó thay vì từ query riêng.",
+          term: "Semantic layer — một định nghĩa KPI cho toàn team",
+        },
+        {
+          problem: "Mỗi người prompt LLM một kiểu, ra một số",
+          why: "Khi ai cũng dùng LLM để viết query, sai lệch không giảm mà tăng — vì giờ mỗi người có một trợ lý riêng, hiểu nghiệp vụ theo một cách riêng.",
+          decision:
+            "Đóng gói định nghĩa KPI, schema bảng và quy tắc nghiệp vụ thành skill dùng chung. LLM không tự đoán nữa mà đọc từ một nguồn duy nhất — cùng câu hỏi, cùng câu trả lời, bất kể ai hỏi.",
+          term: "Context engineering — chuẩn hoá ngữ cảnh thay vì chuẩn hoá prompt",
+        },
+        {
+          problem: "Tin được báo cáo do AI sinh ra tới đâu",
+          why: "Một báo cáo sai gửi tới khách hàng lớn thì thiệt hại không nằm ở con số, mà ở niềm tin — và niềm tin mất rồi rất khó lấy lại.",
+          decision:
+            "Mọi rule đều chạy song song với cách tính cũ và phải giải thích được từng chỗ lệch trước khi phát hành. Chưa đối chiếu xong thì chưa gửi.",
+          term: "Đối chiếu song song (parallel run) trước khi thay thế quy trình cũ",
+        },
+        {
+          /* Lấy từ KAS-149 / KAS-148. Đây là loại quyết định mà người tuyển BI tìm nhất:
+             định nghĩa khoá và kiểm coverage TRƯỚC khi báo cáo, không phải sau. */
+          problem: "Lấy gì làm định danh cho một seller",
+          why: "Báo cáo theo seller chỉ đúng khi mỗi seller là đúng một thực thể. Nếu chọn khoá mà không kiểm coverage trước, thì một seller có thể bị đếm thành hai, hoặc hai seller gộp thành một — và sai lệch này không lộ ra ở tổng, chỉ lộ ra khi khách hàng soi từng dòng.",
+          decision:
+            "Chốt một khoá định danh duy nhất, xác nhận tỷ lệ coverage trên dữ liệu thật, và verify riêng điều kiện lọc phân định luồng đơn trước khi cho phép bất kỳ báo cáo nào chạy trên nó.",
+          term: "Entity resolution — chốt khoá và đo coverage trước khi báo cáo",
+        },
+        {
+          /* Lấy từ KAS-159 / KAS-164: chuyển data job GXT Dashboard sang StarRocks. */
+          problem: "Hạ tầng truy vấn đổi engine, hàng loạt data job đang trỏ vào chỗ cũ",
+          why: "Đổi engine mà bê nguyên query sang là cách nhanh nhất để có một dashboard vẫn chạy nhưng ra số khác — vì cú pháp chạy được không có nghĩa là ngữ nghĩa giữ nguyên.",
+          decision:
+            "Chuyển từng sheet một, và mỗi sheet đều đối chiếu số cũ với số mới trước khi cắt nguồn. Sheet nào chưa khớp thì chưa chuyển.",
+          term: "Migration theo lô có đối chiếu, không cutover một lần",
+        },
+        {
+          /* Decision này lấy từ section `ai` đã bỏ (card "Pipeline không cần người trực").
+             Nó thuộc về đây, chứ không phải một section riêng nói về AI. */
+          problem: "Báo cáo vẫn phải chờ có người bấm chạy",
+          why: "Một pipeline cần người trực thì nó chưa phải hệ thống, chỉ là một script có chủ. Tuần nào người đó nghỉ là tuần đó báo cáo trễ, và cả team quay lại làm tay.",
+          decision:
+            "Vòng chạy định kỳ qua n8n và Google Apps Script gửi thẳng tới stakeholder. Người chỉ can thiệp khi hệ thống chủ động báo bất thường — không phải khi có người nhớ ra.",
+          term: "Automation có cảnh báo, không phải automation im lặng",
+        },
       ],
+
       ownership: {
         owned: [
-          "Chốt định nghĩa KPI dùng chung cho toàn team",
+          "Chốt định nghĩa KPI dùng chung cho toàn team, gồm cả định danh seller và điều kiện phân luồng đơn",
           "Xây SQL model trên Trino / Iceberg làm nguồn duy nhất",
           "Đóng gói quy tắc nghiệp vụ thành agent skill để LLM sinh đúng query và đúng báo cáo",
+          "Xây web app theo dõi sản lượng multi-KPI (actual vs forecast vs AOP, theo client và theo tỉnh), thay cho các file Excel/HTML rời rạc",
+          "Chuyển data job của dashboard sang engine truy vấn mới, đối chiếu từng sheet trước khi cắt nguồn",
           "Tự động hoá vòng chạy định kỳ và phân phối báo cáo",
         ],
-        notOwned: [],
+        notOwned: [
+          "Hạ tầng lakehouse do team Data Platform vận hành — tôi là người tiêu thụ và mô hình hoá trên đó",
+        ],
       },
+
+      results: [
+        {
+          label: "Thời gian soạn một báo cáo",
+          value: "từ hàng giờ xuống vài phút",
+          method: "So sánh quy trình soạn tay trước đây với pipeline hiện tại",
+          verified: false,
+        },
+        {
+          label: "Tính nhất quán",
+          value: "một định nghĩa KPI cho toàn team",
+          method: "Thay cho tình trạng mỗi người một cách tính, không truy được nguồn lệch",
+          verified: true,
+        },
+        {
+          label: "Nhóm người dùng",
+          value: "điều hành vùng · KAM/KAC khách hàng · các team vận hành khác",
+          method:
+            "Cùng một SQL model chuẩn hoá phục vụ ba định dạng đầu ra khác nhau: báo cáo tuần DOCX, dashboard theo dõi hằng ngày, và bản gửi group điều hành.",
+          verified: true,
+        },
+        {
+          label: "Số loại báo cáo đã chuẩn hoá",
+          value: NEEDS_INPUT("đếm số loại báo cáo định kỳ đang chạy qua pipeline này"),
+          method: "Thống kê từ pipeline đang vận hành",
+          verified: false,
+        },
+      ],
+
+      reflection: [
+        "Bài học lớn nhất: vấn đề không phải là viết query nhanh hơn, mà là làm sao để mọi người viết ra cùng một con số. Chuẩn hoá ngữ cảnh có giá trị hơn chuẩn hoá công cụ.",
+      ],
+
+      flowHeading: "Từ một định nghĩa KPI tới ba loại đầu ra",
       flow: {
         nodes: [
           { id: "raw", label: "Dữ liệu vận hành thô", sublabel: "Iceberg lakehouse" },
@@ -305,64 +509,18 @@ export const content: SiteContent = {
           { from: "out", to: "send" },
         ],
       },
-      decisions: [
-        {
-          problem: "Mỗi người prompt một kiểu, ra một số",
-          why: "Khi ai cũng dùng LLM để viết query, sai lệch không giảm mà tăng — vì giờ mỗi người có một trợ lý riêng, hiểu nghiệp vụ theo một cách riêng.",
-          decision:
-            "Đóng gói định nghĩa KPI, schema bảng và quy tắc nghiệp vụ thành skill dùng chung. LLM không tự đoán nữa mà đọc từ một nguồn duy nhất — cùng câu hỏi, cùng câu trả lời, bất kể ai hỏi.",
-          term: "Context engineering — chuẩn hoá ngữ cảnh thay vì chuẩn hoá prompt",
-        },
-        {
-          problem: "Tin được báo cáo do AI sinh ra tới đâu",
-          why: "Một báo cáo sai gửi tới khách hàng lớn thì thiệt hại không nằm ở con số, mà ở niềm tin — và niềm tin mất rồi rất khó lấy lại.",
-          decision:
-            "Mọi rule đều chạy song song với cách tính cũ và phải giải thích được từng chỗ lệch trước khi phát hành. Chưa đối chiếu xong thì chưa gửi.",
-          term: "Đối chiếu song song (parallel run) trước khi thay thế quy trình cũ",
-        },
-      ],
-      features: [
-        {
-          title: "SQL model dùng chung",
-          description: "Một nguồn định nghĩa KPI duy nhất trên Trino, thay cho query rời rạc của từng người.",
-          icon: "database",
-        },
-        {
-          title: "Agent skill sinh báo cáo",
-          description: "Từ dữ liệu thô ra báo cáo DOCX/HTML đúng template, đúng cách tính, đúng thuật ngữ.",
-          icon: "sparkles",
-        },
-        {
-          title: "Phân phối tự động",
-          description: "Vòng chạy định kỳ gửi thẳng tới stakeholder; người chỉ can thiệp khi có cảnh báo bất thường.",
-          icon: "send",
-        },
-      ],
+
       stack: [
         { group: "Dữ liệu", items: ["Trino SQL", "Iceberg lakehouse", "Metabase"] },
         { group: "Tự động hoá", items: ["LLM agent skills", "n8n", "Google Apps Script"] },
       ],
-      results: [
-        {
-          label: "Thời gian soạn một báo cáo",
-          value: { value: "từ hàng giờ xuống vài phút", todo: "" },
-          method: "So sánh quy trình soạn tay trước đây với pipeline hiện tại",
-        },
-        {
-          label: "Tính nhất quán",
-          value: { value: "một định nghĩa KPI cho toàn team", todo: "" },
-          method: "Thay cho tình trạng mỗi người một cách tính",
-        },
-      ],
-      reflection: [
-        "Bài học lớn nhất: vấn đề không phải là viết query nhanh hơn, mà là làm sao để mọi người viết ra cùng một con số. Chuẩn hoá ngữ cảnh có giá trị hơn chuẩn hoá công cụ.",
-      ],
+
       media: [
         {
-          id: "kas-report-sample",
+          id: "kas-monitor",
           kind: "image",
           brief:
-            "Dashboard giám sát Vol/Forecast/Capacity theo từng tỉnh, cập nhật theo ngày — một cách dùng khác của cùng SQL model chuẩn hoá, thay cho việc mở từng file báo cáo rời rạc để so sánh. Đã thay hết số thật bằng dữ liệu demo và che tên đăng nhập.",
+            "Dashboard giám sát Vol/Forecast/Capacity theo tỉnh, cập nhật theo ngày — một cách dùng khác của cùng SQL model chuẩn hoá. Đã thay hết số thật bằng dữ liệu demo và che tên đăng nhập.",
           src: "/case-kas-monitor.png",
           alt: "Dashboard theo dõi sản lượng, dự báo và năng lực theo tỉnh, cập nhật theo ngày",
           isDemoData: true,
@@ -370,49 +528,47 @@ export const content: SiteContent = {
       ],
     },
 
-    /* ─────────────────────────────────────────────────────────────
-       CASE 3 — Pipeline SQL. Đây là chỗ tư duy business rule sắc nhất.
-       ───────────────────────────────────────────────────────────── */
+    /* ═══════════════════════════════════════════════════════════════════════
+       DEEP #2 — GHN. Case có tư duy business rule sắc nhất. Không features,
+       không flow — sức nặng dồn hết vào 3 decisions.
+       ═══════════════════════════════════════════════════════════════════════ */
     {
-      slug: "sla-attribution",
-      kind: "system",
-      kindLabel: "Pipeline SQL",
-      title: "Quy trách nhiệm đơn vi phạm SLA",
+      slug: "sla-attribution-recovery",
+      tier: "deep",
+      scopeLabel: "Business logic · từ log vận hành tới số tiền đòi được",
+      proves:
+        "Công việc của tôi kết thúc ở một con số tiền có bên thứ ba kiểm — không kết thúc ở một dashboard đẹp.",
+      title: "Từ đơn trễ tới số tiền truy thu",
       client: "Giao Hàng Nhanh (GHN)",
-      role: "Thiết kế rule engine và xây toàn bộ pipeline",
+      clientNote: "Công việc chính, toàn thời gian",
+      role: "Thiết kế rule engine, xây pipeline, và đối chiếu số tiền với bộ phận kiểm soát",
       period: "2025 – nay",
       oneLiner:
-        "Rule engine trên log ra/vào kho, chỉ đúng kho hoặc chặng hành trình gây trễ — để vận hành khắc phục đúng chỗ thay vì đổ lỗi vòng quanh.",
+        "Chuỗi hoàn chỉnh: rule engine trên log ra/vào kho chỉ đúng kho gây trễ, ra số tiền truy thu và đền bù, rồi đối chiếu chéo hai chiều trước khi gửi bộ phận kiểm soát nội bộ.",
       accent: "amber",
-      context: [
-        "Một đơn trễ đi qua nhiều kho và nhiều chặng. Khi khách hàng khiếu nại, câu hỏi đầu tiên luôn là: trễ ở đâu, ai chịu trách nhiệm.",
-        "Trước đó câu trả lời phụ thuộc vào việc ai tra tay nhanh hơn, và thường kết thúc bằng tranh cãi giữa các bộ phận.",
-      ],
-      problems: [
-        "Nhiều quy tắc có thể cùng chỉ ra một đơn là vi phạm, nhưng chỉ được chọn một kho chịu trách nhiệm.",
-        "Log ra/vào kho có nhiễu: quét trùng, quét thiếu, thứ tự không chuẩn.",
-        "Kết quả phải giải thích được cho vận hành, nếu không thì không ai chấp nhận.",
-      ],
-      ownership: {
-        owned: [
-          "Phỏng vấn vận hành để rút ra quy tắc quy trách nhiệm và thứ tự ưu tiên giữa chúng",
-          "Thiết kế cách dựng episode nhập/xuất kho từ log thô",
-          "Xây pipeline Trino và bộ ca hồi quy để bảo vệ logic khi mở rộng rule",
-        ],
-        notOwned: [],
+
+      keyResult: {
+        value: "log vận hành → trách nhiệm → tiền → đối chiếu chéo",
+        label: "một chuỗi duy nhất, mỗi mắt đều tái lập được và có bên thứ ba kiểm",
+        verified: true,
       },
-      flow: null,
+
+      context: [
+        "Một đơn trễ đi qua nhiều kho và nhiều chặng. Khi khách hàng khiếu nại, câu hỏi đầu tiên là: trễ ở đâu, ai chịu trách nhiệm. Nhưng câu hỏi thứ hai — và là câu đắt hơn — là: vậy bao nhiêu tiền, và ai trả.",
+        "Trước đó câu trả lời đầu phụ thuộc vào việc ai tra tay nhanh hơn, và thường kết thúc bằng tranh cãi giữa các bộ phận. Câu trả lời thứ hai thì gần như không ai dựng được, vì nó cần cả hai chiều: tiền GHN truy thu từ đối tác, và tiền GHN đền bù cho khách.",
+      ],
+
       decisions: [
         {
-          problem: "Nhiều quy tắc cùng đúng trên một đơn",
+          problem: "Nhiều quy tắc cùng đúng trên một đơn, nhưng chỉ được chọn một kho",
           why: "Nếu để rule nào khớp trước thì thắng, kết quả sẽ đổi theo thứ tự dữ liệu — cùng một đơn chạy lại có thể ra kho khác. Vận hành sẽ không bao giờ tin.",
           decision:
             "Định nghĩa thứ tự ưu tiên rõ ràng giữa các rule và áp dụng nhất quán. Một đơn chỉ có đúng một kho chịu trách nhiệm, và kết quả tái lập được.",
           term: "Rule priority — kết quả xác định, không phụ thuộc thứ tự dữ liệu",
         },
         {
-          problem: "Log kho có nhiễu",
-          why: "Quét trùng làm một lần nhập kho trông như hai; quét thiếu làm đơn trông như chưa bao giờ rời kho. Cả hai đều dẫn tới quy sai trách nhiệm.",
+          problem: "Log ra/vào kho có nhiễu: quét trùng, quét thiếu, thứ tự không chuẩn",
+          why: "Quét trùng làm một lần nhập kho trông như hai; quét thiếu làm đơn trông như chưa bao giờ rời kho. Cả hai đều dẫn tới quy sai trách nhiệm — và quy sai một lần là mất luôn sự hợp tác của kho đó.",
           decision:
             "Gom log thành các episode nhập/xuất có ý nghĩa nghiệp vụ trước khi áp rule, thay vì chạy rule thẳng trên từng dòng log.",
           term: "Chuẩn hoá event thành episode trước khi suy luận",
@@ -424,54 +580,107 @@ export const content: SiteContent = {
             "Giữ một bộ ca hồi quy gồm các đơn đã được vận hành xác nhận kết quả đúng. Rule mới phải chạy qua bộ này trước khi áp dụng.",
           term: "Regression cases cho business logic",
         },
+        {
+          /* Lấy từ KAS-131 (map đền bù × truy thu, gửi CRC), KAS-166 (gộp truy thu
+             TikTokShop vào chung dashboard với Shopee), KAS-91 và KAS-71 (miễn cước).
+             Đây là mắt cuối của chuỗi, và là mắt duy nhất chạm tới tiền. */
+          problem: "Số tiền đền bù và số tiền truy thu là hai danh sách rời, không ai đối chiếu",
+          why: "Đền bù và truy thu là hai chiều của cùng một sự cố: GHN trả cho khách vì đơn trễ, và GHN thu lại từ bên gây trễ. Nếu chỉ dựng một chiều thì con số luôn có lỗ — đền bù mà không truy thu là thất thoát, truy thu mà không có đền bù đối ứng là đòi sai. Và khác với báo cáo hiệu suất, sai ở đây là sai tiền, có người phải chịu.",
+          decision:
+            "Đối chiếu hai danh sách theo mã đơn trên cùng một khung thời gian, gộp cả các client khác nhau về một mô hình chung, rồi gửi bộ phận kiểm soát nội bộ kiểm độc lập trước khi chốt. Không tự xác nhận số tiền của chính mình.",
+          term: "Đối chiếu hai chiều + kiểm soát độc lập trước khi chốt số tiền",
+        },
       ],
-      features: [],
-      stack: [{ group: "Dữ liệu", items: ["Trino SQL", "Iceberg", "inside_package_history"] }],
+
+      ownership: {
+        owned: [
+          "Phỏng vấn vận hành để rút ra quy tắc quy trách nhiệm và thứ tự ưu tiên giữa chúng",
+          "Thiết kế cách dựng episode nhập/xuất kho từ log thô",
+          "Xây pipeline Trino và bộ ca hồi quy để bảo vệ logic khi mở rộng rule",
+          "Dựng luồng đối chiếu đền bù × truy thu theo mã đơn, gộp nhiều client về một mô hình",
+          "Dashboard theo dõi số tiền miễn cước và tích hợp vào báo cáo tuần",
+        ],
+        notOwned: [
+          "Quyết định chế tài với kho vi phạm thuộc về vận hành — tôi cung cấp cơ sở dữ liệu để họ quyết",
+          "Xác nhận cuối cùng về số tiền thuộc bộ phận kiểm soát nội bộ — tôi chuẩn bị số và bằng chứng để họ kiểm",
+        ],
+      },
+
       results: [
         {
           label: "Kết quả cho vận hành",
-          value: { value: "mỗi đơn trễ chỉ về đúng một kho", todo: "" },
-          method: "Thay cho tranh luận thủ công giữa các bộ phận",
+          value: "mỗi đơn trễ chỉ về đúng một kho",
+          method: "Thay cho tranh luận thủ công giữa các bộ phận; kết quả tái lập được khi chạy lại",
+          verified: true,
+        },
+        {
+          label: "Kết quả tài chính",
+          value: NEEDS_INPUT("khoảng số tiền truy thu/đền bù đã đối chiếu — nếu được phép công khai, ghi dạng khoảng"),
+          method: "Đối chiếu đền bù × truy thu theo mã đơn, có bộ phận kiểm soát nội bộ kiểm độc lập",
+          verified: true,
+        },
+        {
+          label: "Phạm vi đối chiếu",
+          value: "nhiều client trên cùng một mô hình truy thu",
+          method: "Gộp các client khác nhau về chung một dashboard thay vì mỗi client một file",
+          verified: true,
         },
       ],
+
       reflection: [
         "Phần khó nhất không phải SQL mà là chốt thứ tự ưu tiên giữa các quy tắc — đó là quyết định nghiệp vụ, không phải quyết định kỹ thuật, và nó cần vận hành đồng ý chứ không thể tự quyết.",
+        "Khi đầu ra của một pipeline là số tiền chứ là con số hiệu suất, mọi thứ đổi: không còn khái niệm 'gần đúng'. Tôi học được cách chủ động đưa số của mình cho một bên độc lập kiểm, thay vì chờ tới lúc có người phát hiện lệch.",
       ],
-      media: [],
+
+      flowHeading: "Từ một dòng log tới một con số tiền",
+      flow: {
+        nodes: [
+          { id: "log", label: "Log ra/vào kho", sublabel: "dữ liệu thô, có nhiễu" },
+          { id: "episode", label: "Episode nhập/xuất", sublabel: "chuẩn hoá event trước khi suy luận" },
+          { id: "rule", label: "Rule engine có thứ tự ưu tiên", sublabel: "1 đơn → 1 kho chịu trách nhiệm" },
+          { id: "money", label: "Truy thu × đền bù", sublabel: "đối chiếu hai chiều theo mã đơn" },
+          { id: "crc", label: "Kiểm soát nội bộ kiểm độc lập", sublabel: "trước khi chốt số" },
+        ],
+        edges: [
+          { from: "log", to: "episode" },
+          { from: "episode", to: "rule" },
+          { from: "rule", to: "money" },
+          { from: "money", to: "crc" },
+        ],
+      },
+      stack: [{ group: "Dữ liệu", items: ["Trino SQL", "Iceberg", "log ra/vào kho"] }],
     },
 
-    /* ─────────────────────────────────────────────────────────────
-       CASE 4 — Kết quả. Case duy nhất có con số cứng đã được xác nhận.
-       ───────────────────────────────────────────────────────────── */
+    /* ═══════════════════════════════════════════════════════════════════════
+       BRIEF — Shopee. Case duy nhất có con số cứng đã được bên thứ ba xác nhận.
+       Tier "brief" nên trang ngắn: keyResult → context → decisions → results.
+       Không flow, không features, không media. Chính sự NGẮN này tạo hierarchy:
+       nó đọc như một dải kết quả, không phải case study thứ tư.
+       ═══════════════════════════════════════════════════════════════════════ */
     {
       slug: "shopee-3pl-performance",
-      kind: "outcome",
-      kindLabel: "Kết quả",
-      title: "Hiệu suất đối tác vận chuyển",
+      tier: "brief",
+      scopeLabel: "Kết quả đã kiểm chứng · 4 năm",
+      proves: "Con số cứng nhất trong portfolio này — đã được cả Shopee và đối tác vận chuyển xác nhận.",
+      title: "Hiệu suất đối tác vận chuyển 3PL",
       client: "Shopee",
       role: "Phân tích hiệu suất 3PL và điều phối cải tiến cùng đối tác",
       period: "2021 – 2025",
       oneLiner:
-        "Hệ thống theo dõi KPI 3PL và cơ chế làm việc với đối tác: pickup on-time VTP từ 90.1% lên 97.5%, contact rate giảm 15–20% mỗi đơn.",
-      accent: "navy",
-      context: [
-        "Shopee giao phần lớn sản lượng cho các đối tác vận chuyển bên thứ ba: Vietnam Post, Viettel Post, J&T.",
-        "Hiệu suất đối tác ảnh hưởng trực tiếp tới trải nghiệm người mua, nhưng dữ liệu nằm rải rác và chu kỳ phản hồi tới đối tác quá chậm để kịp điều chỉnh.",
-      ],
-      problems: [
-        "Không có bức tranh KPI thời gian thực dùng chung giữa Shopee và đối tác — mỗi bên nhìn một bộ số.",
-        "Khi hiệu suất tụt, mất nhiều ngày mới xác định được nguyên nhân nằm ở khu vực nào.",
-        "Luồng trạng thái vận chuyển gây khó hiểu cho người mua, đẩy contact rate lên cao.",
-      ],
-      ownership: {
-        owned: [
-          "Xây dashboard KPI tự động bằng SQL và Google Sheets cho cả nội bộ lẫn đối tác",
-          "Thiết lập nhịp làm việc định kỳ với đối tác dựa trên cùng một bộ số",
-          "Phân tích và thiết kế lại luồng trạng thái vận chuyển hiển thị cho người mua",
-        ],
-        notOwned: ["Vận hành giao nhận thực tế thuộc về đối tác — vai trò của tôi là phân tích và điều phối"],
+        "Hệ thống theo dõi KPI 3PL và cơ chế làm việc với đối tác: pickup on-time Viettel Post từ 90.1% lên 97.5%, contact rate giảm 15–20% mỗi đơn.",
+      accent: "lime",
+
+      keyResult: {
+        value: "90.1% → 97.5%",
+        label: "pickup on-time của Viettel Post, theo dõi trong 4 năm",
+        verified: true,
       },
-      flow: null,
+
+      context: [
+        "Shopee giao phần lớn sản lượng cho các đối tác vận chuyển bên thứ ba: Vietnam Post, Viettel Post, J&T. Hiệu suất đối tác ảnh hưởng trực tiếp tới trải nghiệm người mua.",
+        "Nhưng dữ liệu nằm rải rác, mỗi bên nhìn một bộ số, và chu kỳ phản hồi tới đối tác quá chậm để kịp điều chỉnh.",
+      ],
+
       decisions: [
         {
           problem: "Đối tác và Shopee tranh luận trên hai bộ số khác nhau",
@@ -488,85 +697,110 @@ export const content: SiteContent = {
           term: "Thiết kế chỉ số quanh câu hỏi của người dùng cuối",
         },
       ],
-      features: [],
-      stack: [{ group: "Công cụ", items: ["SQL", "Google Sheets", "Google Apps Script"] }],
+
+      ownership: {
+        owned: [
+          "Xây dashboard KPI tự động bằng SQL và Google Sheets cho cả nội bộ lẫn đối tác",
+          "Thiết lập nhịp làm việc định kỳ với đối tác dựa trên cùng một bộ số",
+          "Phân tích và thiết kế lại luồng trạng thái vận chuyển hiển thị cho người mua",
+        ],
+        notOwned: ["Vận hành giao nhận thực tế thuộc về đối tác — vai trò của tôi là phân tích và điều phối"],
+      },
+
       results: [
         {
-          label: "Pickup on-time (VTP)",
-          value: { value: "90.1% → 97.5%", todo: "" },
+          label: "Pickup on-time (Viettel Post)",
+          value: "90.1% → 97.5%",
           method: "Theo dõi KPI hằng tuần và làm việc có cấu trúc với đối tác",
+          verified: true,
         },
         {
           label: "Contact rate mỗi đơn",
-          value: { value: "giảm 15–20%", todo: "" },
+          value: "giảm 15–20%",
           method: "Sau khi thiết kế lại luồng trạng thái vận chuyển",
+          verified: true,
         },
         {
           label: "Khối lượng thủ công của team",
-          value: { value: "giảm khoảng 30%", todo: "" },
+          value: "giảm khoảng 30%",
           method: "Nhờ công cụ báo cáo tự động bằng Google Apps Script",
+          verified: false,
         },
       ],
+
       reflection: [
         "Con số 97.5% không đến từ một phân tích xuất sắc nào cả. Nó đến từ việc lặp lại một nhịp làm việc đủ lâu: cùng nhìn một bộ số, chỉ ra khu vực cụ thể, theo tới khi khắc phục xong.",
       ],
-      media: [],
+
+      flow: null,
+      stack: [{ group: "Công cụ", items: ["SQL", "Google Sheets", "Google Apps Script"] }],
     },
   ],
 
-  ai: {
-    heading: "AI-assisted, human-accountable",
-    intro:
-      "AI rút ngắn đường từ requirement tới code chạy được. Phần thuộc về tôi — và cũng là phần khó — là đóng khung vấn đề, chốt business rule, kiểm chứng đầu ra, và chịu trách nhiệm khi số sai.",
-    cards: [
-      {
-        label: "Context engineering",
-        title: "Agent skill cho team",
-        body: "Đóng gói định nghĩa KPI, schema và quy tắc nghiệp vụ thành skill để LLM sinh đúng query và đúng báo cáo — thay vì mỗi người prompt một kiểu, ra một số.",
-      },
-      {
-        label: "Guardrail",
-        title: "Test cho business rule",
-        body: "Mọi rule AI viết ra đều phải qua test phủ ca oái oăm trong dữ liệu thật, và đối chiếu song song với cách tính cũ. Chưa giải thích được chỗ lệch thì chưa phát hành.",
-      },
-      {
-        label: "Automation",
-        title: "Pipeline không cần người trực",
-        body: "n8n, Google Apps Script và agent workflow đưa dữ liệu thô thành báo cáo tuần chuẩn hoá, gửi thẳng tới stakeholder. Người chỉ can thiệp khi hệ thống báo bất thường.",
-      },
-    ],
-  },
+  /* Section `ai` đã bị XOÁ (3 card của nó mô tả lại chính case GHN reporting, và câu
+     về AI bị lặp 3 lần trên site cũ). Section `process` cũ — 6 bước kiểu "quan sát nỗi
+     đau vận hành / dựng bản thử / lặp cùng người dùng" — cũng bỏ: analyst nào cũng viết
+     được y hệt nên nó không chứng minh gì.
 
-  process: {
-    heading: "Cách tôi làm việc",
+     Thay bằng đường đi THẬT của một dashboard tại GHN, với ràng buộc ghi rõ ở mỗi mắt.
+     Luận điểm: Vinh ship được sản phẩm chạy thật mà KHÔNG sở hữu một mẩu hạ tầng nào —
+     không quyền ghi warehouse, không server, không DevOps. Thứ không fake được ở đây là
+     các RÀNG BUỘC; không ai bịa ra được chúng nếu chưa sống trong tổ chức đó. */
+  pipeline: {
+    heading: "Đường đi của một dashboard, từ yêu cầu tới production",
     intro:
-      "Không có bước nào ở đây là kỹ thuật thuần. Phần lớn thời gian là hiểu cho đúng trước khi xây, và kiểm cho kỹ sau khi xây.",
+      "Tôi không sở hữu hạ tầng nào trong chuỗi này: không có quyền ghi vào lakehouse, không tự tạo được job định kỳ, không được cấp server. Mỗi mắt dưới đây là một đường hợp lệ tìm ra trong ràng buộc sẵn có — và chính các ràng buộc đó định hình kiến trúc, chứ không phải sở thích kỹ thuật của tôi.",
     steps: [
       {
-        title: "Quan sát nỗi đau vận hành",
-        body: "Ngồi cạnh người đang làm tay. Xem họ mở file nào, copy cột nào, sửa gì bằng mắt. Đây là nơi phát hiện những quy tắc không ai viết ra.",
+        label: "Chốt lại câu hỏi",
+        tool: "Trao đổi với stakeholder",
+        owner: "Tôi",
+        body: "Yêu cầu ban đầu gần như luôn là \"cho tôi cái dashboard\". Việc đầu tiên là quy nó về một câu hỏi trả lời được: đo trên grain nào, đơn nào được tính, ngưỡng nào thì gọi là bất thường. Chưa chốt xong phần này thì mọi thứ phía sau đều phải làm lại.",
       },
       {
-        title: "Định nghĩa quy tắc",
-        body: "Viết ra bằng chữ: chỉ tiêu tính trên grain nào, đơn nào được tính, ngoại lệ xử lý ra sao. Cho người dùng đọc và xác nhận trước khi động vào code.",
+        label: "Tự viết query, tự kiểm output",
+        tool: "Trino · Iceberg lakehouse",
+        owner: "Tôi",
+        constraint: "Chỉ có quyền đọc lakehouse",
+        body: "Tôi không chờ ai viết query hộ. Viết xong thì chạy song song với nguồn số đang dùng và phải giải thích được từng chỗ lệch. Số chưa khớp thì không có bước tiếp theo — đây là chỗ tôi dừng nhiều lần nhất.",
       },
       {
-        title: "Dựng bản thử",
-        body: "Làm nhanh một bản đủ để nhìn thấy, không đủ để dùng. Mục tiêu là để người dùng chỉ ra chỗ tôi hiểu sai, càng sớm càng rẻ.",
+        label: "Nhờ team BI dựng job định kỳ",
+        tool: "Cronjob → Google Sheets",
+        owner: "Team BI",
+        constraint: "Quyền tạo job định kỳ thuộc team khác",
+        body: "Tôi không tự tạo được job, nên query phải viết sao cho team BI dựng được ngay và chạy ổn định mà không cần tôi giải thích lại, và phải xếp được vào lịch của họ. Thiết kế trong năng lực và thời gian của một team khác là ràng buộc thật, không phải chi tiết phụ.",
       },
       {
-        title: "Xây với AI hỗ trợ",
-        body: "AI giúp tôi đi từ requirement tới code chạy được nhanh hơn nhiều lần. Nhưng nó không quyết định thay tôi business rule nào đúng.",
+        label: "Đồng bộ sang cơ sở dữ liệu ứng dụng",
+        tool: "Google Apps Script → Supabase",
+        owner: "Tôi",
+        constraint: "Kênh chia sẻ file trực tiếp bị chặn theo chính sách; đích đến đã được phê duyệt",
+        body: "Script chạy theo lịch, chuẩn hoá kiểu dữ liệu và chặn dòng lỗi ngay tại biên thay vì để số sai chảy vào ứng dụng. Đây là mắt tôi phải thiết kế cẩn thận nhất, vì nó là chỗ duy nhất dữ liệu đi qua ranh giới hệ thống.",
       },
       {
-        title: "Đối chiếu với dữ liệu thật",
-        body: "Chạy song song với cách tính cũ, tìm chỗ lệch, và giải thích được từng chỗ lệch. Báo cáo chưa đối chiếu được thì chưa được phát hành.",
+        label: "Mô hình hoá lại cho ứng dụng",
+        tool: "PostgreSQL (Supabase) · RLS",
+        owner: "Tôi",
+        body: "Dữ liệu báo cáo và dữ liệu ứng dụng cần hai mô hình khác nhau. Ở đây tôi dựng lại schema theo cách ứng dụng đọc, và bật Row Level Security để phân quyền được thực thi ở tầng cơ sở dữ liệu chứ không chỉ ở giao diện.",
       },
       {
-        title: "Lặp cùng người dùng",
-        body: "Sản phẩm nội bộ không có ngày ra mắt. Nó chỉ có tuần thứ nhất, tuần thứ hai, và những gì người dùng phàn nàn ở tuần thứ ba.",
+        label: "Dựng ứng dụng",
+        tool: "React · TypeScript",
+        owner: "Tôi",
+        body: "Filter theo client, vùng và loại hub; panel tự đẩy các trường hợp cần can thiệp lên trước; nút xuất ảnh cho từng mục vì đích thật của báo cáo là group điều hành, không phải màn hình.",
+      },
+      {
+        label: "Deploy và vận hành",
+        tool: "Vercel · phân quyền theo vai trò",
+        owner: "Tôi",
+        body: "Lên production, cấp quyền theo vai trò, rồi sửa theo phản hồi thật. Sản phẩm nội bộ không có ngày ra mắt — chỉ có tuần thứ nhất, tuần thứ hai, và những gì người dùng phàn nàn ở tuần thứ ba.",
       },
     ],
+    /* Tự nhận điểm yếu kiến trúc. Kỹ sư dữ liệu nào đọc cũng thấy ngay, nên giấu đi thì
+       mất điểm thật; nói ra thì nó thành bằng chứng về khả năng phán đoán. */
+    tradeoff:
+      "Chuỗi này là đồ ghép, và tôi biết điều đó. Google Sheets ở giữa là điểm dễ vỡ, Apps Script không có retry và không tự báo khi job chết, mỗi mắt nối thêm là thêm một chỗ có thể lệch số. Tôi chọn nó vì đó là đường hợp lệ duy nhất trong quyền hạn mình có. Nếu được cấp quyền ghi vào warehouse, tôi đã bỏ hai mắt giữa và cho ứng dụng đọc thẳng từ một bảng được quản lý.",
     aiNote:
       "Tôi dùng AI-assisted coding để rút ngắn khoảng cách từ ý tưởng tới sản phẩm chạy được. Phần thuộc về tôi — và cũng là phần khó — là đóng khung vấn đề, chốt business rule, kiểm chứng đầu ra và chịu trách nhiệm khi số sai.",
   },
@@ -574,7 +808,12 @@ export const content: SiteContent = {
   skills: [
     {
       title: "Phân tích & truy vấn",
-      items: ["SQL (Trino/Presto, PostgreSQL)", "Python", "Excel / Google Sheets nâng cao", "Phân tích nguyên nhân gốc"],
+      items: [
+        "SQL (Trino/Presto, StarRocks, PostgreSQL)",
+        "Python",
+        "Excel / Google Sheets nâng cao",
+        "Phân tích nguyên nhân gốc",
+      ],
     },
     {
       title: "Mô hình hoá dữ liệu",
@@ -590,8 +829,15 @@ export const content: SiteContent = {
       items: ["Metabase", "Power BI", "Looker Studio", "Thiết kế dashboard cho cấp quản lý", "Báo cáo định kỳ tự động"],
     },
     {
-      title: "Chất lượng dữ liệu",
-      items: ["Validation ở biên", "Đối chiếu số liệu", "Test cho business rule", "Audit trail & phân quyền"],
+      title: "Chất lượng & đối chiếu dữ liệu",
+      items: [
+        "Validation ở biên (staging rồi promote)",
+        "Đối chiếu song song khi thay quy trình",
+        "Đối chiếu số tiền hai chiều",
+        "Entity resolution & kiểm coverage khoá",
+        "Test cho business rule",
+        "Audit trail, RLS & phân quyền",
+      ],
     },
     {
       title: "Tự động hoá",
@@ -611,23 +857,25 @@ export const content: SiteContent = {
   experience: [
     {
       company: "Giao Hàng Nhanh (GHN)",
-      role: "Key Account Specialist",
+      role: "Key Account Solution / Data Analyst",
       period: "2025 – nay",
       summary:
-        "Phụ trách dữ liệu và hiệu suất vận hành cho các tài khoản chiến lược (Shopee, TikTok Shop).",
+        "Phụ trách dữ liệu, hiệu suất vận hành và đối chiếu tài chính cho các tài khoản chiến lược (Shopee Express, Shopee Bulky, TikTok Shop). Làm việc trực tiếp với điều hành vùng, team KA của khách hàng và bộ phận kiểm soát nội bộ.",
       highlights: [
-        "Xây pipeline SQL trên Trino quy trách nhiệm từng đơn vi phạm SLA về đúng kho hoặc chặng hành trình gây ra, giúp vận hành khắc phục đúng chỗ.",
-        "Thiết kế hệ thống sinh báo cáo tự động từ dữ liệu thô, chuẩn hoá chất lượng báo cáo trong toàn team.",
-        "Theo dõi sản lượng so với forecast/AOP và tuân thủ SLA, đưa khuyến nghị dựa trên dữ liệu được cả khách hàng lẫn vận hành áp dụng.",
-        "Tự động hoá các quy trình lặp lại bằng n8n và Google Apps Script.",
+        "Xây pipeline SQL trên Trino quy trách nhiệm từng đơn vi phạm SLA về đúng kho hoặc chặng hành trình gây ra, rồi dẫn tiếp thành số tiền truy thu và đền bù có đối chiếu chéo.",
+        "Chuẩn hoá định nghĩa KPI cho toàn team — gồm cả định danh seller và điều kiện phân luồng đơn — và xây pipeline sinh báo cáo tự động từ dữ liệu thô.",
+        "Xây web app theo dõi sản lượng multi-KPI (actual vs forecast vs AOP, theo client và theo tỉnh), thay cho các file Excel/HTML rời rạc.",
+        "Chuyển data job của dashboard sang engine truy vấn mới theo từng lô, đối chiếu số cũ với số mới trước khi cắt nguồn.",
+        "Dựng báo cáo điều hành theo vùng/hub cho giám đốc vùng, phân phối tự động qua n8n và Google Apps Script.",
+        "Hỗ trợ các team khác (vận hành, chăm sóc khách hàng) dựng báo cáo và trực quan hoá backlog trên cùng nguồn dữ liệu chuẩn hoá.",
       ],
     },
     {
       company: "Interdist",
-      role: "Xây hệ thống quản lý doanh số nội bộ",
-      period: "2026 – nay",
+      role: "Sở hữu dữ liệu & sản phẩm (bán thời gian, từ xa)",
+      period: "T5/2026 – nay",
       summary:
-        "Làm việc từ xa, bán thời gian, song song với GHN. Sở hữu toàn bộ phần dữ liệu và sản phẩm của hệ thống vận hành doanh số.",
+        "Làm song song với GHN, khoảng 18 giờ/tuần. Sở hữu toàn bộ phần dữ liệu và sản phẩm của hệ thống vận hành doanh số P&G.",
       highlights: [
         "Chuyển quy trình tổng hợp doanh số từ các file Excel rời rạc sang một cơ sở dữ liệu trung tâm có kiểm soát chất lượng.",
         "Thiết kế lược đồ dữ liệu và business rule: giá theo khoảng hiệu lực, phân bổ chỉ tiêu theo lịch hoạt động cửa hàng.",
@@ -640,7 +888,7 @@ export const content: SiteContent = {
       period: "2021 – 2025",
       summary: "Phân tích hiệu suất đối tác vận chuyển (Vietnam Post, Viettel Post, J&T).",
       highlights: [
-        "Đưa pickup on-time của VTP từ 90.1% lên 97.5% thông qua theo dõi dữ liệu chặt và phối hợp có cấu trúc với đối tác.",
+        "Đưa pickup on-time của Viettel Post từ 90.1% lên 97.5% thông qua theo dõi dữ liệu chặt và phối hợp có cấu trúc với đối tác.",
         "Thiết kế lại luồng trạng thái vận chuyển dựa trên phân tích dữ liệu, giảm 15–20% contact rate trên mỗi đơn.",
         "Xây dashboard SQL + Google Sheets tự động cho cấp quản lý và đối tác.",
       ],
@@ -666,10 +914,11 @@ export const content: SiteContent = {
 
   contact: {
     heading: "Cùng trao đổi nhé",
-    body: "Nếu team bạn cần một người hiểu nghiệp vụ đủ sâu để định nghĩa đúng con số, và đủ tay nghề để tự dựng hệ thống sinh ra con số đó — mình rất muốn trao đổi.",
+    /* Thêm một câu cho nửa client consulting — trước đây body chỉ nói với nhà tuyển dụng. */
+    body: "Nếu team bạn cần một người hiểu nghiệp vụ đủ sâu để định nghĩa đúng con số, và đủ tay nghề để tự dựng hệ thống sinh ra con số đó — mình rất muốn trao đổi. Mình cũng nhận dự án data product theo phạm vi rõ ràng, làm từ xa.",
     email: "luongthevinh996@gmail.com",
     linkedin: "https://www.linkedin.com/in/vinhluongg/",
     cvHref: "/cv.pdf",
-    availability: "ĐANG TÌM VỊ TRÍ BI / DATA ANALYST · DATA PRODUCT",
+    availability: "ĐANG TÌM VỊ TRÍ BI / DATA ANALYST · NHẬN DỰ ÁN DATA PRODUCT",
   },
 };

@@ -13,6 +13,7 @@ export function StatBand() {
                 {s.suffix ? <span className="text-lime">{s.suffix}</span> : null}
               </dd>
               <dt className="mt-3 text-xs leading-relaxed text-mute-2">{s.label}</dt>
+              {s.note ? <p className="mt-1 text-[11px] text-mute-3">{s.note}</p> : null}
             </div>
           </Reveal>
         ))}
