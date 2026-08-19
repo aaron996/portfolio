@@ -54,8 +54,8 @@ export const content: SiteContent = {
       label: "Đang phụ trách",
       figures: [
         {
-          value: NEEDS_INPUT("sản lượng/tháng bạn đang phụ trách ở GHN"),
-          label: "đơn/tháng — tài khoản Shopee Express & Bulky",
+          value: "300–500K",
+          label: "đơn/ngày — tổng sản lượng GHN, nơi tôi phụ trách tài khoản Shopee Express & Bulky",
         },
         { value: "4", label: "hệ thống dữ liệu đang chạy thật" },
       ],
@@ -241,25 +241,25 @@ export const content: SiteContent = {
         {
           label: "Khối lượng dữ liệu đang gánh",
           value: "85.563 giao dịch · 12.476 bản tổng hợp ngày · 569 dòng chỉ tiêu tháng",
-          method: "Đếm trực tiếp từ Postgres production. Bảng tổng hợp ngày được dẫn xuất từ bảng giao dịch, không nhập tay.",
+          method: "Nguồn: Postgres production của hệ thống Interdist, đếm trực tiếp. Bảng tổng hợp ngày được dẫn xuất từ bảng giao dịch, không nhập tay.",
           verified: true,
         },
         {
           label: "Người dùng",
           value: "8 tài khoản",
-          method: "Số profile đang hoạt động trên hệ thống, phân ba cấp quyền",
+          method: "Nguồn: Postgres production của hệ thống Interdist — số profile đang hoạt động, phân ba cấp quyền",
           verified: true,
         },
         {
           label: "Phạm vi master data",
           value: "41 cửa hàng · 176 SKU · 6 vùng · 2 kênh",
-          method: "Hệ thống đang được mở rộng cho các khách hàng khác của Interdist.",
+          method: "Nguồn: master data trên hệ thống Interdist. Hệ thống đang được mở rộng cho các khách hàng khác của Interdist.",
           verified: true,
         },
         {
           label: "Kiểm soát truy cập",
           value: "Row Level Security bật trên toàn bộ 22 bảng",
-          method: "Phân quyền được thực thi ở tầng cơ sở dữ liệu, không chỉ ở tầng giao diện — người dùng không thể lách qua API để đọc dữ liệu ngoài phạm vi.",
+          method: "Nguồn: cấu hình RLS trên hệ thống Interdist. Phân quyền được thực thi ở tầng cơ sở dữ liệu, không chỉ ở tầng giao diện — người dùng không thể lách qua API để đọc dữ liệu ngoài phạm vi.",
           verified: true,
         },
       ],
@@ -483,9 +483,9 @@ export const content: SiteContent = {
         },
         {
           label: "Số loại báo cáo đã chuẩn hoá",
-          value: NEEDS_INPUT("đếm số loại báo cáo định kỳ đang chạy qua pipeline này"),
-          method: "Thống kê từ pipeline đang vận hành",
-          verified: false,
+          value: "5 loại báo cáo",
+          method: "Đếm trực tiếp số loại báo cáo định kỳ đang chạy qua pipeline này",
+          verified: true,
         },
       ],
 
@@ -614,10 +614,18 @@ export const content: SiteContent = {
           verified: true,
         },
         {
+          /* Vinh: bỏ số tiền, nhưng chưa chốt thay bằng chỉ số gì. Ba lựa chọn gợi ý
+             (điền value + method thật, rồi xoá NEEDS_INPUT):
+             - % / số lượng đơn được tự động quy trách nhiệm đúng kho (thay vì tranh cãi thủ công)
+             - Số client / số kho được gộp về chung một mô hình truy thu
+             - Thời gian xử lý một ca tranh chấp: trước vs sau khi có pipeline này
+             Đừng tự điền số — không có nguồn thì để nguyên NEEDS_INPUT. */
           label: "Kết quả tài chính",
-          value: NEEDS_INPUT("khoảng số tiền truy thu/đền bù đã đối chiếu — nếu được phép công khai, ghi dạng khoảng"),
+          value: NEEDS_INPUT(
+            "đã bỏ số tiền theo yêu cầu — cần một chỉ số thay thế không phải VND/USD (ví dụ: % đơn được tự động quy trách nhiệm, số client/kho gộp về một mô hình, hoặc thời gian xử lý tranh chấp giảm bao nhiêu) kèm số liệu cụ thể",
+          ),
           method: "Đối chiếu đền bù × truy thu theo mã đơn, có bộ phận kiểm soát nội bộ kiểm độc lập",
-          verified: true,
+          verified: false,
         },
         {
           label: "Phạm vi đối chiếu",
