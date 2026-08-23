@@ -3,8 +3,12 @@ import type { SiteContent } from "./types";
 /**
  * ⚠️ Chỗ cần Vinh điền trước khi deploy.
  * Cố tình render ra chữ chói mắt để KHÔNG lỡ ship như chuỗi "TODO:" ở bản cũ.
- * Tìm hết bằng: grep -n "NEEDS_INPUT" content_vi.ts
+ * Tìm hết bằng: grep -n "NEEDS_INPUT" content.vi.ts
+ *
+ * Hiện KHÔNG còn chỗ nào dùng — giữ helper lại vì đây là quy ước của dự án cho
+ * lần tới có dữ liệu chưa xác thực. Đừng xoá nhãn bằng cách điền số ước chừng.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const NEEDS_INPUT = (hint: string) => `⚠️ NEEDS_INPUT: ${hint}`;
 
 export const content: SiteContent = {
@@ -529,42 +533,62 @@ export const content: SiteContent = {
     },
 
     /* ═══════════════════════════════════════════════════════════════════════
-       DEEP #2 — GHN. Case có tư duy business rule sắc nhất. Không features,
-       không flow — sức nặng dồn hết vào 3 decisions.
+       DEEP #2 — GHN. Case có tư duy business rule sắc nhất. Không features —
+       sức nặng dồn hết vào decisions.
+
+       ĐÃ THU HẸP PHẠM VI: bản trước gộp cả nhánh tiền (đền bù × truy thu, gửi
+       CRC — KAS-131, KAS-166, KAS-91, KAS-71) vào cùng case. Bỏ hẳn nhánh đó,
+       vì (a) số tiền là dữ liệu nhạy cảm không public được, (b) gộp hai luận
+       điểm vào một case làm loãng cả hai. Case giờ neo vào đúng một việc:
+       rule engine quy trách nhiệm kho (KAS-77) — cộng một quyết định từ
+       KAS-136, luồng công việc riêng nhưng cùng miền "quy trách nhiệm trễ".
+
+       Slug đổi lại thành `sla-attribution` cho khớp bảng case trong CLAUDE.md;
+       hậu tố `-recovery` chính là phần truy thu vừa bỏ.
        ═══════════════════════════════════════════════════════════════════════ */
     {
-      slug: "sla-attribution-recovery",
+      slug: "sla-attribution",
       tier: "deep",
-      scopeLabel: "Business logic · từ log vận hành tới số tiền đòi được",
+      scopeLabel: "Business logic · từ log thô tới một kho chịu trách nhiệm",
       proves:
-        "Công việc của tôi kết thúc ở một con số tiền có bên thứ ba kiểm — không kết thúc ở một dashboard đẹp.",
-      title: "Từ đơn trễ tới số tiền truy thu",
+        "Tôi biến tranh chấp giữa các bộ phận thành một quy tắc chạy được — và nói ra khi định nghĩa của người khác có lỗ.",
+      title: "Đơn trễ này là lỗi của kho nào",
       client: "Giao Hàng Nhanh (GHN)",
       clientNote: "Công việc chính, toàn thời gian",
-      role: "Thiết kế rule engine, xây pipeline, và đối chiếu số tiền với bộ phận kiểm soát",
+      role: "Thiết kế rule engine quy trách nhiệm và xây pipeline trên log ra/vào kho",
       period: "2025 – nay",
       oneLiner:
-        "Chuỗi hoàn chỉnh: rule engine trên log ra/vào kho chỉ đúng kho gây trễ, ra số tiền truy thu và đền bù, rồi đối chiếu chéo hai chiều trước khi gửi bộ phận kiểm soát nội bộ.",
+        "Rule engine đọc log ra/vào kho của từng đơn bị khiếu nại quá hạn, rồi chỉ ra đúng một kho chịu trách nhiệm — thay cho việc mỗi bộ phận tự tra tay rồi tranh luận xem ai sai.",
       accent: "amber",
 
       keyResult: {
-        value: "log vận hành → trách nhiệm → tiền → đối chiếu chéo",
-        label: "một chuỗi duy nhất, mỗi mắt đều tái lập được và có bên thứ ba kiểm",
+        value: "4 quy tắc · mọi đơn · đúng một kho",
+        label: "quy tắc do vận hành chốt · cùng một đơn chạy lại luôn ra cùng kết quả",
         verified: true,
       },
 
       context: [
-        "Một đơn trễ đi qua nhiều kho và nhiều chặng. Khi khách hàng khiếu nại, câu hỏi đầu tiên là: trễ ở đâu, ai chịu trách nhiệm. Nhưng câu hỏi thứ hai — và là câu đắt hơn — là: vậy bao nhiêu tiền, và ai trả.",
-        "Trước đó câu trả lời đầu phụ thuộc vào việc ai tra tay nhanh hơn, và thường kết thúc bằng tranh cãi giữa các bộ phận. Câu trả lời thứ hai thì gần như không ai dựng được, vì nó cần cả hai chiều: tiền GHN truy thu từ đối tác, và tiền GHN đền bù cho khách.",
+        "Một đơn quá hạn đi qua nhiều kho: kho lấy, kho luân chuyển, kho giao, và có thể cả kho trả. Khi khách hàng mở khiếu nại đền bù, câu phải trả lời là kho nào đã giữ hàng quá lâu — và câu trả lời đó dẫn tới chế tài thật với một bưu cục thật.",
+        "Trước đó, câu trả lời phụ thuộc vào bộ phận nào tra log nhanh hơn và lập luận thuyết phục hơn. Cùng một đơn, hai người tra có thể ra hai kho khác nhau — nên kết luận nào cũng bị phản bác được, và cuộc họp nào cũng quay lại từ đầu.",
       ],
 
       decisions: [
         {
           problem: "Nhiều quy tắc cùng đúng trên một đơn, nhưng chỉ được chọn một kho",
-          why: "Nếu để rule nào khớp trước thì thắng, kết quả sẽ đổi theo thứ tự dữ liệu — cùng một đơn chạy lại có thể ra kho khác. Vận hành sẽ không bao giờ tin.",
+          why: "Nếu để rule nào khớp trước thì thắng, kết quả sẽ đổi theo thứ tự dữ liệu — cùng một đơn chạy lại có thể ra kho khác. Mà đầu ra này dẫn tới chế tài với một bưu cục cụ thể, nên chỉ cần một lần kết quả không tái lập được là mất luôn niềm tin của vận hành.",
           decision:
-            "Định nghĩa thứ tự ưu tiên rõ ràng giữa các rule và áp dụng nhất quán. Một đơn chỉ có đúng một kho chịu trách nhiệm, và kết quả tái lập được.",
+            "Định nghĩa thứ tự ưu tiên rõ ràng giữa các quy tắc và áp dụng nhất quán. Bốn quy tắc được chốt cùng vận hành, mỗi quy tắc gắn với một khâu cụ thể và một ngưỡng tồn cụ thể. Một đơn chỉ có đúng một kho chịu trách nhiệm.",
           term: "Rule priority — kết quả xác định, không phụ thuộc thứ tự dữ liệu",
+        },
+        {
+          /* Quyết định sắc nhất của case. Nó không đến từ kỹ thuật mà từ việc
+             nhận ra: nhãn khiếu nại do khách chọn, vi phạm thật do dữ liệu chỉ ra,
+             và hai thứ đó không buộc phải trùng nhau. */
+          problem: "Có nên chỉ chạy các quy tắc thuộc đúng nhóm khiếu nại của đơn đó",
+          why: "Cách tự nhiên nhất là đơn bị khiếu nại 'quá hạn giao' thì chỉ chạy các quy tắc nhóm giao. Nhưng nhóm khiếu nại do phía khách chọn, còn vi phạm thật nằm ở chỗ dữ liệu chỉ ra — hai thứ đó không buộc phải trùng nhau. Chạy hẹp theo nhóm nghĩa là mọi ca lệch nhóm đều lặng lẽ trả về 'không tìm thấy vi phạm', và không ai biết mình đang bỏ sót.",
+          decision:
+            "Chạy cả bốn quy tắc trên mọi đơn, bất kể đơn đó thuộc nhóm khiếu nại nào, rồi đếm số quy tắc cùng vi phạm trên từng đơn. Nhờ vậy bắt được đúng loại ca mà cách làm hẹp bỏ sót: đơn khiếu nại 'quá hạn giao' nhưng vi phạm thật nằm ở khâu trả hàng.",
+          term: "Đánh giá vét cạn thay vì lọc theo nhãn đầu vào",
         },
         {
           problem: "Log ra/vào kho có nhiễu: quét trùng, quét thiếu, thứ tự không chuẩn",
@@ -574,86 +598,90 @@ export const content: SiteContent = {
           term: "Chuẩn hoá event thành episode trước khi suy luận",
         },
         {
-          problem: "Làm sao biết rule mới không phá rule cũ",
-          why: "Mỗi lần thêm quy tắc là một lần rủi ro các kết quả cũ âm thầm đổi — và không ai phát hiện cho tới khi bị phản ánh.",
+          problem: "'Tồn quá 2 ngày' nên đếm theo ngày trên lịch hay theo 48 giờ trôi qua",
+          why: "Hai cách đếm cho ra hai tập kho vi phạm khác nhau, và phần lệch rơi đúng vào các ca sát ngưỡng — tức các ca dễ bị phản bác nhất. Đây là loại chi tiết không ai hỏi tới lúc thiết kế, nhưng là chỗ đầu tiên bị chất vấn khi một bưu cục không đồng ý với kết luận.",
           decision:
-            "Giữ một bộ ca hồi quy gồm các đơn đã được vận hành xác nhận kết quả đúng. Rule mới phải chạy qua bộ này trước khi áp dụng.",
-          term: "Regression cases cho business logic",
+            "Đếm theo ngày trên lịch, vì kho vận hành theo ngày và theo chuyến luân chuyển trong ngày, không theo đồng hồ bấm giây từ lúc quét. Chọn xong thì ghi thẳng vào định nghĩa chỉ tiêu, để lần sau không ai phải đoán lại.",
+          term: "Grain của ngưỡng thời gian — calendar day, không phải elapsed hours",
         },
         {
-          /* Lấy từ KAS-131 (map đền bù × truy thu, gửi CRC), KAS-166 (gộp truy thu
-             TikTokShop vào chung dashboard với Shopee), KAS-91 và KAS-71 (miễn cước).
-             Đây là mắt cuối của chuỗi, và là mắt duy nhất chạm tới tiền. */
-          problem: "Số tiền đền bù và số tiền truy thu là hai danh sách rời, không ai đối chiếu",
-          why: "Đền bù và truy thu là hai chiều của cùng một sự cố: GHN trả cho khách vì đơn trễ, và GHN thu lại từ bên gây trễ. Nếu chỉ dựng một chiều thì con số luôn có lỗ — đền bù mà không truy thu là thất thoát, truy thu mà không có đền bù đối ứng là đòi sai. Và khác với báo cáo hiệu suất, sai ở đây là sai tiền, có người phải chịu.",
+          /* KAS-136 — luồng công việc riêng, cùng miền "quy trách nhiệm trễ".
+             Đây là decision duy nhất trong cả bốn case thể hiện việc phản biện
+             định nghĩa của một bộ phận khác, và đúng. Giữ nó ở đây vì nó thuộc
+             cùng câu hỏi nghiệp vụ: ai chịu trách nhiệm cho một đơn trễ. */
+          problem:
+            "Vận hành kết luận seller bàn giao trễ nên đơn về kho giao trễ — dựa trên một định nghĩa thiếu ràng buộc",
+          why: "Chỉ tiêu họ dùng đo 'đơn vào kho trung chuyển trước 22h30', nhưng không ràng buộc đó phải cùng ngày với lúc lấy hàng. Một đơn lấy hôm nay, vào kho trung chuyển 22h00 hôm sau vẫn được tính là đạt. Định nghĩa lỏng như vậy làm chỉ tiêu trông cao hơn thực tế, và mọi kết luận rút ra từ nó đều chỉ về phía seller.",
           decision:
-            "Đối chiếu hai danh sách theo mã đơn trên cùng một khung thời gian, gộp cả các client khác nhau về một mô hình chung, rồi gửi bộ phận kiểm soát nội bộ kiểm độc lập trước khi chốt. Không tự xác nhận số tiền của chính mình.",
-          term: "Đối chiếu hai chiều + kiểm soát độc lập trước khi chốt số tiền",
+            "Không phản bác bằng lời. Dựng lại chỉ tiêu theo cả hai định nghĩa — bản lỏng họ đang dùng và bản chặt có ràng buộc cùng ngày — rồi đặt cạnh nhau trên cùng tệp dữ liệu để khoảng lệch tự nói. Song song tách riêng ba khâu bàn giao / trung chuyển / giao để thấy khâu nào thật sự đóng góp vào trễ, chạy cho cả tệp seller VIP và toàn bộ seller.",
+          term: "Audit định nghĩa chỉ tiêu — một ngưỡng thời gian cần ràng buộc grain ngày",
         },
       ],
 
       ownership: {
         owned: [
-          "Phỏng vấn vận hành để rút ra quy tắc quy trách nhiệm và thứ tự ưu tiên giữa chúng",
+          "Phỏng vấn vận hành để diễn giải bốn quy tắc quy trách nhiệm thành logic chạy được, và chốt thứ tự ưu tiên giữa chúng",
           "Thiết kế cách dựng episode nhập/xuất kho từ log thô",
-          "Xây pipeline Trino và bộ ca hồi quy để bảo vệ logic khi mở rộng rule",
-          "Dựng luồng đối chiếu đền bù × truy thu theo mã đơn, gộp nhiều client về một mô hình",
-          "Dashboard theo dõi số tiền miễn cước và tích hợp vào báo cáo tuần",
+          "Xây pipeline Trino sinh một dòng kết quả cho mỗi đơn, kèm số ngày tồn từng khâu và số quy tắc cùng vi phạm",
+          "Dựng lại chỉ tiêu trung chuyển theo hai định nghĩa để đối chiếu, và đóng gói cách phân tích thành quy trình dùng lại được",
         ],
         notOwned: [
+          "Bốn quy tắc và các ngưỡng tồn do vận hành (OE) chốt — tôi đề xuất cách diễn giải chúng thành dữ liệu và chỉ ra chỗ định nghĩa còn hở",
           "Quyết định chế tài với kho vi phạm thuộc về vận hành — tôi cung cấp cơ sở dữ liệu để họ quyết",
-          "Xác nhận cuối cùng về số tiền thuộc bộ phận kiểm soát nội bộ — tôi chuẩn bị số và bằng chứng để họ kiểm",
         ],
       },
 
       results: [
         {
           label: "Kết quả cho vận hành",
-          value: "mỗi đơn trễ chỉ về đúng một kho",
-          method: "Thay cho tranh luận thủ công giữa các bộ phận; kết quả tái lập được khi chạy lại",
+          value: "mỗi đơn quá hạn chỉ về đúng một kho",
+          method:
+            "Thay cho tranh luận thủ công giữa các bộ phận. Cùng một đơn chạy lại luôn ra cùng một kết quả, nên kết luận không bị lật lại vì thứ tự dữ liệu.",
           verified: true,
         },
         {
-          /* Vinh: bỏ số tiền, nhưng chưa chốt thay bằng chỉ số gì. Ba lựa chọn gợi ý
-             (điền value + method thật, rồi xoá NEEDS_INPUT):
-             - % / số lượng đơn được tự động quy trách nhiệm đúng kho (thay vì tranh cãi thủ công)
-             - Số client / số kho được gộp về chung một mô hình truy thu
-             - Thời gian xử lý một ca tranh chấp: trước vs sau khi có pipeline này
-             Đừng tự điền số — không có nguồn thì để nguyên NEEDS_INPUT. */
-          label: "Kết quả tài chính",
-          value: NEEDS_INPUT(
-            "đã bỏ số tiền theo yêu cầu — cần một chỉ số thay thế không phải VND/USD (ví dụ: % đơn được tự động quy trách nhiệm, số client/kho gộp về một mô hình, hoặc thời gian xử lý tranh chấp giảm bao nhiêu) kèm số liệu cụ thể",
-          ),
-          method: "Đối chiếu đền bù × truy thu theo mã đơn, có bộ phận kiểm soát nội bộ kiểm độc lập",
-          verified: false,
+          label: "Phạm vi quy tắc",
+          value: "4 quy tắc · 2 nhóm khiếu nại · chạy trên mọi đơn",
+          method:
+            "Quá hạn giao và quá hạn trả, mỗi nhóm hai quy tắc gắn với một khâu và một ngưỡng tồn riêng. Cả bốn quy tắc đều do vận hành (OE) xác nhận trước khi áp dụng.",
+          verified: true,
         },
         {
-          label: "Phạm vi đối chiếu",
-          value: "nhiều client trên cùng một mô hình truy thu",
-          method: "Gộp các client khác nhau về chung một dashboard thay vì mỗi client một file",
+          label: "Đầu ra cho mỗi đơn",
+          value: "1 dòng · kho vi phạm từng quy tắc · số ngày tồn · số quy tắc cùng vi phạm",
+          method:
+            "Đủ chi tiết để vận hành tự kiểm lại kết luận trên từng đơn cụ thể, thay vì phải tin vào một con số tổng.",
+          verified: true,
+        },
+        {
+          label: "Lỗi định nghĩa đã phát hiện",
+          value: "một ngưỡng thời gian thiếu ràng buộc ngày",
+          method:
+            "Chỉ tiêu 'vào kho trung chuyển trước 22h30' không ràng buộc cùng ngày lấy hàng, làm chỉ tiêu trông cao hơn thực tế. Đã dựng bản định nghĩa chặt để đặt cạnh bản đang dùng.",
           verified: true,
         },
       ],
 
       reflection: [
         "Phần khó nhất không phải SQL mà là chốt thứ tự ưu tiên giữa các quy tắc — đó là quyết định nghiệp vụ, không phải quyết định kỹ thuật, và nó cần vận hành đồng ý chứ không thể tự quyết.",
-        "Khi đầu ra của một pipeline là số tiền chứ là con số hiệu suất, mọi thứ đổi: không còn khái niệm 'gần đúng'. Tôi học được cách chủ động đưa số của mình cho một bên độc lập kiểm, thay vì chờ tới lúc có người phát hiện lệch.",
+        "Khi kết luận của một pipeline dẫn tới chế tài với một bưu cục cụ thể, 'gần đúng' không còn là lựa chọn. Tôi học được cách trình bày kết quả ở mức từng đơn để chính người bị kết luận kiểm lại được — và học được rằng khi định nghĩa của bộ phận khác có lỗ, cách hiệu quả nhất là dựng cả hai bản định nghĩa rồi để khoảng lệch tự nói, chứ không phải tranh luận.",
+        "Giữa lúc phân tích, tôi tự tìm ra một lỗi nhân dòng trong query của mình. Nó nhắc rằng người đi chỉ ra lỗi định nghĩa của người khác thì càng phải kiểm số của chính mình trước.",
       ],
 
-      flowHeading: "Từ một dòng log tới một con số tiền",
+      flowHeading: "Từ một dòng log tới một kho chịu trách nhiệm",
       flow: {
         nodes: [
           { id: "log", label: "Log ra/vào kho", sublabel: "dữ liệu thô, có nhiễu" },
           { id: "episode", label: "Episode nhập/xuất", sublabel: "chuẩn hoá event trước khi suy luận" },
-          { id: "rule", label: "Rule engine có thứ tự ưu tiên", sublabel: "1 đơn → 1 kho chịu trách nhiệm" },
-          { id: "money", label: "Truy thu × đền bù", sublabel: "đối chiếu hai chiều theo mã đơn" },
-          { id: "crc", label: "Kiểm soát nội bộ kiểm độc lập", sublabel: "trước khi chốt số" },
+          { id: "rule", label: "4 quy tắc chạy trên mọi đơn", sublabel: "không lọc theo nhãn khiếu nại" },
+          { id: "pick", label: "Thứ tự ưu tiên", sublabel: "1 đơn → 1 kho chịu trách nhiệm" },
+          { id: "out", label: "Bảng chi tiết theo đơn", sublabel: "vận hành tự kiểm lại được" },
         ],
         edges: [
           { from: "log", to: "episode" },
           { from: "episode", to: "rule" },
-          { from: "rule", to: "money" },
-          { from: "money", to: "crc" },
+          { from: "rule", to: "pick" },
+          { from: "pick", to: "out" },
         ],
       },
       stack: [{ group: "Dữ liệu", items: ["Trino SQL", "Iceberg", "log ra/vào kho"] }],
@@ -870,7 +898,7 @@ export const content: SiteContent = {
       summary:
         "Phụ trách dữ liệu, hiệu suất vận hành và đối chiếu tài chính cho các tài khoản chiến lược (Shopee Express, Shopee Bulky, TikTok Shop). Làm việc trực tiếp với điều hành vùng, team KA của khách hàng và bộ phận kiểm soát nội bộ.",
       highlights: [
-        "Xây pipeline SQL trên Trino quy trách nhiệm từng đơn vi phạm SLA về đúng kho hoặc chặng hành trình gây ra, rồi dẫn tiếp thành số tiền truy thu và đền bù có đối chiếu chéo.",
+        "Xây pipeline SQL trên Trino quy trách nhiệm từng đơn vi phạm SLA về đúng kho gây ra — bốn quy tắc do vận hành chốt, chạy vét cạn trên mọi đơn, kết quả tái lập được. Đầu ra được dùng tiếp cho khâu đối chiếu tài chính với bộ phận kiểm soát nội bộ.",
         "Chuẩn hoá định nghĩa KPI cho toàn team — gồm cả định danh seller và điều kiện phân luồng đơn — và xây pipeline sinh báo cáo tự động từ dữ liệu thô.",
         "Xây web app theo dõi sản lượng multi-KPI (actual vs forecast vs AOP, theo client và theo tỉnh), thay cho các file Excel/HTML rời rạc.",
         "Chuyển data job của dashboard sang engine truy vấn mới theo từng lô, đối chiếu số cũ với số mới trước khi cắt nguồn.",
