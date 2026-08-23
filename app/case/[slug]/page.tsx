@@ -247,7 +247,9 @@ export default async function CasePage({ params }: Params) {
         {others.length > 0 && (
           <Section tone="darker" className="border-b border-ink-800">
             <SectionHeading eyebrow="Case khác">Xem tiếp</SectionHeading>
-            <div className="grid gap-4 sm:grid-cols-3">
+            {/* 4 case còn lại: 2 cột trên tablet, 4 cột trên desktop — tránh để
+                lẻ một card mồ côi như lưới 3 cột. */}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {others.map((o) => (
                 <Link
                   key={o.slug}

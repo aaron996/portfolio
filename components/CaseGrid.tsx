@@ -5,10 +5,14 @@ import { Reveal } from "./ui/Reveal";
 import { DraftBadge } from "./ui/DraftBadge";
 
 /**
- * Ba case còn lại chia theo tier: "deep" (2 case GHN) render thành card ngang
- * đầy đủ scopeLabel + proves; "brief" (Shopee) render mỏng hơn hẳn — thành một
- * dải kết quả (result strip), không phải card thứ ba cùng cỡ. Chính sự chênh
- * kích cỡ này là hierarchy nhìn thấy được, thay vì 3 card giống hệt nhau.
+ * Các case còn lại chia theo tier: "deep" render thành card đầy đủ scopeLabel +
+ * proves; "brief" render mỏng hơn hẳn — thành một dải kết quả (result strip),
+ * không phải card cùng cỡ. Chính sự chênh kích cỡ này là hierarchy nhìn thấy
+ * được, thay vì các card giống hệt nhau.
+ *
+ * Lưới deep là 2 cột, nên số case deep lẻ sẽ để card cuối mồ côi kèm một ô
+ * trống bằng nửa hàng. Card đó được cho trải hết chiều ngang và xếp ngang lại —
+ * lấp ô trống mà không phải hạ cấp một case xuống tier thấp hơn chỉ vì layout.
  */
 export function CaseGrid() {
   const others = content.cases.filter((c) => c.slug !== content.featuredSlug);
@@ -22,31 +26,55 @@ export function CaseGrid() {
       </SectionHeading>
 
       <div className="grid gap-4 md:grid-cols-2">
-        {deep.map((c, i) => (
-          <Reveal key={c.slug} delay={i * 0.06}>
-            <Link
-              href={`/case/${c.slug}`}
-              className="group flex h-full flex-col rounded-2xl border border-ink-700 bg-ink-900 p-6 transition-all hover:-translate-y-1 hover:border-lime/50"
-            >
+        {deep.map((c, i) => {
+          const isOrphan = deep.length % 2 === 1 && i === deep.length - 1;
+
+          const head = (
+            <>
               <p className="eyebrow text-lime">{c.scopeLabel}</p>
               <h3 className="mt-3 font-display text-lg font-bold uppercase leading-tight text-paper">
                 {c.title}
               </h3>
               <p className="mt-2 text-sm font-semibold text-paper">{c.proves}</p>
-              <p className="mt-3 flex-1 text-sm leading-relaxed text-mute">{c.oneLiner}</p>
-              <div className="mt-5 border-t border-ink-800 pt-4">
-                <p className="font-display text-base font-bold text-paper">
-                  {c.keyResult.value}
-                  <DraftBadge verified={c.keyResult.verified} />
-                </p>
-                <p className="mt-1 text-xs text-mute-3">{c.keyResult.label}</p>
-              </div>
-              <span className="mt-4 text-sm font-semibold text-lime group-hover:underline">
+            </>
+          );
+          const result = (
+            <>
+              <p className="font-display text-base font-bold text-paper">
+                {c.keyResult.value}
+                <DraftBadge verified={c.keyResult.verified} />
+              </p>
+              <p className="mt-1 text-xs text-mute-3">{c.keyResult.label}</p>
+              <span className="mt-4 block text-sm font-semibold text-lime group-hover:underline">
                 Xem chi tiết →
               </span>
-            </Link>
-          </Reveal>
-        ))}
+            </>
+          );
+          const card =
+            "group rounded-2xl border border-ink-700 bg-ink-900 p-6 transition-all hover:-translate-y-1 hover:border-lime/50";
+
+          return (
+            <Reveal key={c.slug} delay={i * 0.06} className={isOrphan ? "md:col-span-2" : ""}>
+              {isOrphan ? (
+                <Link href={`/case/${c.slug}`} className={`${card} flex flex-col md:flex-row md:items-center md:gap-10`}>
+                  <div className="md:flex-1">
+                    {head}
+                    <p className="mt-3 text-sm leading-relaxed text-mute">{c.oneLiner}</p>
+                  </div>
+                  <div className="mt-5 flex-none border-t border-ink-800 pt-4 md:mt-0 md:w-64 md:border-l md:border-t-0 md:pl-8 md:pt-0">
+                    {result}
+                  </div>
+                </Link>
+              ) : (
+                <Link href={`/case/${c.slug}`} className={`${card} flex h-full flex-col`}>
+                  {head}
+                  <p className="mt-3 flex-1 text-sm leading-relaxed text-mute">{c.oneLiner}</p>
+                  <div className="mt-5 border-t border-ink-800 pt-4">{result}</div>
+                </Link>
+              )}
+            </Reveal>
+          );
+        })}
       </div>
 
       {brief.length > 0 ? (

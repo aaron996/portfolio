@@ -108,7 +108,7 @@ export const content: SiteContent = {
       /* Câu này là "bản đồ cho người đọc". Nó là thứ bản cũ thiếu: 4 case trước đây
          là 4 dự án na ná nhau; giờ chúng được khai báo thẳng là 4 luận điểm khác nhau,
          nên người đọc biết vì sao phải đọc cả bốn. */
-      "Bốn case dưới đây chứng minh bốn điều khác nhau: một sản phẩm tôi ship end-to-end một mình, một hệ thống tôi chuẩn hoá cho cả team, một rule engine tôi dựng ra từ tranh chấp giữa các bộ phận, và một con số kết quả đã được đối tác xác nhận.",
+      "Năm case dưới đây chứng minh năm điều khác nhau: một sản phẩm tôi ship end-to-end một mình, một sản phẩm được team khác nhúng lại vào hệ thống của họ, một hệ thống tôi chuẩn hoá cho cả team, một rule engine tôi dựng ra từ tranh chấp giữa các bộ phận, và một con số kết quả đã được đối tác xác nhận.",
     ],
     boundary:
       "Tôi không định vị mình là software engineer. Tôi là người xây hệ thống dữ liệu cho bài toán vận hành mình hiểu rõ.",
@@ -118,8 +118,8 @@ export const content: SiteContent = {
      "Dự án khác" → công việc chính của bạn không phải "khác". */
   sectionLabels: {
     featuredEyebrow: "Case tiêu biểu ·",
-    otherCasesEyebrow: "Ba case còn lại",
-    otherCasesHeading: "Ba bài toán, ba loại bằng chứng",
+    otherCasesEyebrow: "Bốn case còn lại",
+    otherCasesHeading: "Bốn bài toán, bốn loại bằng chứng",
     ctaHeading: "Tôi biến dữ liệu phức tạp thành hành động rõ ràng",
     /* Field mới, không có trong bản gốc gửi qua — bản gốc dùng intro.body[2] cho
        chỗ này, nhưng body[2] mới mang nghĩa khác (dẫn nhập 4 case). Câu dưới đây
@@ -368,7 +368,161 @@ export const content: SiteContent = {
     },
 
     /* ═══════════════════════════════════════════════════════════════════════
-       DEEP #1 — GHN. Bản cũ để case này mỏng hơn Interdist rất nhiều, dù nó là
+       DEEP #1 — GHN (KAS-183, KAS-192). Đặt NGAY SAU flagship là có chủ đích.
+       Điểm yếu lớn nhất của flagship: sản phẩm end-to-end duy nhất lại là một
+       engagement bán thời gian 3 tháng, 41 cửa hàng. Case này trả lời thẳng
+       phản biện đó — cùng năng lực, nhưng ở job chính và quy mô lớn hơn hẳn.
+
+       Luận điểm KHÁC flagship: không phải "tôi tự làm được", mà là "sản phẩm
+       của tôi được team khác chọn nhúng vào hệ thống của họ". Đó là thứ duy
+       nhất trong portfolio có bên thứ ba chủ động dùng lại.
+
+       ⚠️ App có auth allowlist theo email → KHÔNG phải demo click được. Không
+       quảng cáo như live demo, và chưa gắn `media` vì chưa có ảnh dữ liệu demo.
+       ═══════════════════════════════════════════════════════════════════════ */
+    {
+      slug: "kas-shopee-performance",
+      tier: "deep",
+      scopeLabel: "Sản phẩm nội bộ · từ báo cáo rời tới một app điều hành",
+      proves:
+        "Sản phẩm tôi làm không dừng ở chỗ chạy được — nó được một team khác chọn nhúng vào hệ thống của họ.",
+      title: "App điều hành hiệu suất Shopee",
+      client: "Giao Hàng Nhanh (GHN)",
+      clientNote: "Công việc chính, toàn thời gian — yêu cầu từ quản lý trực tiếp",
+      role: "Tự làm toàn bộ: tầng dữ liệu, 5 báo cáo, phân quyền, giao diện, vận hành",
+      period: "2026 – nay",
+      oneLiner:
+        "Web app theo dõi ontime pickup/giao hàng của Shopee theo Miền/Vùng/Hub, seller VIP, ca và lane — thay cho các bảng rời phải dựng lại tay mỗi lần điều hành cần xem.",
+      accent: "blue",
+
+      /* KeyResult mạnh nhất không phải số người dùng mà là việc được tái sử dụng.
+         Nguồn: KAS-192 — Control Tower SPE chọn nhúng app này làm Tab 2 thay vì
+         dựng lại UI từ đầu. */
+      keyResult: {
+        value: "Được team khác nhúng vào hệ thống của họ",
+        label: "Control Tower SPE chọn nhúng app này làm tab sức khoẻ vận hành thay vì dựng lại",
+        verified: true,
+      },
+
+      context: [
+        "Điều hành vùng và team Key Account cần nhìn ontime pickup và ontime giao hàng ở nhiều lát cắt khác nhau: theo miền/vùng/hub, theo seller lớn, theo ca trong ngày, theo lane. Mỗi lát cắt trước đó là một bảng dựng tay, và mỗi lần cần xem lại là dựng lại từ đầu.",
+        "Hệ quả không nằm ở thời gian dựng bảng, mà ở nhịp điều hành: khi số chỉ có sau khi ai đó ngồi làm, thì cuộc họp sáng phải chờ, và bưu cục đang tụt chỉ tiêu chỉ được phát hiện muộn hơn một nhịp.",
+      ],
+
+      decisions: [
+        {
+          /* Nguồn: KAS-192 — "định hướng: nhúng (embed) web app báo cáo điều hành
+             Shopee hiện có của Vinh vào app Control Tower, thay vì build lại UI". */
+          problem: "Control Tower của team khác cần đúng phần việc app này đang làm",
+          why: "Lựa chọn mặc định trong tổ chức là mỗi team dựng lại giao diện của mình — an toàn về quyền sở hữu, nhưng tạo ra hai bản báo cáo cùng chủ đề, và tới lúc chúng lệch nhau thì không ai biết bản nào đúng.",
+          decision:
+            "Thay vì dựng lại tab đó trong app của họ, nhúng thẳng app này vào Control Tower làm tab sức khoẻ vận hành. Một nơi tính số, hai nơi hiển thị — nên không có bản thứ hai để lệch.",
+          term: "Tái sử dụng thay vì nhân bản — tránh hai nguồn sự thật cho cùng chỉ tiêu",
+        },
+        {
+          /* Nguồn: KAS-183 — export ảnh/Excel + chế độ fullscreen; và thực tế các
+             báo cáo điều hành này được screenshot gửi group Telegram bưu cục. */
+          problem: "Người dùng thật không mở dashboard — họ chụp màn hình gửi vào group",
+          why: "Điều hành bưu cục trao đổi trong group chat, không trong dashboard. Một app đẹp mà bắt người ta rời group để đăng nhập vào xem thì sẽ thua một tấm ảnh chụp bảng Excel — không phải vì nó tốt hơn, mà vì nó nằm đúng chỗ người ta đang làm việc.",
+          decision:
+            "Thiết kế theo đúng thói quen đó thay vì chống lại nó: chế độ toàn màn hình để trình chiếu trong họp, và xuất thẳng ra ảnh hoặc Excel để dán vào group. App phục vụ luồng phân phối sẵn có, không đòi thay nó.",
+          term: "Thiết kế theo kênh phân phối thật của người dùng",
+        },
+        {
+          /* Nguồn: KAS-183 — "Auth + phân quyền truy cập (chỉ email được allow),
+             có dev admin riêng" + "Access log + realtime presence". */
+          problem: "Số hiệu suất theo hub là số có người chịu trách nhiệm, không phải số công khai",
+          why: "Bảng này gọi tên bưu cục đang tụt chỉ tiêu. Mở rộng cho ai cũng xem được thì nó thành công cụ chỉ trích chéo giữa các đơn vị; khoá quá chặt thì lại không ai dùng. Và nếu có tranh cãi về một con số, câu hỏi đầu tiên luôn là ai đã xem bản nào, lúc nào.",
+          decision:
+            "Chỉ email trong danh sách cho phép mới truy cập được, kèm nhật ký truy cập để luôn trả lời được ai đã xem gì. Phân quyền đặt ở tầng dữ liệu chứ không chỉ ẩn trên giao diện.",
+          term: "Access control + audit log cho báo cáo có tính quy trách nhiệm",
+        },
+        {
+          /* Nguồn: KAS-183 subtask 1 — "Setup data layer: Supabase schema, sync
+             pipeline, migrate từ Google Sheet CSV".
+             ⚠️ Phần `why` bên dưới là cách mình hiểu lý do — Vinh xác nhận lại. */
+          problem: "Dữ liệu đang sống trong Google Sheet mà nhiều người vẫn đang sửa hằng ngày",
+          why: "Chuyển hẳn sang cơ sở dữ liệu thì sạch về kỹ thuật, nhưng bắt người đang nhập liệu đổi thói quen — và thói quen là thứ khó đổi nhất, thường kết thúc bằng việc họ quay lại dùng file cũ song song.",
+          decision:
+            "Giữ Google Sheet làm nơi nhập liệu, nhưng đồng bộ sang Supabase làm tầng phục vụ cho app. Người nhập không phải đổi gì, còn app đọc từ một lược đồ có kiểu dữ liệu rõ ràng thay vì đọc CSV.",
+          term: "Tách nơi nhập liệu khỏi nơi phục vụ truy vấn",
+        },
+      ],
+
+      ownership: {
+        owned: [
+          "Tầng dữ liệu: lược đồ Supabase và pipeline đồng bộ từ nguồn Google Sheet",
+          "Năm báo cáo ma trận (Miền/Vùng/Hub, seller VIP, Ca/Hub, Focus một vùng, Lane/Ca 1) và toàn bộ logic lọc",
+          "Xác thực, danh sách truy cập, nhật ký truy cập",
+          "Toàn bộ giao diện: nhiều vòng chỉnh theme, responsive mobile, dark mode",
+          "Xuất Excel/ảnh, chế độ trình chiếu toàn màn hình",
+          "Vận hành sau khi phát hành và xử lý lỗi phát sinh",
+        ],
+        notOwned: [
+          "Định nghĩa các chỉ tiêu ontime pickup / ontime giao là chuẩn chung của công ty — tôi hiển thị và cắt lát chúng, không tự định nghĩa lại",
+          "App Control Tower là sản phẩm của team khác — tôi chỉ sở hữu phần được nhúng vào",
+        ],
+      },
+
+      results: [
+        {
+          label: "Được tái sử dụng bởi team khác",
+          value: "nhúng vào Control Tower SPE",
+          method:
+            "Team xây Control Tower chọn nhúng app này làm tab sức khoẻ vận hành thay vì dựng lại giao diện tương đương.",
+          verified: true,
+        },
+        {
+          label: "Phạm vi báo cáo",
+          value: "5 báo cáo ma trận trên cùng một nguồn",
+          method:
+            "Miền/Vùng/Hub · seller VIP · Ca/Hub · Focus một vùng · Lane/Ca 1. Lọc theo vùng/miền, loại hub và khoảng ngày.",
+          verified: true,
+        },
+        {
+          label: "Nguồn gốc yêu cầu",
+          value: "yêu cầu từ quản lý, không phải dự án tự phát",
+          method: "Xuất phát từ yêu cầu của quản lý trực tiếp, không phải sản phẩm tôi tự nghĩ ra rồi đi thuyết phục.",
+          verified: true,
+        },
+        {
+          label: "Khối lượng công việc quy đổi",
+          value: "~12–14 ngày công nếu làm thủ công",
+          method:
+            "Ước tính nội bộ khi tách hạng mục lúc mở task, dùng để so sánh với cách làm không có AI hỗ trợ. Là ước tính công sức, không phải thời gian thực tế đã bỏ ra.",
+          verified: false,
+        },
+      ],
+
+      reflection: [
+        "Thứ khiến app này được dùng không phải là biểu đồ, mà là nút xuất ảnh. Tôi mất vài vòng mới chấp nhận rằng người dùng sẽ không đổi chỗ làm việc của họ vì sản phẩm của mình — sản phẩm phải đi tới chỗ họ đang đứng.",
+        "Được team khác nhúng lại là kết quả tôi thấy đáng giá nhất, nhưng nó cũng đổi bản chất công việc: từ lúc đó app không còn là công cụ riêng nữa mà thành một phụ thuộc của người khác. Nếu làm lại, tôi sẽ chốt trước cam kết về tính ổn định và cách thông báo thay đổi, thay vì để nó thành thoả thuận ngầm.",
+      ],
+
+      flowHeading: "Từ bảng dựng tay tới một app có người khác dùng lại",
+      flow: {
+        nodes: [
+          { id: "src", label: "Nguồn vận hành", sublabel: "Google Sheet người dùng vẫn nhập hằng ngày" },
+          { id: "db", label: "Supabase", sublabel: "lược đồ có kiểu, tầng phục vụ truy vấn" },
+          { id: "app", label: "5 báo cáo ma trận", sublabel: "lọc theo vùng · hub · khoảng ngày" },
+          { id: "gate", label: "Allowlist + nhật ký truy cập", sublabel: "ai xem gì, lúc nào" },
+          { id: "out", label: "Trình chiếu · ảnh · Excel · nhúng", sublabel: "đi tới đúng chỗ người dùng đang làm việc" },
+        ],
+        edges: [
+          { from: "src", to: "db" },
+          { from: "db", to: "app" },
+          { from: "app", to: "gate" },
+          { from: "gate", to: "out" },
+        ],
+      },
+      stack: [
+        { group: "Dữ liệu", items: ["Supabase (Postgres)", "pipeline đồng bộ từ Google Sheet"] },
+        { group: "Ứng dụng", items: ["Web app trên Vercel", "xác thực & phân quyền theo allowlist", "nhật ký truy cập"] },
+      ],
+    },
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       DEEP #2 — GHN. Bản cũ để case này mỏng hơn Interdist rất nhiều, dù nó là
        job chính. Đã dồn thêm sức nặng: thêm decision thứ 3 (lấy từ section `ai`
        đã bỏ), và bỏ `features` để toàn bộ chú ý dồn vào `decisions`.
        ═══════════════════════════════════════════════════════════════════════ */
@@ -533,7 +687,7 @@ export const content: SiteContent = {
     },
 
     /* ═══════════════════════════════════════════════════════════════════════
-       DEEP #2 — GHN. Case có tư duy business rule sắc nhất. Không features —
+       DEEP #3 — GHN. Case có tư duy business rule sắc nhất. Không features —
        sức nặng dồn hết vào decisions.
 
        ĐÃ THU HẸP PHẠM VI: bản trước gộp cả nhánh tiền (đền bù × truy thu, gửi
