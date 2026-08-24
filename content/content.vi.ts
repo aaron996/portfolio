@@ -19,7 +19,7 @@ export const content: SiteContent = {
     description:
       "Tôi chốt định nghĩa chỉ tiêu, dựng data model, rồi tự ship hệ thống sinh ra con số đó. Sáu năm vận hành logistics và thương mại điện tử: Shopee, GHN, J&T Express, Maersk.",
     ogImage: "/og.png",
-    url: "https://REPLACE-ME.com", // ⚠️ thay domain thật trước khi deploy (ảnh hưởng OG tag)
+    url: "https://vinhluong-here.vercel.app", // URL Vercel đang chạy (Vinh chốt không mua domain riêng)
     locale: "vi_VN",
   },
 
