@@ -19,7 +19,6 @@ Yêu cầu Node 18.18 trở lên.
 File này có sẵn các chỗ đánh dấu `TODO` — tìm bằng Ctrl+F. Danh sách hiện tại:
 
 - `meta.url` — domain thật, thay khi đã mua
-- `reflection` của case P&G — thêm một điều sẽ làm khác đi
 
 ### Cấu trúc một case study
 

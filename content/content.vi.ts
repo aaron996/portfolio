@@ -270,10 +270,12 @@ export const content: SiteContent = {
 
       /* Đã XOÁ chuỗi "TODO: thêm một điều bạn sẽ làm khác đi..." — nó nằm trong
          mảng render ra UI và sẽ ship thẳng lên production.
-         Vẫn nên có reflection thứ hai, nhưng phải là chuyện thật của bạn: xem note
-         mình gửi kèm. */
+         Reflection thứ hai: Vinh chọn hướng "đo thời gian tiết kiệm thật ngay từ
+         đầu" (24/08/2026). Nó cũng vá đúng điểm yếu của results[1]: con số
+         40–60 giờ/tháng vẫn đang là ước tính chưa đo. */
       reflection: [
         "Sai lầm lớn nhất ở giai đoạn đầu là tôi build dashboard trước khi chốt xong định nghĩa chỉ tiêu. Kết quả là phải làm lại phần tính toán khi nghiệp vụ nói lại cho rõ. Từ đó tôi luôn viết định nghĩa ra giấy và cho người dùng xác nhận trước khi động vào code.",
+        "Điều tôi sẽ làm khác đi là đo thời gian ngay từ đầu. Con số tiết kiệm 40–60 giờ mỗi tháng tới giờ vẫn là ước tính, vì tôi không bấm giờ một chu kỳ tổng hợp tay nào trước khi triển khai — mà chỉ cần vài lần bấm giờ ở tuần đầu là đã có mốc để so. Thiếu mốc đó thì kết quả rõ nhất của cả hệ thống lại đúng là phần duy nhất tôi không chứng minh được bằng số.",
       ],
 
       features: [
