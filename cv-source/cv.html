@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Luong The Vinh — CV</title>
+<style>
+  /* Dựng lại theo đúng metric của bản gốc: A4, Carlito, lề 43.2pt,
+     header mục màu #C0451C có gạch chân, ngày tháng italic #595959. */
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 210mm; }
+  body {
+    font-family: Carlito, Calibri, "Liberation Sans", sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.22;
+    color: #000;
+    padding: 30pt 43.2pt 24pt 43.2pt;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  h1 { font-size: 21pt; font-weight: 700; letter-spacing: 0.2pt; line-height: 1.1; }
+  .subtitle { font-size: 11.5pt; margin-top: 2pt; }
+  .subtitle .role { color: #C0451C; }
+  .contact { font-size: 10pt; margin-top: 3pt; }
+  .contact a { color: #000; text-decoration: none; }
+
+  h2 {
+    font-size: 11.5pt;
+    font-weight: 700;
+    color: #C0451C;
+    text-transform: uppercase;
+    border-bottom: 0.6pt solid #C0451C;
+    padding-bottom: 1pt;
+    margin-top: 7pt;
+    margin-bottom: 3pt;
+  }
+  p.summary { text-align: left; }
+
+  .job { display: flex; justify-content: space-between; align-items: baseline; gap: 10pt; margin-top: 5pt; }
+  .job:first-of-type { margin-top: 2pt; }
+  .job .title { font-size: 11pt; font-weight: 700; }
+  .job .when { font-size: 10pt; font-style: italic; color: #595959; white-space: nowrap; }
+
+  ul { list-style: none; margin-top: 1.5pt; }
+  li { position: relative; padding-left: 11pt; margin-top: 1.1pt; }
+  li::before { content: "•"; position: absolute; left: 1.5pt; }
+
+  .edu { display: flex; justify-content: space-between; align-items: baseline; margin-top: 2pt; }
+  .edu .title { font-weight: 700; }
+  .edu .when { font-size: 10pt; font-style: italic; color: #595959; }
+  .interests { margin-top: 1pt; }
+  b { font-weight: 700; }
+</style>
+</head>
+<body>
+
+  <h1>LUONG THE VINH</h1>
+  <p class="subtitle"><span class="role">Key Account &amp; E-commerce Logistics Specialist</span>
+    &nbsp;|&nbsp; Data Analytics · AI Automation</p>
+  <p class="contact">luongthevinh996@gmail.com &nbsp; | &nbsp; +84 857 613 020 &nbsp; | &nbsp;
+    Go Vap District, Ho Chi Minh City &nbsp; | &nbsp;
+    <a href="https://www.linkedin.com/in/vinhluongg/">linkedin.com/in/vinhluongg</a></p>
+
+  <h2>Summary</h2>
+  <p class="summary">E-commerce logistics and key account specialist with 6+ years across marketplaces and carriers
+    (Shopee, GHN, J&amp;T Express, Maersk). Combines strong SQL analytics with hands-on AI automation — building LLM
+    agent workflows, automated reporting pipelines, and internal web tools that replace manual reporting. Proven
+    record of improving operational KPIs (pickup on-time 90.1% → 97.5%, contact rate per order −15–20%) and turning
+    complex data into decisions for senior management and enterprise clients.</p>
+
+  <h2>Experience</h2>
+
+  <div class="job">
+    <span class="title">Giao Hang Nhanh (GHN) — Key Account Specialist</span>
+    <span class="when">Oct 2025 – Present</span>
+  </div>
+  <ul>
+    <li>Trusted advisor to strategic e-commerce accounts (Shopee, TikTok Shop): own volume vs. forecast (FC/AOP)
+      tracking, SLA adherence and weekly performance reviews; deliver data-backed recommendations adopted by both
+      clients and internal operations.</li>
+    <li>Designed and built an AI reporting pipeline using LLM agent skills and prompt engineering (Claude) that turns
+      raw SQL/CSV extracts into standardized Word/HTML client reports, making report quality consistent across the
+      team.</li>
+    <li>Shipped an internal operations dashboard end-to-end (React, Supabase, Vercel) tracking Shopee pickup and
+      delivery on-time by region, hub and lane, with email-allowlist access control and audit logging; a second team
+      embedded it into their control-tower app instead of rebuilding the same view.</li>
+    <li>Built advanced Trino SQL pipelines that attribute each SLA breach to the responsible warehouse or journey leg,
+      enabling targeted corrective actions with operations.</li>
+    <li>Automated recurring workflows (data pulls, KPI alerts, report distribution) with n8n and Google Apps Script,
+      removing repetitive manual steps for the team.</li>
+    <li>Lead resolution of high-severity escalations across functions, protecting service continuity and quality for
+      key clients.</li>
+  </ul>
+
+  <div class="job">
+    <span class="title">Shopee — Logistics Management Specialist</span>
+    <span class="when">Aug 2021 – Feb 2025</span>
+  </div>
+  <ul>
+    <li>Led performance analytics for 3PL partners (Vietnam Post, Viettel Post, J&amp;T): built automated SQL + Google
+      Sheets dashboards giving senior management and partners real-time KPI visibility.</li>
+    <li>Improved partner pickup on-time performance (VTP) from 90.1% to 97.5% through rigorous data monitoring and
+      structured partner collaboration.</li>
+    <li>Redesigned shipping-status flows based on data analysis, reducing contact rate per order by 15–20% and
+      improving customer experience.</li>
+    <li>Developed automated reporting tools with Google Apps Script, cutting the team's manual workload by ~30%.</li>
+  </ul>
+
+  <div class="job">
+    <span class="title">J&amp;T Express — Key Account Specialist</span>
+    <span class="when">Oct 2020 – Aug 2021</span>
+  </div>
+  <ul>
+    <li>Partnered with Shopee's logistics department to operate high-volume order flows (~300,000 orders/day), using
+      data to track initiatives and design delivery solutions.</li>
+    <li>Implemented internal dashboards, tools and reports that standardized business metrics and enabled data-driven
+      decisions for the operations team.</li>
+  </ul>
+
+  <div class="job">
+    <span class="title">A.P. Moller Maersk — Export Care Business Partner</span>
+    <span class="when">Aug 2019 – Sep 2020</span>
+  </div>
+  <ul>
+    <li>Acted as strategic partner for export clients, coordinating with overseas agents and internal teams to execute
+      shipments and resolve issues in a global environment.</li>
+    <li>Maintained customer master-data accuracy to optimize internal systems and the end-to-end customer
+      experience.</li>
+  </ul>
+
+  <h2>Skills</h2>
+  <ul>
+    <li><b>Data &amp; Analytics:</b> SQL (Trino, large-scale e-commerce datasets), Python, Power BI, Excel / Google
+      Sheets, dashboard design</li>
+    <li><b>AI &amp; Automation:</b> Prompt engineering, LLM agents &amp; AI workflow design (Claude, MCP), AI-assisted
+      development (Next.js, React, Supabase, Vercel), n8n, Google Apps Script</li>
+    <li><b>Account &amp; Operations:</b> Key account management, SLA &amp; escalation management, demand forecasting,
+      client consulting, cross-functional collaboration</li>
+    <li><b>Languages:</b> Vietnamese (native), English</li>
+  </ul>
+
+  <h2>Education &amp; Interests</h2>
+  <div class="edu">
+    <span class="title">University of Finance – Marketing — Bachelor of Business Administration</span>
+    <span class="when">2014 – 2018</span>
+  </div>
+  <p class="interests"><b>Interests:</b> Badminton · Cooking · AI tools &amp; science</p>
+
+</body>
+</html>
