@@ -127,6 +127,12 @@ export interface Media {
   src: string;
   alt: string;
   isDemoData: boolean;
+  /**
+   * Ảnh chiếm hết chiều ngang thay vì nằm trong lưới 2 cột.
+   * Dùng cho ảnh bảng số dày: ở nửa chiều ngang thì chữ trong bảng nhỏ tới mức
+   * chỉ còn là hoa văn, tức là ảnh mất hết công dụng làm bằng chứng.
+   */
+  wide?: boolean;
 }
 
 export interface CaseStudy {

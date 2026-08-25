@@ -2,7 +2,11 @@ import type { Media } from "@/content/types";
 
 export function MediaPlaceholder({ slot }: { slot: Media }) {
   return (
-    <figure className="overflow-hidden rounded-2xl border border-ink-700 bg-ink-900">
+    <figure
+      className={`overflow-hidden rounded-2xl border border-ink-700 bg-ink-900${
+        slot.wide ? " md:col-span-2" : ""
+      }`}
+    >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={slot.src} alt={slot.alt} className="w-full" />
       {slot.isDemoData ? (

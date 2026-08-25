@@ -19,7 +19,7 @@ export const content: SiteContent = {
     description:
       "Tôi chốt định nghĩa chỉ tiêu, dựng data model, rồi tự ship hệ thống sinh ra con số đó. Sáu năm vận hành logistics và thương mại điện tử: Shopee, GHN, J&T Express, Maersk.",
     ogImage: "/og.png",
-    url: "https://REPLACE-ME.com", // ⚠️ thay domain thật trước khi deploy (ảnh hưởng OG tag)
+    url: "https://vinhluong-here.vercel.app", // URL Vercel đang chạy (Vinh chốt không mua domain riêng)
     locale: "vi_VN",
   },
 
@@ -270,10 +270,12 @@ export const content: SiteContent = {
 
       /* Đã XOÁ chuỗi "TODO: thêm một điều bạn sẽ làm khác đi..." — nó nằm trong
          mảng render ra UI và sẽ ship thẳng lên production.
-         Vẫn nên có reflection thứ hai, nhưng phải là chuyện thật của bạn: xem note
-         mình gửi kèm. */
+         Reflection thứ hai: Vinh chọn hướng "đo thời gian tiết kiệm thật ngay từ
+         đầu" (24/08/2026). Nó cũng vá đúng điểm yếu của results[1]: con số
+         40–60 giờ/tháng vẫn đang là ước tính chưa đo. */
       reflection: [
         "Sai lầm lớn nhất ở giai đoạn đầu là tôi build dashboard trước khi chốt xong định nghĩa chỉ tiêu. Kết quả là phải làm lại phần tính toán khi nghiệp vụ nói lại cho rõ. Từ đó tôi luôn viết định nghĩa ra giấy và cho người dùng xác nhận trước khi động vào code.",
+        "Điều tôi sẽ làm khác đi là đo thời gian ngay từ đầu. Con số tiết kiệm 40–60 giờ mỗi tháng tới giờ vẫn là ước tính, vì tôi không bấm giờ một chu kỳ tổng hợp tay nào trước khi triển khai — mà chỉ cần vài lần bấm giờ ở tuần đầu là đã có mốc để so. Thiếu mốc đó thì kết quả rõ nhất của cả hệ thống lại đúng là phần duy nhất tôi không chứng minh được bằng số.",
       ],
 
       features: [
@@ -378,7 +380,16 @@ export const content: SiteContent = {
        nhất trong portfolio có bên thứ ba chủ động dùng lại.
 
        ⚠️ App có auth allowlist theo email → KHÔNG phải demo click được. Không
-       quảng cáo như live demo, và chưa gắn `media` vì chưa có ảnh dữ liệu demo.
+       quảng cáo như live demo. `media` là ảnh chụp CHÍNH app đó chạy ở máy
+       local với dataset mẫu của repo (tên hub/seller đổi sang "Demo", số sinh
+       bằng PRNG có seed) — giao diện thật, dữ liệu minh hoạ.
+
+       ⚠️ Phạm vi đã đối chiếu với repo aaron996/kas_shopee_performance
+       (HEAD 24/08/2026): app ship 4 tab — 4 chỉ số nationwide theo
+       Miền/Vùng/Hub, %Ca 1 theo lane, leadtime từng chặng, Insight. Ba report
+       "Top Seller VIP / Ca-Hub / Focus 1 Vùng" nằm trong YÊU CẦU ban đầu
+       (KAS-183) nhưng đã bị xoá khỏi app ở commit fcbbf6d (21/08) vì thành
+       code chết, không import ở đâu. Vì vậy KHÔNG viết "5 báo cáo" ở đây nữa.
        ═══════════════════════════════════════════════════════════════════════ */
     {
       slug: "kas-shopee-performance",
@@ -389,10 +400,10 @@ export const content: SiteContent = {
       title: "App điều hành hiệu suất Shopee",
       client: "Giao Hàng Nhanh (GHN)",
       clientNote: "Công việc chính, toàn thời gian — yêu cầu từ quản lý trực tiếp",
-      role: "Tự làm toàn bộ: tầng dữ liệu, 5 báo cáo, phân quyền, giao diện, vận hành",
+      role: "Tự làm toàn bộ: tầng dữ liệu, 4 tab báo cáo, phân quyền, giao diện, vận hành",
       period: "2026 – nay",
       oneLiner:
-        "Web app theo dõi ontime pickup/giao hàng của Shopee theo Miền/Vùng/Hub, seller VIP, ca và lane — thay cho các bảng rời phải dựng lại tay mỗi lần điều hành cần xem.",
+        "Web app theo dõi ontime pickup/giao hàng của Shopee theo Miền/Vùng/Hub, theo lane và theo từng chặng leadtime — thay cho các bảng rời phải dựng lại tay mỗi lần điều hành cần xem.",
       accent: "blue",
 
       /* KeyResult mạnh nhất không phải số người dùng mà là việc được tái sử dụng.
@@ -420,12 +431,15 @@ export const content: SiteContent = {
           term: "Tái sử dụng thay vì nhân bản — tránh hai nguồn sự thật cho cùng chỉ tiêu",
         },
         {
-          /* Nguồn: KAS-183 — export ảnh/Excel + chế độ fullscreen; và thực tế các
-             báo cáo điều hành này được screenshot gửi group Telegram bưu cục. */
+          /* Nguồn: KAS-183 (yêu cầu export + fullscreen) và code thật:
+             Report1/Report5 dùng html-to-image ghi ảnh bảng vào clipboard —
+             toast của app ghi đúng luồng đích: "dán (Ctrl+V) vào Zalo/Chat".
+             Header còn đúng 1 nút xuất CSV (commit 961d993). Không phải file
+             Excel — đừng viết "xuất Excel". */
           problem: "Người dùng thật không mở dashboard — họ chụp màn hình gửi vào group",
           why: "Điều hành bưu cục trao đổi trong group chat, không trong dashboard. Một app đẹp mà bắt người ta rời group để đăng nhập vào xem thì sẽ thua một tấm ảnh chụp bảng Excel — không phải vì nó tốt hơn, mà vì nó nằm đúng chỗ người ta đang làm việc.",
           decision:
-            "Thiết kế theo đúng thói quen đó thay vì chống lại nó: chế độ toàn màn hình để trình chiếu trong họp, và xuất thẳng ra ảnh hoặc Excel để dán vào group. App phục vụ luồng phân phối sẵn có, không đòi thay nó.",
+            "Thiết kế theo đúng thói quen đó thay vì chống lại nó: chế độ toàn màn hình để trình chiếu trong họp, và một nút copy thẳng bảng thành ảnh để dán vào group chat (kèm xuất CSV khi cần số thô). App phục vụ luồng phân phối sẵn có, không đòi thay nó.",
           term: "Thiết kế theo kênh phân phối thật của người dùng",
         },
         {
@@ -438,13 +452,14 @@ export const content: SiteContent = {
           term: "Access control + audit log cho báo cáo có tính quy trách nhiệm",
         },
         {
-          /* Nguồn: KAS-183 subtask 1 — "Setup data layer: Supabase schema, sync
-             pipeline, migrate từ Google Sheet CSV".
-             ⚠️ Phần `why` bên dưới là cách mình hiểu lý do — Vinh xác nhận lại. */
-          problem: "Dữ liệu đang sống trong Google Sheet mà nhiều người vẫn đang sửa hằng ngày",
-          why: "Chuyển hẳn sang cơ sở dữ liệu thì sạch về kỹ thuật, nhưng bắt người đang nhập liệu đổi thói quen — và thói quen là thứ khó đổi nhất, thường kết thúc bằng việc họ quay lại dùng file cũ song song.",
+          /* Nguồn: docs/google-sheet-supabase-sync.md + comment đầu
+             src/utils/supabaseSheetSync.js trong repo app (không phải suy luận).
+             Lý do thật là ràng buộc bảo mật tổ chức, KHÔNG phải "sợ người nhập
+             liệu đổi thói quen" như bản trước viết. */
+          problem: "Đường nạp dữ liệu của app bị chính chính sách bảo mật công ty cắt giữa lúc đang chạy",
+          why: "App vốn đọc thẳng link CSV export của Google Sheet từ browser. Cách đó chỉ chạy được khi Sheet để chế độ ai có link cũng xem được — và khi Workspace của công ty chặn share ra ngoài thì link trả về 401/403. Điểm mấu chốt: không có mức share nào cứu được cách gọi cũ, vì một request không đăng nhập thì không bao giờ mang theo cookie Google của người đang xem. Tức là phải đổi kiến trúc, không phải sửa một tuỳ chọn.",
           decision:
-            "Giữ Google Sheet làm nơi nhập liệu, nhưng đồng bộ sang Supabase làm tầng phục vụ cho app. Người nhập không phải đổi gì, còn app đọc từ một lược đồ có kiểu dữ liệu rõ ràng thay vì đọc CSV.",
+            "Giữ Google Sheet làm nơi nhập liệu, nhưng đổi chiều nạp: một Apps Script gắn trong chính file Sheet, chạy dưới quyền người sở hữu nên không phụ thuộc cấu hình share, đẩy dữ liệu theo lịch sang Supabase làm tầng phục vụ cho app. Đẩy thành từng dòng quan hệ chứ không phải một khối JSON, để dữ liệu đó còn query/join bằng SQL cho việc khác. Người nhập liệu không phải đổi gì.",
           term: "Tách nơi nhập liệu khỏi nơi phục vụ truy vấn",
         },
       ],
@@ -452,10 +467,10 @@ export const content: SiteContent = {
       ownership: {
         owned: [
           "Tầng dữ liệu: lược đồ Supabase và pipeline đồng bộ từ nguồn Google Sheet",
-          "Năm báo cáo ma trận (Miền/Vùng/Hub, seller VIP, Ca/Hub, Focus một vùng, Lane/Ca 1) và toàn bộ logic lọc",
+          "Bốn tab báo cáo (4 chỉ số theo Miền/Vùng/Hub, %Ca 1 theo lane, leadtime từng chặng, Insight) và toàn bộ logic lọc",
           "Xác thực, danh sách truy cập, nhật ký truy cập",
           "Toàn bộ giao diện: nhiều vòng chỉnh theme, responsive mobile, dark mode",
-          "Xuất Excel/ảnh, chế độ trình chiếu toàn màn hình",
+          "Copy bảng thành ảnh, xuất CSV, chế độ trình chiếu toàn màn hình",
           "Vận hành sau khi phát hành và xử lý lỗi phát sinh",
         ],
         notOwned: [
@@ -474,9 +489,9 @@ export const content: SiteContent = {
         },
         {
           label: "Phạm vi báo cáo",
-          value: "5 báo cáo ma trận trên cùng một nguồn",
+          value: "4 tab báo cáo trên cùng một nguồn",
           method:
-            "Miền/Vùng/Hub · seller VIP · Ca/Hub · Focus một vùng · Lane/Ca 1. Lọc theo vùng/miền, loại hub và khoảng ngày.",
+            "4 chỉ số ontime theo Miền/Vùng/Hub (mở được tới từng hub) · %Ca 1 theo lane · leadtime từng chặng · Insight. Lọc theo vùng/miền, loại hub và khoảng ngày. Đối chiếu với repo app tại HEAD 24/08/2026.",
           verified: true,
         },
         {
@@ -504,9 +519,9 @@ export const content: SiteContent = {
         nodes: [
           { id: "src", label: "Nguồn vận hành", sublabel: "Google Sheet người dùng vẫn nhập hằng ngày" },
           { id: "db", label: "Supabase", sublabel: "lược đồ có kiểu, tầng phục vụ truy vấn" },
-          { id: "app", label: "5 báo cáo ma trận", sublabel: "lọc theo vùng · hub · khoảng ngày" },
+          { id: "app", label: "4 tab báo cáo", sublabel: "lọc theo vùng · hub · khoảng ngày" },
           { id: "gate", label: "Allowlist + nhật ký truy cập", sublabel: "ai xem gì, lúc nào" },
-          { id: "out", label: "Trình chiếu · ảnh · Excel · nhúng", sublabel: "đi tới đúng chỗ người dùng đang làm việc" },
+          { id: "out", label: "Trình chiếu · ảnh · CSV · nhúng", sublabel: "đi tới đúng chỗ người dùng đang làm việc" },
         ],
         edges: [
           { from: "src", to: "db" },
@@ -518,6 +533,50 @@ export const content: SiteContent = {
       stack: [
         { group: "Dữ liệu", items: ["Supabase (Postgres)", "pipeline đồng bộ từ Google Sheet"] },
         { group: "Ứng dụng", items: ["Web app trên Vercel", "xác thực & phân quyền theo allowlist", "nhật ký truy cập"] },
+      ],
+
+      /* Ảnh chụp chính app này chạy local với dataset mẫu của repo: tên hub và
+         tên seller đổi thành "Demo ...", số sinh bằng PRNG có seed, không nối
+         vào Supabase thật. Giao diện là thật, số liệu là minh hoạ. */
+      media: [
+        {
+          id: "matrix-overview",
+          kind: "image",
+          brief:
+            "Màn hình chính: 4 thẻ chỉ số D-1 so với target, dải chip 'cần can thiệp', rồi ma trận ontime theo Miền/Vùng với thang màu theo mức đạt target.",
+          src: "/case-kas-shopee-matrix.png",
+          alt: "Màn hình tổng quan: bốn thẻ chỉ số ontime kèm ngưỡng target, dải cảnh báo hub cần can thiệp, và bảng ma trận tỷ lệ đúng giờ theo miền và vùng",
+          isDemoData: true,
+          wide: true,
+        },
+        {
+          id: "hub-drill",
+          brief:
+            "Cùng bảng đó mở xuống cấp hub trong vùng đang yếu nhất — cấp có người chịu trách nhiệm. Nút 'Copy Ảnh' nằm ngay cạnh tiêu đề bảng.",
+          kind: "image",
+          src: "/case-kas-shopee-hub-drill.png",
+          alt: "Bảng ma trận mở rộng một vùng xuống từng hub, kèm nút copy bảng thành ảnh cạnh tiêu đề",
+          isDemoData: true,
+          wide: true,
+        },
+        {
+          id: "insight",
+          kind: "image",
+          brief:
+            "Tab Insight: tự nêu chỉ số nào đổi và hub nào đáng chú ý, kèm câu rào đón rằng đây là tương quan theo thời gian chứ chưa phải nhân quả.",
+          src: "/case-kas-shopee-insight.png",
+          alt: "Tab Insight liệt kê chỉ số biến động và xếp hạng hub đáng chú ý, kèm ghi chú đây là tương quan chứ chưa phải quan hệ nhân quả",
+          isDemoData: true,
+        },
+        {
+          id: "access-log",
+          kind: "image",
+          brief:
+            "Trang quản trị: ai đã từng truy cập, bao nhiêu lượt, ai đang online — phần trả lời được câu 'ai đã xem bản nào, lúc nào'.",
+          src: "/case-kas-shopee-access-log.png",
+          alt: "Trang quản trị hiển thị danh sách người đã truy cập kèm số lượt, số người đang online và biểu đồ lượt truy cập bảy ngày",
+          isDemoData: true,
+        },
       ],
     },
 
