@@ -27,27 +27,26 @@ export const content: SiteContent = {
      biết hai cái đó khác gì nhau. Giờ chỉ còn một mục #cases, hierarchy nằm trong
      chính danh sách case. */
   nav: [
-    { label: "Case", href: "#cases" },
-    { label: "Cách làm việc", href: "#pipeline" },
-    { label: "Năng lực", href: "#skills" },
+    { label: "Việc đã làm", href: "#cases" },
+    { label: "Cách làm", href: "#pipeline" },
+    { label: "Về tôi", href: "#about" },
     { label: "Kinh nghiệm", href: "#experience" },
-    { label: "Liên hệ", href: "#contact" },
   ],
 
   hero: {
     /* Bỏ "AI-ASSISTED BUILDER" khỏi eyebrow: AI là phương tiện, không phải danh tính,
        và nó đã được nói ở process.aiNote. Thêm domain vì đó mới là thứ khiến bạn
        khác biệt với một BI analyst chung chung. */
-    eyebrow: "BI / DATA ANALYST · LOGISTICS & E-COMMERCE · HỒ CHÍ MINH",
-    headline: ["Analyst tự build được"],
+    eyebrow: "Đang nhận dự án data product · làm từ xa · phạm vi rõ ràng",
+    headline: ["Số của bạn, có người chịu trách nhiệm"],
     /* Bản render đang luân phiên "dashboard vận hành" ⇄ "sản phẩm dữ liệu".
        Mình bỏ "dashboard vận hành" — nó tự hạ cấp bạn xuống người làm dashboard,
        đúng cái định vị bạn đang cố thoát ra. Ba từ thay thế đều leo thang về quyền
        sở hữu: sản phẩm → hệ thống → con số có người chịu trách nhiệm. */
-    headlineRotating: ["sản phẩm dữ liệu", "hệ thống báo cáo", "con số dám bảo vệ"],
+    headlineRotating: [],
     subline:
-      "Sáu năm trong vận hành logistics và thương mại điện tử. Tôi chốt định nghĩa chỉ tiêu, dựng data model, rồi tự ship hệ thống sinh ra con số — và chịu trách nhiệm khi nó sai.",
-    primaryCta: { label: "Xem case", href: "#cases" },
+      "Tôi chốt định nghĩa chỉ tiêu, dựng data model, rồi tự ship hệ thống sinh ra con số và đứng sau con số đó khi có người hỏi lại.",
+    primaryCta: { label: "Xem 5 hệ thống", href: "#cases" },
     secondaryCta: { label: "Tải CV", href: "/cv.pdf" },
 
     /* SỬA QUAN TRỌNG: liveCard cũ hiển thị 41 cửa hàng · 176 SKU (Interdist).

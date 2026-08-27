@@ -1,105 +1,64 @@
 "use client";
+
 import { useState } from "react";
 import { content } from "@/content/content.vi";
-import { Section } from "./ui/Section";
 import { Reveal } from "./ui/Reveal";
 
-/**
- * Đường đi thật của một dashboard, từ yêu cầu tới production — thay cho section
- * `ai` (3 card lặp lại chính case GHN) và `process` (6 bước chung chung mà analyst
- * nào cũng viết được). Dạng rail dọc + node — quen thuộc, không phát minh gì mới.
- *
- * Điểm nhấn không nằm ở tên công cụ, mà ở hai thứ: `owner` khác "Tôi" (mắt do team
- * khác nắm), và `constraint` (ràng buộc tổ chức tạo ra mắt đó) — thứ không ai bịa
- * ra được nếu chưa sống trong tổ chức đó.
- */
 export function PipelineSection() {
-  const [openTradeoff, setOpenTradeoff] = useState(true);
-  const { pipeline } = content;
+  const [expanded, setExpanded] = useState(false);
 
   return (
-    <Section id="pipeline" tone="darker" className="border-b border-ink-800">
-      <Reveal>
-        <p className="eyebrow text-lime">Cách tôi làm việc</p>
-        <h2 className="display mt-4 max-w-2xl text-[clamp(1.9rem,5vw,3.25rem)]">{pipeline.heading}</h2>
-        <p className="prose-lede mt-6 max-w-3xl text-mute md:text-lg">{pipeline.intro}</p>
-      </Reveal>
+    <section id="pipeline" className="border-b border-ink-800 bg-ink-925">
+      <div className="control-shell py-20 md:py-28">
+        <Reveal>
+          <p className="eyebrow text-lime">Cách tôi làm việc</p>
+          <h2 className="display mt-4 max-w-[26ch] text-[clamp(2rem,4vw,3.25rem)]">{content.pipeline.heading}</h2>
+          <p className="mt-6 max-w-[75ch] text-base leading-8 text-mute">{content.pipeline.intro}</p>
+        </Reveal>
 
-      <ol className="mt-14 max-w-3xl">
-        {pipeline.steps.map((s, i) => {
-          const delegated = s.owner && s.owner !== "Tôi";
-          const isLast = i === pipeline.steps.length - 1;
-          return (
-            <li key={s.label} className="relative pb-8 pl-14">
-              {!isLast && (
-                <span
-                  aria-hidden="true"
-                  className="absolute left-[15px] top-8 bottom-0 w-px bg-ink-700"
-                />
-              )}
-              <Reveal delay={i * 0.04}>
-                <span
-                  aria-hidden="true"
-                  className={`absolute left-0 top-0 flex h-8 w-8 items-center justify-center rounded-full border font-display text-[11px] font-bold tabular-nums ${
-                    delegated
-                      ? "border-amber-400/70 text-amber-400"
-                      : "border-ink-700 bg-ink-800 text-mute-2"
-                  }`}
-                >
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-
-                <div className={`rounded-xl border p-5 ${delegated ? "border-amber-400/25 bg-ink-800/60" : "border-ink-700 bg-ink-900"}`}>
-                  <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <h3 className="font-display text-base font-bold text-paper">{s.label}</h3>
-                    <span
-                      className={`flex-none rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
-                        delegated
-                          ? "border-amber-400/40 bg-amber-400/10 text-amber-400"
-                          : "border-ink-700 bg-ink-800 text-mute-2"
-                      }`}
-                    >
-                      {s.owner}
-                    </span>
-                  </div>
-                  <p className="mt-1.5 text-xs font-semibold text-lime">{s.tool}</p>
-
-                  {s.constraint ? (
-                    <p className="mt-3 rounded-r border-l-2 border-amber-400 bg-amber-400/[0.08] px-3 py-2 text-xs leading-relaxed text-paper">
-                      <span className="mb-0.5 block text-[10px] font-bold uppercase tracking-wide text-amber-400">
-                        Ràng buộc
-                      </span>
-                      {s.constraint}
-                    </p>
-                  ) : null}
-
-                  <p className="mt-3 text-sm leading-relaxed text-mute">{s.body}</p>
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {content.pipeline.steps.map((step, index) => (
+            <Reveal key={step.label} delay={index * 0.04}>
+              <article className="group h-full rounded-2xl border border-ink-700 bg-ink-900 p-5 transition duration-300 hover:-translate-y-1 hover:border-lime/45">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="font-mono text-xs text-mute-3">{String(index + 1).padStart(2, "0")}</span>
+                  <span className="rounded-full border border-ink-700 bg-ink-800 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.05em] text-mute-2">
+                    {step.owner}
+                  </span>
                 </div>
-              </Reveal>
-            </li>
-          );
-        })}
-      </ol>
+                <h3 className="mt-4 font-display text-base font-bold leading-snug text-paper">{step.label}</h3>
+                <p className="mt-2 text-xs font-semibold text-lime">{step.tool}</p>
+                {step.constraint ? (
+                  <p className="mt-4 border-l-2 border-lime bg-lime/[0.05] px-3 py-2 text-xs leading-5 text-mute">
+                    <span className="mb-0.5 block text-[10px] font-bold uppercase tracking-[0.06em] text-lime">Ràng buộc</span>
+                    {step.constraint}
+                  </p>
+                ) : null}
+                <p className="mt-4 text-[13px] leading-6 text-mute-2">{step.body}</p>
+              </article>
+            </Reveal>
+          ))}
 
-      <Reveal>
-        <div className="mt-4 max-w-3xl border-t border-ink-800 pt-6">
-          <button
-            type="button"
-            onClick={() => setOpenTradeoff((v) => !v)}
-            aria-expanded={openTradeoff}
-            className="text-xs font-bold uppercase tracking-wide text-lime"
-          >
-            {openTradeoff ? "−" : "+"} Điểm yếu của kiến trúc này
-          </button>
-          {openTradeoff ? (
-            <p className="mt-3 text-sm leading-relaxed text-mute">{pipeline.tradeoff}</p>
-          ) : null}
-
-          <p className="mt-6 border-t border-ink-800 pt-5 text-xs leading-relaxed text-mute-3">
-            {pipeline.aiNote}
-          </p>
+          <Reveal delay={0.28}>
+            <button
+              type="button"
+              onClick={() => setExpanded((value) => !value)}
+              aria-expanded={expanded}
+              className="h-full w-full rounded-2xl border border-dashed border-ink-700 p-5 text-left transition-colors hover:border-lime/50"
+            >
+              <span className="font-mono text-xs text-lime">Điểm yếu đã biết</span>
+              <span className="mt-4 block font-display text-base font-bold text-paper">Điểm yếu của kiến trúc này</span>
+              <span className={`mt-4 block text-[13px] leading-6 ${expanded ? "text-mute" : "text-mute-3"}`}>
+                {expanded ? content.pipeline.tradeoff : "Bấm để xem chỗ tôi biết là chưa tốt."}
+              </span>
+            </button>
+          </Reveal>
         </div>
-      </Reveal>
-    </Section>
+
+        <p className="mt-8 max-w-[78ch] border-t border-ink-800 pt-6 text-sm leading-7 text-mute-3">
+          {content.pipeline.aiNote}
+        </p>
+      </div>
+    </section>
   );
 }

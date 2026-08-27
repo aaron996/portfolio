@@ -1,23 +1,23 @@
 import { content } from "@/content/content.vi";
-import { Reveal } from "./ui/Reveal";
 
 export function StatBand() {
   return (
-    <section className="border-b border-ink-800 bg-ink-900" aria-label="Số liệu tổng quan">
-      <dl className="mx-auto grid w-full max-w-6xl grid-cols-2 gap-8 px-5 py-12 sm:px-8 lg:grid-cols-4">
-        {content.statBand.map((s, i) => (
-          <Reveal key={s.label} delay={i * 0.06}>
-            <div>
-              <dd className="font-display text-[clamp(2rem,5vw,3rem)] font-extrabold leading-none text-paper">
-                {s.value}
-                {s.suffix ? <span className="text-lime">{s.suffix}</span> : null}
-              </dd>
-              <dt className="mt-3 text-xs leading-relaxed text-mute-2">{s.label}</dt>
-              {s.note ? <p className="mt-1 text-[11px] text-mute-3">{s.note}</p> : null}
-            </div>
-          </Reveal>
+    <div className="relative border-t border-ink-800 bg-ink-925/80" aria-label="Số liệu tổng quan">
+      <dl className="grid grid-cols-2 lg:grid-cols-4">
+        {content.statBand.map((stat, index) => (
+          <div
+            key={stat.label}
+            className={`px-5 py-6 sm:px-8 lg:px-9 ${index % 2 === 0 ? "border-r border-ink-800" : ""} ${index < 2 ? "border-b border-ink-800 lg:border-b-0" : ""} ${index > 0 ? "lg:border-l lg:border-ink-800" : ""}`}
+          >
+            <dd className="font-display text-[clamp(2rem,4.2vw,2.7rem)] font-extrabold leading-none text-paper">
+              {stat.value}
+              {stat.suffix ? <span className="text-lime">{stat.suffix}</span> : null}
+            </dd>
+            <dt className="mt-2.5 max-w-[26ch] text-xs leading-5 text-mute-2">{stat.label}</dt>
+            {stat.note ? <p className="mt-1 text-[10px] leading-4 text-mute-3">{stat.note}</p> : null}
+          </div>
         ))}
       </dl>
-    </section>
+    </div>
   );
 }
