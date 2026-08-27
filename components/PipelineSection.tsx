@@ -11,7 +11,7 @@ export function PipelineSection() {
     <section id="pipeline" className="border-b border-ink-800 bg-ink-925">
       <div className="control-shell py-20 md:py-28">
         <Reveal>
-          <p className="eyebrow text-lime">Cách tôi làm việc</p>
+          <p className="eyebrow text-lime">{content.pipeline.eyebrow}</p>
           <h2 className="display mt-4 max-w-[26ch] text-[clamp(2rem,4vw,3.25rem)]">{content.pipeline.heading}</h2>
           <p className="mt-6 max-w-[75ch] text-base leading-8 text-mute">{content.pipeline.intro}</p>
         </Reveal>

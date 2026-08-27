@@ -39,49 +39,16 @@ export const content: SiteContent = {
        khác biệt với một BI analyst chung chung. */
     eyebrow: "Đang nhận dự án data product · làm từ xa · phạm vi rõ ràng",
     headline: ["Số của bạn, có người chịu trách nhiệm"],
-    /* Bản render đang luân phiên "dashboard vận hành" ⇄ "sản phẩm dữ liệu".
-       Mình bỏ "dashboard vận hành" — nó tự hạ cấp bạn xuống người làm dashboard,
-       đúng cái định vị bạn đang cố thoát ra. Ba từ thay thế đều leo thang về quyền
-       sở hữu: sản phẩm → hệ thống → con số có người chịu trách nhiệm. */
-    headlineRotating: [],
     subline:
       "Tôi chốt định nghĩa chỉ tiêu, dựng data model, rồi tự ship hệ thống sinh ra con số và đứng sau con số đó khi có người hỏi lại.",
     primaryCta: { label: "Xem 5 hệ thống đang chạy thật →", href: "#cases" },
     secondaryCta: { label: "Đặt 20 phút trao đổi", href: "#contact" },
 
-    /* SỬA QUAN TRỌNG: liveCard cũ hiển thị 41 cửa hàng · 176 SKU (Interdist).
-       Đó là con số ĐẦU TIÊN người đọc thấy, và nó là scale nhỏ nhất trong CV bạn.
-       Con số nhận diện phải đến từ GHN — job chính, quy mô lớn nhất.
-       Số Interdist đã chuyển xuống cases[0].keyResult, nơi nó đúng ngữ cảnh. */
-    liveCard: {
-      label: "Đang phụ trách",
-      figures: [
-        {
-          value: "300–500K",
-          label: "đơn/ngày — tổng sản lượng GHN, nơi tôi phụ trách tài khoản Shopee Express & Bulky",
-        },
-        { value: "4", label: "hệ thống dữ liệu đang chạy thật" },
-      ],
-      /* Caption cũ ghi "Số liệu từ hệ thống P&G Sales Operations đang vận hành tại
-         Interdist" — tức dòng chú thích ngay dưới màn hình đầu tiên nói với người đọc
-         rằng thành tựu tiêu biểu của bạn thuộc về một engagement bán thời gian 3 tháng. */
-      caption: "Phạm vi công việc chính tại GHN. Chi tiết từng hệ thống ở phần case bên dưới.",
-    },
-
-    ticker: [
-      "SQL / Trino",
-      "Iceberg lakehouse",
-      "StarRocks",
-      "PostgreSQL",
-      "Python",
-      "Metabase",
-      "Power BI",
-      "React · TypeScript",
-      "Supabase",
-      "n8n",
-      "Google Apps Script",
-    ],
   },
+
+  /* Trước đây hardcode trong LogoRail.tsx. Chưa có file logo nên render dạng chữ;
+     khi có ảnh thì đổi type thành { name, src } chứ đừng thêm mảng thứ hai. */
+  logos: ["Shopee", "GHN", "J&T Express", "Maersk", "Interdist"],
 
   /* statBand cũ trộn 3 mốc thời gian mà không nói ra: 97.5% là Shopee 2021,
      300k đơn/ngày là J&T 2020, đứng cạnh "4 hệ thống đã ship" (hiện tại).
@@ -100,7 +67,12 @@ export const content: SiteContent = {
   ],
 
   intro: {
-    heading: "Tôi đứng giữa nghiệp vụ và dữ liệu",
+    eyebrow: "Về tôi",
+    /* Heading DUY NHẤT của section "Về tôi". Trước đây About.tsx hardcode
+       "Tôi đến với dữ liệu từ phía vận hành" và bỏ qua field này, nên tồn tại hai
+       heading song song. Giữ câu của About vì nó nói thẳng xuất phát điểm vận hành
+       — đúng luận điểm — còn "đứng giữa nghiệp vụ và dữ liệu" thì trung tính hơn. */
+    heading: "Tôi đến với dữ liệu từ phía vận hành",
     body: [
       "Tôi bắt đầu từ vận hành, không phải từ kỹ thuật. Sáu năm ngồi trong logistics và thương mại điện tử dạy tôi một thứ mà không khoá học nào dạy được: biết khi nào một con số trông thì đúng nhưng thật ra sai, và sai ở khâu nào.",
       "Công việc của tôi là dịch vấn đề vận hành thành định nghĩa dữ liệu rõ ràng — chỉ tiêu này tính trên grain nào, đơn nào được tính, ngoại lệ xử lý ra sao — rồi biến định nghĩa đó thành pipeline và báo cáo mà người dùng dám tin.",
@@ -111,14 +83,29 @@ export const content: SiteContent = {
     ],
     boundary:
       "Tôi không định vị mình là software engineer. Tôi là người xây hệ thống dữ liệu cho bài toán vận hành mình hiểu rõ.",
+
+    /* Hai danh sách này trước đây hardcode trong About.tsx (FIT / NOT_FIT). */
+    fit: [
+      "Chỉ tiêu đang bị mỗi bên hiểu một kiểu",
+      "Báo cáo còn dựng tay mỗi tuần",
+      "Cần một người vừa chốt logic vừa ship được",
+    ],
+    notFit: [
+      "Cần một data engineer dựng hạ tầng từ đầu",
+      "Bài toán thuần ML hoặc mô hình dự báo nặng",
+      "Chỉ cần người chạy query theo yêu cầu",
+    ],
   },
 
-  /* Bốn chuỗi này trước đây hardcode trong component. Thay đổi quan trọng nhất là
-     "Dự án khác" → công việc chính của bạn không phải "khác". */
+  /* Mọi chuỗi hiển thị đều phải ở đây, không nằm trong .tsx — xem QUY TẮC ở
+     types.ts. featuredEyebrow / otherCasesEyebrow / otherCasesHeading đã bỏ cùng
+     component FeaturedCase (thiết kế cũ, không còn được mount). */
   sectionLabels: {
-    featuredEyebrow: "Case tiêu biểu ·",
-    otherCasesEyebrow: "Bốn case còn lại",
-    otherCasesHeading: "Bốn bài toán, bốn loại bằng chứng",
+    navCta: "Nhận brief dự án",
+    casesEyebrow: "Năm case · năm loại bằng chứng",
+    casesHeading: "Đưa con trỏ vào một dòng để xem hệ thống",
+    experienceEyebrow: "Kinh nghiệm",
+    experienceHeading: "Sáu năm trong vận hành thật",
     ctaHeading: "Tôi biến dữ liệu phức tạp thành hành động rõ ràng",
     /* Field mới, không có trong bản gốc gửi qua — bản gốc dùng intro.body[2] cho
        chỗ này, nhưng body[2] mới mang nghĩa khác (dẫn nhập 4 case). Câu dưới đây
@@ -126,6 +113,15 @@ export const content: SiteContent = {
        suốt các decision, không phải claim mới. */
     ctaBody:
       "Tôi không chỉ viết được query nhanh. Tôi biết chỉ tiêu nào đúng, số nào sai ở đâu, và đứng sau con số đó khi có người hỏi lại.",
+  },
+
+  /* Trước đây toàn bộ nằm trong Testimonials.tsx. Ghi chú viết cho người đọc
+     trang, không phải ghi chú cho chính mình như trong file template. */
+  testimonials: {
+    eyebrow: "Người từng làm việc cùng",
+    heading: "Ba chỗ trống chờ trích dẫn thật",
+    note: "Để trống có chủ ý — trích dẫn bịa ra thì phản tác dụng. Chỗ này sẽ chỉ được điền khi có 2–3 câu thật từ quản lý cũ hoặc stakeholder từng làm việc cùng.",
+    slots: 3,
   },
 
   featuredSlug: "pg-sales-operations",
@@ -995,6 +991,7 @@ export const content: SiteContent = {
      không quyền ghi warehouse, không server, không DevOps. Thứ không fake được ở đây là
      các RÀNG BUỘC; không ai bịa ra được chúng nếu chưa sống trong tổ chức đó. */
   pipeline: {
+    eyebrow: "Cách tôi làm việc",
     heading: "Đường đi của một dashboard, từ yêu cầu tới production",
     intro:
       "Tôi không sở hữu hạ tầng nào trong chuỗi này: không có quyền ghi vào lakehouse, không tự tạo được job định kỳ, không được cấp server. Mỗi mắt dưới đây là một đường hợp lệ tìm ra trong ràng buộc sẵn có — và chính các ràng buộc đó định hình kiến trúc, chứ không phải sở thích kỹ thuật của tôi.",

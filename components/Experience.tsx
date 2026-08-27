@@ -6,8 +6,10 @@ export function Experience() {
     <section id="experience" className="border-b border-ink-800">
       <div className="control-shell py-20 md:py-28">
         <Reveal>
-          <p className="eyebrow text-lime">Kinh nghiệm</p>
-          <h2 className="display mt-4 text-[clamp(2rem,4vw,3.25rem)]">Sáu năm trong vận hành thật</h2>
+          <p className="eyebrow text-lime">{content.sectionLabels.experienceEyebrow}</p>
+          <h2 className="display mt-4 text-[clamp(2rem,4vw,3.25rem)]">
+            {content.sectionLabels.experienceHeading}
+          </h2>
         </Reveal>
 
         <ol className="mt-10 border-b border-ink-800">
@@ -24,7 +26,7 @@ export function Experience() {
                     <p className="text-sm leading-7 text-mute">{experience.summary}</p>
                     {experience.highlights.length ? (
                       <ul className="mt-3 space-y-2">
-                        {experience.highlights.slice(0, 3).map((highlight) => (
+                        {experience.highlights.map((highlight) => (
                           <li key={highlight.slice(0, 30)} className="text-sm leading-6 text-mute-2">
                             {highlight}
                           </li>

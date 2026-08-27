@@ -1,5 +1,4 @@
 import { content } from "@/content/content.vi";
-import { Marquee } from "./ui/Marquee";
 import { Reveal } from "./ui/Reveal";
 
 const KEYWORDS = ["Analyze", "Simplify", "Automate", "Visualize", "Improve"];

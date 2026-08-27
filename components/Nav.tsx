@@ -85,7 +85,7 @@ export function Nav() {
                 href="/#contact"
                 className="whitespace-nowrap rounded-full bg-lime px-5 py-2.5 text-sm font-semibold text-ink-950"
               >
-                Nhận brief dự án
+                {content.sectionLabels.navCta}
               </a>
             </Magnetic>
 
@@ -127,7 +127,7 @@ export function Nav() {
             onClick={() => setOpen(false)}
             className="mt-8 block rounded-full bg-lime px-6 py-4 text-center font-semibold text-ink-950"
           >
-            Nhận brief dự án
+            {content.sectionLabels.navCta}
           </a>
         </div>
       ) : null}

@@ -36,8 +36,10 @@ export function Hero() {
                 Ảnh<br />chân dung
               </div>
               <div>
-                <p className="font-display text-sm font-extrabold uppercase text-paper">Lương Thế Vinh</p>
-                <p className="mt-1 text-xs text-mute-2">BI & Data Analyst, TP.HCM</p>
+                <p className="font-display text-sm font-extrabold uppercase text-paper">
+                  {content.meta.name}
+                </p>
+                <p className="mt-1 text-xs text-mute-2">{content.meta.roleLabel}, TP.HCM</p>
                 <a href={`mailto:${content.contact.email}`} className="nav-link mt-1.5 inline-block text-xs text-lime">
                   {content.contact.email}
                 </a>
