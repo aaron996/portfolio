@@ -37,6 +37,7 @@ export const metadata: Metadata = {
     description: meta.description,
   },
   robots: { index: true, follow: true },
+  icons: { icon: "/og.png" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

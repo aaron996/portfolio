@@ -1,112 +1,70 @@
+import Image from "next/image";
 import Link from "next/link";
 import { content } from "@/content/content.vi";
-import { Section, SectionHeading } from "./ui/Section";
 import { Reveal } from "./ui/Reveal";
-import { DraftBadge } from "./ui/DraftBadge";
 
-/**
- * Các case còn lại chia theo tier: "deep" render thành card đầy đủ scopeLabel +
- * proves; "brief" render mỏng hơn hẳn — thành một dải kết quả (result strip),
- * không phải card cùng cỡ. Chính sự chênh kích cỡ này là hierarchy nhìn thấy
- * được, thay vì các card giống hệt nhau.
- *
- * Lưới deep là 2 cột, nên số case deep lẻ sẽ để card cuối mồ côi kèm một ô
- * trống bằng nửa hàng. Card đó được cho trải hết chiều ngang và xếp ngang lại —
- * lấp ô trống mà không phải hạ cấp một case xuống tier thấp hơn chỉ vì layout.
- */
+const PREVIEWS: Record<string, string> = {
+  "pg-sales-operations": "/case-pg-dashboard.png",
+  "kas-shopee-performance": "/case-kas-shopee-matrix.png",
+  "sla-attribution": "/case-kas-shopee-hub-drill.png",
+  "kas-reporting-automation": "/case-kas-monitor.png",
+  "shopee-3pl-performance": "/case-kas-shopee-insight.png",
+};
+
 export function CaseGrid() {
-  const others = content.cases.filter((c) => c.slug !== content.featuredSlug);
-  const deep = others.filter((c) => c.tier === "deep");
-  const brief = others.filter((c) => c.tier === "brief");
-
   return (
-    <Section className="border-b border-ink-800">
-      <SectionHeading eyebrow={content.sectionLabels.otherCasesEyebrow}>
-        {content.sectionLabels.otherCasesHeading}
-      </SectionHeading>
+    <section id="cases" className="border-b border-ink-800">
+      <div className="control-shell py-20 md:py-28">
+        <Reveal>
+          <h2 className="display max-w-[25ch] text-[clamp(2rem,4vw,3.25rem)]">
+            Đưa con trỏ vào một dòng để xem hệ thống
+          </h2>
+          <p className="mt-5 max-w-[65ch] text-sm leading-7 text-mute-2">
+            {content.intro.body[2]}
+          </p>
+        </Reveal>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        {deep.map((c, i) => {
-          const isOrphan = deep.length % 2 === 1 && i === deep.length - 1;
+        <div className="mt-10 border-b border-ink-800">
+          {content.cases.map((caseStudy, index) => {
+            const preview = PREVIEWS[caseStudy.slug];
 
-          const head = (
-            <>
-              <p className="eyebrow text-lime">{c.scopeLabel}</p>
-              <h3 className="mt-3 font-display text-lg font-bold uppercase leading-tight text-paper">
-                {c.title}
-              </h3>
-              <p className="mt-2 text-sm font-semibold text-paper">{c.proves}</p>
-            </>
-          );
-          const result = (
-            <>
-              <p className="font-display text-base font-bold text-paper">
-                {c.keyResult.value}
-                <DraftBadge verified={c.keyResult.verified} />
-              </p>
-              <p className="mt-1 text-xs text-mute-3">{c.keyResult.label}</p>
-              <span className="mt-4 block text-sm font-semibold text-lime group-hover:underline">
-                Xem chi tiết →
-              </span>
-            </>
-          );
-          const card =
-            "group rounded-2xl border border-ink-700 bg-ink-900 p-6 transition-all hover:-translate-y-1 hover:border-lime/50";
-
-          return (
-            <Reveal key={c.slug} delay={i * 0.06} className={isOrphan ? "md:col-span-2" : ""}>
-              {isOrphan ? (
-                <Link href={`/case/${c.slug}`} className={`${card} flex flex-col md:flex-row md:items-center md:gap-10`}>
-                  <div className="md:flex-1">
-                    {head}
-                    <p className="mt-3 text-sm leading-relaxed text-mute">{c.oneLiner}</p>
+            return (
+              <Reveal key={caseStudy.slug} delay={index * 0.04}>
+                <Link
+                  href={`/case/${caseStudy.slug}`}
+                  className="case-row group relative grid gap-4 border-t border-ink-800 py-7 outline-none sm:py-8 lg:grid-cols-[2.5rem_minmax(0,1fr)_16rem_4rem] lg:items-center lg:gap-6"
+                >
+                  <span className="font-mono text-xs text-mute-3">{String(index + 1).padStart(2, "0")}</span>
+                  <div className="case-row-title transition-transform duration-500 [transition-timing-function:cubic-bezier(.22,1,.36,1)]">
+                    <h3 className="font-display text-xl font-extrabold uppercase leading-tight text-paper sm:text-2xl lg:text-[1.75rem]">
+                      {caseStudy.title}
+                    </h3>
+                    <p className="mt-2 max-w-[58ch] text-sm leading-6 text-mute-2">{caseStudy.oneLiner}</p>
                   </div>
-                  <div className="mt-5 flex-none border-t border-ink-800 pt-4 md:mt-0 md:w-64 md:border-l md:border-t-0 md:pl-8 md:pt-0">
-                    {result}
+                  <div className="lg:pl-2">
+                    <p className="font-display text-lg font-extrabold leading-tight text-lime">{caseStudy.keyResult.value}</p>
+                    <p className="mt-1 text-xs leading-5 text-mute-3">{caseStudy.keyResult.label}</p>
                   </div>
+                  <span className="text-sm font-semibold text-paper/60 transition-all group-hover:translate-x-1 group-hover:text-paper">
+                    Xem
+                  </span>
+
+                  {preview ? (
+                    <Image
+                      src={preview}
+                      alt={caseStudy.media?.[0]?.alt ?? `Ảnh hệ thống ${caseStudy.title}`}
+                      width={360}
+                      height={230}
+                      className="case-row-image pointer-events-none absolute right-[8.5rem] top-1/2 z-10 hidden w-[330px] -translate-y-1/2 scale-[.94] rounded-xl border border-ink-700 object-cover opacity-0 shadow-[0_30px_60px_rgba(0,0,0,.65)] transition-all duration-500 xl:block"
+                    />
+                  ) : null}
+                  <span className="case-row-line absolute inset-x-0 bottom-[-1px] h-px origin-left scale-x-0 bg-lime transition-transform duration-500" />
                 </Link>
-              ) : (
-                <Link href={`/case/${c.slug}`} className={`${card} flex h-full flex-col`}>
-                  {head}
-                  <p className="mt-3 flex-1 text-sm leading-relaxed text-mute">{c.oneLiner}</p>
-                  <div className="mt-5 border-t border-ink-800 pt-4">{result}</div>
-                </Link>
-              )}
-            </Reveal>
-          );
-        })}
-      </div>
-
-      {brief.length > 0 ? (
-        <div className="mt-4 grid gap-4">
-          {brief.map((c) => (
-            <Reveal key={c.slug}>
-              <Link
-                href={`/case/${c.slug}`}
-                className="group flex flex-col gap-4 rounded-2xl border border-ink-700 bg-ink-900 p-6 transition-colors hover:border-lime/50 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div>
-                  <p className="eyebrow text-lime">{c.scopeLabel} · {c.client}</p>
-                  <h3 className="mt-2 font-display text-base font-bold uppercase leading-tight text-paper">
-                    {c.title}
-                  </h3>
-                  <p className="mt-1 max-w-xl text-sm leading-relaxed text-mute">{c.oneLiner}</p>
-                </div>
-                <div className="flex flex-none items-center gap-6 sm:pl-6">
-                  <div>
-                    <p className="font-display text-2xl font-extrabold text-paper">
-                      {c.keyResult.value}
-                      <DraftBadge verified={c.keyResult.verified} />
-                    </p>
-                    <p className="mt-1 text-xs text-mute-3">{c.keyResult.label}</p>
-                  </div>
-                  <span className="text-sm font-semibold text-lime group-hover:underline">→</span>
-                </div>
-              </Link>
-            </Reveal>
-          ))}
+              </Reveal>
+            );
+          })}
         </div>
-      ) : null}
-    </Section>
+      </div>
+    </section>
   );
 }

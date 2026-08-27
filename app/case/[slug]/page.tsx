@@ -11,6 +11,7 @@ import { Reveal } from "@/components/ui/Reveal";
 import { DraftBadge } from "@/components/ui/DraftBadge";
 import { MediaPlaceholder } from "@/components/ui/MediaPlaceholder";
 import { FlowDiagram } from "@/components/ui/FlowDiagram";
+import { SensorBotCanvas } from "@/components/ui/SensorBotCanvas";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -271,6 +272,7 @@ export default async function CasePage({ params }: Params) {
 
         <Contact />
       </main>
+      <SensorBotCanvas />
       <Footer />
     </>
   );
