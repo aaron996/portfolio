@@ -5,12 +5,18 @@ export function Testimonials() {
     <section className="border-b border-ink-800 bg-ink-925">
       <div className="mx-auto w-full max-w-7xl px-5 py-20 sm:px-8 md:py-24 xl:px-11">
         <Reveal>
-          <h2 className="display max-w-[24ch] text-[clamp(1.8rem,3.4vw,2.8rem)]">
-            Ba chỗ trống chờ trích dẫn thật
-          </h2>
-          <p className="mt-5 max-w-[62ch] text-sm leading-7 text-mute-3">
-            Trích dẫn sẽ chỉ xuất hiện khi có phản hồi thật từ quản lý hoặc stakeholder từng làm việc cùng.
-          </p>
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
+            <div>
+              <p className="eyebrow text-lime">Người từng làm việc cùng</p>
+              <h2 className="display mt-4 max-w-[24ch] text-[clamp(1.8rem,3.4vw,2.8rem)]">
+                Ba chỗ trống chờ trích dẫn thật
+              </h2>
+            </div>
+            <p className="max-w-[42ch] text-sm leading-7 text-mute-3">
+              Để trống có chủ ý — trích dẫn bịa ra thì phản tác dụng. Chỗ này sẽ chỉ được điền khi có
+              2–3 câu thật từ quản lý cũ hoặc stakeholder từng làm việc cùng.
+            </p>
+          </div>
         </Reveal>
 
         <div className="mt-9 grid gap-4 md:grid-cols-3">

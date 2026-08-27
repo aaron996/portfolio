@@ -16,15 +16,18 @@ export function CaseGrid() {
     <section id="cases" className="border-b border-ink-800">
       <div className="control-shell py-20 md:py-28">
         <Reveal>
-          <h2 className="display max-w-[25ch] text-[clamp(2rem,4vw,3.25rem)]">
-            Đưa con trỏ vào một dòng để xem hệ thống
-          </h2>
-          <p className="mt-5 max-w-[65ch] text-sm leading-7 text-mute-2">
-            {content.intro.body[2]}
-          </p>
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
+            <div>
+              <p className="eyebrow text-lime">Năm case · năm loại bằng chứng</p>
+              <h2 className="display mt-4 max-w-[24ch] text-[clamp(2rem,4vw,3.25rem)]">
+                Đưa con trỏ vào một dòng để xem hệ thống
+              </h2>
+            </div>
+            <p className="max-w-[38ch] text-sm leading-7 text-mute-2">{content.intro.body[2]}</p>
+          </div>
         </Reveal>
 
-        <div className="mt-10 border-b border-ink-800">
+        <div className="mt-9 border-b border-ink-800">
           {content.cases.map((caseStudy, index) => {
             const preview = PREVIEWS[caseStudy.slug];
 
@@ -45,8 +48,8 @@ export function CaseGrid() {
                     <p className="font-display text-lg font-extrabold leading-tight text-lime">{caseStudy.keyResult.value}</p>
                     <p className="mt-1 text-xs leading-5 text-mute-3">{caseStudy.keyResult.label}</p>
                   </div>
-                  <span className="text-sm font-semibold text-paper/60 transition-all group-hover:translate-x-1 group-hover:text-paper">
-                    Xem
+                  <span className="whitespace-nowrap text-sm font-semibold text-paper/35 transition-all duration-300 group-hover:translate-x-1 group-hover:text-paper lg:justify-self-end">
+                    Xem →
                   </span>
 
                   {preview ? (

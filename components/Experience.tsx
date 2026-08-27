@@ -6,7 +6,8 @@ export function Experience() {
     <section id="experience" className="border-b border-ink-800">
       <div className="control-shell py-20 md:py-28">
         <Reveal>
-          <h2 className="display text-[clamp(2rem,4vw,3.25rem)]">Sáu năm trong vận hành thật</h2>
+          <p className="eyebrow text-lime">Kinh nghiệm</p>
+          <h2 className="display mt-4 text-[clamp(2rem,4vw,3.25rem)]">Sáu năm trong vận hành thật</h2>
         </Reveal>
 
         <ol className="mt-10 border-b border-ink-800">

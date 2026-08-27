@@ -34,7 +34,8 @@ export function About() {
         </Reveal>
 
         <Reveal delay={0.08}>
-          <h2 className="display max-w-[20ch] text-[clamp(2rem,4.2vw,3.4rem)]">
+          <p className="eyebrow text-lime">Về tôi</p>
+          <h2 className="display mt-4 max-w-[20ch] text-[clamp(2rem,4.2vw,3.4rem)]">
             Tôi đến với dữ liệu từ phía vận hành
           </h2>
           <div className="mt-7 max-w-[64ch] space-y-5 text-base leading-8 text-mute md:text-[17px]">

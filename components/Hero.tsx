@@ -2,6 +2,7 @@ import Link from "next/link";
 import { content } from "@/content/content.vi";
 import { Reveal } from "./ui/Reveal";
 import { HeroGrid } from "./ui/HeroGrid";
+import { Magnetic } from "./ui/Magnetic";
 import { StatBand } from "./StatBand";
 
 export function Hero() {
@@ -46,19 +47,23 @@ export function Hero() {
         </Reveal>
 
         <Reveal delay={0.18}>
-          <div className="mt-9 flex flex-wrap gap-3">
-            <Link
-              href={hero.primaryCta.href}
-              className="whitespace-nowrap rounded-full bg-lime px-7 py-4 text-sm font-semibold text-ink-950 transition-transform duration-300 active:translate-y-px sm:hover:-translate-y-0.5"
-            >
-              {hero.primaryCta.label}
-            </Link>
-            <a
-              href={hero.secondaryCta.href}
-              className="whitespace-nowrap rounded-full border border-ink-700 px-7 py-4 text-sm font-semibold text-paper transition-colors hover:border-lime hover:text-lime"
-            >
-              {hero.secondaryCta.label}
-            </a>
+          <div className="mt-9 flex flex-wrap gap-3.5">
+            <Magnetic>
+              <Link
+                href={hero.primaryCta.href}
+                className="whitespace-nowrap rounded-full bg-lime px-7 py-4 text-sm font-semibold text-ink-950"
+              >
+                {hero.primaryCta.label}
+              </Link>
+            </Magnetic>
+            <Magnetic>
+              <a
+                href={hero.secondaryCta.href}
+                className="whitespace-nowrap rounded-full border border-ink-700 px-7 py-4 text-sm font-semibold text-paper transition-colors hover:border-lime hover:text-lime"
+              >
+                {hero.secondaryCta.label}
+              </a>
+            </Magnetic>
           </div>
         </Reveal>
       </div>

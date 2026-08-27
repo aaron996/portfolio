@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Archivo, Inter } from "next/font/google";
 import { content } from "@/content/content.vi";
+import { CursorLight } from "@/components/ui/CursorLight";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Bỏ qua tới nội dung chính
         </a>
+        <CursorLight />
         {children}
       </body>
     </html>

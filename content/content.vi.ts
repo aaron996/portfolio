@@ -46,8 +46,8 @@ export const content: SiteContent = {
     headlineRotating: [],
     subline:
       "Tôi chốt định nghĩa chỉ tiêu, dựng data model, rồi tự ship hệ thống sinh ra con số và đứng sau con số đó khi có người hỏi lại.",
-    primaryCta: { label: "Xem 5 hệ thống", href: "#cases" },
-    secondaryCta: { label: "Tải CV", href: "/cv.pdf" },
+    primaryCta: { label: "Xem 5 hệ thống đang chạy thật →", href: "#cases" },
+    secondaryCta: { label: "Đặt 20 phút trao đổi", href: "#contact" },
 
     /* SỬA QUAN TRỌNG: liveCard cũ hiển thị 41 cửa hàng · 176 SKU (Interdist).
        Đó là con số ĐẦU TIÊN người đọc thấy, và nó là scale nhỏ nhất trong CV bạn.
@@ -1161,12 +1161,12 @@ export const content: SiteContent = {
   ],
 
   contact: {
-    heading: "Cùng trao đổi nhé",
+    heading: "Bạn đang có một con số không ai dám bảo vệ?",
     /* Thêm một câu cho nửa client consulting — trước đây body chỉ nói với nhà tuyển dụng. */
     body: "Nếu team bạn cần một người hiểu nghiệp vụ đủ sâu để định nghĩa đúng con số, và đủ tay nghề để tự dựng hệ thống sinh ra con số đó — mình rất muốn trao đổi. Mình cũng nhận dự án data product theo phạm vi rõ ràng, làm từ xa.",
     email: "luongthevinh996@gmail.com",
     linkedin: "https://www.linkedin.com/in/vinhluongg/",
     cvHref: "/cv.pdf",
-    availability: "ĐANG TÌM VỊ TRÍ BI / DATA ANALYST · NHẬN DỰ ÁN DATA PRODUCT",
+    availability: "Nhận dự án data product · cũng cân nhắc vị trí BI / Data Analyst",
   },
 };
