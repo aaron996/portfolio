@@ -1,5 +1,6 @@
 import { content } from "@/content/content.vi";
 import { Reveal } from "./ui/Reveal";
+import { Magnetic } from "./ui/Magnetic";
 
 export function Contact() {
   const { contact } = content;
@@ -19,27 +20,33 @@ export function Contact() {
           <h2 className="display mt-6 text-[clamp(2.2rem,7vw,4.5rem)]">{contact.heading}</h2>
           <p className="prose-lede mt-6 text-mute md:text-lg">{contact.body}</p>
 
-          <div className="mt-10 flex flex-wrap items-center gap-3">
-            <a
-              href={`mailto:${contact.email}`}
-              className="min-h-11 whitespace-nowrap rounded-full bg-lime px-7 py-3.5 text-sm font-semibold text-ink-950 transition-transform active:translate-y-px sm:hover:-translate-y-0.5"
-            >
-              {contact.email}
-            </a>
-            <a
-              href={contact.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="min-h-11 whitespace-nowrap rounded-full border border-ink-700 px-7 py-3.5 text-sm font-semibold text-paper transition-colors hover:border-lime hover:text-lime"
-            >
-              LinkedIn
-            </a>
-            <a
-              href={contact.cvHref}
-              className="min-h-11 whitespace-nowrap rounded-full border border-ink-700 px-7 py-3.5 text-sm font-semibold text-paper transition-colors hover:border-lime hover:text-lime"
-            >
-              Tải CV (PDF)
-            </a>
+          <div className="mt-10 flex flex-wrap items-center gap-3.5">
+            <Magnetic>
+              <a
+                href={`mailto:${contact.email}`}
+                className="inline-flex min-h-11 items-center whitespace-nowrap rounded-full bg-lime px-7 py-3.5 text-sm font-semibold text-ink-950"
+              >
+                {contact.email}
+              </a>
+            </Magnetic>
+            <Magnetic>
+              <a
+                href={contact.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 items-center whitespace-nowrap rounded-full border border-ink-700 px-7 py-3.5 text-sm font-semibold text-paper transition-colors hover:border-lime hover:text-lime"
+              >
+                LinkedIn
+              </a>
+            </Magnetic>
+            <Magnetic>
+              <a
+                href={contact.cvHref}
+                className="inline-flex min-h-11 items-center whitespace-nowrap rounded-full border border-ink-700 px-7 py-3.5 text-sm font-semibold text-paper transition-colors hover:border-lime hover:text-lime"
+              >
+                Tải CV (PDF)
+              </a>
+            </Magnetic>
           </div>
         </Reveal>
       </div>

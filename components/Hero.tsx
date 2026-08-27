@@ -2,6 +2,7 @@ import Link from "next/link";
 import { content } from "@/content/content.vi";
 import { Reveal } from "./ui/Reveal";
 import { HeroGrid } from "./ui/HeroGrid";
+import { Magnetic } from "./ui/Magnetic";
 import { StatBand } from "./StatBand";
 
 export function Hero() {
@@ -35,8 +36,10 @@ export function Hero() {
                 Ảnh<br />chân dung
               </div>
               <div>
-                <p className="font-display text-sm font-extrabold uppercase text-paper">Lương Thế Vinh</p>
-                <p className="mt-1 text-xs text-mute-2">BI & Data Analyst, TP.HCM</p>
+                <p className="font-display text-sm font-extrabold uppercase text-paper">
+                  {content.meta.name}
+                </p>
+                <p className="mt-1 text-xs text-mute-2">{content.meta.roleLabel}, TP.HCM</p>
                 <a href={`mailto:${content.contact.email}`} className="nav-link mt-1.5 inline-block text-xs text-lime">
                   {content.contact.email}
                 </a>
@@ -46,19 +49,23 @@ export function Hero() {
         </Reveal>
 
         <Reveal delay={0.18}>
-          <div className="mt-9 flex flex-wrap gap-3">
-            <Link
-              href={hero.primaryCta.href}
-              className="whitespace-nowrap rounded-full bg-lime px-7 py-4 text-sm font-semibold text-ink-950 transition-transform duration-300 active:translate-y-px sm:hover:-translate-y-0.5"
-            >
-              {hero.primaryCta.label}
-            </Link>
-            <a
-              href={hero.secondaryCta.href}
-              className="whitespace-nowrap rounded-full border border-ink-700 px-7 py-4 text-sm font-semibold text-paper transition-colors hover:border-lime hover:text-lime"
-            >
-              {hero.secondaryCta.label}
-            </a>
+          <div className="mt-9 flex flex-wrap gap-3.5">
+            <Magnetic>
+              <Link
+                href={hero.primaryCta.href}
+                className="whitespace-nowrap rounded-full bg-lime px-7 py-4 text-sm font-semibold text-ink-950"
+              >
+                {hero.primaryCta.label}
+              </Link>
+            </Magnetic>
+            <Magnetic>
+              <a
+                href={hero.secondaryCta.href}
+                className="whitespace-nowrap rounded-full border border-ink-700 px-7 py-4 text-sm font-semibold text-paper transition-colors hover:border-lime hover:text-lime"
+              >
+                {hero.secondaryCta.label}
+              </a>
+            </Magnetic>
           </div>
         </Reveal>
       </div>

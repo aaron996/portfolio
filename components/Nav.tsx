@@ -4,10 +4,22 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { content } from "@/content/content.vi";
 import { BrandMark } from "./ui/BrandMark";
+import { Magnetic } from "./ui/Magnetic";
 
 export function Nav() {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("");
+  const [scrolled, setScrolled] = useState(false);
+
+  /* Thanh nav trong suốt khi ở đỉnh trang rồi mới đặc dần khi cuộn — hero cần
+     nguyên khung hình cho lưới sáng, một thanh đen kịt ngay từ đầu làm mất hiệu
+     ứng đó. */
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     const sections = content.nav
@@ -38,7 +50,13 @@ export function Nav() {
 
   return (
     <>
-      <nav className="fixed inset-x-0 top-0 z-40 h-[68px] border-b border-ink-800 bg-ink-950/88 backdrop-blur-xl">
+      <nav
+        className={`fixed inset-x-0 top-0 z-40 h-[68px] border-b transition-[background-color,border-color,backdrop-filter] duration-300 ${
+          scrolled || open
+            ? "border-ink-800 bg-ink-950/88 backdrop-blur-xl"
+            : "border-transparent bg-transparent"
+        }`}
+      >
         <div className="control-shell flex h-full items-center justify-between">
           <Link href="/" className="flex items-center gap-3 text-paper" aria-label="Vinh Lương, về trang chủ">
             <BrandMark className="h-[26px] w-[26px]" />
@@ -54,7 +72,7 @@ export function Nav() {
                   <Link
                     href={`/${item.href}`}
                     aria-current={active === item.href ? "location" : undefined}
-                    className={`nav-link text-sm ${active === item.href ? "text-paper" : "text-mute-2"}`}
+                    className={`nav-link text-sm ${active === item.href ? "text-lime" : "text-mute"}`}
                   >
                     {item.label}
                   </Link>
@@ -62,12 +80,14 @@ export function Nav() {
               ))}
             </ul>
 
-            <a
-              href="/#contact"
-              className="hidden whitespace-nowrap rounded-full bg-lime px-5 py-2.5 text-sm font-semibold text-ink-950 transition-transform duration-300 active:translate-y-px sm:block sm:hover:-translate-y-0.5"
-            >
-              Nhận brief dự án
-            </a>
+            <Magnetic className="hidden sm:inline-flex">
+              <a
+                href="/#contact"
+                className="whitespace-nowrap rounded-full bg-lime px-5 py-2.5 text-sm font-semibold text-ink-950"
+              >
+                {content.sectionLabels.navCta}
+              </a>
+            </Magnetic>
 
             <button
               type="button"
@@ -107,7 +127,7 @@ export function Nav() {
             onClick={() => setOpen(false)}
             className="mt-8 block rounded-full bg-lime px-6 py-4 text-center font-semibold text-ink-950"
           >
-            Nhận brief dự án
+            {content.sectionLabels.navCta}
           </a>
         </div>
       ) : null}

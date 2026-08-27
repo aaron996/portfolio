@@ -12,6 +12,13 @@ export function HeroGrid() {
     const context = canvas.getContext("2d");
     if (!context) return;
 
+    /* Nghe chuột trên cả khối hero, KHÔNG phải trên canvas.
+       Canvas nằm ở lớp dưới cùng (absolute inset-0), toàn bộ chữ và nút hero
+       phủ lên trên nó — nên listener gắn trực tiếp vào canvas gần như không
+       bao giờ nhận được mousemove, và đó là lý do lưới không sáng theo chuột.
+       Sự kiện trên phần tử cha vẫn nổi lên từ mọi con, kể cả chữ. */
+    const host = canvas.parentElement ?? canvas;
+
     const pointer = { x: -9999, y: -9999 };
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let frame = 0;
@@ -36,12 +43,12 @@ export function HeroGrid() {
       for (let x = step / 2; x < width; x += step) {
         for (let y = step / 2; y < height; y += step) {
           const distance = Math.hypot(x - pointer.x, y - pointer.y);
-          const proximity = Math.max(0, 1 - distance / 210);
-          const pulse = reduced ? 0.5 : 0.5 + 0.5 * Math.sin(time / 1200 + (x + y) / 210);
-          const alpha = Math.min(1, 0.05 + pulse * 0.035 + proximity * proximity * 0.85);
-          const size = 4 + proximity * proximity * 6;
+          const proximity = Math.max(0, 1 - distance / 200);
+          const pulse = reduced ? 0.5 : 0.5 + 0.5 * Math.sin(time / 1176 + (x + y) / 200);
+          const alpha = Math.min(1, 0.055 + pulse * 0.045 + proximity * proximity * 0.95);
+          const size = 5 + proximity * proximity * 5;
           context.fillStyle =
-            proximity > 0.3
+            proximity > 0.34
               ? `rgba(212,242,54,${alpha.toFixed(3)})`
               : `rgba(150,150,138,${alpha.toFixed(3)})`;
           context.fillRect(x - size / 2, y - size / 2, size, size);
@@ -72,14 +79,14 @@ export function HeroGrid() {
     resize();
     draw();
     window.addEventListener("resize", resize);
-    canvas.addEventListener("pointermove", onPointerMove, { passive: true });
-    canvas.addEventListener("pointerleave", onPointerLeave);
+    host.addEventListener("pointermove", onPointerMove, { passive: true });
+    host.addEventListener("pointerleave", onPointerLeave);
     if (!reduced) frame = window.requestAnimationFrame(loop);
 
     return () => {
       window.removeEventListener("resize", resize);
-      canvas.removeEventListener("pointermove", onPointerMove);
-      canvas.removeEventListener("pointerleave", onPointerLeave);
+      host.removeEventListener("pointermove", onPointerMove);
+      host.removeEventListener("pointerleave", onPointerLeave);
       if (frame) window.cancelAnimationFrame(frame);
     };
   }, []);

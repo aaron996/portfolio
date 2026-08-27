@@ -1,4 +1,4 @@
-const COMPANIES = ["Shopee", "GHN", "J&T Express", "Maersk", "Interdist"];
+import { content } from "@/content/content.vi";
 
 export function LogoRail() {
   return (
@@ -8,7 +8,7 @@ export function LogoRail() {
           Đã làm trong
         </p>
         <div className="grid flex-1 grid-cols-2 gap-3 sm:grid-cols-5">
-          {COMPANIES.map((company) => (
+          {content.logos.map((company) => (
             <div
               key={company}
               className="grid h-11 place-items-center rounded-xl border border-dashed border-ink-700 px-3 text-center font-display text-xs font-bold uppercase tracking-[0.08em] text-mute-2"

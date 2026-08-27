@@ -38,6 +38,21 @@
    - `Result.value.todo`   → footgun. Chính field này làm chuỗi "TODO: ..." lọt vào
                              cases[0].reflection và sẵn sàng render ra production.
                              Giờ `value` là string phẳng.
+   - `hero.liveCard`       → hero theo template dùng dải 4 số (statBand) + hàng logo,
+     `hero.ticker`           không còn card nổi và dải ticker. Ba field này nằm trong
+     `hero.headlineRotating`  content mà không component nào đọc — sửa chúng không lên
+                             trang, nên bỏ hẳn thay vì để làm bẫy.
+   - `Figure`              → type chỉ phục vụ hero.liveCard.
+   - `sectionLabels.featuredEyebrow` / `otherCasesEyebrow` / `otherCasesHeading`
+                           → chỉ FeaturedCase (thiết kế cũ) đọc. Component đã xoá.
+
+   CHƯA ĐƯỢC ĐỌC BỞI COMPONENT NÀO (giữ lại có ý thức, không phải bỏ sót)
+   - `featuredSlug`        → CaseGrid render cả 5 case cùng một kích cỡ nên chưa cần
+                             biết case nào là flagship.
+   - `CaseStudy.tier`      → cùng lý do: hierarchy 3 kích cỡ chưa được cài lại sau
+                             đợt rebuild theo template. Dữ liệu giữ nguyên cho lần sau.
+   Nếu sửa hai field này mà không thấy gì đổi trên trang thì đó là đúng như mô tả,
+   không phải lỗi build.
    ========================================================================== */
 
 export type Accent = "navy" | "blue" | "amber" | "lime";
@@ -60,11 +75,6 @@ export type CaseTier = "flagship" | "deep" | "brief";
 export interface Cta {
   label: string;
   href: string;
-}
-
-export interface Figure {
-  value: string;
-  label: string;
 }
 
 export interface KeyResult {
@@ -197,31 +207,42 @@ export interface SiteContent {
   hero: {
     eyebrow: string;
     headline: string[];
-    /**
-     * Các từ luân phiên ở dòng cuối headline (hiệu ứng rotate đang có trong bản render:
-     * "dashboard vận hành" ⇄ "sản phẩm dữ liệu"). Tách riêng khỏi `headline` để
-     * `aria-label` dựng được câu đầy đủ cho screen reader.
-     */
-    headlineRotating?: string[];
     subline: string;
     primaryCta: Cta;
     secondaryCta: Cta;
-    liveCard: { label: string; figures: Figure[]; caption?: string };
-    ticker: string[];
   };
+
+  /** Hàng "Đã làm trong" dưới hero. Chưa có file logo nên render dạng chữ. */
+  logos: string[];
 
   /**
    * Các chuỗi trước đây HARDCODE trong component. Đưa vào content vì chúng là
-   * quyết định biên tập, không phải quyết định layout — và vì "Dự án khác" đang
-   * gọi công việc chính của Vinh là phụ.
+   * quyết định biên tập, không phải quyết định layout.
+   *
+   * QUY TẮC: mọi chuỗi hiển thị cho người đọc phải nằm ở file content, không
+   * nằm trong .tsx. Đợt rebuild theo template đã hardcode lại một loạt heading
+   * và danh sách vào component, khiến sửa content không lên trang — đó là lỗi
+   * cần tránh lặp lại.
    */
   sectionLabels: {
-    featuredEyebrow: string;
-    otherCasesEyebrow: string;
-    otherCasesHeading: string;
+    /** Nhãn nút CTA trên nav (và trong menu mobile). */
+    navCta: string;
+    casesEyebrow: string;
+    casesHeading: string;
+    experienceEyebrow: string;
+    experienceHeading: string;
     ctaHeading: string;
     /** Tuyên ngôn ngắn dưới ctaHeading, ở section nền lime. */
     ctaBody: string;
+  };
+
+  /** Ba ô trích dẫn để trống có chủ ý — xem `note`. */
+  testimonials: {
+    eyebrow: string;
+    heading: string;
+    note: string;
+    /** Số ô trống render ra. */
+    slots: number;
   };
 
   statBand: {
@@ -232,11 +253,17 @@ export interface SiteContent {
     note?: string;
   }[];
 
+  /** Section "Về tôi". `heading` là heading duy nhất của section này. */
   intro: {
+    eyebrow: string;
     heading: string;
     body: string[];
     /** Giới hạn tự nhận. Xuất hiện đúng 1 lần trên toàn site. */
     boundary: string;
+    /** Khi nào nên gọi mình. */
+    fit: string[];
+    /** Khi nào KHÔNG nên — nói ra thì tăng độ tin, không giảm. */
+    notFit: string[];
   };
 
   featuredSlug: string;
@@ -251,6 +278,7 @@ export interface SiteContent {
    *                   không ai bịa ra được nếu chưa sống trong tổ chức đó.
    */
   pipeline: {
+    eyebrow: string;
     heading: string;
     intro: string;
     steps: {

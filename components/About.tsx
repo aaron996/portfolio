@@ -1,20 +1,8 @@
 import { content } from "@/content/content.vi";
 import { Reveal } from "./ui/Reveal";
 
-const FIT = [
-  "Chỉ tiêu đang bị mỗi bên hiểu một kiểu",
-  "Báo cáo còn dựng tay mỗi tuần",
-  "Cần một người vừa chốt logic vừa ship được",
-];
-
-const NOT_FIT = [
-  "Cần một data engineer dựng hạ tầng từ đầu",
-  "Bài toán thuần ML hoặc mô hình dự báo nặng",
-  "Chỉ cần người chạy query theo yêu cầu",
-];
-
 export function About() {
-  const skills = Array.from(new Set(content.skills.flatMap((group) => group.items))).slice(0, 9);
+  const { intro } = content;
 
   return (
     <section id="about" className="border-b border-ink-800">
@@ -27,34 +15,58 @@ export function About() {
               </div>
             </div>
             <div className="absolute -bottom-5 left-4 rounded-xl bg-lime px-5 py-4 text-ink-950 sm:-left-4 sm:bottom-7">
-              <p className="font-display text-sm font-extrabold uppercase tracking-[0.08em]">Lương Thế Vinh</p>
-              <p className="mt-1 text-xs text-ink-950/70">BI & Data Analyst, TP.HCM</p>
+              <p className="font-display text-sm font-extrabold uppercase tracking-[0.08em]">
+                {content.meta.name}
+              </p>
+              <p className="mt-1 text-xs text-ink-950/70">{content.meta.roleLabel}, TP.HCM</p>
             </div>
           </div>
         </Reveal>
 
         <Reveal delay={0.08}>
-          <h2 className="display max-w-[20ch] text-[clamp(2rem,4.2vw,3.4rem)]">
-            Tôi đến với dữ liệu từ phía vận hành
-          </h2>
+          <p className="eyebrow text-lime">{intro.eyebrow}</p>
+          <h2 className="display mt-4 max-w-[20ch] text-[clamp(2rem,4.2vw,3.4rem)]">{intro.heading}</h2>
           <div className="mt-7 max-w-[64ch] space-y-5 text-base leading-8 text-mute md:text-[17px]">
-            {content.intro.body.slice(0, 2).map((paragraph) => (
+            {intro.body.slice(0, 2).map((paragraph) => (
               <p key={paragraph.slice(0, 32)}>{paragraph}</p>
             ))}
           </div>
 
+          {/* Giới hạn tự nhận — theo types.ts phải xuất hiện đúng một lần trên site,
+              và đây là chỗ của nó. Trước đây không component nào render câu này. */}
+          <p className="mt-6 max-w-[64ch] border-l-2 border-ink-700 pl-4 text-sm leading-7 text-mute-2">
+            {intro.boundary}
+          </p>
+
           <div className="mt-9 grid gap-4 sm:grid-cols-2">
-            <FitList title="Tôi phù hợp khi" items={FIT} positive />
-            <FitList title="Tôi không phù hợp khi" items={NOT_FIT} />
+            <FitList title="Tôi phù hợp khi" items={intro.fit} positive />
+            <FitList title="Tôi không phù hợp khi" items={intro.notFit} />
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-2">
-            {skills.map((skill) => (
-              <span key={skill} className="rounded-full border border-ink-700 px-3 py-1.5 text-xs text-mute">
-                {skill}
-              </span>
+          {/* Sáu nhóm năng lực, mỗi nhóm một hàng chip. Bản cũ flatten hết rồi
+              .slice(0, 9) — mất tên nhóm và mất 18/27 item của content.skills. */}
+          <dl className="mt-7 space-y-4 border-t border-ink-800 pt-6">
+            {content.skills.map((group) => (
+              <div
+                key={group.title}
+                className="grid gap-2 sm:grid-cols-[10.5rem_minmax(0,1fr)] sm:gap-5"
+              >
+                <dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-mute-3 sm:pt-2">
+                  {group.title}
+                </dt>
+                <dd className="flex flex-wrap gap-2">
+                  {group.items.map((item) => (
+                    <span
+                      key={item}
+                      className="rounded-full border border-ink-700 px-3 py-1.5 text-xs leading-5 text-mute"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </dd>
+              </div>
             ))}
-          </div>
+          </dl>
         </Reveal>
       </div>
     </section>
@@ -69,7 +81,7 @@ function FitList({ title, items, positive = false }: { title: string; items: str
         {items.map((item) => (
           <li key={item} className="flex gap-2.5 text-sm leading-6 text-mute-2">
             <span className={positive ? "text-lime" : "text-mute-3"} aria-hidden="true">
-              {positive ? "+" : "×"}
+              {positive ? "→" : "×"}
             </span>
             <span>{item}</span>
           </li>
