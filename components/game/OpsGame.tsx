@@ -25,7 +25,12 @@ export function OpsGame() {
     const instance = createGame(
       canvas,
       game.maps,
-      { bossAppear: game.bossAppear, deathLine: game.deathLine },
+      {
+        bossAppear: game.bossAppear,
+        deathLine: game.deathLine,
+        pickupTool: game.pickupTool,
+        pickupHeal: game.pickupHeal,
+      },
       {
         onMap: (i) => setMapIndex(i),
         onCleared: (i, skills) => {

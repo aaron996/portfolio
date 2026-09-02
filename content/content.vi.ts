@@ -1188,6 +1188,8 @@ export const content: SiteContent = {
     bossAppear: "{boss} xuất hiện!",
     deathLine: "Ngã rồi. Đứng dậy đi.",
     skillsLabel: "Túi kỹ năng",
+    pickupTool: "Nhặt được {name}",
+    pickupHeal: "Hồi một máu",
     finish: {
       heading: "Hết ải",
       body: "Mười kỹ năng, sáu năm, năm con trùm. Không cái nào tự rơi xuống.",
@@ -1195,12 +1197,13 @@ export const content: SiteContent = {
     },
 
     maps: [
+      /* Ải 1 — dạy chơi. Bệ rộng, thấp, một bãi gai duy nhất. */
       {
         year: "2019",
         place: "A.P. Moller Maersk",
         name: "Cảng Cát Lái",
-        mob: "Chứng từ lệch",
         boss: "Trùm Sai Mã Container",
+        bossKind: "slam",
         line: "Hai lô lệch một ký tự. Không ai chết, nhưng hàng đi nhầm nước.",
         skills: ["Master data", "Đối chiếu chứng từ"],
         palette: {
@@ -1209,14 +1212,30 @@ export const content: SiteContent = {
           mob: "#FAF6E8", boss: "#E0563F",
         },
         deco: "container",
-        plats: [[300,266,130],[520,204,110],[760,272,140],[1010,212,120],[1290,262,150],[1560,200,130],[1810,268,150]],
+        plats: [[300,268,150],[560,262,140],[840,266,160],[1120,258,150],[1400,264,150],[1680,256,160],[1930,262,140]],
+        mobs: [
+          { kind: "walker", name: "Chứng từ lệch", x: 430 },
+          { kind: "walker", name: "Chứng từ lệch", x: 700 },
+          { kind: "walker", name: "Chứng từ lệch", x: 920, y: 266, range: 60 },
+          { kind: "walker", name: "Chứng từ lệch", x: 1180 },
+          { kind: "flyer", name: "Sai một ký tự", x: 1450, y: 196 },
+          { kind: "walker", name: "Chứng từ lệch", x: 1740 },
+          { kind: "flyer", name: "Sai một ký tự", x: 1980, y: 186 },
+        ],
+        traps: [{ kind: "spike", x: 1010, w: 70 }],
+        pickups: [
+          { kind: "heal", x: 900, y: 266, name: "Ly cà phê" },
+          { kind: "tool", x: 1740, y: 256, name: "Máy quét mã vỏ" },
+        ],
       },
+
+      /* Ải 2 — leo thùng. Bệ so le cao thấp, hai lưỡi cưa chạy dưới đất. */
       {
         year: "2020",
         place: "J&T Express",
         name: "Kho Phân Loại",
-        mob: "Kiện lạc tuyến",
         boss: "Băng Chuyền Kẹt",
+        bossKind: "volley",
         line: "Ba trăm nghìn đơn một ngày. Băng chuyền không chờ ai.",
         skills: ["Vận hành quy mô lớn", "Chuẩn hoá chỉ số"],
         palette: {
@@ -1225,14 +1244,35 @@ export const content: SiteContent = {
           mob: "#FFF3DC", boss: "#C0392B",
         },
         deco: "crate",
-        plats: [[280,252,120],[480,196,140],[720,258,120],[960,206,130],[1220,250,140],[1500,192,120],[1780,256,170]],
+        plats: [[280,266,110],[470,214,110],[660,166,110],[900,214,120],[1120,266,120],[1340,206,110],[1560,158,120],[1800,220,130],[2000,270,120]],
+        mobs: [
+          { kind: "walker", name: "Kiện lạc tuyến", x: 330, y: 266, range: 40 },
+          { kind: "charger", name: "Kiện văng ra", x: 620 },
+          { kind: "walker", name: "Kiện lạc tuyến", x: 710, y: 166, range: 40 },
+          { kind: "charger", name: "Kiện văng ra", x: 1090 },
+          { kind: "walker", name: "Kiện lạc tuyến", x: 1390, y: 206, range: 40 },
+          { kind: "charger", name: "Kiện văng ra", x: 1720 },
+          { kind: "walker", name: "Kiện lạc tuyến", x: 1860, y: 220, range: 50 },
+          { kind: "flyer", name: "Kiện rơi tầng trên", x: 2040, y: 190 },
+        ],
+        traps: [
+          { kind: "saw", x: 760, w: 260 },
+          { kind: "saw", x: 1420, w: 220 },
+          { kind: "spike", x: 1240, w: 60 },
+        ],
+        pickups: [
+          { kind: "heal", x: 700, y: 166, name: "Bữa trưa ca đêm" },
+          { kind: "tool", x: 1610, y: 158, name: "Súng bắn mã" },
+        ],
       },
+
+      /* Ải 3 — nhảy nhiều. Bệ nhỏ rải rác, dưới đất có ba miệng phun. */
       {
         year: "2021",
         place: "Shopee",
         name: "Sàn Điều Phối",
-        mob: "Đơn trễ pickup",
         boss: "Trùm 90,1%",
+        bossKind: "dash",
         line: "Con trùm này có thật. Hạ được nó mất hơn một năm, không phải một phút.",
         skills: ["Quản trị đối tác", "KPI on-time"],
         palette: {
@@ -1241,14 +1281,36 @@ export const content: SiteContent = {
           mob: "#FFEDD8", boss: "#7A2E9D",
         },
         deco: "tower",
-        plats: [[320,244,110],[540,192,120],[790,260,130],[1040,200,140],[1300,254,120],[1550,196,140],[1820,262,150]],
+        plats: [[320,250,90],[500,200,80],[680,250,80],[860,190,90],[1060,246,80],[1240,192,90],[1440,248,80],[1640,196,90],[1840,250,100],[2030,200,90]],
+        mobs: [
+          { kind: "flyer", name: "Đơn trễ pickup", x: 420, y: 210 },
+          { kind: "shooter", name: "Hub báo đỏ", x: 700, y: 250 },
+          { kind: "flyer", name: "Đơn trễ pickup", x: 900, y: 150 },
+          { kind: "walker", name: "Đơn dồn ca", x: 1150 },
+          { kind: "shooter", name: "Hub báo đỏ", x: 1280, y: 192 },
+          { kind: "flyer", name: "Đơn trễ pickup", x: 1520, y: 200 },
+          { kind: "walker", name: "Đơn dồn ca", x: 1780 },
+          { kind: "shooter", name: "Hub báo đỏ", x: 1880, y: 250 },
+        ],
+        traps: [
+          { kind: "pulse", x: 620 },
+          { kind: "pulse", x: 1000 },
+          { kind: "pulse", x: 1560 },
+          { kind: "spike", x: 1340, w: 80 },
+        ],
+        pickups: [
+          { kind: "heal", x: 900, y: 190, name: "Nghỉ giữa ca" },
+          { kind: "tool", x: 1680, y: 196, name: "Dashboard realtime" },
+        ],
       },
+
+      /* Ải 4 — nhiều bẫy nhất. Quái đứng bắn từ xa, dưới đất đầy gai. */
       {
         year: "2025",
         place: "Giao Hàng Nhanh",
         name: "Phòng Dữ Liệu",
-        mob: "Query lỗi",
         boss: "Đơn Vô Chủ",
+        bossKind: "volley",
         line: "Đơn trễ mà không kho nào nhận. Phải chỉ đúng tên nó mới chịu ngã.",
         skills: ["SQL / Trino", "Quy trách nhiệm"],
         palette: {
@@ -1257,14 +1319,37 @@ export const content: SiteContent = {
           mob: "#E8EAFF", boss: "#2C3E75",
         },
         deco: "server",
-        plats: [[300,258,130],[530,200,120],[770,262,140],[1030,204,120],[1280,256,150],[1540,198,130],[1800,264,160]],
+        plats: [[360,262,130],[640,206,120],[900,262,140],[1180,206,130],[1460,262,140],[1740,206,130],[1980,262,140]],
+        mobs: [
+          { kind: "shooter", name: "Query lỗi", x: 420, y: 262 },
+          { kind: "charger", name: "Join nhân dòng", x: 700 },
+          { kind: "shooter", name: "Query lỗi", x: 960, y: 262 },
+          { kind: "walker", name: "Cột thiếu", x: 1240, y: 206, range: 50 },
+          { kind: "charger", name: "Join nhân dòng", x: 1400 },
+          { kind: "shooter", name: "Query lỗi", x: 1520, y: 262 },
+          { kind: "walker", name: "Cột thiếu", x: 1800, y: 206, range: 50 },
+          { kind: "charger", name: "Join nhân dòng", x: 2020 },
+        ],
+        traps: [
+          { kind: "spike", x: 560, w: 70 },
+          { kind: "spike", x: 840, w: 70 },
+          { kind: "saw", x: 1080, w: 240 },
+          { kind: "spike", x: 1660, w: 80 },
+          { kind: "pulse", x: 1900 },
+        ],
+        pickups: [
+          { kind: "heal", x: 700, y: 206, name: "Nghỉ năm phút" },
+          { kind: "tool", x: 1800, y: 206, name: "Câu SQL đúng" },
+        ],
       },
+
+      /* Ải 5 — tổng hợp. Đủ bốn loại quái, đủ ba loại bẫy. */
       {
         year: "2026",
         place: "Interdist",
         name: "Xưởng Sản Phẩm",
-        mob: "File Excel rời",
         boss: "CATEGORY.SKU",
+        bossKind: "dash",
         line: "Con trùm cuối là một cái tên cột. Tách sai một dấu chấm là vỡ cả bảng.",
         skills: ["Data modeling", "Ship sản phẩm"],
         palette: {
@@ -1273,7 +1358,28 @@ export const content: SiteContent = {
           mob: "#EFFBF4", boss: "#1F6E52",
         },
         deco: "gear",
-        plats: [[290,250,140],[520,198,110],[780,256,130],[1020,202,140],[1290,248,130],[1560,194,120],[1820,258,160]],
+        plats: [[300,258,120],[520,198,100],[740,252,110],[960,190,110],[1200,246,120],[1420,186,110],[1660,250,120],[1900,196,110],[2070,258,110]],
+        mobs: [
+          { kind: "walker", name: "File Excel rời", x: 400 },
+          { kind: "charger", name: "Dòng lỗi định dạng", x: 660 },
+          { kind: "flyer", name: "Số lệch", x: 800, y: 200 },
+          { kind: "shooter", name: "Cột trùng tên", x: 1010, y: 190 },
+          { kind: "walker", name: "File Excel rời", x: 1260, y: 246, range: 50 },
+          { kind: "charger", name: "Dòng lỗi định dạng", x: 1520 },
+          { kind: "flyer", name: "Số lệch", x: 1700, y: 180 },
+          { kind: "shooter", name: "Cột trùng tên", x: 1950, y: 196 },
+        ],
+        traps: [
+          { kind: "spike", x: 580, w: 70 },
+          { kind: "saw", x: 860, w: 220 },
+          { kind: "pulse", x: 1340 },
+          { kind: "spike", x: 1600, w: 70 },
+          { kind: "saw", x: 1780, w: 200 },
+        ],
+        pickups: [
+          { kind: "heal", x: 1000, y: 190, name: "Cà phê lần ba" },
+          { kind: "tool", x: 1460, y: 186, name: "Data contract" },
+        ],
       },
     ],
   },

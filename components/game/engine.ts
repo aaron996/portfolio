@@ -6,9 +6,9 @@
  * hết game). HUD máu và thanh máu trùm vẽ thẳng trong canvas — nếu đẩy
  * chúng lên React thì mỗi khung hình phải re-render một lần, không đáng.
  *
- * Toàn bộ chữ và bảng màu đến từ content/content.vi.ts.
+ * Toàn bộ bố cục, tên quái, bẫy và vật phẩm đến từ content/content.vi.ts.
  */
-import type { GameMap } from "@/content/types";
+import type { GameMap, MobKind } from "@/content/types";
 
 export type GameKey = "left" | "right" | "jump" | "atk";
 export type GamePhase = "title" | "play" | "clear" | "end";
@@ -26,26 +26,52 @@ export interface GameLabels {
   /** Có {boss} */
   bossAppear: string;
   deathLine: string;
+  /** Có {name} */
+  pickupTool: string;
+  pickupHeal: string;
 }
 
-/** Kích thước thế giới, cố định để bố cục bệ nhảy trong content luôn đúng */
+/** Kích thước thế giới, cố định để bố cục trong content luôn đúng */
 const W = 800;
 const H = 420;
 const GY = 344;
 const WORLD = 2200;
 
+/** Màu chung cho mọi thứ gây sát thương, để người chơi học một lần là nhớ */
+const HAZARD = "#E0563F";
+const LIME = "#d4f236";
+
+/** Đồ nghề: 12 giây đánh nhanh hơn, xa hơn, mạnh gấp đôi */
+const TOOL_SECONDS = 12;
+
 interface Mob {
+  kind: MobKind;
+  name: string;
   x: number; y: number; w: number; h: number;
-  hp: number; dir: number; a: number; b: number;
+  hp: number; dir: number;
+  a: number; b: number;
+  floor: number;
   hurt: number; bob: number; dead: boolean;
+  cd: number; dash: number;
 }
 interface Boss {
   x: number; y: number; w: number; h: number;
   hp: number; mhp: number; dir: number;
-  hurt: number; tel: number; cd: number; bob: number;
+  hurt: number; tel: number; cd: number; bob: number; dash: number;
+}
+interface Trap {
+  kind: "spike" | "saw" | "pulse";
+  x: number; y: number; w: number;
+  t: number; pos: number; dir: number;
+}
+interface Pickup {
+  kind: "heal" | "tool";
+  name: string;
+  x: number; y: number;
+  taken: boolean; bob: number;
 }
 interface Particle { x: number; y: number; vx: number; vy: number; life: number; color: string }
-interface Shot { x: number; y: number; vx: number; r: number }
+interface Shot { x: number; y: number; vx: number; vy: number; r: number }
 
 export interface GameInstance {
   loadMap(index: number): void;
@@ -91,8 +117,11 @@ export function createGame(
     x: 60, y: GY - 40, w: 26, h: 40,
     vx: 0, vy: 0, face: 1,
     hp: 5, mhp: 5, inv: 0, atk: 0, cd: 0, ground: false,
+    tool: 0,
   };
   let mobs: Mob[] = [];
+  let traps: Trap[] = [];
+  let pickups: Pickup[] = [];
   let parts: Particle[] = [];
   let shots: Shot[] = [];
   let boss: Boss | null = null;
@@ -100,12 +129,14 @@ export function createGame(
 
   /* ── vòng đời ải ─────────────────────────────────────── */
 
+  const MOB_HP: Record<MobKind, number> = { walker: 2, flyer: 2, charger: 3, shooter: 2 };
+
   function loadMap(index: number) {
     lv = index;
     const m = maps[lv];
     Object.assign(player, {
       x: 60, y: GY - 40, vx: 0, vy: 0, face: 1,
-      hp: 5, inv: 0, atk: 0, cd: 0, ground: false,
+      hp: 5, inv: 0, atk: 0, cd: 0, ground: false, tool: 0,
     });
     parts = [];
     shots = [];
@@ -116,18 +147,35 @@ export function createGame(
     msg = "";
     msgT = 0;
 
-    // Quái đứng rải trên mặt đất, cộng thêm vài con đứng trên bệ nhảy
-    const spots: [number, number][] = [
-      [430, GY], [660, GY], [900, GY], [1150, GY], [1420, GY], [1680, GY],
-    ];
-    m.plats.forEach((p, i) => {
-      if (i % 2 === 0) spots.push([p[0] + p[2] / 2, p[1]]);
+    mobs = m.mobs.map((sp) => {
+      const floor = sp.y ?? GY;
+      const range = sp.range ?? 70;
+      const h = sp.kind === "flyer" ? 28 : 30;
+      return {
+        kind: sp.kind, name: sp.name,
+        x: sp.x, y: floor - h, w: 30, h,
+        hp: MOB_HP[sp.kind],
+        dir: Math.random() < 0.5 ? -1 : 1,
+        a: sp.x - range, b: sp.x + range,
+        floor,
+        hurt: 0, bob: Math.random() * 6, dead: false,
+        cd: 1 + Math.random(), dash: 0,
+      };
     });
-    mobs = spots.map(([x, y]) => ({
-      x, y: y - 30, w: 30, h: 30,
-      hp: 2, dir: Math.random() < 0.5 ? -1 : 1,
-      a: x - 70, b: x + 70,
-      hurt: 0, bob: Math.random() * 6, dead: false,
+
+    traps = m.traps.map((t) => ({
+      kind: t.kind,
+      x: t.x,
+      y: t.y ?? GY,
+      w: t.w ?? 26,
+      t: Math.random() * 2,
+      pos: 0,
+      dir: 1,
+    }));
+
+    pickups = m.pickups.map((p) => ({
+      kind: p.kind, name: p.name, x: p.x, y: p.y,
+      taken: false, bob: Math.random() * 6,
     }));
 
     handlers.onMap?.(lv);
@@ -137,7 +185,7 @@ export function createGame(
     boss = {
       x: WORLD - 190, y: GY - 78, w: 70, h: 78,
       hp: 16, mhp: 16, dir: -1,
-      hurt: 0, tel: 0, cd: 2.2, bob: 0,
+      hurt: 0, tel: 0, cd: 2.2, bob: 0, dash: 0,
     };
     say(labels.bossAppear.replace("{boss}", maps[lv].boss), 1.6);
   }
@@ -146,7 +194,7 @@ export function createGame(
     phase = "clear";
     fade = 0;
     const m = maps[lv];
-    if (boss) puff(boss.x + boss.w / 2, boss.y + boss.h / 2, "#d4f236", 40);
+    if (boss) puff(boss.x + boss.w / 2, boss.y + boss.h / 2, LIME, 40);
     boss = null;
     handlers.onCleared?.(lv, m.skills);
     if (lv + 1 >= maps.length) handlers.onFinished?.();
@@ -163,31 +211,34 @@ export function createGame(
 
   function attack() {
     if (phase !== "play" || player.cd > 0) return;
+    const buffed = player.tool > 0;
     player.atk = 0.19;
-    player.cd = 0.3;
+    player.cd = buffed ? 0.17 : 0.3;
+    const reach = buffed ? 84 : 58;
+    const dmg = buffed ? 2 : 1;
 
     // Tầm chém rộng hơn thân người, để đánh được trước khi bị quái chạm vào
     const hb = {
-      x: player.face > 0 ? player.x + player.w - 6 : player.x - 52,
-      y: player.y + 2, w: 58, h: 34,
+      x: player.face > 0 ? player.x + player.w - 6 : player.x + 6 - reach,
+      y: player.y + 2, w: reach, h: 34,
     };
     const m = maps[lv];
 
     for (const o of mobs) {
       if (o.dead || !overlap(hb, o)) continue;
-      o.hp -= 1;
+      o.hp -= dmg;
       o.hurt = 0.18;
       o.x += player.face * 14;
       shake = Math.max(shake, 3);
       puff(o.x + o.w / 2, o.y + o.h / 2, m.palette.mob, 6);
       if (o.hp <= 0) {
         o.dead = true;
-        puff(o.x + o.w / 2, o.y + o.h / 2, "#d4f236", 14);
+        puff(o.x + o.w / 2, o.y + o.h / 2, LIME, 14);
       }
     }
 
     if (boss && overlap(hb, boss)) {
-      boss.hp -= 1;
+      boss.hp -= dmg;
       boss.hurt = 0.16;
       shake = Math.max(shake, 5);
       puff(boss.x + boss.w / 2, boss.y + boss.h / 2, m.palette.boss, 8);
@@ -196,7 +247,7 @@ export function createGame(
   }
 
   function hurtPlayer(dir: number) {
-    if (player.inv > 0) return;
+    if (player.inv > 0 || phase !== "play") return;
     player.hp -= 1;
     player.inv = 1.35;
     player.vy = -6;
@@ -231,8 +282,107 @@ export function createGame(
     msg = text;
     msgT = seconds;
   }
+  function fire(x: number, y: number, vx: number, vy: number) {
+    shots.push({ x, y, vx, vy, r: 9 });
+  }
+
+  /** Hộp gây sát thương của một cái bẫy tại thời điểm hiện tại, null nếu đang tắt */
+  function trapBox(t: Trap): Box | null {
+    if (t.kind === "spike") return { x: t.x, y: t.y - 13, w: t.w, h: 13 };
+    if (t.kind === "saw") return { x: t.x + t.pos - 15, y: t.y - 30, w: 30, h: 30 };
+    // pulse: bật 1,1 giây rồi tắt 1,5 giây — có nhịp để đi qua
+    return t.t % 2.6 < 1.1 ? { x: t.x, y: t.y - 74, w: 26, h: 74 } : null;
+  }
 
   /* ── cập nhật ────────────────────────────────────────── */
+
+  function stepMob(o: Mob, dt: number) {
+    o.hurt = Math.max(0, o.hurt - dt);
+    o.bob += dt * 6;
+    if (o.hurt > 0) return;
+
+    if (o.kind === "walker") {
+      o.x += o.dir * 0.92 * dt * 60;
+      if (o.x < o.a) { o.x = o.a; o.dir = 1; }
+      if (o.x > o.b) { o.x = o.b; o.dir = -1; }
+      o.y = o.floor - o.h;
+    } else if (o.kind === "flyer") {
+      o.x += o.dir * 0.75 * dt * 60;
+      if (o.x < o.a) { o.x = o.a; o.dir = 1; }
+      if (o.x > o.b) { o.x = o.b; o.dir = -1; }
+      o.y = o.floor - o.h + Math.sin(o.bob * 0.5) * 16;
+    } else if (o.kind === "charger") {
+      o.y = o.floor - o.h;
+      if (o.dash > 0) {
+        o.dash -= dt;
+        o.x += o.dir * 4.4 * dt * 60;
+        if (o.dash <= 0) o.cd = 1.3;
+      } else {
+        o.cd -= dt;
+        const near = Math.abs(player.x - o.x) < 240 && Math.abs(player.y - o.y) < 70;
+        if (near && o.cd <= 0) {
+          o.dir = player.x < o.x ? -1 : 1;
+          o.dash = 0.75;
+          puff(o.x + o.w / 2, o.y, HAZARD, 4);
+        }
+      }
+      // Không cho lao ra khỏi vùng của nó quá xa
+      o.x = Math.max(o.a - 140, Math.min(o.b + 140, o.x));
+    } else {
+      // shooter: đứng im, nhả đạn về phía người chơi
+      o.y = o.floor - o.h;
+      o.cd -= dt;
+      if (o.cd <= 0) {
+        o.cd = 2.2;
+        const dir = player.x < o.x ? -1 : 1;
+        o.dir = dir;
+        fire(o.x + o.w / 2, o.y + o.h / 2, dir * 3.4, 0);
+      }
+    }
+  }
+
+  function stepBoss(b: Boss, dt: number) {
+    const kind = maps[lv].bossKind;
+    b.hurt = Math.max(0, b.hurt - dt);
+    b.bob += dt * 3;
+
+    if (b.dash > 0) {
+      b.dash -= dt;
+      b.x += b.dir * 9 * dt * 60;
+      b.x = Math.max(60, Math.min(WORLD - b.w - 20, b.x));
+      if (b.dash <= 0) b.cd = 1.8;
+      return;
+    }
+
+    if (b.tel > 0) {
+      b.tel -= dt;
+      if (b.tel <= 0) {
+        shake = 8;
+        if (kind === "slam") {
+          fire(b.x + 8, GY - 16, -4.2, 0);
+          fire(b.x + b.w - 8, GY - 16, 4.2, 0);
+        } else if (kind === "volley") {
+          const dir = player.x < b.x ? -1 : 1;
+          fire(b.x + b.w / 2, b.y + 20, dir * 4.4, -1.1);
+          fire(b.x + b.w / 2, b.y + 34, dir * 4.6, 0);
+          fire(b.x + b.w / 2, b.y + 48, dir * 4.4, 1.1);
+        } else {
+          b.dir = player.x < b.x ? -1 : 1;
+          b.dash = 0.55;
+        }
+      }
+      return;
+    }
+
+    b.cd -= dt;
+    if (b.cd <= 0) {
+      b.tel = kind === "dash" ? 0.6 : 0.55;
+      b.cd = kind === "dash" ? 2.4 : 2.6;
+      return;
+    }
+    b.dir = player.x < b.x ? -1 : 1;
+    b.x = Math.max(60, Math.min(WORLD - b.w - 20, b.x + b.dir * 0.85 * dt * 60));
+  }
 
   function step(dt: number) {
     if (phase !== "play" && phase !== "clear") return;
@@ -241,6 +391,7 @@ export function createGame(
     player.cd = Math.max(0, player.cd - dt);
     player.atk = Math.max(0, player.atk - dt);
     player.inv = Math.max(0, player.inv - dt);
+    player.tool = Math.max(0, player.tool - dt);
     msgT = Math.max(0, msgT - dt);
     shake *= 0.86;
 
@@ -279,43 +430,54 @@ export function createGame(
     for (const o of mobs) {
       if (o.dead) continue;
       alive++;
-      o.hurt = Math.max(0, o.hurt - dt);
-      o.bob += dt * 6;
-      if (o.hurt <= 0) o.x += o.dir * 0.92 * dt * 60;
-      if (o.x < o.a) { o.x = o.a; o.dir = 1; }
-      if (o.x > o.b) { o.x = o.b; o.dir = -1; }
+      stepMob(o, dt);
       if (overlap(player, o)) hurtPlayer(player.x < o.x ? -1 : 1);
     }
     if (!alive && !boss && phase === "play") spawnBoss();
 
-    if (boss) {
-      boss.hurt = Math.max(0, boss.hurt - dt);
-      boss.bob += dt * 3;
-      boss.cd -= dt;
-      if (boss.tel > 0) {
-        boss.tel -= dt;
-        if (boss.tel <= 0) {
-          // Giậm đất: hai quả cầu chạy hai bên, phải nhảy tránh
-          shake = 8;
-          shots.push({ x: boss.x + 8, y: GY - 16, vx: -4.2, r: 11 });
-          shots.push({ x: boss.x + boss.w - 8, y: GY - 16, vx: 4.2, r: 11 });
-        }
-      } else if (boss.cd <= 0) {
-        boss.tel = 0.55;
-        boss.cd = 2.6;
-      } else {
-        boss.dir = player.x < boss.x ? -1 : 1;
-        boss.x = Math.max(60, Math.min(WORLD - boss.w - 20, boss.x + boss.dir * 0.85 * dt * 60));
+    for (const t of traps) {
+      t.t += dt;
+      if (t.kind === "saw") {
+        t.pos += t.dir * 1.9 * dt * 60;
+        if (t.pos < 0) { t.pos = 0; t.dir = 1; }
+        if (t.pos > t.w) { t.pos = t.w; t.dir = -1; }
       }
+      const box = trapBox(t);
+      if (box && overlap(player, box)) {
+        hurtPlayer(player.x < box.x + box.w / 2 ? -1 : 1);
+      }
+    }
+
+    for (const p of pickups) {
+      if (p.taken) continue;
+      p.bob += dt * 4;
+      const box = { x: p.x, y: p.y - 26, w: 24, h: 24 };
+      if (!overlap(player, box)) continue;
+      p.taken = true;
+      if (p.kind === "heal") {
+        player.hp = Math.min(player.mhp, player.hp + 1);
+        say(labels.pickupHeal, 1.2);
+        puff(p.x + 12, p.y - 14, "#ff6b5e", 12);
+      } else {
+        player.tool = TOOL_SECONDS;
+        say(labels.pickupTool.replace("{name}", p.name), 1.6);
+        puff(p.x + 12, p.y - 14, LIME, 16);
+      }
+    }
+
+    if (boss) {
+      stepBoss(boss, dt);
       if (overlap(player, boss)) hurtPlayer(player.x < boss.x ? -1 : 1);
     }
 
     shots = shots.filter((s) => {
       s.x += s.vx * dt * 60;
+      s.y += s.vy * dt * 60;
       if (overlap(player, { x: s.x - s.r, y: s.y - s.r, w: s.r * 2, h: s.r * 2 })) {
         hurtPlayer(s.vx > 0 ? 1 : -1);
+        return false;
       }
-      return s.x > -30 && s.x < WORLD + 30;
+      return s.x > -30 && s.x < WORLD + 30 && s.y > -30 && s.y < H + 60;
     });
 
     parts = parts.filter((p) => {
@@ -368,31 +530,128 @@ export function createGame(
     g!.fillRect(0, GY, W, 7);
   }
 
-  function drawLabel(text: string, x: number, y: number) {
+  function drawLabel(text: string, x: number, y: number, color = "#ffffff") {
     g!.font = `500 10px ${FONT_SANS}`;
     g!.textAlign = "center";
     g!.globalAlpha = 0.82;
     g!.lineWidth = 3;
     g!.strokeStyle = "rgba(10,10,10,.75)";
     g!.strokeText(text, x, y);
-    g!.fillStyle = "#ffffff";
+    g!.fillStyle = color;
     g!.fillText(text, x, y);
     g!.globalAlpha = 1;
   }
 
-  function drawBlob(x: number, y: number, w: number, h: number, color: string, hurt: number, bob: number) {
-    const o = Math.sin(bob) * 2;
-    g!.fillStyle = hurt > 0 ? "#ffffff" : color;
-    g!.beginPath();
-    g!.roundRect(x, y + o, w, h, 9);
-    g!.fill();
+  function drawFace(x: number, y: number, w: number, h: number) {
     g!.fillStyle = "rgba(10,10,10,.82)";
     const e = w * 0.08;
     g!.beginPath();
-    g!.arc(x + w * 0.33, y + h * 0.4 + o, e, 0, Math.PI * 2);
-    g!.arc(x + w * 0.67, y + h * 0.4 + o, e, 0, Math.PI * 2);
+    g!.arc(x + w * 0.33, y + h * 0.4, e, 0, Math.PI * 2);
+    g!.arc(x + w * 0.67, y + h * 0.4, e, 0, Math.PI * 2);
     g!.fill();
-    g!.fillRect(x + w * 0.34, y + h * 0.66 + o, w * 0.32, 2.5);
+    g!.fillRect(x + w * 0.34, y + h * 0.66, w * 0.32, 2.5);
+  }
+
+  function drawMob(o: Mob, color: string) {
+    const body = o.hurt > 0 ? "#ffffff" : color;
+
+    if (o.kind === "flyer") {
+      // Cánh đập nhẹ hai bên
+      g!.fillStyle = body;
+      const flap = Math.sin(o.bob * 2) * 4;
+      g!.beginPath();
+      g!.moveTo(o.x - 2, o.y + 10);
+      g!.lineTo(o.x - 14, o.y + 4 + flap);
+      g!.lineTo(o.x - 2, o.y + 18);
+      g!.moveTo(o.x + o.w + 2, o.y + 10);
+      g!.lineTo(o.x + o.w + 14, o.y + 4 + flap);
+      g!.lineTo(o.x + o.w + 2, o.y + 18);
+      g!.fill();
+    }
+
+    g!.fillStyle = body;
+    g!.beginPath();
+    g!.roundRect(o.x, o.y, o.w, o.h, o.kind === "charger" ? 4 : 9);
+    g!.fill();
+
+    if (o.kind === "charger") {
+      // Mũi nhọn quay về hướng sắp lao tới
+      g!.fillStyle = o.dash > 0 ? HAZARD : body;
+      g!.beginPath();
+      const tip = o.dir > 0 ? o.x + o.w + 11 : o.x - 11;
+      g!.moveTo(o.dir > 0 ? o.x + o.w : o.x, o.y + 6);
+      g!.lineTo(tip, o.y + o.h / 2);
+      g!.lineTo(o.dir > 0 ? o.x + o.w : o.x, o.y + o.h - 6);
+      g!.fill();
+    }
+    if (o.kind === "shooter") {
+      // Nòng chĩa về phía người chơi, đỏ dần khi sắp bắn
+      g!.fillStyle = o.cd < 0.4 ? HAZARD : "rgba(10,10,10,.55)";
+      g!.fillRect(o.dir > 0 ? o.x + o.w : o.x - 10, o.y + o.h * 0.42, 10, 6);
+    }
+
+    drawFace(o.x, o.y, o.w, o.h);
+  }
+
+  function drawTrap(t: Trap) {
+    if (t.kind === "spike") {
+      g!.fillStyle = HAZARD;
+      g!.beginPath();
+      for (let x = t.x; x < t.x + t.w; x += 12) {
+        g!.moveTo(x, t.y);
+        g!.lineTo(x + 6, t.y - 14);
+        g!.lineTo(x + 12, t.y);
+      }
+      g!.fill();
+      return;
+    }
+    if (t.kind === "saw") {
+      const cx = t.x + t.pos;
+      const cy = t.y - 15;
+      g!.strokeStyle = "rgba(10,10,10,.25)";
+      g!.lineWidth = 2;
+      g!.beginPath();
+      g!.moveTo(t.x, t.y - 2);
+      g!.lineTo(t.x + t.w, t.y - 2);
+      g!.stroke();
+      g!.fillStyle = HAZARD;
+      g!.beginPath();
+      for (let i = 0; i < 8; i++) {
+        const a = t.t * 6 + (i * Math.PI) / 4;
+        g!.moveTo(cx, cy);
+        g!.lineTo(cx + Math.cos(a) * 19, cy + Math.sin(a) * 19);
+        g!.lineTo(cx + Math.cos(a + 0.4) * 19, cy + Math.sin(a + 0.4) * 19);
+      }
+      g!.fill();
+      g!.beginPath();
+      g!.arc(cx, cy, 12, 0, Math.PI * 2);
+      g!.fill();
+      return;
+    }
+    // pulse: lúc tắt còn thấy miệng phun, để biết đường mà tránh
+    const on = t.t % 2.6 < 1.1;
+    g!.fillStyle = on ? HAZARD : "rgba(10,10,10,.35)";
+    if (on) g!.fillRect(t.x, t.y - 74, 26, 74);
+    g!.fillRect(t.x - 2, t.y - 8, 30, 8);
+  }
+
+  function drawPickup(p: Pickup) {
+    const y = p.y - 26 + Math.sin(p.bob) * 3;
+    const tool = p.kind === "tool";
+    g!.fillStyle = tool ? LIME : "#ff8f85";
+    g!.beginPath();
+    g!.roundRect(p.x, y, 24, 24, 6);
+    g!.fill();
+    g!.fillStyle = "#0a0a0a";
+    if (tool) {
+      g!.fillRect(p.x + 7, y + 6, 4, 12);
+      g!.fillRect(p.x + 13, y + 6, 4, 12);
+      g!.fillRect(p.x + 7, y + 16, 10, 3);
+    } else {
+      g!.fillRect(p.x + 10, y + 6, 4, 12);
+      g!.fillRect(p.x + 6, y + 10, 12, 4);
+    }
+    drawLabel(p.name, p.x + 12, y - 6, tool ? LIME : "#ffd2ce");
   }
 
   function draw() {
@@ -413,6 +672,9 @@ export function createGame(
       g!.fillRect(px + 4, py + 2, pw - 8, 3);
     }
 
+    for (const t of traps) drawTrap(t);
+    for (const p of pickups) if (!p.taken) drawPickup(p);
+
     // Cửa ải ở cuối bản đồ
     g!.fillStyle = "rgba(255,255,255,.5)";
     g!.fillRect(WORLD - 70, GY - 96, 46, 96);
@@ -421,14 +683,18 @@ export function createGame(
 
     for (const o of mobs) {
       if (o.dead) continue;
-      drawBlob(o.x, o.y, o.w, o.h, m.palette.mob, o.hurt, o.bob);
-      drawLabel(m.mob, o.x + o.w / 2, o.y - 7);
+      drawMob(o, m.palette.mob);
+      drawLabel(o.name, o.x + o.w / 2, o.y - 7);
     }
 
     if (boss) {
       const flash = boss.tel > 0 && Math.floor(boss.tel * 14) % 2 === 0;
-      drawBlob(boss.x, boss.y, boss.w, boss.h, flash ? "#ffe9a8" : m.palette.boss, boss.hurt, boss.bob);
-      g!.fillStyle = "#d4f236";
+      g!.fillStyle = boss.hurt > 0 ? "#ffffff" : flash ? "#ffe9a8" : m.palette.boss;
+      g!.beginPath();
+      g!.roundRect(boss.x, boss.y + Math.sin(boss.bob) * 2, boss.w, boss.h, 9);
+      g!.fill();
+      drawFace(boss.x, boss.y + Math.sin(boss.bob) * 2, boss.w, boss.h);
+      g!.fillStyle = LIME;
       g!.beginPath();
       g!.moveTo(boss.x + 12, boss.y - 4);
       g!.lineTo(boss.x + 22, boss.y - 20);
@@ -438,7 +704,7 @@ export function createGame(
       g!.fill();
     }
 
-    g!.fillStyle = "#d4f236";
+    g!.fillStyle = HAZARD;
     for (const s of shots) {
       g!.beginPath();
       g!.arc(s.x, s.y, s.r, 0, Math.PI * 2);
@@ -458,12 +724,22 @@ export function createGame(
       g!.fillStyle = "#0a0a0a";
       g!.fillRect(player.x + (player.face > 0 ? 15 : 6), player.y - 4, 4, 4);
 
+      if (player.tool > 0) {
+        // Đang cầm đồ nghề: viền sáng quanh người
+        g!.strokeStyle = LIME;
+        g!.lineWidth = 2;
+        g!.beginPath();
+        g!.roundRect(player.x - 3, player.y - 12, player.w + 6, player.h + 14, 9);
+        g!.stroke();
+      }
+
       if (player.atk > 0) {
+        const reach = player.tool > 0 ? 40 : 32;
         g!.fillStyle = "rgba(212,242,54,.92)";
         g!.beginPath();
         g!.arc(
           player.face > 0 ? player.x + player.w + 10 : player.x - 10,
-          player.y + 18, 32,
+          player.y + 18, reach,
           player.face > 0 ? -1.1 : 2.0,
           player.face > 0 ? 1.1 : 4.3
         );
@@ -487,6 +763,12 @@ export function createGame(
       g!.roundRect(14 + i * 20, 14, 15, 14, 4);
       g!.fill();
     }
+    if (player.tool > 0) {
+      g!.fillStyle = "rgba(242,241,236,.2)";
+      g!.fillRect(14, 34, 95, 5);
+      g!.fillStyle = LIME;
+      g!.fillRect(14, 34, 95 * (player.tool / TOOL_SECONDS), 5);
+    }
 
     if (boss) {
       const bw = 380;
@@ -495,7 +777,7 @@ export function createGame(
       g!.beginPath();
       g!.roundRect(bx - 3, 11, bw + 6, 20, 6);
       g!.fill();
-      g!.fillStyle = "#e0563f";
+      g!.fillStyle = HAZARD;
       g!.beginPath();
       g!.roundRect(bx, 14, bw * (boss.hp / boss.mhp), 14, 4);
       g!.fill();
@@ -512,7 +794,7 @@ export function createGame(
       g!.lineWidth = 6;
       g!.strokeStyle = "rgba(10,10,10,.8)";
       g!.strokeText(msg, W / 2, 140);
-      g!.fillStyle = "#d4f236";
+      g!.fillStyle = LIME;
       g!.fillText(msg, W / 2, 140);
       g!.globalAlpha = 1;
     }
