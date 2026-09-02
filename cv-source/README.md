@@ -44,6 +44,11 @@ document.body.scrollHeight - 297 / 25.4 * 96  // âm là còn vừa 1 trang
   portfolio có Interdist (experience + case study + logo) mà CV không có.
   Đặt **sau GHN** dù ngày bắt đầu mới hơn, vì GHN là vai trò full-time chính —
   để part-time lên đầu sẽ làm người đọc hiểu sai vai trò hiện tại.
+- **Thêm link portfolio** (`vinhluong-here.vercel.app`) vào dòng contact, rút
+  gọn địa chỉ (`Go Vap District, Ho Chi Minh City` → `Ho Chi Minh City`) để lấy
+  chỗ. Domain có gạch nối nên phải set `white-space: nowrap` trên thẻ `<a>`,
+  không thì trình duyệt/Chrome PDF sẽ bẻ dòng ngay tại dấu `-` giữa domain,
+  trông như hai domain khác nhau.
 - J&T Express: `Jan 2020 – Aug 2021` → `Oct 2020 – Aug 2021`
 - Maersk: `Nov 2019 – Jan 2021` → `Aug 2019 – Sep 2020` (bản cũ chồng lấn với J&T)
 - Bỏ hết 5 chỗ placeholder bôi vàng và 2 nhãn `[confirm dates]`
