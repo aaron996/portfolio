@@ -49,6 +49,12 @@ document.body.scrollHeight - 297 / 25.4 * 96  // âm là còn vừa 1 trang
   chỗ. Domain có gạch nối nên phải set `white-space: nowrap` trên thẻ `<a>`,
   không thì trình duyệt/Chrome PDF sẽ bẻ dòng ngay tại dấu `-` giữa domain,
   trông như hai domain khác nhau.
+- **Dòng contact về lại 1 dòng, link tô xanh**: link LinkedIn/portfolio đổi màu
+  `#1155CC` cho nổi. Bỏ khoảng trắng thừa quanh dấu `|` (`&nbsp; | &nbsp;` →
+  `&nbsp;|&nbsp;`) không đủ để về 1 dòng — nguyên nhân chính là cụm
+  `vinhluong-here.vercel.app` có `nowrap` nên bị đẩy nguyên cụm xuống dòng 2
+  dù dòng 1 còn dư chỗ (không đủ cho cả cụm). Fix bằng cách giảm
+  `.contact { font-size }` 10pt → 9.3pt.
 - J&T Express: `Jan 2020 – Aug 2021` → `Oct 2020 – Aug 2021`
 - Maersk: `Nov 2019 – Jan 2021` → `Aug 2019 – Sep 2020` (bản cũ chồng lấn với J&T)
 - Bỏ hết 5 chỗ placeholder bôi vàng và 2 nhãn `[confirm dates]`
