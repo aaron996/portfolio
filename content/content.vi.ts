@@ -38,7 +38,7 @@ export const content: SiteContent = {
        và nó đã được nói ở process.aiNote. Thêm domain vì đó mới là thứ khiến bạn
        khác biệt với một BI analyst chung chung. */
     eyebrow: "Đang nhận dự án data product · làm từ xa · phạm vi rõ ràng",
-    headline: ["Số của bạn, có người chịu trách nhiệm"],
+    headline: ["Define the metric. Automate the system. Solve the problem."],
     subline:
       "Tôi chốt định nghĩa chỉ tiêu, dựng data model, rồi tự ship hệ thống sinh ra con số và đứng sau con số đó khi có người hỏi lại.",
     primaryCta: { label: "Xem 5 hệ thống đang chạy thật →", href: "#cases" },
