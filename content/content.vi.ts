@@ -31,6 +31,7 @@ export const content: SiteContent = {
     { label: "Cách làm", href: "#pipeline" },
     { label: "Về tôi", href: "#about" },
     { label: "Kinh nghiệm", href: "#experience" },
+    { label: "Minigame", href: "/game" },
   ],
 
   hero: {
@@ -1166,5 +1167,114 @@ export const content: SiteContent = {
     linkedin: "https://www.linkedin.com/in/vinhluongg/",
     cvHref: "/cv.pdf",
     availability: "Nhận dự án data product · cũng cân nhắc vị trí BI / Data Analyst",
+  },
+
+  /* ─────────────────────────────────────────────────────────────
+     MINIGAME — side-scroller 5 ải, ở route /game.
+     Muốn sửa tên quái, tên trùm, câu chốt hay bảng màu thì sửa ở
+     đây, không cần đụng vào engine trong components/game/.
+     ───────────────────────────────────────────────────────────── */
+  game: {
+    eyebrow: "MINIGAME · DỰNG BẰNG AI-ASSISTED CODING",
+    heading: "Ải Vận Hành",
+    intro:
+      "Năm bản đồ là năm nơi mình từng làm việc. Chạy sang phải, dọn sạch quái, hạ trùm cuối bản đồ để nhận hai kỹ năng. Hết năm ải là xong sáu năm.",
+    note:
+      "Game này mình dựng bằng AI-assisted coding. Phần khó không nằm ở code — nó nằm ở chỗ quyết định cái gì đáng đưa vào và cái gì nên bỏ.",
+    controlsHint: "← → di chuyển · ↑ hoặc Space nhảy · J đánh · trên điện thoại dùng nút bên dưới",
+    startLabel: "Bắt đầu",
+    nextLabel: "Vào ải {n} →",
+    clearHeading: "Hạ trùm ải {n}",
+    bossAppear: "{boss} xuất hiện!",
+    deathLine: "Ngã rồi. Đứng dậy đi.",
+    skillsLabel: "Túi kỹ năng",
+    finish: {
+      heading: "Hết ải",
+      body: "Mười kỹ năng, sáu năm, năm con trùm. Không cái nào tự rơi xuống.",
+      cta: "Xem case study thật →",
+    },
+
+    maps: [
+      {
+        year: "2019",
+        place: "A.P. Moller Maersk",
+        name: "Cảng Cát Lái",
+        mob: "Chứng từ lệch",
+        boss: "Trùm Sai Mã Container",
+        line: "Hai lô lệch một ký tự. Không ai chết, nhưng hàng đi nhầm nước.",
+        skills: ["Master data", "Đối chiếu chứng từ"],
+        palette: {
+          sky: "#A9DCF0", far: "#7BB9D4", mid: "#4E8FAE",
+          ground: "#2F5F78", groundEdge: "#24485C",
+          mob: "#FAF6E8", boss: "#E0563F",
+        },
+        deco: "container",
+        plats: [[300,266,130],[520,204,110],[760,272,140],[1010,212,120],[1290,262,150],[1560,200,130],[1810,268,150]],
+      },
+      {
+        year: "2020",
+        place: "J&T Express",
+        name: "Kho Phân Loại",
+        mob: "Kiện lạc tuyến",
+        boss: "Băng Chuyền Kẹt",
+        line: "Ba trăm nghìn đơn một ngày. Băng chuyền không chờ ai.",
+        skills: ["Vận hành quy mô lớn", "Chuẩn hoá chỉ số"],
+        palette: {
+          sky: "#FFDFAF", far: "#F0BE7E", mid: "#CF8B45",
+          ground: "#8C5A2B", groundEdge: "#6E4520",
+          mob: "#FFF3DC", boss: "#C0392B",
+        },
+        deco: "crate",
+        plats: [[280,252,120],[480,196,140],[720,258,120],[960,206,130],[1220,250,140],[1500,192,120],[1780,256,170]],
+      },
+      {
+        year: "2021",
+        place: "Shopee",
+        name: "Sàn Điều Phối",
+        mob: "Đơn trễ pickup",
+        boss: "Trùm 90,1%",
+        line: "Con trùm này có thật. Hạ được nó mất hơn một năm, không phải một phút.",
+        skills: ["Quản trị đối tác", "KPI on-time"],
+        palette: {
+          sky: "#FFCDB4", far: "#FBA981", mid: "#EE7A4D",
+          ground: "#B4482A", groundEdge: "#8E351E",
+          mob: "#FFEDD8", boss: "#7A2E9D",
+        },
+        deco: "tower",
+        plats: [[320,244,110],[540,192,120],[790,260,130],[1040,200,140],[1300,254,120],[1550,196,140],[1820,262,150]],
+      },
+      {
+        year: "2025",
+        place: "Giao Hàng Nhanh",
+        name: "Phòng Dữ Liệu",
+        mob: "Query lỗi",
+        boss: "Đơn Vô Chủ",
+        line: "Đơn trễ mà không kho nào nhận. Phải chỉ đúng tên nó mới chịu ngã.",
+        skills: ["SQL / Trino", "Quy trách nhiệm"],
+        palette: {
+          sky: "#C8CCF2", far: "#9BA2DE", mid: "#6C74BE",
+          ground: "#454C8E", groundEdge: "#343A70",
+          mob: "#E8EAFF", boss: "#2C3E75",
+        },
+        deco: "server",
+        plats: [[300,258,130],[530,200,120],[770,262,140],[1030,204,120],[1280,256,150],[1540,198,130],[1800,264,160]],
+      },
+      {
+        year: "2026",
+        place: "Interdist",
+        name: "Xưởng Sản Phẩm",
+        mob: "File Excel rời",
+        boss: "CATEGORY.SKU",
+        line: "Con trùm cuối là một cái tên cột. Tách sai một dấu chấm là vỡ cả bảng.",
+        skills: ["Data modeling", "Ship sản phẩm"],
+        palette: {
+          sky: "#C6EBD9", far: "#93D6B8", mid: "#5FB18E",
+          ground: "#3B7A61", groundEdge: "#2C5E4A",
+          mob: "#EFFBF4", boss: "#1F6E52",
+        },
+        deco: "gear",
+        plats: [[290,250,140],[520,198,110],[780,256,130],[1020,202,140],[1290,248,130],[1560,194,120],[1820,258,160]],
+      },
+    ],
   },
 };

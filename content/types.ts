@@ -191,6 +191,59 @@ export interface CaseStudy {
   homepageDecisionCount?: number;
 }
 
+/* ── Minigame ──────────────────────────────────────────────
+   Side-scroller 5 ải. Mỗi ải là một nơi từng làm việc.
+   Toàn bộ chữ và bảng màu của game nằm ở đây, không hardcode
+   trong engine. Sửa ải mới = thêm một phần tử vào `maps`. */
+
+export interface GameMap {
+  year: string;
+  place: string;
+  /** Tên bản đồ hiện trên HUD */
+  name: string;
+  /** Tên quái thường, vẽ nổi trên đầu mỗi con */
+  mob: string;
+  /** Tên trùm cuối bản đồ */
+  boss: string;
+  /** Câu chốt hiện sau khi hạ trùm — chỗ duy nhất game kể chuyện nghề */
+  line: string;
+  /** Hai kỹ năng rơi ra khi hạ trùm */
+  skills: [string, string];
+  palette: {
+    sky: string;
+    far: string;
+    mid: string;
+    ground: string;
+    groundEdge: string;
+    mob: string;
+    boss: string;
+  };
+  /** Hình khối trang trí ở lớp giữa */
+  deco: "container" | "crate" | "tower" | "server" | "gear";
+  /** Bệ nhảy: [x, y, rộng] trong toạ độ thế giới rộng 2200px */
+  plats: [number, number, number][];
+}
+
+export interface GameContent {
+  eyebrow: string;
+  heading: string;
+  intro: string;
+  /** Ghi chú thành thật về việc đây là bản nháp */
+  note: string;
+  controlsHint: string;
+  startLabel: string;
+  /** Có {n} — số thứ tự ải kế tiếp */
+  nextLabel: string;
+  /** Có {n} — số thứ tự ải vừa qua */
+  clearHeading: string;
+  /** Có {boss} */
+  bossAppear: string;
+  deathLine: string;
+  skillsLabel: string;
+  finish: { heading: string; body: string; cta: string };
+  maps: GameMap[];
+}
+
 export interface SiteContent {
   meta: {
     name: string;
@@ -312,4 +365,6 @@ export interface SiteContent {
     cvHref: string;
     availability: string;
   };
+
+  game: GameContent;
 }
