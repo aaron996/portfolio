@@ -19,17 +19,31 @@ Kiểm tra sau khi in: **phải vừa đúng 1 trang**. Nếu tràn sang trang 2
 `line-height` của `body` hoặc `margin-top` của `li`, đừng giảm `font-size` xuống
 dưới 10pt.
 
-## Còn chờ Vinh xác nhận
+Lưu ý: hiện đã siết khá sát để nhét thêm Interdist — `line-height: 1.15`,
+`li { margin-top: 0.8pt }`, lề dưới 16pt. Chỗ nới còn lại rất ít, nên lần sau
+thêm nội dung thì tính tới việc **cắt một bullet cũ** thay vì siết tiếp typography.
 
-- **Trình độ tiếng Anh**: đang ghi trơn `English`, chưa có mức. Bản cũ để
-  placeholder `[professional working proficiency]` nên không dùng được. Điền mức
-  thật vào dòng `Languages`.
-- **Thời gian làm báo cáo**: bản cũ ghi `từ [~X hours] xuống [under Y minutes]`
-  nhưng chưa có số đo. Câu hiện tại chỉ nói phần đã kiểm chứng được (chuẩn hoá
-  chất lượng báo cáo). Có số đo thật thì thêm lại.
+Cách đo nhanh còn dư bao nhiêu chỗ (mở `cv.html` trong browser, chạy console):
+
+```js
+document.body.scrollHeight - 297 / 25.4 * 96  // âm là còn vừa 1 trang
+```
 
 ## Đã sửa so với bản cũ
 
+- **Trình độ tiếng Anh**: điền `working proficiency, TOEIC 600` (thay vì để trơn
+  `English` hoặc placeholder `[professional working proficiency]` cũ).
+- **Thời gian làm báo cáo**: thêm số đo `~70%` vào bullet AI reporting pipeline
+  (thay cho placeholder `từ [~X hours] xuống [under Y minutes]` của bản cũ).
+  Con số này cũng đã đồng bộ sang `content/content.vi.ts` (case KPI/báo cáo,
+  `results[0]`) — trước đó portfolio ghi "từ hàng giờ xuống vài phút", tức mạnh
+  hơn CV rất nhiều.
+- **Title GHN**: `Key Account Specialist` → `Key Account Solution / Data Analyst`
+  cho khớp với portfolio.
+- **Thêm Interdist** (May 2026 – Present, part-time remote, 2 bullet). Trước đó
+  portfolio có Interdist (experience + case study + logo) mà CV không có.
+  Đặt **sau GHN** dù ngày bắt đầu mới hơn, vì GHN là vai trò full-time chính —
+  để part-time lên đầu sẽ làm người đọc hiểu sai vai trò hiện tại.
 - J&T Express: `Jan 2020 – Aug 2021` → `Oct 2020 – Aug 2021`
 - Maersk: `Nov 2019 – Jan 2021` → `Aug 2019 – Sep 2020` (bản cũ chồng lấn với J&T)
 - Bỏ hết 5 chỗ placeholder bôi vàng và 2 nhãn `[confirm dates]`

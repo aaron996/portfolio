@@ -676,8 +676,9 @@ export const content: SiteContent = {
       results: [
         {
           label: "Thời gian soạn một báo cáo",
-          value: "từ hàng giờ xuống vài phút",
-          method: "So sánh quy trình soạn tay trước đây với pipeline hiện tại",
+          value: "giảm ~70% thời gian làm tay",
+          method:
+            "Ước lượng của người trực tiếp làm, so sánh quy trình soạn tay trước đây với pipeline hiện tại. Chưa đo bằng time-tracking thực tế nên vẫn để là ước lượng.",
           verified: false,
         },
         {
