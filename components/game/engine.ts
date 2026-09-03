@@ -47,10 +47,9 @@ const TOOL_SECONDS = 12;
 /**
  * Ảnh asset, tải bất đồng bộ, có fallback về hình khối khi chưa có.
  *
- * Chỉ những nhóm đã có ảnh thật mới nằm trong ASSET_PATHS — phần còn thiếu
- * (nền trời/xa/đất/bệ, vật phẩm, hiệu ứng, giao diện) vẫn vẽ bằng code như
- * cũ. Thêm ảnh cho nhóm nào thì bổ sung đường dẫn ở đây, không cần sửa chỗ
- * khác — hàm draw tự chuyển sang dùng ảnh khi nó tải xong.
+ * Nhân vật, quái, trùm, bẫy, lớp nền giữa và vật phẩm dùng ảnh thật; nền
+ * trời/xa/đất/bệ, hiệu ứng và giao diện vẫn vẽ bằng code. Hàm draw giữ sẵn
+ * fallback hình khối để game không trống trong lúc ảnh đang tải.
  */
 const ASSET_BASE = "/game";
 const imageCache = new Map<string, HTMLImageElement>();
@@ -89,6 +88,29 @@ const TRAP_SPRITES = {
 function bgMidSprite(mapIndex: number) {
   return img(`bg/m${mapIndex + 1}-mid.png`);
 }
+function pickupSprite(mapIndex: number, kind: Pickup["kind"]) {
+  return img(`item/${kind}-${mapIndex + 1}.png`);
+}
+
+/** Vẽ ảnh theo đúng tỉ lệ, neo giữa ở chân thay vì ép vừa hitbox. */
+function drawSpriteAtFeet(
+  g: CanvasRenderingContext2D,
+  sprite: HTMLImageElement,
+  centerX: number,
+  feetY: number,
+  maxW: number,
+  maxH: number,
+  flip = false,
+) {
+  const scale = Math.min(maxW / sprite.naturalWidth, maxH / sprite.naturalHeight);
+  const w = sprite.naturalWidth * scale;
+  const h = sprite.naturalHeight * scale;
+  g.save();
+  g.translate(centerX, feetY);
+  if (flip) g.scale(-1, 1);
+  g.drawImage(sprite, -w / 2, -h, w, h);
+  g.restore();
+}
 
 /** Vẽ một ảnh lặp ngang để lấp đầy bề rộng `w`, cắt tấm cuối nếu dư */
 function drawTiled(g: CanvasRenderingContext2D, im: HTMLImageElement, x: number, y: number, w: number, h: number) {
@@ -109,7 +131,7 @@ interface Mob {
   hp: number; dir: number;
   a: number; b: number;
   floor: number;
-  hurt: number; bob: number; dead: boolean;
+  hurt: number; bob: number; anim: number; dead: boolean;
   cd: number; dash: number;
 }
 interface Boss {
@@ -168,6 +190,8 @@ export function createGame(
   let fade = 0;
   let msg = "";
   let msgT = 0;
+  let worldTime = 0;
+  let accumulator = 0;
 
   const keys: Record<GameKey, boolean> = { left: false, right: false, jump: false, atk: false };
 
@@ -175,7 +199,8 @@ export function createGame(
     x: 60, y: GY - 40, w: 26, h: 40,
     vx: 0, vy: 0, face: 1,
     hp: 5, mhp: 5, inv: 0, atk: 0, cd: 0, ground: false,
-    tool: 0, hurtT: 0,
+    tool: 0, hurtT: 0, runFrame: 0,
+    attackActive: 0, attackHit: false, attackBuffed: false,
   };
   let mobs: Mob[] = [];
   let traps: Trap[] = [];
@@ -195,6 +220,7 @@ export function createGame(
     Object.assign(player, {
       x: 60, y: GY - 40, vx: 0, vy: 0, face: 1,
       hp: 5, inv: 0, atk: 0, cd: 0, ground: false, tool: 0, hurtT: 0,
+      runFrame: 0, attackActive: 0, attackHit: false, attackBuffed: false,
     });
     parts = [];
     shots = [];
@@ -216,7 +242,7 @@ export function createGame(
         dir: Math.random() < 0.5 ? -1 : 1,
         a: sp.x - range, b: sp.x + range,
         floor,
-        hurt: 0, bob: Math.random() * 6, dead: false,
+        hurt: 0, bob: Math.random() * 6, anim: Math.random(), dead: false,
         cd: 1 + Math.random(), dash: 0,
       };
     });
@@ -241,7 +267,7 @@ export function createGame(
 
   function spawnBoss() {
     boss = {
-      x: WORLD - 190, y: GY - 78, w: 70, h: 78,
+      x: WORLD - 190, y: GY - 82, w: 72, h: 82,
       hp: 16, mhp: 16, dir: -1,
       hurt: 0, tel: 0, cd: 2.2, bob: 0, dash: 0,
     };
@@ -262,7 +288,7 @@ export function createGame(
 
   function jump() {
     if (phase !== "play" || !player.ground) return;
-    player.vy = -11.4;
+    player.vy = -684;
     player.ground = false;
     puff(player.x + player.w / 2, player.y + player.h, "#ffffff", 4);
   }
@@ -270,10 +296,19 @@ export function createGame(
   function attack() {
     if (phase !== "play" || player.cd > 0) return;
     const buffed = player.tool > 0;
-    player.atk = 0.19;
-    player.cd = buffed ? 0.17 : 0.3;
-    const reach = buffed ? 84 : 58;
-    const dmg = buffed ? 2 : 1;
+    player.atk = buffed ? 0.2 : 0.28;
+    player.attackActive = buffed ? 0.085 : 0.12;
+    player.attackHit = false;
+    player.attackBuffed = buffed;
+    player.cd = buffed ? 0.23 : 0.34;
+  }
+
+  /** Sát thương rơi đúng vào khung chém, không xảy ra ngay lúc người chơi bấm. */
+  function resolveAttack() {
+    if (player.attackHit) return;
+    player.attackHit = true;
+    const reach = player.attackBuffed ? 84 : 58;
+    const dmg = player.attackBuffed ? 2 : 1;
 
     // Tầm chém rộng hơn thân người, để đánh được trước khi bị quái chạm vào
     const hb = {
@@ -309,8 +344,8 @@ export function createGame(
     player.hp -= 1;
     player.inv = 1.35;
     player.hurtT = 0.35;
-    player.vy = -6;
-    player.vx = dir * 7.5;
+    player.vy = -360;
+    player.vx = dir * 450;
     shake = 6;
     puff(player.x + player.w / 2, player.y + player.h / 2, "#ff6b5e", 8);
     if (player.hp <= 0) {
@@ -331,8 +366,8 @@ export function createGame(
     for (let i = 0; i < n; i++) {
       parts.push({
         x, y, color,
-        vx: (Math.random() - 0.5) * 5,
-        vy: -Math.random() * 4 - 1,
+        vx: (Math.random() - 0.5) * 300,
+        vy: -Math.random() * 240 - 60,
         life: 0.55,
       });
     }
@@ -359,6 +394,7 @@ export function createGame(
   function stepMob(o: Mob, dt: number) {
     o.hurt = Math.max(0, o.hurt - dt);
     o.bob += dt * 6;
+    o.anim += dt;
     if (o.hurt > 0) return;
 
     if (o.kind === "walker") {
@@ -447,27 +483,38 @@ export function createGame(
   function step(dt: number) {
     if (phase !== "play" && phase !== "clear") return;
     const m = maps[lv];
+    worldTime += dt;
 
     player.cd = Math.max(0, player.cd - dt);
+    const previousAttack = player.atk;
     player.atk = Math.max(0, player.atk - dt);
+    if (
+      previousAttack > player.attackActive &&
+      player.atk <= player.attackActive &&
+      !player.attackHit
+    ) resolveAttack();
     player.inv = Math.max(0, player.inv - dt);
     player.tool = Math.max(0, player.tool - dt);
     player.hurtT = Math.max(0, player.hurtT - dt);
     msgT = Math.max(0, msgT - dt);
-    shake *= 0.86;
+    shake *= Math.exp(-9 * dt);
 
     const dir = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
     if (dir) {
-      player.vx += dir * 1.5;
+      player.vx += dir * 2300 * dt;
       player.face = dir;
     }
-    player.vx *= 0.82;
-    player.vx = Math.max(-6, Math.min(6, player.vx));
-    player.x = Math.max(0, Math.min(WORLD - player.w, player.x + player.vx * dt * 60));
+    player.vx *= Math.exp(-12 * dt);
+    player.vx = Math.max(-360, Math.min(360, player.vx));
+    const moveX = player.vx * dt;
+    player.x = Math.max(0, Math.min(WORLD - player.w, player.x + moveX));
+    if (player.ground && Math.abs(moveX) > 0.01) {
+      player.runFrame += Math.abs(moveX) / 32;
+    }
 
     const prevBottom = player.y + player.h;
-    player.vy += 0.62 * dt * 60;
-    player.y += player.vy * dt * 60;
+    player.vy += 2232 * dt;
+    player.y += player.vy * dt;
     player.ground = false;
     if (player.y + player.h >= GY) {
       player.y = GY - player.h;
@@ -543,9 +590,9 @@ export function createGame(
 
     parts = parts.filter((p) => {
       p.life -= dt;
-      p.vy += 0.35;
-      p.x += p.vx;
-      p.y += p.vy;
+      p.vy += 1260 * dt;
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
       return p.life > 0;
     });
 
@@ -631,23 +678,17 @@ export function createGame(
   function mobFrame(o: Mob): 1 | 2 {
     if (o.kind === "charger") return o.dash > 0 ? 2 : 1;
     if (o.kind === "shooter") return o.cd < 0.4 ? 2 : 1;
-    return Math.floor(o.bob) % 2 === 0 ? 1 : 2;
+    const fps = o.kind === "flyer" ? 8 : 6;
+    return Math.floor(o.anim * fps) % 2 === 0 ? 1 : 2;
   }
 
   function drawMob(o: Mob, color: string) {
     const sprite = mobSprite(lv, o.kind, mobFrame(o));
     if (sprite) {
       g!.filter = o.hurt > 0 ? "brightness(2.2) saturate(0.3)" : "none";
-      const flip = o.dir < 0;
-      g!.save();
-      if (flip) {
-        g!.translate(o.x + o.w, o.y);
-        g!.scale(-1, 1);
-        g!.drawImage(sprite, 0, 0, o.w, o.h);
-      } else {
-        g!.drawImage(sprite, o.x, o.y, o.w, o.h);
-      }
-      g!.restore();
+      const maxW = o.kind === "flyer" ? 68 : 48;
+      const maxH = o.kind === "flyer" ? 40 : 48;
+      drawSpriteAtFeet(g!, sprite, o.x + o.w / 2, o.y + o.h + 3, maxW, maxH, o.dir < 0);
       g!.filter = "none";
       return;
     }
@@ -761,6 +802,16 @@ export function createGame(
   function drawPickup(p: Pickup) {
     const y = p.y - 26 + Math.sin(p.bob) * 3;
     const tool = p.kind === "tool";
+    const sprite = pickupSprite(lv, p.kind);
+    if (sprite) {
+      g!.save();
+      g!.shadowColor = tool ? "rgba(212,242,54,.85)" : "rgba(255,143,133,.85)";
+      g!.shadowBlur = 11;
+      drawSpriteAtFeet(g!, sprite, p.x + 12, y + 28, 36, 36);
+      g!.restore();
+      drawLabel(p.name, p.x + 12, y - 8, tool ? LIME : "#ffd2ce");
+      return;
+    }
     g!.fillStyle = tool ? LIME : "#ff8f85";
     g!.beginPath();
     g!.roundRect(p.x, y, 24, 24, 6);
@@ -779,6 +830,19 @@ export function createGame(
 
   function draw() {
     const m = maps[lv];
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width > 0) {
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      const targetW = Math.round(rect.width * dpr);
+      const targetH = Math.round(rect.height * dpr);
+      if (canvas.width !== targetW || canvas.height !== targetH) {
+        canvas.width = targetW;
+        canvas.height = targetH;
+      }
+    }
+    g!.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
+    g!.imageSmoothingEnabled = true;
+    g!.imageSmoothingQuality = "high";
     g!.save();
     if (!reduced && shake > 0.2) {
       g!.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
@@ -817,7 +881,7 @@ export function createGame(
       const sprite = bossSprite(lv, telegraphing);
       if (sprite) {
         g!.filter = boss.hurt > 0 ? "brightness(2) saturate(0.3)" : "none";
-        g!.drawImage(sprite, boss.x, by, boss.w, boss.h);
+        drawSpriteAtFeet(g!, sprite, boss.x + boss.w / 2, by + boss.h + 2, 104, 108, boss.dir < 0);
         g!.filter = "none";
       } else {
         g!.fillStyle = boss.hurt > 0 ? "#ffffff" : telegraphing ? "#ffe9a8" : m.palette.boss;
@@ -851,18 +915,22 @@ export function createGame(
         // đang chạy > đứng yên. Khung chém rộng hơn thân (168x196 gốc,
         // hitbox chém vẫn tính riêng ở attack() — sprite chỉ là hình vẽ).
         let sprite: HTMLImageElement | null;
-        let sw = player.w, sh = player.h + 9, sy = player.y - 9;
+        let maxW = 54, maxH = 70;
         if (player.hurtT > 0) {
           sprite = img(PLAYER_SPRITES.hurt);
+          maxW = 76;
         } else if (player.atk > 0) {
-          const i = player.atk > 0.1 ? 0 : 1;
+          const i = player.atk > player.attackActive ? 0 : 1;
           sprite = img(PLAYER_SPRITES.attack[i]);
-          sw = player.w + 16;
+          maxW = 104;
+          maxH = 74;
         } else if (!player.ground) {
           sprite = img(PLAYER_SPRITES.jump);
+          maxW = 66;
         } else if (Math.abs(player.vx) > 0.5) {
-          const i = Math.floor(performance.now() / 90) % 4;
+          const i = Math.floor(player.runFrame) % 4;
           sprite = img(PLAYER_SPRITES.run[i]);
+          maxW = 64;
         } else {
           sprite = idleImg;
         }
@@ -870,23 +938,19 @@ export function createGame(
         // (đã chắc chắn có ở đây) thay vì để nhân vật biến mất một khung hình
         if (!sprite) {
           sprite = idleImg;
-          sw = player.w;
-          sh = player.h + 9;
-          sy = player.y - 9;
+          maxW = 54;
+          maxH = 70;
         }
-        {
-          g!.save();
-          if (player.face < 0) {
-            // Sprite vẽ mặt phải sẵn — quay ngược quanh mép phải hitbox
-            const dx = player.x + player.w - sw;
-            g!.translate(dx + sw, sy);
-            g!.scale(-1, 1);
-            g!.drawImage(sprite, 0, 0, sw, sh);
-          } else {
-            g!.drawImage(sprite, player.x, sy, sw, sh);
-          }
-          g!.restore();
-        }
+        const idleBob = !reduced && player.ground && Math.abs(player.vx) < 8
+          ? Math.sin(worldTime * 3.2) * 0.8
+          : 0;
+        drawSpriteAtFeet(
+          g!, sprite,
+          player.x + player.w / 2,
+          player.y + player.h + 3 + idleBob,
+          maxW, maxH,
+          player.face < 0,
+        );
       } else {
         g!.fillStyle = "#1e1e1c";
         g!.beginPath();
@@ -911,7 +975,11 @@ export function createGame(
 
       if (player.atk > 0) {
         const reach = player.tool > 0 ? 40 : 32;
-        g!.fillStyle = "rgba(212,242,54,.92)";
+        const progress = 1 - player.atk / (player.attackBuffed ? 0.2 : 0.28);
+        const alpha = Math.max(0, 1 - Math.abs(progress - 0.72) * 3.3);
+        g!.strokeStyle = `rgba(212,242,54,${0.82 * alpha})`;
+        g!.lineWidth = player.attackBuffed ? 8 : 6;
+        g!.lineCap = "round";
         g!.beginPath();
         g!.arc(
           player.face > 0 ? player.x + player.w + 10 : player.x - 10,
@@ -919,8 +987,7 @@ export function createGame(
           player.face > 0 ? -1.1 : 2.0,
           player.face > 0 ? 1.1 : 4.3
         );
-        g!.lineTo(player.face > 0 ? player.x + player.w - 4 : player.x + 4, player.y + 18);
-        g!.fill();
+        g!.stroke();
       }
     }
 
@@ -940,10 +1007,12 @@ export function createGame(
       g!.fill();
     }
     if (player.tool > 0) {
+      const activeTool = pickupSprite(lv, "tool");
+      if (activeTool) drawSpriteAtFeet(g!, activeTool, 28, 68, 30, 30);
       g!.fillStyle = "rgba(242,241,236,.2)";
-      g!.fillRect(14, 34, 95, 5);
+      g!.fillRect(48, 47, 95, 6);
       g!.fillStyle = LIME;
-      g!.fillRect(14, 34, 95 * (player.tool / TOOL_SECONDS), 5);
+      g!.fillRect(48, 47, 95 * (player.tool / TOOL_SECONDS), 6);
     }
 
     if (boss) {
@@ -981,6 +1050,7 @@ export function createGame(
       g!.fillRect(0, 0, W, H);
       g!.globalAlpha = 1;
     }
+    g!.setTransform(1, 0, 0, 1, 0, 0);
   }
 
   /* ── vòng lặp và input ───────────────────────────────── */
@@ -988,7 +1058,12 @@ export function createGame(
   function frame(t: number) {
     const dt = Math.min(0.05, (t - last) / 1000 || 0.016);
     last = t;
-    step(dt);
+    accumulator = Math.min(0.1, accumulator + dt);
+    const fixedStep = 1 / 120;
+    while (accumulator >= fixedStep) {
+      step(fixedStep);
+      accumulator -= fixedStep;
+    }
     draw();
     raf = requestAnimationFrame(frame);
   }
@@ -1040,6 +1115,8 @@ export function createGame(
     img(`boss/b${i + 1}.png`);
     img(`boss/b${i + 1}-tel.png`);
     img(`bg/m${i + 1}-mid.png`);
+    img(`item/heal-${i + 1}.png`);
+    img(`item/tool-${i + 1}.png`);
     const kinds = new Set(m.mobs.map((sp) => sp.kind));
     kinds.forEach((k) => {
       img(`mob/m${i + 1}-${k}-1.png`);
@@ -1052,7 +1129,11 @@ export function createGame(
 
   return {
     loadMap,
-    resume() { phase = "play"; },
+    resume() {
+      phase = "play";
+      last = performance.now();
+      accumulator = 0;
+    },
     pause() { if (phase === "play") phase = "title"; },
     press,
     release,
