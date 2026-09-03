@@ -6,6 +6,8 @@ import { content } from "@/content/content.vi";
 import { BrandMark } from "./ui/BrandMark";
 import { Magnetic } from "./ui/Magnetic";
 
+const toHref = (href: string) => (href.startsWith("#") ? `/${href}` : href);
+
 export function Nav() {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("");
@@ -23,6 +25,7 @@ export function Nav() {
 
   useEffect(() => {
     const sections = content.nav
+      .filter((item) => item.href.startsWith("#"))
       .map((item) => document.getElementById(item.href.slice(1)))
       .filter((section): section is HTMLElement => Boolean(section));
     if (!sections.length) return;
@@ -70,7 +73,7 @@ export function Nav() {
               {content.nav.map((item) => (
                 <li key={item.href}>
                   <Link
-                    href={`/${item.href}`}
+                    href={toHref(item.href)}
                     aria-current={active === item.href ? "location" : undefined}
                     className={`nav-link text-sm ${active === item.href ? "text-lime" : "text-mute"}`}
                   >
@@ -113,7 +116,7 @@ export function Nav() {
             {content.nav.map((item) => (
               <li key={item.href} className="border-b border-ink-800">
                 <Link
-                  href={`/${item.href}`}
+                  href={toHref(item.href)}
                   onClick={() => setOpen(false)}
                   className="block py-5 font-display text-2xl font-bold uppercase text-paper"
                 >

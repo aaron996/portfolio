@@ -8,3 +8,4 @@ next-env.d.ts
 
 # ngữ cảnh nội bộ cho Claude Code, không public
 CLAUDE.md
+.claude/
