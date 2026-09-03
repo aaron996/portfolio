@@ -1,7 +1,10 @@
 # Prompt sinh ảnh cho minigame "Ải Vận Hành"
 
-Toàn bộ prompt để tạo asset cho game ở route `/game`. Kích thước lấy thẳng từ
-`components/game/engine.ts` — vẽ đúng tỉ lệ thì ráp vào không phải chỉnh toạ độ.
+Toàn bộ prompt để tạo asset cho game ở route `/game`. Kích thước ghi trong tài liệu
+là **kích thước hiển thị logic**, không phải kích thước file PNG. Engine tự scale ảnh
+theo chiều cao và giữ nguyên tỉ lệ, tách riêng khỏi hitbox.
+Các cặp kích thước `A → B` ở prompt cũ chỉ còn dùng để tham chiếu tỉ lệ khung;
+không export file ở kích thước `B`.
 
 Tổng: **109 tấm** (đã tính khung động).
 
@@ -12,8 +15,10 @@ Tổng: **109 tấm** (đã tính khung động).
 1. **Prompt viết bằng tiếng Anh.** Model sinh ảnh hiểu tiếng Anh tốt hơn hẳn.
 2. **Luôn dán khối "Style chung" (mục 1) lên trước mỗi prompt.** Đó là thứ giữ cho
    hơn trăm tấm trông như cùng một game thay vì trăm game khác nhau.
-3. **Sinh ở kích thước lớn rồi thu nhỏ.** Đừng bảo model vẽ 30×30px — nó không làm
-   được. Sinh 1024×1024 rồi thu về đúng số ghi ở mỗi mục.
+3. **Giữ texture lớn.** Đừng bảo model vẽ 30×30px và đừng thu file PNG về đúng
+   hitbox. Sinh 1024×1024, crop phần alpha thừa rồi giữ cạnh dài khoảng 180–450px.
+   Canvas sẽ thu texture về kích thước hiển thị và dùng DPR của màn hình, nhờ vậy
+   hình vẫn nét trên màn hình Retina/125% scaling.
 4. **Làm nhân vật chính trước.** Ưng rồi thì dùng chính ảnh đó làm ảnh tham chiếu
    (Midjourney `--cref`, hoặc upload làm reference) cho mọi asset còn lại. Đây là
    mẹo quan trọng nhất — bỏ qua bước này thì mỗi tấm một style.
@@ -54,10 +59,10 @@ no scenery, no text, no watermark, no border, single object only.
 
 ## 2. Nhân vật chính — 6 tấm
 
-Thân 26×40px, đầu nhô lên thêm 9px. Vẽ ở 4× rồi thu nhỏ. Luôn quay mặt sang phải,
-engine tự lật khi đi ngược.
+Hitbox thân 26×40px; sprite hiển thị cao khoảng 70–74px và được neo ở chân. Giữ file
+nguồn lớn, không resize về hitbox. Luôn quay mặt sang phải, engine tự lật khi đi ngược.
 
-### Đứng yên · idle — `104×196` → `26×49`
+### Đứng yên · idle — texture cạnh dài tối thiểu `300px`
 
 Tấm gốc. Làm tấm này ưng ý trước, vì nó là ảnh tham chiếu cho cả bộ.
 
@@ -115,8 +120,9 @@ scattering from the hand.
 
 ## 3. Quái — 15 con
 
-Quái thường `30×30px`, quái bay `58×28px` (cánh xoè hai bên). Vẽ 512×512 rồi thu
-nhỏ — nên silhouette phải đơn giản, chi tiết nhỏ sẽ mất hết.
+Hitbox quái thường là `30×30px`; sprite hiển thị tối đa `48×48px`. Quái bay hiển thị
+tối đa `68×40px` để giữ đúng sải cánh. Vẽ 512×512, crop alpha và giữ texture lớn;
+silhouette vẫn cần đơn giản để đọc rõ khi Canvas thu nhỏ.
 
 ### Ải 1 · Cảng Cát Lái — tông giấy ngà `#FAF6E8`
 
