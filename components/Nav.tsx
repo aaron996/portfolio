@@ -3,6 +3,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { content } from "@/content/content.vi";
 
+const toHref = (href: string) => (href.startsWith("#") ? `/${href}` : href);
+
 export function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -16,7 +18,9 @@ export function Nav() {
   }, []);
 
   useEffect(() => {
-    const ids = content.nav.map((n) => n.href.replace("#", ""));
+    const ids = content.nav
+      .filter((n) => n.href.startsWith("#"))
+      .map((n) => n.href.slice(1));
     const els = ids
       .map((id) => document.getElementById(id))
       .filter((el): el is HTMLElement => Boolean(el));
@@ -68,7 +72,7 @@ export function Nav() {
               {content.nav.map((item) => (
                 <li key={item.href}>
                   <Link
-                    href={`/${item.href}`}
+                    href={toHref(item.href)}
                     aria-current={active === item.href ? "true" : undefined}
                     className={`relative text-sm transition-colors hover:text-paper ${
                       active === item.href ? "text-paper" : "text-mute-2"
@@ -130,7 +134,7 @@ export function Nav() {
             {content.nav.map((item) => (
               <li key={item.href}>
                 <Link
-                  href={`/${item.href}`}
+                  href={toHref(item.href)}
                   className="block border-b border-ink-800 py-4 font-display text-2xl font-bold uppercase text-paper"
                 >
                   {item.label}

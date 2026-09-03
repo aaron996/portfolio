@@ -157,6 +157,128 @@ export interface Contact {
   availability: string;
 }
 
+/* ── Minigame ──────────────────────────────────────────────
+   Side-scroller 5 ải. Mỗi ải là một nơi từng làm việc.
+   Toàn bộ chữ và bảng màu của game nằm ở đây, không hardcode
+   trong engine. Sửa ải mới = thêm một phần tử vào `maps`. */
+
+/** Quái thường. Mỗi loại một kiểu hành xử, không chỉ khác tên. */
+export type MobKind =
+  /** Đi tuần qua lại trên mặt phẳng */
+  | "walker"
+  /** Bay lơ lửng, nhấp nhô, không rơi */
+  | "flyer"
+  /** Đứng im tới khi người chơi lại gần thì lao vào */
+  | "charger"
+  /** Đứng im, bắn đạn về phía người chơi */
+  | "shooter";
+
+/** Bẫy tĩnh của bản đồ. Chạm là mất máu, không đánh được. */
+export type TrapKind =
+  /** Bãi gai nằm yên */
+  | "spike"
+  /** Lưỡi cưa chạy qua lại trong một đoạn */
+  | "saw"
+  /** Luồng phun lên theo chu kỳ, có lúc tắt để đi qua */
+  | "pulse";
+
+/** Vật phẩm nhặt dọc đường, thường đặt ở bệ khó với */
+export type PickupKind =
+  /** Hồi một máu */
+  | "heal"
+  /** Đồ nghề: 12 giây đánh nhanh hơn, tầm xa hơn, mạnh gấp đôi */
+  | "tool";
+
+/** Đòn của trùm — mỗi bản đồ một kiểu, để năm trận không giống nhau */
+export type BossKind =
+  /** Giậm đất, bắn hai luồng chạy hai bên */
+  | "slam"
+  /** Bắn một loạt ba quả về phía người chơi */
+  | "volley"
+  /** Nhắm rồi lao ngang thật nhanh */
+  | "dash";
+
+export interface GameMobSpawn {
+  kind: MobKind;
+  /** Tên hiện trên đầu con quái */
+  name: string;
+  x: number;
+  /** Cao độ mặt sàn con quái đứng. Bỏ trống là đứng dưới đất. */
+  y?: number;
+  /** Nửa quãng đường đi tuần, mặc định 70 */
+  range?: number;
+}
+
+export interface GameTrap {
+  kind: TrapKind;
+  x: number;
+  /** Cao độ mặt sàn đặt bẫy. Bỏ trống là dưới đất. */
+  y?: number;
+  /** Bề ngang. Với `saw` là cả đoạn chạy qua lại. */
+  w?: number;
+}
+
+export interface GamePickup {
+  kind: PickupKind;
+  x: number;
+  y: number;
+  /** Tên đồ nghề, hiện lúc nhặt được */
+  name: string;
+}
+
+export interface GameMap {
+  year: string;
+  place: string;
+  /** Tên bản đồ hiện trên HUD */
+  name: string;
+  /** Tên trùm cuối bản đồ */
+  boss: string;
+  bossKind: BossKind;
+  /** Câu chốt hiện sau khi hạ trùm — chỗ duy nhất game kể chuyện nghề */
+  line: string;
+  /** Hai kỹ năng rơi ra khi hạ trùm */
+  skills: [string, string];
+  palette: {
+    sky: string;
+    far: string;
+    mid: string;
+    ground: string;
+    groundEdge: string;
+    mob: string;
+    boss: string;
+  };
+  /** Hình khối trang trí ở lớp giữa */
+  deco: "container" | "crate" | "tower" | "server" | "gear";
+  /** Bệ nhảy: [x, y, rộng] trong toạ độ thế giới rộng 2200px */
+  plats: [number, number, number][];
+  mobs: GameMobSpawn[];
+  traps: GameTrap[];
+  pickups: GamePickup[];
+}
+
+export interface GameContent {
+  eyebrow: string;
+  heading: string;
+  intro: string;
+  /** Ghi chú thành thật về việc đây là bản nháp */
+  note: string;
+  controlsHint: string;
+  startLabel: string;
+  /** Có {n} — số thứ tự ải kế tiếp */
+  nextLabel: string;
+  /** Có {n} — số thứ tự ải vừa qua */
+  clearHeading: string;
+  /** Có {boss} */
+  bossAppear: string;
+  deathLine: string;
+  skillsLabel: string;
+  /** Có {name} — hiện khi nhặt được đồ nghề */
+  pickupTool: string;
+  pickupHeal: string;
+  finish: { heading: string; body: string; cta: string };
+  maps: GameMap[];
+}
+
 export interface SiteContent {
   meta: SiteMeta;
   nav: NavItem[];
@@ -171,4 +293,5 @@ export interface SiteContent {
   skills: SkillGroup[];
   experience: ExperienceItem[];
   contact: Contact;
+  game: GameContent;
 }
