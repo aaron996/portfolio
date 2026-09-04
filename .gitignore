@@ -6,8 +6,8 @@ out
 *.tsbuildinfo
 next-env.d.ts
 
-# ngữ cảnh nội bộ cho Claude Code, không public
-CLAUDE.md
+# Phiên làm việc, worktree, cấu hình máy của Claude Code — chỉ có nghĩa trên máy này.
+# CLAUDE.md thì KHÔNG ignore: đó là quy ước của repo, phải theo repo sang máy khác.
 .claude/
 
 # Python bytecode của scripts/
