@@ -67,9 +67,6 @@ async function save(src, relative, mode = 'sprite') {
 (async()=>{
   if (!sourceRoot) throw new Error('Pass the directory containing the asset packages.');
   const packs = [
-    ['game-animation-additions/masters','sprite'],
-    ['player-v2-18-frames/public/game','player'],
-    ['game-v2-batch2/public/game','sprite'],
     ['mob-v2-additions/complete-set/public/game','normalized'],
   ];
   for (const [pack, mode] of packs) {

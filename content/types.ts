@@ -204,10 +204,14 @@ export type MobKind =
   | "flyer"
   /** Đứng im tới khi người chơi lại gần thì lao vào */
   | "charger"
-  /** Rider rú ga báo trước rồi lao ngang */
-  | "rider"
   /** Đứng im, bắn đạn về phía người chơi */
-  | "shooter";
+  | "shooter"
+  /**
+   * Rider: thấy người chơi từ rất xa, rú ga báo trước rồi lao ngang với tốc
+   * độ gấp đôi charger và chạy hết đà mới quay lại. Nguy hiểm nhất trong
+   * nhóm quái thường — đổi lại có 0,5 giây báo đòn để nhảy tránh.
+   */
+  | "rider";
 
 /** Bẫy tĩnh của bản đồ. Chạm là mất máu, không đánh được. */
 export type TrapKind =
@@ -260,6 +264,12 @@ export interface GamePickup {
   y: number;
   /** Tên đồ nghề, hiện lúc nhặt được */
   name: string;
+  /**
+   * Một câu giải nghĩa: vật phẩm này làm gì trong game, và nó ứng với cái gì
+   * ở nghề thật. Hiện trong thẻ nhỏ lúc nhặt được — không có câu này thì
+   * người chơi nhặt xong vẫn không biết mình vừa được gì.
+   */
+  desc: string;
 }
 
 export interface GameMap {
@@ -272,6 +282,10 @@ export interface GameMap {
   bossKind: BossKind;
   /** Câu chốt hiện sau khi hạ trùm — chỗ duy nhất game kể chuyện nghề */
   line: string;
+  /** Mục tiêu ải, hiện ở bảng tạm dừng. Một câu, nói rõ phải làm gì để qua ải. */
+  objective: string;
+  /** Mẹo riêng của ải, hiện ở bảng tạm dừng dưới mục tiêu */
+  tip: string;
   /** Hai kỹ năng rơi ra khi hạ trùm */
   skills: [string, string];
   palette: {
@@ -311,6 +325,26 @@ export interface GameContent {
   /** Có {name} — hiện khi nhặt được đồ nghề */
   pickupTool: string;
   pickupHeal: string;
+  /** Nhãn trên thẻ giải nghĩa vật phẩm, phân biệt hai loại */
+  pickupKindLabel: { heal: string; tool: string };
+  /** Bảng tạm dừng: hướng dẫn điều khiển + mục tiêu ải hiện tại */
+  pause: {
+    heading: string;
+    controlsHeading: string;
+    /** Mỗi dòng một hàng phím và việc nó làm */
+    controls: { keys: string; label: string }[];
+    /** Thay cho bảng phím trên màn hình hẹp — ở đó chơi bằng nút ảo */
+    mobileControls: string;
+    objectiveHeading: string;
+    tipHeading: string;
+    /** Có {left} và {total} */
+    progressMobs: string;
+    progressBoss: string;
+    resumeLabel: string;
+    restartLabel: string;
+  };
+  /** Gợi ý phím tạm dừng, hiện ở góc màn chơi */
+  pauseHint: string;
   finish: { heading: string; body: string; cta: string };
   maps: GameMap[];
 }

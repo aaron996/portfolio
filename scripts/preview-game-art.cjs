@@ -26,7 +26,7 @@ const html=`<!doctype html><html lang="vi"><meta charset="utf-8"><title>Game art
 <button id="idle">Đứng</button><button id="run">Chạy</button><button id="jump">Nhảy</button><button id="attack">Chém</button><button id="aura">Đồ nghề</button><button id="rider">Rider báo đòn</button><button id="boss">Trùm báo đòn</button><button id="hit">Trùm trúng đòn</button><button id="gate">Cửa ải</button>
 <canvas width="800" height="420" aria-label="Game art preview"></canvas><pre id="results">Đang tải ảnh…</pre>
 <script>const engine=(()=>{const exports={};const require=()=>({default:${metrics}});${engine};return exports})();const data=(()=>{const exports={};${content};return exports.content.game})();
-const game=engine.createGame(document.querySelector('canvas'),data.maps,{bossAppear:data.bossAppear,deathLine:data.deathLine,pickupTool:data.pickupTool,pickupHeal:data.pickupHeal});
+const game=engine.createGame(document.querySelector('canvas'),data.maps,{bossAppear:data.bossAppear,deathLine:data.deathLine,pickupTool:data.pickupTool,pickupHeal:data.pickupHeal,pauseHint:data.pauseHint});
 const map=document.querySelector('#map');data.maps.forEach((m,i)=>map.add(new Option(m.name,i)));
 map.onchange=()=>{game.loadMap(+map.value);game.qa.pose({player:{ground:true}})};
 const pose=p=>game.qa.pose({player:{atk:0,hurtT:0,tool:0,landT:0,ground:true,vx:0,...p}});
@@ -46,7 +46,7 @@ const frames=(mapIndex,kind,fps)=>{game.loadMap(mapIndex);const o=game.qa.state(
 check('Walker cycles through frames 1-4',frames(0,'walker',6).join(',')==='1,2,3,4');
 check('Flyer cycles through frames 1-4',frames(0,'flyer',8).join(',')==='1,2,3,4');
 game.loadMap(1);const charger=game.qa.state().mobs.find(o=>o.kind==='charger');game.qa.pose({mobs:[{...charger,tel:.2,dash:0}]});check('Charger wind-up uses frame 3',game.qa.frame('charger')===3);game.qa.pose({mobs:[{...charger,tel:0,dash:.2}]});check('Charger dash uses frame 4',game.qa.frame('charger')===4);
-game.loadMap(2);const shooter=game.qa.state().mobs.find(o=>o.kind==='shooter');game.qa.pose({mobs:[{...shooter,tel:.2,dash:0}]});check('Shooter aim uses frame 3',game.qa.frame('shooter')===3);game.qa.pose({mobs:[{...shooter,tel:0,dash:.12}]});check('Shooter recoil uses frame 4',game.qa.frame('shooter')===4);
+game.loadMap(2);const shooter=game.qa.state().mobs.find(o=>o.kind==='shooter');game.qa.pose({mobs:[{...shooter,cd:.2,recoil:0}]});check('Shooter aim uses frame 3',game.qa.frame('shooter')===3);game.qa.pose({mobs:[{...shooter,cd:2,recoil:1}]});check('Shooter recoil uses frame 4',game.qa.frame('shooter')===4);
 game.loadMap(0);game.qa.tick(.03);const x=game.qa.state().player.x;game.press('right');game.qa.tick(.3);game.release('right');check('Movement advances player',game.qa.state().player.x>x+10);
 const y=game.qa.state().player.y;game.resume();game.press('jump');game.release('jump');game.qa.tick(.2);check('Jump rises',game.qa.state().player.y<y-40);game.qa.tick(1);check('Landing returns to floor',game.qa.state().player.ground);
 game.loadMap(0);game.qa.pose({player:{x:100,y:304,ground:true},mobs:[{...game.qa.state().mobs[0],x:145,y:314,a:145,b:145,dir:1,hp:2}]});game.resume();game.press('atk');game.release('atk');game.qa.tick(.1);check('No damage during windup',game.qa.state().mobs[0].hp===2);game.qa.tick(.08);check('Damage on active frame',game.qa.state().mobs[0].hp===1);
