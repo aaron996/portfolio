@@ -1182,7 +1182,7 @@ export const content: SiteContent = {
     note:
       "Game này mình dựng bằng AI-assisted coding. Phần khó không nằm ở code — nó nằm ở chỗ quyết định cái gì đáng đưa vào và cái gì nên bỏ.",
     controlsHint:
-      "← → di chuyển · ↑ hoặc Space nhảy · J đánh · P tạm dừng để xem hướng dẫn · trên điện thoại dùng nút bên dưới",
+      "← → di chuyển · ↑ hoặc Space nhảy · J chém · K bắn · L đỡ · B túi đồ · P tạm dừng · trên điện thoại dùng nút bên dưới",
     startLabel: "Bắt đầu",
     nextLabel: "Vào ải {n} →",
     clearHeading: "Hạ trùm ải {n}",
@@ -1191,20 +1191,50 @@ export const content: SiteContent = {
     skillsLabel: "Túi kỹ năng",
     pickupTool: "Nhặt được {name}",
     pickupHeal: "Hồi một máu",
-    pickupKindLabel: { heal: "Hồi máu", tool: "Đồ nghề · 12 giây" },
-    pauseHint: "P hoặc Esc — tạm dừng & hướng dẫn",
+    pickupGun: "Nạp đạn: {name}",
+    pickupKindLabel: {
+      heal: "Hồi máu",
+      tool: "Đồ nghề · 12 giây",
+      gun: "Vũ khí tầm xa · phím K",
+    },
+    noAmmo: "Hết đạn — J để chém",
+    parryLine: "Đỡ chuẩn!",
+    guardBreakLine: "Vỡ đỡ!",
+    pickupPanel: {
+      heading: "Vừa nhặt được",
+      dontPauseLabel: "Đừng dừng game khi nhặt vật phẩm nữa",
+      inventoryHint: "Bấm B bất cứ lúc nào để xem lại những gì đang cầm.",
+      resumeLabel: "Chơi tiếp",
+    },
+    inventory: {
+      heading: "Túi đồ",
+      hpLabel: "Máu",
+      guardLabel: "Thể lực đỡ",
+      toolLabel: "Đồ nghề",
+      gunLabel: "Vũ khí tầm xa",
+      toolLeft: "còn {n} giây",
+      ammoLeft: "còn {n} viên",
+      noneLabel: "Chưa có",
+      emptyLabel: "Chưa nhặt được gì trong ải này.",
+      itemsHeading: "Đã nhặt trong ải này",
+      closeLabel: "Đóng túi đồ",
+    },
+    pauseHint: "P tạm dừng · B túi đồ",
     pause: {
       heading: "Tạm dừng",
       controlsHeading: "Điều khiển",
       controls: [
         { keys: "← →  ·  A D", label: "Di chuyển" },
         { keys: "↑  ·  W  ·  Space", label: "Nhảy — bấm sớm lúc đang rơi vẫn được ghi nhận" },
-        { keys: "J  ·  Z  ·  X", label: "Chém — ba nhát liền nhau thành combo, nhát thứ ba mạnh nhất" },
+        { keys: "J  ·  Z", label: "Chém — ba nhát liền nhau thành combo, nhát thứ ba mạnh nhất" },
+        { keys: "K  ·  X", label: "Bắn — cần súng quét nhặt dọc đường, giữ nút thì bắn liên tục" },
+        { keys: "L  ·  Shift", label: "Giữ để đỡ — chặn đòn từ phía trước, tốn thể lực. Đỡ ngay lúc đòn tới thì không tốn gì và bật ngược đạn về" },
+        { keys: "B", label: "Túi đồ — xem đang cầm gì, còn bao nhiêu đạn" },
         { keys: "Bấm vào màn chơi", label: "Cũng là chém, dùng khi chơi bằng chuột" },
         { keys: "P  ·  Esc", label: "Tạm dừng và mở lại bảng này" },
       ],
       /** Thay cho bảng phím trên màn hình hẹp — ở đó chơi bằng nút ảo */
-      mobileControls: "Chơi bằng nút ◀ ▶ ▲ và ĐÁNH ở dưới màn chơi.",
+      mobileControls: "Chơi bằng nút ◀ ▶ ▲, CHÉM, BẮN và ĐỠ ở dưới màn chơi. Nút 🎒 mở túi đồ.",
       objectiveHeading: "Mục tiêu ải này",
       tipHeading: "Mẹo",
       progressMobs: "Còn {left}/{total} quái thường phải dọn",
@@ -1229,7 +1259,7 @@ export const content: SiteContent = {
         line: "Hai lô lệch một ký tự. Không ai chết, nhưng hàng đi nhầm nước.",
         objective:
           "Dọn hết chứng từ lệch dọc cầu cảng, rồi hạ Trùm Sai Mã Container ở cuối bãi.",
-        tip: "Quái bay cao hơn tầm chém. Nhảy lên ngang tầm nó rồi mới bấm chém.",
+        tip: "Quái bay cao hơn tầm chém. Nhảy lên ngang tầm nó rồi mới bấm chém — hoặc nhặt súng quét ở bệ thứ hai rồi đứng dưới bắn lên.",
         skills: ["Master data", "Đối chiếu chứng từ"],
         palette: {
           sky: "#A9DCF0", far: "#7BB9D4", mid: "#4E8FAE",
@@ -1257,6 +1287,10 @@ export const content: SiteContent = {
             kind: "tool", x: 1740, y: 256, name: "Máy quét mã vỏ",
             desc: "12 giây chém nhanh hơn, xa hơn, sát thương gấp đôi. Quét mã vỏ container thay vì đọc bằng mắt: sai số về gần không.",
           },
+          {
+            kind: "gun", x: 600, y: 262, name: "Súng quét mã vỏ",
+            desc: "Vũ khí tầm xa, bấm K để bắn, 14 viên. Đứng dưới bắn con bay trên đầu — thứ mà nhát chém không với tới.",
+          },
         ],
       },
 
@@ -1270,7 +1304,7 @@ export const content: SiteContent = {
         line: "Ba trăm nghìn đơn một ngày. Băng chuyền không chờ ai.",
         objective:
           "Leo hết ba tầng thùng, dọn sạch kiện lạc tuyến, rồi hạ Băng Chuyền Kẹt.",
-        tip: "Lưỡi cưa chỉ chạy dưới đất. Đường an toàn là leo bệ, không phải chạy thẳng.",
+        tip: "Lưỡi cưa chỉ chạy dưới đất, phải né bằng chân — đỡ không chặn được bẫy. Trùm ải này bắn loạt ba quả: giữ L để đỡ, bấm L đúng lúc quả đầu tới thì không tốn thể lực và đạn bật ngược vào chính nó.",
         skills: ["Vận hành quy mô lớn", "Chuẩn hoá chỉ số"],
         palette: {
           sky: "#FFDFAF", far: "#F0BE7E", mid: "#CF8B45",
@@ -1303,6 +1337,10 @@ export const content: SiteContent = {
             kind: "tool", x: 1610, y: 158, name: "Súng bắn mã",
             desc: "12 giây chém nhanh hơn, xa hơn, sát thương gấp đôi. Ba trăm nghìn đơn một ngày thì tốc độ quét là tốc độ cả kho.",
           },
+          {
+            kind: "gun", x: 940, y: 214, name: "Súng bắn mã vạch",
+            desc: "Vũ khí tầm xa, bấm K để bắn, 14 viên. Bắn kiện văng ra từ bệ bên kia, không phải nhảy sang tận nơi mới chém được.",
+          },
         ],
       },
 
@@ -1316,7 +1354,7 @@ export const content: SiteContent = {
         line: "Con trùm này có thật. Hạ được nó mất hơn một năm, không phải một phút.",
         objective:
           "Dọn hết đơn trễ, hub báo đỏ và hai rider giao gấp, rồi hạ Trùm 90,1% ở cuối sàn.",
-        tip: "Rider rú ga nửa giây trước khi lao. Nghe tiếng là nhảy — đứng chắn đường nó là mất máu.",
+        tip: "Rider rú ga nửa giây trước khi lao. Nghe tiếng là nhảy, hoặc quay mặt về phía nó và giữ L để đỡ cú tông.",
         skills: ["Quản trị đối tác", "KPI on-time"],
         palette: {
           sky: "#FFCDB4", far: "#FBA981", mid: "#EE7A4D",
@@ -1353,6 +1391,10 @@ export const content: SiteContent = {
             kind: "tool", x: 1680, y: 196, name: "Dashboard realtime",
             desc: "12 giây chém nhanh hơn, xa hơn, sát thương gấp đôi. Thấy hub đỏ ngay lúc nó đỏ, không phải sáng mai mới biết.",
           },
+          {
+            kind: "gun", x: 1080, y: 246, name: "Súng quét mã đơn",
+            desc: "Vũ khí tầm xa, bấm K để bắn, 14 viên. Hạ hub báo đỏ từ ngoài tầm đạn của nó — cách rẻ nhất để không mất máu.",
+          },
         ],
       },
 
@@ -1366,7 +1408,7 @@ export const content: SiteContent = {
         line: "Đơn trễ mà không kho nào nhận. Phải chỉ đúng tên nó mới chịu ngã.",
         objective:
           "Dọn hết query lỗi và join nhân dòng giữa rừng gai, rồi hạ Đơn Vô Chủ.",
-        tip: "Đạn bay ngang tầm ngực. Nhảy sớm một nhịp thì đạn lọt dưới chân.",
+        tip: "Đạn bay ngang tầm ngực. Nhảy sớm một nhịp thì đạn lọt dưới chân — hoặc đứng yên quay mặt về phía nó, bấm L đúng lúc để bật đạn ngược lại.",
         skills: ["SQL / Trino", "Quy trách nhiệm"],
         palette: {
           sky: "#C8CCF2", far: "#9BA2DE", mid: "#6C74BE",
@@ -1401,6 +1443,10 @@ export const content: SiteContent = {
             kind: "tool", x: 1800, y: 206, name: "Câu SQL đúng",
             desc: "12 giây chém nhanh hơn, xa hơn, sát thương gấp đôi. Một câu query đúng thay được cả buổi tranh nhau ai làm trễ.",
           },
+          {
+            kind: "gun", x: 1200, y: 206, name: "Con trỏ truy vấn",
+            desc: "Vũ khí tầm xa, bấm K để bắn, 14 viên. Chỉ đúng dòng cần bắn từ đầu bên kia phòng, khỏi lội qua rừng gai.",
+          },
         ],
       },
 
@@ -1414,7 +1460,7 @@ export const content: SiteContent = {
         line: "Con trùm cuối là một cái tên cột. Tách sai một dấu chấm là vỡ cả bảng.",
         objective:
           "Đủ bốn loại quái, đủ ba loại bẫy. Dọn sạch xưởng rồi hạ CATEGORY.SKU.",
-        tip: "Chém ba nhát liền nhau thì nhát thứ ba mạnh gấp đôi. Giữ nhịp, đừng bấm loạn.",
+        tip: "Chém ba nhát liền nhau thì nhát thứ ba mạnh gấp đôi. Giữ nhịp, đừng bấm loạn — và để dành đạn súng cho trùm cuối.",
         skills: ["Data modeling", "Ship sản phẩm"],
         palette: {
           sky: "#C6EBD9", far: "#93D6B8", mid: "#5FB18E",
@@ -1448,6 +1494,10 @@ export const content: SiteContent = {
           {
             kind: "tool", x: 1460, y: 186, name: "Data contract",
             desc: "12 giây chém nhanh hơn, xa hơn, sát thương gấp đôi. Thoả thuận trước tên cột và kiểu dữ liệu, đỡ phải sửa sau khi vỡ.",
+          },
+          {
+            kind: "gun", x: 760, y: 252, name: "Súng dán nhãn SKU",
+            desc: "Vũ khí tầm xa, bấm K để bắn, 14 viên. Ải cuối có đủ bốn loại quái — để dành đạn cho hai con đứng bắn ở trên bệ cao.",
           },
         ],
       },

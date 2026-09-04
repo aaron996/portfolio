@@ -14,16 +14,24 @@
 import type { GameMap, MobKind } from "@/content/types";
 import mobSpriteMetrics from "./mob-sprite-metrics.json";
 
-export type GameKey = "left" | "right" | "jump" | "atk";
+export type GameKey = "left" | "right" | "jump" | "atk" | "shoot" | "guard";
 export type GamePhase = "title" | "play" | "paused" | "clear" | "end";
+
+/**
+ * Vì sao game đang dừng. Ba lý do dùng chung một `phase`, khác nhau ở bảng
+ * mà giao diện dựng lên: tự bấm dừng, vừa nhặt vật phẩm, hay đang mở túi đồ.
+ */
+export type PauseReason = "manual" | "pickup" | "inventory";
 
 /** Thông tin đủ để giao diện dựng thẻ giải nghĩa vật phẩm vừa nhặt */
 export interface PickupInfo {
-  kind: "heal" | "tool";
+  kind: "heal" | "tool" | "gun";
   name: string;
   desc: string;
-  /** Số giây buff còn hiệu lực, 0 với vật phẩm hồi máu */
+  /** Số giây buff còn hiệu lực, 0 với vật phẩm hồi máu và súng */
   seconds: number;
+  /** Số đạn được nạp, 0 với hai loại còn lại */
+  ammo: number;
 }
 
 /** Ảnh chụp trạng thái ải, để bảng tạm dừng nói đúng việc còn phải làm */
@@ -35,6 +43,16 @@ export interface GameStatus {
   bossHpPct: number;
   hp: number;
   mhp: number;
+  /** Số giây buff đồ nghề còn lại, 0 nếu không cầm */
+  toolLeft: number;
+  toolName: string | null;
+  /** Đạn còn trong súng, 0 nếu chưa nhặt hoặc đã bắn hết */
+  ammo: number;
+  gunName: string | null;
+  /** Thể lực đỡ đòn, 0..1 */
+  guard: number;
+  /** Mọi vật phẩm đã nhặt trong ải này, theo thứ tự nhặt */
+  items: PickupInfo[];
 }
 
 export interface GameHandlers {
@@ -45,7 +63,7 @@ export interface GameHandlers {
   /** Hạ trùm ải cuối */
   onFinished?: () => void;
   /** Vào/ra trạng thái tạm dừng — kể cả khi engine tự dừng vì mất focus */
-  onPause?: (paused: boolean) => void;
+  onPause?: (paused: boolean, reason: PauseReason) => void;
   /** Nhặt được vật phẩm, kèm câu giải nghĩa để dựng thẻ */
   onPickup?: (info: PickupInfo) => void;
 }
@@ -57,6 +75,14 @@ export interface GameLabels {
   /** Có {name} */
   pickupTool: string;
   pickupHeal: string;
+  /** Có {name} */
+  pickupGun: string;
+  /** Bấm bắn mà súng rỗng */
+  noAmmo: string;
+  /** Đỡ trúng nhịp */
+  parryLine: string;
+  /** Giữ đỡ tới cạn thể lực */
+  guardBreakLine: string;
   /** Gợi ý phím tạm dừng, vẽ ở góc dưới canvas */
   pauseHint: string;
 }
@@ -73,6 +99,40 @@ const LIME = "#d4f236";
 
 /** Đồ nghề: 12 giây đánh nhanh hơn, xa hơn, mạnh gấp đôi */
 const TOOL_SECONDS = 12;
+
+/**
+ * Súng quét — vũ khí thứ hai, bấm K.
+ *
+ * Cân bằng ở đây là cố ý: đạn ít và giãn nhịp hơn nhát chém, đổi lại bắn
+ * được từ xa. Không giới hạn đạn thì cả game rút về đứng một chỗ nhả đạn,
+ * mà nhịp gần mới là chỗ vui của thể loại này. 14 viên đủ dọn một cụm quái
+ * khó hoặc bào một phần ba máu trùm, không đủ để đi hết ải bằng súng.
+ */
+const GUN_AMMO = 14;
+const GUN_COOLDOWN = 0.26;
+const GUN_DMG = 1;
+const GUN_SPEED = 620;
+
+/**
+ * Đỡ đòn — giữ L.
+ *
+ * Thể lực là thứ giữ cho đỡ đòn không thành "giữ nút là bất tử": giữ lâu tự
+ * cạn, mỗi đòn chặn được tốn thêm một phần. Cạn thì vỡ đỡ, đứng chịu trận
+ * 0,7 giây — đúng cái giá phải trả cho việc bấm đỡ bừa.
+ *
+ * PARRY_WINDOW là 0,22 giây đầu sau khi bấm: chặn trong khoảng đó không tốn
+ * thể lực và bật ngược đạn về phía kẻ bắn. Đây là đường vượt trùm ải 2 và 4
+ * (hai con bắn loạt ba quả) cho người chơi không muốn nhảy né.
+ */
+const GUARD_DRAIN = 0.3;
+const GUARD_BLOCK_COST = 0.26;
+const GUARD_REGEN = 0.5;
+/** Trễ trước khi thể lực bắt đầu hồi, tính từ lúc thả đỡ hoặc chặn xong */
+const GUARD_REGEN_DELAY = 0.35;
+const GUARD_BREAK_TIME = 0.7;
+/** Vỡ đỡ xong phải hồi tới mức này mới đỡ lại được */
+const GUARD_MIN_TO_RAISE = 0.35;
+const PARRY_WINDOW = 0.22;
 
 /**
  * Bố cục ba lớp nền, chốt bằng cách ghép thử cả năm ải rồi soi.
@@ -151,6 +211,8 @@ const ASSETS = {
   riderArt: true,
   /** fx/slash-1..N.png. 0 = vẽ vệt chém bằng code. */
   slashFx: 3,
+  /** item/gun-X.png đã có chưa. Chưa thì engine vẽ khẩu súng bằng code. */
+  gunArt: false,
   /** bg/mX-sky.png — lớp trời vẽ bằng ảnh thay vì dốc màu code */
   bgSky: false,
   /** bg/mX-far.png — lớp xa vẽ bằng ảnh thay vì bằng code */
@@ -275,6 +337,8 @@ function bossSprite(mapIndex: number, state: "idle" | "tel" | "hit") {
   return img(`boss/b${n}${state === "tel" ? "-tel" : ""}.png`);
 }
 function pickupSprite(mapIndex: number, kind: Pickup["kind"]) {
+  // Chưa gen ảnh súng thì đừng gọi img() — mỗi lần gọi là một cái 404
+  if (kind === "gun" && !ASSETS.gunArt) return null;
   return img(`item/${kind}-${mapIndex + 1}.png`);
 }
 
@@ -403,7 +467,7 @@ interface Trap {
   t: number; pos: number; dir: number;
 }
 interface Pickup {
-  kind: "heal" | "tool";
+  kind: "heal" | "tool" | "gun";
   name: string;
   desc: string;
   x: number; y: number;
@@ -417,6 +481,8 @@ interface Particle {
   size: number;
 }
 interface Shot { x: number; y: number; vx: number; vy: number; r: number; t: number }
+/** Tia súng quét của người chơi — bay thẳng, xuyên qua bẫy, tan khi trúng */
+interface Bullet { x: number; y: number; vx: number; t: number }
 /** Một nhát chém đã bay ra khỏi tay — vẽ vệt lưỡi liềm rồi tự tan */
 interface Slash {
   x: number; y: number; face: number;
@@ -432,6 +498,15 @@ export interface GameInstance {
   pause(): void;
   togglePause(): void;
   isPaused(): boolean;
+  /** Mở/đóng bảng túi đồ — game dừng lại trong lúc mở */
+  toggleInventory(): void;
+  /** Vì sao đang dừng, để giao diện chọn đúng bảng */
+  pauseReason(): PauseReason;
+  /**
+   * Có dừng hẳn game mỗi khi nhặt vật phẩm không. Giao diện đọc lựa chọn đã
+   * lưu của người chơi rồi báo xuống — engine không đụng vào localStorage.
+   */
+  setPauseOnPickup(on: boolean): void;
   status(): GameStatus;
   press(key: GameKey): void;
   release(key: GameKey): void;
@@ -475,13 +550,29 @@ export function createGame(
    */
   let freeze = 0;
 
-  const keys: Record<GameKey, boolean> = { left: false, right: false, jump: false, atk: false };
+  const keys: Record<GameKey, boolean> = {
+    left: false, right: false, jump: false, atk: false, shoot: false, guard: false,
+  };
+  let pauseWhy: PauseReason = "manual";
+  let pauseOnPickup = true;
+  /** Vật phẩm đã nhặt trong ải đang chơi — nguồn của bảng túi đồ */
+  let bag: PickupInfo[] = [];
 
   const player = {
     x: 60, y: GY - 40, w: 26, h: 40,
     vx: 0, vy: 0, face: 1,
     hp: 5, mhp: 5, inv: 0, atk: 0, atkDur: 0.28, cd: 0, ground: false,
     tool: 0, hurtT: 0,
+    /** Tên đồ nghề đang cầm, để bảng túi đồ gọi đúng tên */
+    toolName: null as string | null,
+    /** Đạn còn lại và tên khẩu súng đang cầm */
+    ammo: 0, gunName: null as string | null,
+    /** Đếm ngược hoạt ảnh bắn, và nhịp nghỉ giữa hai phát */
+    shootT: 0, gunCd: 0,
+    /** Đang giơ đỡ hay không, và đã giơ được bao lâu (để tính parry) */
+    guarding: false, guardT: 0,
+    /** Thể lực đỡ, 0..1. Cạn thì vỡ đỡ. */
+    stam: 1, stamDelay: 0, breakT: 0,
     /** Pha chu kỳ chạy, 0..1 — quy ra khung hình và cả nhịp nhún */
     runPhase: 0,
     attackActive: 0, attackHit: false, attackBuffed: false,
@@ -501,6 +592,7 @@ export function createGame(
   let pickups: Pickup[] = [];
   let parts: Particle[] = [];
   let shots: Shot[] = [];
+  let bullets: Bullet[] = [];
   let slashes: Slash[] = [];
   let boss: Boss | null = null;
   let cam = 0;
@@ -525,11 +617,15 @@ export function createGame(
     Object.assign(player, {
       x: 60, y: GY - 40, vx: 0, vy: 0, face: 1,
       hp: 5, inv: 0, atk: 0, cd: 0, ground: false, tool: 0, hurtT: 0,
+      toolName: null, ammo: 0, gunName: null, shootT: 0, gunCd: 0,
+      guarding: false, guardT: 0, stam: 1, stamDelay: 0, breakT: 0,
       runPhase: 0, attackActive: 0, attackHit: false, attackBuffed: false,
       combo: 0, comboT: 0, landT: 0, coyote: 0, jumpBuf: 0, fallSpeed: 0,
     });
+    bag = [];
     parts = [];
     shots = [];
+    bullets = [];
     slashes = [];
     boss = null;
     cam = 0;
@@ -603,8 +699,11 @@ export function createGame(
 
   /* ── hành động ───────────────────────────────────────── */
 
+  /** Đang bị khoá tay: vỡ đỡ chưa hồi xong, hoặc đang giơ đỡ */
+  const busy = () => player.breakT > 0 || player.guarding;
+
   function tryJump() {
-    if (phase !== "play") return;
+    if (phase !== "play" || busy()) return;
     if (!player.ground && player.coyote <= 0) return;
     player.vy = -684;
     player.ground = false;
@@ -614,7 +713,7 @@ export function createGame(
   }
 
   function attack() {
-    if (phase !== "play" || player.cd > 0) return;
+    if (phase !== "play" || player.cd > 0 || busy()) return;
     const buffed = player.tool > 0;
     // Combo ba nhát: hai nhát đầu nhanh, nhát ba chậm hơn nhưng nặng
     player.combo = player.comboT > 0 ? (player.combo + 1) % 3 : 0;
@@ -697,8 +796,155 @@ export function createGame(
     }
   }
 
-  function hurtPlayer(dir: number) {
+  /* ── súng quét: đòn tầm xa, bấm K ─────────────────────── */
+
+  function shoot() {
+    if (phase !== "play" || busy() || player.gunCd > 0 || player.atk > 0) return;
+    if (player.ammo <= 0) {
+      // Không im lặng nuốt cú bấm: người chơi phải biết vì sao không có gì xảy ra
+      say(labels.noAmmo, 1);
+      player.gunCd = 0.3;
+      return;
+    }
+    player.ammo -= 1;
+    player.gunCd = GUN_COOLDOWN;
+    player.shootT = 0.2;
+    // Giật lùi nhẹ — đòn tầm xa mà không có phản lực thì bấm như bấm chuột
+    if (player.ground) player.vx -= player.face * 46;
+    const muzzleX = player.x + player.w / 2 + player.face * 20;
+    const muzzleY = player.y + 17;
+    bullets.push({ x: muzzleX, y: muzzleY, vx: player.face * GUN_SPEED, t: 0 });
+    puff(muzzleX, muzzleY, LIME, 3);
+    shake = Math.max(shake, 1.6);
+  }
+
+  /** Một viên đạn của người chơi ăn vào cái gì đó. `true` nghĩa là viên đó tan. */
+  function bulletHits(b: Bullet, m: GameMap): boolean {
+    const box = { x: b.x - 7, y: b.y - 5, w: 14, h: 10 };
+    for (const o of mobs) {
+      if (o.dead || !overlap(box, o)) continue;
+      o.hp -= GUN_DMG;
+      o.hurt = 0.16;
+      o.tel = 0;
+      o.dash = 0;
+      spark(b.x, b.y, Math.sign(b.vx) || 1);
+      puff(o.x + o.w / 2, o.y + o.h / 2, m.palette.mob, 5);
+      if (o.hp <= 0) {
+        o.dead = true;
+        o.deadT = 0;
+        puff(o.x + o.w / 2, o.y + o.h / 2, LIME, 16);
+        ring(o.x + o.w / 2, o.y + o.h / 2, LIME);
+      }
+      return true;
+    }
+    if (boss && overlap(box, boss)) {
+      boss.hp -= GUN_DMG;
+      boss.hurt = 0.14;
+      spark(b.x, b.y, Math.sign(b.vx) || 1);
+      puff(boss.x + boss.w / 2, boss.y + boss.h / 2, m.palette.boss, 6);
+      if (boss.hp <= 0) clearMap();
+      return true;
+    }
+    return false;
+  }
+
+  /* ── đỡ đòn: giữ L ───────────────────────────────────── */
+
+  /**
+   * Cập nhật trạng thái đỡ mỗi khung. Tách khỏi `press`/`release` vì đỡ là
+   * trạng thái giữ nút, không phải một cú bấm: điều kiện giơ được hay không
+   * thay đổi liên tục (rời mặt đất, cạn thể lực, vừa vỡ đỡ).
+   */
+  function stepGuard(dt: number) {
+    if (player.breakT > 0) {
+      player.breakT = Math.max(0, player.breakT - dt);
+      player.guarding = false;
+    }
+
+    const canRaise =
+      keys.guard &&
+      player.breakT <= 0 &&
+      player.ground &&
+      player.atk <= 0 &&
+      player.hurtT <= 0 &&
+      player.stam >= (player.guarding ? 0 : GUARD_MIN_TO_RAISE);
+
+    if (canRaise) {
+      if (!player.guarding) {
+        player.guarding = true;
+        player.guardT = 0;
+        // Khiên dựng lên: một vòng sáng nhỏ để biết đòn đỡ đã ăn từ lúc nào
+        ring(player.x + player.w / 2 + player.face * 14, player.y + 18, "#9fd8ff");
+      }
+      player.guardT += dt;
+      player.stam = Math.max(0, player.stam - GUARD_DRAIN * dt);
+      player.stamDelay = GUARD_REGEN_DELAY;
+      // Đứng tấn: hãm người lại chứ không cấm hẳn, để không bị kẹt trong bẫy
+      player.vx *= Math.exp(-18 * dt);
+      if (player.stam <= 0) breakGuard();
+    } else {
+      player.guarding = false;
+      player.guardT = 0;
+    }
+
+    if (!player.guarding) {
+      player.stamDelay = Math.max(0, player.stamDelay - dt);
+      if (player.stamDelay <= 0) player.stam = Math.min(1, player.stam + GUARD_REGEN * dt);
+    }
+  }
+
+  function breakGuard() {
+    player.guarding = false;
+    player.guardT = 0;
+    player.stam = 0;
+    player.breakT = GUARD_BREAK_TIME;
+    player.stamDelay = GUARD_REGEN_DELAY;
+    say(labels.guardBreakLine, 0.9);
+    shake = Math.max(shake, 5);
+    puff(player.x + player.w / 2, player.y + 18, "#9fd8ff", 10);
+  }
+
+  /**
+   * Đòn tới từ phía trước có bị đỡ không.
+   *
+   * `dir` là hướng đòn hất người chơi đi, nên kẻ tấn công nằm ở phía `-dir`.
+   * Chỉ đỡ được đòn từ đúng hướng đang quay mặt — quay lưng lại là ăn đủ.
+   */
+  function blocks(dir: number) {
+    return player.guarding && dir !== 0 && -dir === player.face;
+  }
+
+  /** Đỡ trúng nhịp: không tốn thể lực, đẩy lùi kẻ tấn công, đứng hình một chớp */
+  function onBlocked(parry: boolean, atX: number) {
+    const y = player.y + 18;
+    if (parry) {
+      say(labels.parryLine, 0.8);
+      flash = Math.max(flash, 0.3);
+      freeze = reduced ? 0 : 0.08;
+      ring(atX, y, LIME);
+      puff(atX, y, LIME, 10);
+    } else {
+      player.stam = Math.max(0, player.stam - GUARD_BLOCK_COST);
+      freeze = reduced ? 0 : 0.03;
+      puff(atX, y, "#9fd8ff", 6);
+      if (player.stam <= 0) breakGuard();
+    }
+    player.stamDelay = GUARD_REGEN_DELAY;
+    player.vx += -player.face * (parry ? 40 : 120);
+    shake = Math.max(shake, parry ? 5 : 3);
+  }
+
+  /**
+   * `unblockable` dành cho bẫy: gai và lưỡi cưa vẫn phải né bằng chân, không
+   * thì cả ải rút về việc giữ nút đỡ mà đi xuyên qua mọi thứ.
+   */
+  function hurtPlayer(dir: number, unblockable = false) {
     if (player.inv > 0 || phase !== "play") return;
+    if (!unblockable && blocks(dir)) {
+      onBlocked(player.guardT <= PARRY_WINDOW, player.x + player.w / 2 + player.face * 18);
+      player.inv = 0.25;
+      return;
+    }
     player.hp -= 1;
     player.inv = 1.35;
     player.hurtT = 0.35;
@@ -706,6 +952,9 @@ export function createGame(
     player.vx = dir * 450;
     player.combo = 0;
     player.comboT = 0;
+    player.guarding = false;
+    player.guardT = 0;
+    player.stamDelay = GUARD_REGEN_DELAY;
     shake = 6;
     flash = 0.25;
     freeze = reduced ? 0 : 0.06;
@@ -926,6 +1175,8 @@ export function createGame(
     worldTime += dt;
 
     player.cd = Math.max(0, player.cd - dt);
+    player.gunCd = Math.max(0, player.gunCd - dt);
+    player.shootT = Math.max(0, player.shootT - dt);
     player.comboT = Math.max(0, player.comboT - dt);
     const previousAttack = player.atk;
     player.atk = Math.max(0, player.atk - dt);
@@ -944,8 +1195,13 @@ export function createGame(
     flash = Math.max(0, flash - dt * 2.6);
     shake *= Math.exp(-9 * dt);
 
+    stepGuard(dt);
+    // Giữ nút bắn thì nhả đạn liên tục theo nhịp súng, không phải bấm từng phát
+    if (keys.shoot) shoot();
+
     const dir = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
-    if (dir) {
+    // Đang đỡ hoặc vừa vỡ đỡ thì mất quyền điều khiển: đó là cái giá của đỡ
+    if (dir && !player.guarding && player.breakT <= 0) {
       player.vx += dir * 2300 * dt;
       // Đang chém thì không cho quay người — quay giữa đòn trông như trượt
       if (player.atk <= 0) player.face = dir;
@@ -1015,7 +1271,7 @@ export function createGame(
       }
       const box = trapBox(t);
       if (box && overlap(player, box)) {
-        hurtPlayer(player.x < box.x + box.w / 2 ? -1 : 1);
+        hurtPlayer(player.x < box.x + box.w / 2 ? -1 : 1, true);
       }
     }
 
@@ -1025,22 +1281,35 @@ export function createGame(
       const box = { x: p.x, y: p.y - 26, w: 24, h: 24 };
       if (!overlap(player, box)) continue;
       p.taken = true;
-      ring(p.x + 12, p.y - 14, p.kind === "tool" ? LIME : "#ff8f85");
+      ring(p.x + 12, p.y - 14, p.kind === "heal" ? "#ff8f85" : LIME);
       if (p.kind === "heal") {
         player.hp = Math.min(player.mhp, player.hp + 1);
         say(labels.pickupHeal, 1.2);
         puff(p.x + 12, p.y - 14, "#ff6b5e", 12);
+      } else if (p.kind === "gun") {
+        // Nhặt lại khi còn đạn thì cộng dồn, không xoá số đạn đang có
+        player.ammo += GUN_AMMO;
+        player.gunName = p.name;
+        say(labels.pickupGun.replace("{name}", p.name), 1.6);
+        puff(p.x + 12, p.y - 14, "#9fd8ff", 16);
       } else {
         player.tool = TOOL_SECONDS;
+        player.toolName = p.name;
         say(labels.pickupTool.replace("{name}", p.name), 1.6);
         puff(p.x + 12, p.y - 14, LIME, 16);
       }
-      handlers.onPickup?.({
+      const info: PickupInfo = {
         kind: p.kind,
         name: p.name,
         desc: p.desc,
         seconds: p.kind === "tool" ? TOOL_SECONDS : 0,
-      });
+        ammo: p.kind === "gun" ? GUN_AMMO : 0,
+      };
+      bag.push(info);
+      handlers.onPickup?.(info);
+      // Dừng hẳn để người chơi đọc xong câu giải nghĩa. Thẻ tự tắt sau vài
+      // giây thì vật phẩm nào cũng trôi qua mà không ai kịp đọc.
+      if (pauseOnPickup) setPaused(true, "pickup");
     }
 
     if (boss) {
@@ -1053,10 +1322,22 @@ export function createGame(
       s.x += s.vx * dt * 60;
       s.y += s.vy * dt * 60;
       if (overlap(player, { x: s.x - s.r, y: s.y - s.r, w: s.r * 2, h: s.r * 2 })) {
-        hurtPlayer(s.vx > 0 ? 1 : -1);
+        const dir = s.vx > 0 ? 1 : -1;
+        // Đỡ trúng nhịp thì đạn bật ngược lại thành đạn của mình. Đây là
+        // phần thưởng cho việc bấm đỡ đúng lúc thay vì giữ đỡ suốt trận.
+        const parried = blocks(dir) && player.guardT <= PARRY_WINDOW;
+        hurtPlayer(dir);
+        if (parried) bullets.push({ x: s.x, y: s.y, vx: -s.vx * 60 * 1.4, t: 0 });
         return false;
       }
       return s.x > -30 && s.x < WORLD + 30 && s.y > -30 && s.y < H + 60;
+    });
+
+    bullets = bullets.filter((b) => {
+      b.t += dt;
+      b.x += b.vx * dt;
+      if (bulletHits(b, m)) return false;
+      return b.t < 1.4 && b.x > cam - 60 && b.x < cam + W + 60;
     });
 
     slashes = slashes.filter((s) => {
@@ -1717,10 +1998,17 @@ export function createGame(
     g!.fillRect(t.x - 2, t.y - 8, 30, 8);
   }
 
+  /** Màu nhận dạng của ba loại vật phẩm — học một lần là nhìn xa biết ngay */
+  const PICKUP_TINT = {
+    heal: { glow: "rgba(255,143,133,", body: "#ff8f85", label: "#ffd2ce" },
+    tool: { glow: "rgba(212,242,54,", body: LIME, label: LIME },
+    gun: { glow: "rgba(159,216,255,", body: "#9fd8ff", label: "#c8e9ff" },
+  } as const;
+
   function drawPickup(p: Pickup) {
     const y = p.y - 26 + Math.sin(p.bob) * 3;
-    const tool = p.kind === "tool";
-    const glow = tool ? "rgba(212,242,54," : "rgba(255,143,133,";
+    const tint = PICKUP_TINT[p.kind];
+    const glow = tint.glow;
 
     // Vòng sáng dưới vật phẩm để nó nổi khỏi nền, kể cả nền sáng
     const pulse = 0.5 + Math.sin(p.bob * 1.4) * 0.5;
@@ -1736,15 +2024,38 @@ export function createGame(
       g!.shadowBlur = 11;
       drawFit(g!, sprite, p.x + 12, y + 28, 36, 36);
       g!.restore();
-      drawLabel(p.name, p.x + 12, y - 8, tool ? LIME : "#ffd2ce");
+      drawLabel(p.name, p.x + 12, y - 8, tint.label);
       return;
     }
-    g!.fillStyle = tool ? LIME : "#ff8f85";
+    if (p.kind === "gun") {
+      // Khẩu súng quét vẽ bằng code: thân ngang, tay cầm chúc xuống, đầu nòng
+      // sáng nhấp nháy. Chưa có ảnh nhưng vẫn phải đọc ra là "cái súng".
+      g!.save();
+      g!.translate(p.x + 12, y + 12);
+      g!.fillStyle = tint.body;
+      g!.beginPath();
+      g!.roundRect(-13, -6, 22, 9, 3);
+      g!.fill();
+      g!.beginPath();
+      g!.roundRect(-9, 1, 7, 11, 3);
+      g!.fill();
+      g!.fillStyle = "#0a0a0a";
+      g!.fillRect(-9, -4, 12, 3);
+      g!.fillStyle = "#f2ffc4";
+      g!.globalAlpha = 0.5 + Math.sin(p.bob * 2.2) * 0.5;
+      g!.beginPath();
+      g!.roundRect(9, -4.5, 5, 6, 2);
+      g!.fill();
+      g!.restore();
+      drawLabel(p.name, p.x + 12, y - 6, tint.label);
+      return;
+    }
+    g!.fillStyle = tint.body;
     g!.beginPath();
     g!.roundRect(p.x, y, 24, 24, 6);
     g!.fill();
     g!.fillStyle = "#0a0a0a";
-    if (tool) {
+    if (p.kind === "tool") {
       g!.fillRect(p.x + 7, y + 6, 4, 12);
       g!.fillRect(p.x + 13, y + 6, 4, 12);
       g!.fillRect(p.x + 7, y + 16, 10, 3);
@@ -1752,7 +2063,7 @@ export function createGame(
       g!.fillRect(p.x + 10, y + 6, 4, 12);
       g!.fillRect(p.x + 6, y + 10, 12, 4);
     }
-    drawLabel(p.name, p.x + 12, y - 6, tool ? LIME : "#ffd2ce");
+    drawLabel(p.name, p.x + 12, y - 6, tint.label);
   }
 
   /**
@@ -1864,6 +2175,25 @@ export function createGame(
     if (player.hurtT > 0) {
       src = P_HURT;
       rot = -player.face * 0.12;
+    } else if (player.breakT > 0) {
+      // Vỡ đỡ: dùng lại khung trúng đòn, người ngả ra sau và run nhẹ
+      src = P_HURT;
+      rot = -player.face * 0.22;
+      dy = 1;
+    } else if (player.guarding) {
+      // Chưa có khung đỡ riêng: lấy khung đứng, hạ thấp và nghiêng người vào
+      // đòn. Cái khiên vẽ bằng code ở drawPlayer mới là thứ đọc ra "đang đỡ".
+      src = P_IDLE[0];
+      rot = player.face * 0.1;
+      sy = 0.95;
+      sx = 1.04;
+      dy = 1.5;
+    } else if (player.shootT > 0) {
+      // Bắn: mượn khung vung tay của đòn chém, giữ nguyên tư thế suốt phát bắn
+      src = P_ATK[Math.min(P_ATK.length - 1, 1)];
+      const kick = player.shootT / 0.2;
+      rot = -player.face * kick * 0.06;
+      sx = 1 + kick * 0.02;
     } else if (player.atk > 0) {
       // Chia đòn theo tiến độ: vung → tới đích → thu về
       const p = 1 - player.atk / player.atkDur;
@@ -1956,6 +2286,61 @@ export function createGame(
       g!.globalAlpha = left * (0.75 + 0.15 * Math.sin(worldTime * 9));
       const aura = img(SCENE_SPRITES.aura);
       if (aura) drawFit(g!, aura, player.x + player.w / 2, player.y + player.h + 5, 78, 110);
+      g!.restore();
+    }
+
+    // Khẩu súng trong tay: chỉ vẽ khi còn đạn, và giấu đi lúc đang chém hoặc
+    // đang đỡ — hai tay đang bận việc khác thì cầm súng nhìn rất sai.
+    if (player.ammo > 0 && player.atk <= 0 && !player.guarding && player.breakT <= 0) {
+      const gx = cx + player.face * (player.shootT > 0 ? 16 : 11);
+      const gy = player.y + (player.shootT > 0 ? 17 : 21);
+      g!.save();
+      g!.translate(gx, gy);
+      g!.scale(player.face, 1);
+      g!.fillStyle = "#3f4a55";
+      g!.beginPath();
+      g!.roundRect(-6, -3, 17, 6, 2);
+      g!.fill();
+      g!.fillStyle = "#9fd8ff";
+      g!.fillRect(-2, -2, 8, 2);
+      g!.fillStyle = "#2b333c";
+      g!.beginPath();
+      g!.roundRect(-5, 2, 5, 7, 2);
+      g!.fill();
+      if (player.shootT > 0) {
+        // Chớp đầu nòng, to nhất ở khung đầu rồi tắt nhanh
+        const k = player.shootT / 0.2;
+        g!.globalAlpha = k;
+        g!.fillStyle = "#f2ffc4";
+        g!.beginPath();
+        g!.ellipse(13 + k * 3, 0, 5 + k * 7, 3 + k * 4, 0, 0, Math.PI * 2);
+        g!.fill();
+      }
+      g!.restore();
+    }
+
+    // Khiên đỡ: một cung sáng trước mặt. Nhạt dần theo thể lực còn lại, nên
+    // nhìn cái khiên là biết còn giữ được bao lâu, không phải liếc lên HUD.
+    if (player.guarding) {
+      const t = Math.max(0.15, player.stam);
+      const parry = player.guardT <= PARRY_WINDOW;
+      const sx0 = cx + player.face * 12;
+      const sy0 = player.y + 18;
+      g!.save();
+      g!.translate(sx0, sy0);
+      g!.scale(player.face, 1);
+      g!.strokeStyle = parry ? LIME : `rgba(159,216,255,${0.35 + t * 0.5})`;
+      g!.lineWidth = parry ? 5 : 3;
+      g!.beginPath();
+      g!.arc(0, 0, 20, -1.15, 1.15);
+      g!.stroke();
+      g!.globalAlpha = parry ? 0.3 : 0.12 + t * 0.1;
+      g!.fillStyle = parry ? LIME : "#9fd8ff";
+      g!.beginPath();
+      g!.arc(0, 0, 20, -1.15, 1.15);
+      g!.lineTo(0, 0);
+      g!.closePath();
+      g!.fill();
       g!.restore();
     }
   }
@@ -2121,6 +2506,21 @@ export function createGame(
       g!.fill();
     }
 
+    // Tia súng quét: lõi trắng, đuôi xanh kéo dài theo hướng bay. Cố ý khác
+    // hẳn màu đạn của quái (đỏ) — nhìn một phần giây phải biết đạn của ai.
+    for (const b of bullets) {
+      const s = Math.sign(b.vx) || 1;
+      const grad = g!.createLinearGradient(b.x - s * 30, b.y, b.x, b.y);
+      grad.addColorStop(0, "rgba(159,216,255,0)");
+      grad.addColorStop(1, "rgba(159,216,255,.9)");
+      g!.fillStyle = grad;
+      g!.fillRect(b.x - (s > 0 ? 30 : 0), b.y - 2, 30, 4);
+      g!.fillStyle = "#f2ffc4";
+      g!.beginPath();
+      g!.roundRect(b.x - 4, b.y - 2.5, 9, 5, 2.5);
+      g!.fill();
+    }
+
     // Nhấp nháy khi đang bất tử sau lúc trúng đòn
     if (player.inv <= 0 || Math.floor(player.inv * 16) % 2 === 0) drawPlayer();
     for (const s of slashes) drawSlash(s);
@@ -2201,13 +2601,56 @@ export function createGame(
       g!.roundRect(14 + i * 20, 14, 15, 14, 4);
       g!.fill();
     }
+    /**
+     * Thanh thể lực đỡ. Luôn hiện, không chỉ hiện lúc đang đỡ: người chơi
+     * phải quyết định CÓ NÊN đỡ hay không trước khi bấm, mà muốn quyết định
+     * thì phải thấy còn bao nhiêu.
+     */
+    const stamW = 112;
+    g!.fillStyle = "rgba(10,10,10,.45)";
+    g!.beginPath();
+    g!.roundRect(13, 35, stamW + 2, 7, 3.5);
+    g!.fill();
+    // Đỏ khi vỡ đỡ, vàng khi sắp cạn, xanh khi còn thoải mái
+    g!.fillStyle =
+      player.breakT > 0 ? HAZARD : player.stam < GUARD_MIN_TO_RAISE ? "#ffcf5c" : "#9fd8ff";
+    g!.beginPath();
+    g!.roundRect(14, 36, Math.max(0, stamW * player.stam), 5, 2.5);
+    g!.fill();
+    if (player.guarding) {
+      // Viền sáng lúc đang giơ khiên, để hai thứ trên màn hình nói cùng một chuyện
+      g!.strokeStyle = "rgba(242,255,196,.85)";
+      g!.lineWidth = 1;
+      g!.strokeRect(13.5, 35.5, stamW + 1, 6);
+    }
+
+    let hy = 50;
     if (player.tool > 0) {
       const activeTool = pickupSprite(lv, "tool");
-      if (activeTool) drawFit(g!, activeTool, 28, 68, 30, 30);
+      if (activeTool) drawFit(g!, activeTool, 28, hy + 30, 30, 30);
       g!.fillStyle = "rgba(242,241,236,.2)";
-      g!.fillRect(48, 47, 95, 6);
+      g!.fillRect(48, hy + 9, 95, 6);
       g!.fillStyle = LIME;
-      g!.fillRect(48, 47, 95 * (player.tool / TOOL_SECONDS), 6);
+      g!.fillRect(48, hy + 9, 95 * (player.tool / TOOL_SECONDS), 6);
+      hy += 34;
+    }
+
+    if (player.ammo > 0) {
+      // Đạn đếm bằng số chứ không bằng vạch: 14 vạch nhỏ thì đếm không kịp
+      g!.save();
+      g!.translate(22, hy + 8);
+      g!.fillStyle = "#9fd8ff";
+      g!.beginPath();
+      g!.roundRect(-8, -3, 15, 6, 2);
+      g!.fill();
+      g!.beginPath();
+      g!.roundRect(-6, 2, 5, 6, 2);
+      g!.fill();
+      g!.restore();
+      g!.font = `800 13px ${FONT_DISPLAY}`;
+      g!.textAlign = "left";
+      g!.fillStyle = player.ammo <= 3 ? "#ffcf5c" : "#c8e9ff";
+      g!.fillText(`× ${player.ammo}`, 36, hy + 13);
     }
 
     // Đếm quái còn lại — không có nó thì không biết còn phải dọn bao nhiêu
@@ -2297,11 +2740,17 @@ export function createGame(
     raf = requestAnimationFrame(frame);
   }
 
+  /**
+   * Hàng J K L là bố cục chuẩn của thể loại này: ngón trỏ chém, ngón giữa
+   * bắn, ngón áp út đỡ — tay trái vẫn rảnh cho A D và Space.
+   */
   const KEYMAP: Record<string, GameKey> = {
     ArrowLeft: "left", KeyA: "left",
     ArrowRight: "right", KeyD: "right",
     ArrowUp: "jump", KeyW: "jump", Space: "jump",
-    KeyJ: "atk", KeyZ: "atk", KeyX: "atk",
+    KeyJ: "atk", KeyZ: "atk",
+    KeyK: "shoot", KeyX: "shoot",
+    KeyL: "guard", ShiftLeft: "guard", ShiftRight: "guard",
   };
 
   function press(k: GameKey) {
@@ -2312,23 +2761,38 @@ export function createGame(
       tryJump();
     }
     if (k === "atk") attack();
+    if (k === "shoot") shoot();
   }
   function release(k: GameKey) {
     keys[k] = false;
+    if (k === "guard") {
+      player.guarding = false;
+      player.guardT = 0;
+    }
   }
 
-  function setPaused(next: boolean) {
+  function setPaused(next: boolean, reason: PauseReason = "manual") {
     if (next && phase === "play") {
       phase = "paused";
+      pauseWhy = reason;
       // Nhả hết phím, không thì lúc quay lại nhân vật tự chạy
-      keys.left = keys.right = keys.jump = keys.atk = false;
-      handlers.onPause?.(true);
+      keys.left = keys.right = keys.jump = keys.atk = keys.shoot = keys.guard = false;
+      player.guarding = false;
+      player.guardT = 0;
+      handlers.onPause?.(true, reason);
     } else if (!next && phase === "paused") {
       phase = "play";
       last = performance.now();
       accumulator = 0;
-      handlers.onPause?.(false);
+      handlers.onPause?.(false, pauseWhy);
+      pauseWhy = "manual";
     }
+  }
+
+  /** Túi đồ đóng vai một kiểu tạm dừng, không phải một trạng thái riêng */
+  function toggleInventory() {
+    if (phase === "paused" && pauseWhy === "inventory") setPaused(false);
+    else if (phase === "play") setPaused(true, "inventory");
   }
 
   /**
@@ -2338,6 +2802,7 @@ export function createGame(
   const KEY_ALIAS: Record<string, string> = {
     ArrowLeft: "ArrowLeft", ArrowRight: "ArrowRight", ArrowUp: "ArrowUp",
     a: "KeyA", d: "KeyD", w: "KeyW", j: "KeyJ", z: "KeyZ", x: "KeyX", p: "KeyP",
+    k: "KeyK", l: "KeyL", b: "KeyB", Shift: "ShiftLeft",
     " ": "Space", Escape: "Escape",
   };
   const codeOf = (e: KeyboardEvent) =>
@@ -2349,6 +2814,15 @@ export function createGame(
       if (phase === "play" || phase === "paused") {
         e.preventDefault();
         setPaused(phase === "play");
+      }
+      return;
+    }
+    if (code === "KeyB") {
+      if (phase === "play" || phase === "paused") {
+        e.preventDefault();
+        // Đang dừng vì lý do khác thì B đóng bảng đó luôn, không chồng bảng
+        if (phase === "paused" && pauseWhy !== "inventory") setPaused(false);
+        else toggleInventory();
       }
       return;
     }
@@ -2393,6 +2867,7 @@ export function createGame(
     if (ASSETS.bgNear) img(`bg/m${i + 1}-near.png`);
     img(`item/heal-${i + 1}.png`);
     img(`item/tool-${i + 1}.png`);
+    if (ASSETS.gunArt) img(`item/gun-${i + 1}.png`);
     const kinds = new Set(m.mobs.map((sp) => sp.kind));
     kinds.forEach((k) => {
       if (k === "rider" && !ASSETS.riderArt) return;
@@ -2413,6 +2888,9 @@ export function createGame(
     pause() { setPaused(true); },
     togglePause() { setPaused(phase === "play"); },
     isPaused: () => phase === "paused",
+    toggleInventory,
+    pauseReason: () => pauseWhy,
+    setPauseOnPickup(on: boolean) { pauseOnPickup = on; },
     status: (): GameStatus => ({
       mapIndex: lv,
       mobsLeft: mobs.filter((o) => !o.dead).length,
@@ -2421,6 +2899,12 @@ export function createGame(
       bossHpPct: boss ? Math.max(0, boss.hp / boss.mhp) : 0,
       hp: player.hp,
       mhp: player.mhp,
+      toolLeft: player.tool,
+      toolName: player.tool > 0 ? player.toolName : null,
+      ammo: player.ammo,
+      gunName: player.ammo > 0 ? player.gunName : null,
+      guard: player.stam,
+      items: bag.slice(),
     }),
     press,
     release,

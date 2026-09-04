@@ -227,7 +227,12 @@ export type PickupKind =
   /** Hồi một máu */
   | "heal"
   /** Đồ nghề: 12 giây đánh nhanh hơn, tầm xa hơn, mạnh gấp đôi */
-  | "tool";
+  | "tool"
+  /**
+   * Súng quét: nạp đạn cho đòn tầm xa bấm bằng K. Đây là vũ khí thứ hai, cầm
+   * mãi cho tới khi bắn hết đạn — không phải buff hết giờ như `tool`.
+   */
+  | "gun";
 
 /** Đòn của trùm — mỗi bản đồ một kiểu, để năm trận không giống nhau */
 export type BossKind =
@@ -325,8 +330,46 @@ export interface GameContent {
   /** Có {name} — hiện khi nhặt được đồ nghề */
   pickupTool: string;
   pickupHeal: string;
-  /** Nhãn trên thẻ giải nghĩa vật phẩm, phân biệt hai loại */
-  pickupKindLabel: { heal: string; tool: string };
+  /** Có {name} — hiện khi nhặt được súng quét */
+  pickupGun: string;
+  /** Nhãn trên thẻ giải nghĩa vật phẩm, phân biệt ba loại */
+  pickupKindLabel: { heal: string; tool: string; gun: string };
+  /** Bấm K mà hết đạn */
+  noAmmo: string;
+  /** Đỡ trúng nhịp — chặn đòn mà không tốn thể lực */
+  parryLine: string;
+  /** Giữ đỡ tới cạn thể lực thì vỡ đỡ, đứng chịu trận một nhịp */
+  guardBreakLine: string;
+  /**
+   * Bảng bật lên khi nhặt được vật phẩm. Game dừng hẳn để người chơi đọc
+   * xong câu giải nghĩa — có tích chọn để thôi dừng ở những lần sau.
+   */
+  pickupPanel: {
+    heading: string;
+    /** Nhãn ô tích "đừng dừng game nữa", lưu vào máy người chơi */
+    dontPauseLabel: string;
+    /** Câu nhắc phím mở túi đồ, hiện dưới ô tích */
+    inventoryHint: string;
+    resumeLabel: string;
+  };
+  /** Bảng túi đồ, mở bằng phím B */
+  inventory: {
+    heading: string;
+    hpLabel: string;
+    guardLabel: string;
+    toolLabel: string;
+    gunLabel: string;
+    /** Có {n} — số giây buff còn lại */
+    toolLeft: string;
+    /** Có {n} — số viên đạn còn lại */
+    ammoLeft: string;
+    /** Chưa cầm đồ nghề / chưa có súng */
+    noneLabel: string;
+    /** Chưa nhặt được gì trong ải này */
+    emptyLabel: string;
+    itemsHeading: string;
+    closeLabel: string;
+  };
   /** Bảng tạm dừng: hướng dẫn điều khiển + mục tiêu ải hiện tại */
   pause: {
     heading: string;
