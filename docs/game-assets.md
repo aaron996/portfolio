@@ -7,31 +7,27 @@ lúc tung đòn, mặt mỗi khung một kiểu, chạy thì cứng, nền chỉ
 không sửa được bằng prompt hay hơn — phải sửa bằng **luật khung** (mục 1) và **nhiều
 khung hơn** (mục 3). Đọc mục 0 và 1 trước, đừng nhảy thẳng xuống prompt.
 
-Tổng: **176 tấm**. Không cần làm hết một lượt — mục 9 có bảng bật cờ, gen tới đâu bật
+Tổng: **176 tấm**, đã có **166**. Không cần làm hết một lượt — mục 9 có bảng bật cờ, gen tới đâu bật
 tới đó, engine dùng ngay phần đã có và giữ nguyên phần cũ.
 
 ## Bảng việc còn phải gen
 
 Đây là **chỗ duy nhất** cần đọc để biết hiện game còn thiếu ảnh gì. Sửa code mà thêm
 một thứ mới nhìn thấy được thì cập nhật bảng này ngay trong cùng lần sửa — xem
-`CLAUDE.md` ở gốc repo.
+[mục 12](#12-luật-khi-thêm-thứ-nhìn-thấy-được-vào-game).
 
 | Cần gen | Số tấm | Hiện đang là gì | Mục |
 |---|---|---|---|
-| `boss/bX-walk-1..4` | 20 | trùm trượt ngang, engine nhấc người 3px cho đỡ | [5.7](#57-chu-kỳ-đi-và-khung-ra-đòn--25-tấm--cần-gen) |
-| `boss/bX-atk` | 5 | dùng lại khung đứng lúc đòn bung ra | [5.7](#57-chu-kỳ-đi-và-khung-ra-đòn--25-tấm--cần-gen) |
-| `item/gun-1..5` | 5 | khẩu súng vẽ bằng ba cái `roundRect` | [8.1](#81-gun-15--5-tấm--cần-gen) |
-| `player/shoot-1..2` | 2 | mượn khung chém `attack-2` | [6.5](#65-súng-quét-và-đỡ-đòn--7-tấm--cần-gen) |
-| `player/guard` | 1 | khung đứng hạ thấp, nghiêng 6 độ | [6.5](#65-súng-quét-và-đỡ-đòn--7-tấm--cần-gen) |
-| `player/gun-held` | 1 | ba `roundRect` trong tay | [6.5](#65-súng-quét-và-đỡ-đòn--7-tấm--cần-gen) |
-| `fx/bullet` · `fx/muzzle` · `fx/shield` | 3 | gradient, ellipse và một cung `arc` | [6.5](#65-súng-quét-và-đỡ-đòn--7-tấm--cần-gen) |
 | `bg/mX-sky` | 5 | dốc màu vẽ bằng code — **tuỳ chọn** | [7](#7-nền--5-ải--4-lớp--20-tấm) |
 | `bg/mX-near` | 5 | không có lớp tiền cảnh — **tuỳ chọn** | [7](#7-nền--5-ải--4-lớp--20-tấm) |
 
-**Đã xong (129 tấm):** 18 khung nhân vật · 64 khung quái (16 loại × 4) · 15 khung trùm
-(đứng, báo đòn, trúng đòn) · 10 lớp nền `far` + `mid` · 4 bẫy · 10 vật phẩm
-`heal`/`tool` · 3 khung vệt chém · `hit` `dust` `ring` `shot` · `ground` `platform` ·
-`gate` `heart-full` `bossbar`.
+Không còn placeholder bắt buộc nào. Mọi thứ nhìn thấy được trong game đều đã có ảnh.
+
+**Đã xong (166 tấm):** 21 khung nhân vật (18 cũ + `shoot-1..2`, `guard`) · 64 khung
+quái (16 loại × 4) · 40 khung trùm (đứng, báo đòn, trúng đòn, 4 khung đi, khung bung
+đòn) · 10 lớp nền `far` + `mid` · 4 bẫy · 15 vật phẩm `heal`/`tool`/`gun` · 3 khung
+vệt chém · `hit` `dust` `ring` `shot` `bullet` `muzzle` `shield` `gun-held` ·
+`ground` `platform` · `gate` `heart-full` `bossbar`.
 
 ---
 
@@ -83,9 +79,35 @@ python scripts/sprites.py check
 `normalize` làm hai việc, và **phải chọn đúng chế độ**:
 
 - `--fit none` — chỉ đặt tâm hông và gan bàn chân vào điểm neo, **không đụng tới cỡ**.
-  Dùng khi bộ ảnh đã nhất quán cỡ nhân vật.
-- `--fit head` — thêm việc phóng từng khung cho chiều cao đầu bằng spec. Chỉ dùng khi
-  bộ ảnh thật sự lệch cỡ giữa các khung (như bộ đời 1, lệch 23%).
+  Dùng khi bộ ảnh đã đúng khung tham chiếu sẵn.
+- `--fit head` — thêm việc phóng **từng khung** cho thước đo bằng spec. Chỉ dùng khi
+  bộ ảnh thật sự lệch cỡ giữa các khung (như bộ đời 1, lệch 23%) **và mọi khung cùng
+  một dáng**. Dùng cho bộ có hoạt ảnh là sai: nó cào bằng luôn cái chênh lệch cao
+  thấp mà hoạt ảnh dựa vào.
+- `--fit uniform` — phóng **cả bộ theo một hệ số duy nhất**, lấy khung cao nhất làm
+  mốc. Giữ nguyên chênh lệch giữa các khung, nên đây là chế độ đúng cho bộ có nhún
+  người: chu kỳ đi của trùm (khung 2 và 4 cao hơn khung 1 và 3 khoảng 11%), khung lao
+  ngang (thấp hơn hẳn vì người rạp xuống), bốn khung rider. Thêm `--group prefix` để
+  tính hệ số riêng theo phần tên trước dấu gạch đầu tiên — `b1-walk-1.png` vào nhóm
+  `b1` — nếu không thì năm con trùm bị kéo theo cùng một số và con nào gen nhỏ hơn sẽ
+  lùn hẳn đi.
+
+`--fit-canvas` là cờ riêng, dùng chung với mọi chế độ trên: khi điểm neo đẩy nội dung
+ra ngoài khung thì nó kéo vào trong thay vì để mép khung chặt mất tay chân. Đẩy ngang
+trước (lệch tâm vài pixel gần như không thấy), chỉ thu nhỏ khi nội dung rộng hơn cả
+khung, và in ra đã làm gì. Dáng nằm ngang cần cờ này: khung `-atk` của trùm rộng nhất
+cả bộ mà neo lại ép tâm hông về giữa khung, ba trong năm khung mất tay chân nếu thiếu.
+
+**Công thức đã dùng cho 25 khung trùm mới:**
+
+```bash
+python scripts/sprites.py normalize raw/boss public/game/boss     --kind boss_v1 --fit uniform --group prefix --fit-canvas
+```
+
+`boss_v1` vì bộ trùm cũ vẫn ở khung 446² và `RIG_SET.boss` vẫn là `"v1"`. Đã thử kéo
+cả 40 khung lên spec v2 cho gọn: `b4.png` (trùm ma, đuôi dưới mờ dần) bị `pack` ăn
+mất dải alpha thấp nên bbox co lại, mặt sàn lệch 26px và con ma nổi lên khỏi đất.
+Không đụng vào 15 tấm đang đúng là cách chắc hơn.
 
 **Bài học từ đợt gen bộ nhân vật v2:** bộ đo tự động tìm chin bằng vệt màu da liền
 khối, nên khung nào có cẳng tay hoặc bàn tay chạm vào mặt/cổ thì vệt da nối liền
@@ -622,15 +644,22 @@ walk-4: mirror of walk-2 — legs passing, body at its highest, torso upright.
 
 Nối khối này vào cuối prompt của từng con trùm ở mục 5.1–5.5:
 
+> **HƯỚNG: mọi thứ vẽ quay SANG PHẢI.** Engine lật ảnh khi hướng đi âm
+> (`flip: dir < 0` — đúng ba chỗ: quái, nhân vật, trùm). Trùm gần như luôn đi về
+> phía người chơi ở bên trái, tức gần như luôn bị lật. Nên ảnh gốc phải quay
+> phải. Đợt gen đầu prompt ghi "walking to the LEFT" vì nghĩ theo hướng trùm đi
+> trong game — cả 25 khung ra ngược, phải lật lại toàn bộ bằng máy. Dáng nằm
+> ngang (`-atk`) sai hướng là thấy ngay: trùm lao ngược chiều nó di chuyển.
+
 ```
 Generate four separate walk-cycle frames of the exact same boss, identical in size,
-colour, facing direction and every design detail, walking to the LEFT in profile
+colour, facing direction and every design detail, walking to the RIGHT in profile
 three-quarter view. It is a heavy slow walker, so keep the vertical travel small — the
 body should rise and fall only a little, never bounce. Do not change the head size or
 the crown between frames.
 Frame 1: near leg just planted taking the weight, body at its lowest point, far leg
-lifted and trailing behind, torso tipped a few degrees forward, arms swinging opposite
-to the legs.
+lifted and trailing behind to the LEFT, torso tipped a few degrees forward to the
+RIGHT, arms swinging opposite to the legs.
 Frame 2: both legs passing each other mid-stride, body at its highest point, torso
 upright, arms crossing the body.
 Frame 3: the mirror of frame 1 with the other leg planted, body at its lowest again.
@@ -648,10 +677,15 @@ the instant its attack lands — fully committed and extended, not winding up.
   crouched deep, shockwave cracks spreading out from its feet.
 · ải 2 và 4 (bắn loạt ba, volley): body flung wide open, chest thrown forward, three
   projectiles just leaving it, arms flared back.
-· ải 3 và 5 (lao ngang, dash): body stretched forward almost horizontal in a full
-  lunge, leading arm reaching out, rear leg kicked out straight behind.
+· ải 3 và 5 (lao ngang, dash): body stretched forward to the RIGHT, almost
+  horizontal in a full lunge, leading arm reaching out to the RIGHT, rear leg kicked
+  out straight behind to the LEFT.
 Transparent background, no ground, no shadow, no text.
 ```
+
+Khung `-atk` là dáng rộng nhất cả bộ, và điểm neo ép tâm hông về giữa khung — nên nó
+là khung dễ bị mép khung chặt mất tay chân nhất. Chuẩn hoá bằng `--fit-canvas` (xem
+mục 1.1) để máy tự đẩy nội dung vào trong; ba trong năm khung đợt đầu cần đến nó.
 
 Sau khi gen: đặt `ASSETS.bossWalk = 4` và `ASSETS.bossAtk = true`. `bossWalk` là loại
 **bắt buộc trọn bộ** — thiếu một ải là con trùm ải đó nhấp nháy về khung đứng.
@@ -758,7 +792,7 @@ draw a shield object — the shield is added separately by code.
 Bốn tấm còn lại là vật và hiệu ứng, không có nhân vật:
 
 ```
-gun-held (player/gun-held.png, 256×192): a compact handheld barcode-scanner gun seen
+gun-held (fx/gun-held.png, 256×192): a compact handheld barcode-scanner gun seen
 from the side, pale blue body (#9FD8FF) with a dark grey grip and trigger, a short
 squared muzzle at the front and a thin glowing blue lens strip along the top. Pointing
 to the RIGHT. Nothing else in frame, no hand, no arm.
@@ -777,6 +811,10 @@ transparent.
 ```
 
 Cả bốn: nền trong suốt, không chữ, không số, không bóng đổ.
+
+`gun-held` cố ý nằm ở `fx/` chứ không phải `player/`: `sprites.py check` quét `player/`
+như khung nhân vật có rig và đòi khung vuông, mà đây là một cái vật `256×192`. Để ở
+`player/` thì checklist báo lỗi vĩnh viễn.
 
 Sau khi gen bật cờ tương ứng ở mục 9. Bốn tấm này đều là loại **có đường lùi** — gen
 lẻ tấm nào bật tấm đó, tấm chưa có thì engine vẫn vẽ bằng code. Riêng `shoot-1..2`:
@@ -1004,15 +1042,15 @@ nên gen dở dang cũng không sinh ra một tràng 404. Gen tới đâu sửa 
 | **`jump-rise`/`jump-fall`/`land` — ĐÃ XONG** | `playerJump: "split"` | đủ 3 khung |
 | **Quái 4 khung — ĐÃ XONG** | `mobFrames.<loại>: 4` | đủ 4 khung cho loại đó, ở **mọi ải** có nó |
 | **Trùm có `bX-hit.png` — ĐÃ XONG** | `bossFrames: 3` | không — thiếu ải nào ải đó dùng khung đứng |
-| `bX-walk-1..4` cả 5 ải | `bossWalk: 4` | **cả nhóm trùm** — thiếu ải nào ải đó nhấp nháy |
-| `bX-atk` cả 5 ải | `bossAtk: true` | không — thiếu thì dùng khung đứng |
-| `item/gun-1..5` | `gunArt: true` | cả 5 ải — thiếu ải nào ải đó vẽ khẩu súng bằng code |
-| `player/shoot-1..2` | `playerShoot: 2` | đủ số khung khai — thiếu thì mượn khung chém |
-| `player/guard.png` | `playerGuard: true` | không |
-| `player/gun-held.png` | `gunHeldArt: true` | không |
-| `fx/bullet.png` | `bulletArt: true` | không |
-| `fx/muzzle.png` | `muzzleArt: true` | không |
-| `fx/shield.png` | `shieldArt: true` | không |
+| **`bX-walk-1..4` — ĐÃ XONG** | `bossWalk: 4` | **cả nhóm trùm** — thiếu ải nào ải đó nhấp nháy |
+| **`bX-atk` — ĐÃ XONG** | `bossAtk: true` | không — thiếu thì dùng khung đứng |
+| **`item/gun-1..5` — ĐÃ XONG** | `gunArt: true` | cả 5 ải — thiếu ải nào ải đó vẽ khẩu súng bằng code |
+| **`player/shoot-1..2` — ĐÃ XONG** | `playerShoot: 2` | đủ số khung khai — thiếu thì mượn khung chém |
+| **`player/guard.png` — ĐÃ XONG** | `playerGuard: true` | không |
+| **`fx/gun-held.png` — ĐÃ XONG** | `gunHeldArt: true` | không |
+| **`fx/bullet.png` — ĐÃ XONG** | `bulletArt: true` | không |
+| **`fx/muzzle.png` — ĐÃ XONG** | `muzzleArt: true` | không |
+| **`fx/shield.png` — ĐÃ XONG** | `shieldArt: true` | không |
 | **Ảnh rider — ĐÃ XONG** | `riderArt: true` | đủ số khung khai trong `mobFrames.rider` |
 | **`fx/slash-1..3` — ĐÃ XONG** | `slashFx: 3` | không — thiếu thì rơi về vệt vẽ bằng code |
 | Nền `mX-sky.png` | `bgSky: true` | không — thiếu ải nào ải đó dùng dốc màu code |
@@ -1072,7 +1110,7 @@ không thấy, và nó sẽ im lặng rơi về hình vẽ bằng code chứ kh�
 ```
 public/game/
   player/  idle-1..3.png  run-1..8.png  jump-rise.png  jump-fall.png  land.png
-           attack-1..3.png  hurt.png  shoot-1..2.png  guard.png  gun-held.png
+           attack-1..3.png  hurt.png  shoot-1..2.png  guard.png
   mob/     m1-walker-1..4.png   m1-flyer-1..4.png
            m2-walker-1..4.png   m2-charger-1..4.png  m2-flyer-1..4.png
            m3-walker-1..4.png   m3-flyer-1..4.png    m3-shooter-1..4.png
@@ -1085,7 +1123,7 @@ public/game/
   trap/    spike.png  saw.png  pulse-jet.png  pulse-vent.png
   item/    heal-1..5.png  tool-1..5.png  gun-1..5.png
   fx/      slash-1..3.png  hit.png  dust.png  ring.png  shot.png
-           bullet.png  muzzle.png  shield.png
+           bullet.png  muzzle.png  shield.png  gun-held.png
   bg/      m1..m5-sky.png  m1..m5-far.png  m1..m5-mid.png  m1..m5-near.png
 ```
 
