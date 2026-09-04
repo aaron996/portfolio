@@ -1,8 +1,5 @@
 # Prompt sinh ảnh cho minigame "Ải Vận Hành" — bản 2
 
-> Cập nhật 04/09/2026: đã nối đủ 64 frame quái (16 loại × 4), điểm neo theo alpha,
-> và 10 ảnh thay placeholder. Xem [game-art-integration.md](game-art-integration.md).
-
 Toàn bộ prompt để tạo asset cho game ở route `/game`.
 
 **Bản 2 khác bản 1 ở đâu:** bản 1 đủ ảnh nhưng chơi lên thì thấy nhân vật phình to
@@ -10,14 +7,31 @@ lúc tung đòn, mặt mỗi khung một kiểu, chạy thì cứng, nền chỉ
 không sửa được bằng prompt hay hơn — phải sửa bằng **luật khung** (mục 1) và **nhiều
 khung hơn** (mục 3). Đọc mục 0 và 1 trước, đừng nhảy thẳng xuống prompt.
 
-Tổng: **139 tấm**. Không cần làm hết một lượt — mục 9 có bảng bật cờ, gen tới đâu bật
+Tổng: **176 tấm**. Không cần làm hết một lượt — mục 9 có bảng bật cờ, gen tới đâu bật
 tới đó, engine dùng ngay phần đã có và giữ nguyên phần cũ.
 
-> **Trạng thái (04/09/2026):** đã ráp vào game **39 tấm**:
-> 18 khung nhân vật · 9 lớp nền (4 `mid` thay tấm chưa seamless + 5 `far` mới) ·
-> 4 khung rider · 3 khung vệt chém · 5 khung trùm trúng đòn.
-> Còn lại: **quái 4 khung cho 15 loại** (60 tấm) là phần lớn nhất, cộng lớp `near`
-> và `sky` nếu muốn (10 tấm) và bốn hiệu ứng nhỏ.
+## Bảng việc còn phải gen
+
+Đây là **chỗ duy nhất** cần đọc để biết hiện game còn thiếu ảnh gì. Sửa code mà thêm
+một thứ mới nhìn thấy được thì cập nhật bảng này ngay trong cùng lần sửa — xem
+`CLAUDE.md` ở gốc repo.
+
+| Cần gen | Số tấm | Hiện đang là gì | Mục |
+|---|---|---|---|
+| `boss/bX-walk-1..4` | 20 | trùm trượt ngang, engine nhấc người 3px cho đỡ | [5.7](#57-chu-kỳ-đi-và-khung-ra-đòn--25-tấm--cần-gen) |
+| `boss/bX-atk` | 5 | dùng lại khung đứng lúc đòn bung ra | [5.7](#57-chu-kỳ-đi-và-khung-ra-đòn--25-tấm--cần-gen) |
+| `item/gun-1..5` | 5 | khẩu súng vẽ bằng ba cái `roundRect` | [8.1](#81-gun-15--5-tấm--cần-gen) |
+| `player/shoot-1..2` | 2 | mượn khung chém `attack-2` | [6.5](#65-súng-quét-và-đỡ-đòn--7-tấm--cần-gen) |
+| `player/guard` | 1 | khung đứng hạ thấp, nghiêng 6 độ | [6.5](#65-súng-quét-và-đỡ-đòn--7-tấm--cần-gen) |
+| `player/gun-held` | 1 | ba `roundRect` trong tay | [6.5](#65-súng-quét-và-đỡ-đòn--7-tấm--cần-gen) |
+| `fx/bullet` · `fx/muzzle` · `fx/shield` | 3 | gradient, ellipse và một cung `arc` | [6.5](#65-súng-quét-và-đỡ-đòn--7-tấm--cần-gen) |
+| `bg/mX-sky` | 5 | dốc màu vẽ bằng code — **tuỳ chọn** | [7](#7-nền--5-ải--4-lớp--20-tấm) |
+| `bg/mX-near` | 5 | không có lớp tiền cảnh — **tuỳ chọn** | [7](#7-nền--5-ải--4-lớp--20-tấm) |
+
+**Đã xong (129 tấm):** 18 khung nhân vật · 64 khung quái (16 loại × 4) · 15 khung trùm
+(đứng, báo đòn, trúng đòn) · 10 lớp nền `far` + `mid` · 4 bẫy · 10 vật phẩm
+`heal`/`tool` · 3 khung vệt chém · `hit` `dust` `ring` `shot` · `ground` `platform` ·
+`gate` `heart-full` `bossbar`.
 
 ---
 
@@ -509,11 +523,20 @@ both staring flatly.
 
 ---
 
-## 5. Trùm — 5 con × 3 khung = 15 tấm
+## 5. Trùm — 5 con × 8 khung = 40 tấm
 
-Ba khung: `bX.png` (đứng), `bX-tel.png` (báo đòn 0,55 giây trước khi ra đòn),
-`bX-hit.png` (vừa ăn đòn). Khung `-hit` là mới ở bản 2; chưa có thì engine tô sáng đè
-lên khung đứng, có rồi thì bật `ASSETS.bossFrames = 3`.
+Tám khung mỗi con:
+
+| Khung | Dùng khi | Có chưa |
+|---|---|---|
+| `bX.png` | đứng yên | ✅ |
+| `bX-tel.png` | báo đòn, 0,55 giây trước khi ra đòn | ✅ |
+| `bX-hit.png` | vừa ăn đòn | ✅ |
+| `bX-walk-1..4.png` | đang đi tới chỗ người chơi | ❌ **cần gen** |
+| `bX-atk.png` | đòn đã bung ra (giậm / nhả loạt / lao) | ❌ **cần gen** |
+
+Khung `-hit` đã xong ở bản 2 (`ASSETS.bossFrames = 3`). Hai nhóm còn lại là phần
+**thiếu duy nhất của trùm** — xem mục 5.7.
 
 ### 5.1 Trùm Sai Mã Container · ải 1, giậm đất
 
@@ -579,9 +602,63 @@ it takes a hit: body flinching back, head snapped away from the impact, eyes scr
 shut, mouth open in a grunt, whole silhouette flashed bright and desaturated.
 ```
 
+### 5.7 Chu kỳ đi và khung ra đòn — 25 tấm · **cần gen**
+
+Trùm đi tới chỗ người chơi ở tốc độ 51px/s trong suốt trận, mà chỉ có một khung đứng
+— nên nó **trượt ngang như đẩy tủ lạnh**. Engine đã có bản chữa tạm: nhấc người 3px
+hai lần mỗi chu kỳ, bóp dọc lúc chân chạm đất, lắc thân 2,5 độ, nhả bụi và rung màn
+nhẹ mỗi bước. Đủ để đọc ra "đang bước", nhưng chân vẫn không cử động — cần ảnh.
+
+**Nhịp bốn khung.** Trùm nặng nên chu kỳ dài và thấp, không nảy như nhân vật: một chu
+kỳ là **96px** đường đi (nhân vật 150px), tức khoảng 1,9 giây một chu kỳ hai bước.
+
+```
+walk-1: weight on the near leg just planted, body at its LOWEST, other leg lifted
+        behind, torso leaning very slightly forward.
+walk-2: mid-stride, both legs passing each other, body at its HIGHEST, torso upright.
+walk-3: mirror of walk-1 — the other leg just planted, body at its lowest again.
+walk-4: mirror of walk-2 — legs passing, body at its highest, torso upright.
+```
+
+Nối khối này vào cuối prompt của từng con trùm ở mục 5.1–5.5:
+
+```
+Generate four separate walk-cycle frames of the exact same boss, identical in size,
+colour, facing direction and every design detail, walking to the LEFT in profile
+three-quarter view. It is a heavy slow walker, so keep the vertical travel small — the
+body should rise and fall only a little, never bounce. Do not change the head size or
+the crown between frames.
+Frame 1: near leg just planted taking the weight, body at its lowest point, far leg
+lifted and trailing behind, torso tipped a few degrees forward, arms swinging opposite
+to the legs.
+Frame 2: both legs passing each other mid-stride, body at its highest point, torso
+upright, arms crossing the body.
+Frame 3: the mirror of frame 1 with the other leg planted, body at its lowest again.
+Frame 4: the mirror of frame 2, legs passing, body at its highest, torso upright.
+Transparent background, no ground, no shadow, no motion blur, no speed lines, no text.
+```
+
+Khung ra đòn — một tấm mỗi con, đúng lúc đòn đã bung ra (0,3 giây). Đòn khác nhau
+theo `bossKind`, nên chọn đúng câu cho từng con:
+
+```
+atk frame: the exact same boss, identical in size, colour and every design detail, at
+the instant its attack lands — fully committed and extended, not winding up.
+· ải 1 (giậm đất, slam): both fists slammed straight down onto the ground, body
+  crouched deep, shockwave cracks spreading out from its feet.
+· ải 2 và 4 (bắn loạt ba, volley): body flung wide open, chest thrown forward, three
+  projectiles just leaving it, arms flared back.
+· ải 3 và 5 (lao ngang, dash): body stretched forward almost horizontal in a full
+  lunge, leading arm reaching out, rear leg kicked out straight behind.
+Transparent background, no ground, no shadow, no text.
+```
+
+Sau khi gen: đặt `ASSETS.bossWalk = 4` và `ASSETS.bossAtk = true`. `bossWalk` là loại
+**bắt buộc trọn bộ** — thiếu một ải là con trùm ải đó nhấp nháy về khung đứng.
+
 ---
 
-## 6. Bẫy và hiệu ứng — 11 tấm
+## 6. Bẫy và hiệu ứng — 18 tấm
 
 ### 6.1 Bẫy — 4 tấm (giữ nguyên bản 1)
 
@@ -646,6 +723,64 @@ shot (256×256): a small round energy projectile for a 2D game, solid brick red 
 (#E0563F) with a bright white highlight on its upper left and a soft red glow around
 it, perfectly round, transparent background.
 ```
+
+### 6.5 Súng quét và đỡ đòn — 7 tấm · **cần gen**
+
+Hai cơ chế mới: bắn tầm xa (phím `K`, nhặt súng dọc đường, 14 viên) và đỡ đòn (giữ
+`L`, tốn thể lực, bấm đúng nhịp thì bật ngược đạn về). Cả hai đang chạy bằng hình vẽ
+trong code — khẩu súng là ba cái `roundRect`, khiên là một cung `arc`, tia đạn là một
+dải gradient. Đọc được nhưng lệch hẳn khỏi phần còn lại của game.
+
+**Màu quy ước:** xanh nhạt `#9FD8FF` cho mọi thứ thuộc súng và khiên. Đỏ `#E0563F` là
+của địch, lime `#D4F236` là của đòn chém — thêm màu thứ ba để người chơi phân biệt
+được đạn của mình với đạn của quái trong một phần giây.
+
+Hai khung nhân vật, dán **khối khoá mặt ở mục 3.2** vào cuối như mọi khung nhân vật:
+
+```
+shoot-1: the same character, same size and same face as the reference, standing
+side-on facing right, firing a compact pale-blue handheld scanner gun (#9FD8FF) held
+out at chest height in the near hand — the gun is drawn as part of the frame. Body
+recoiling: torso rotated a few degrees back, gun arm snapped straight, rear foot
+braced, head steady and eyes on the target. No muzzle flash in this frame.
+shoot-2: the exact same pose one beat later, recoil absorbed — gun arm bent back in
+toward the chest, torso returning upright, weight settling onto the front foot.
+```
+
+```
+guard (player/guard.png): the same character, same size and same face as the
+reference, braced behind a guard: knees bent low, weight dropped, near shoulder turned
+forward into the blow, both forearms raised and crossed in front of the chest and face,
+chin tucked, eyes narrowed and looking over the arms. Facing right, side-on. Do not
+draw a shield object — the shield is added separately by code.
+```
+
+Bốn tấm còn lại là vật và hiệu ứng, không có nhân vật:
+
+```
+gun-held (player/gun-held.png, 256×192): a compact handheld barcode-scanner gun seen
+from the side, pale blue body (#9FD8FF) with a dark grey grip and trigger, a short
+squared muzzle at the front and a thin glowing blue lens strip along the top. Pointing
+to the RIGHT. Nothing else in frame, no hand, no arm.
+bullet (fx/bullet.png, 512×192, wide): a horizontal scanner beam bolt travelling to
+the RIGHT — a hot white core capsule at the leading right edge with a pale blue
+(#9FD8FF) tail streaking back to the left and fading to fully transparent. Sharp and
+thin, like a barcode laser line, not a fireball.
+muzzle (fx/muzzle.png, 256×256): a short muzzle flash burst pointing RIGHT, hot white
+centre with four uneven pale blue (#9FD8FF) petals flaring forward, brightest at the
+left where it meets the barrel, fading out to the right.
+shield (fx/shield.png, 384×512, tall): a guard barrier facing RIGHT — a vertical
+curved arc of pale blue (#9FD8FF) energy, bulging toward the right, bright hard rim
+line along the outer edge and a soft translucent fill behind it, faint hexagonal
+facets in the fill. The left side (the side against the character) fades to
+transparent.
+```
+
+Cả bốn: nền trong suốt, không chữ, không số, không bóng đổ.
+
+Sau khi gen bật cờ tương ứng ở mục 9. Bốn tấm này đều là loại **có đường lùi** — gen
+lẻ tấm nào bật tấm đó, tấm chưa có thì engine vẫn vẽ bằng code. Riêng `shoot-1..2`:
+có ảnh thì khẩu súng nằm luôn trong khung, nên engine tự bỏ lớp `gun-held` vẽ đè.
 
 ---
 
@@ -796,10 +931,11 @@ boxes, a coil of cable. Transparent everywhere else.
 
 ---
 
-## 8. Vật phẩm — 10 tấm
+## 8. Vật phẩm — 15 tấm
 
-Hiển thị `36×36px`, vẽ `512×512`, nền trong suốt. Mỗi ải một cặp: một hồi máu (viền
-hồng đỏ `#FF8F85`), một đồ nghề (viền lime `#D4F236`, buff 12 giây).
+Hiển thị `36×36px`, vẽ `512×512`, nền trong suốt. Mỗi ải một bộ ba: hồi máu (viền hồng
+đỏ `#FF8F85`), đồ nghề (viền lime `#D4F236`, buff 12 giây), và **súng quét** (viền
+xanh nhạt `#9FD8FF`, nạp 14 viên cho đòn tầm xa phím `K`).
 
 | Ải | `heal` | `tool` |
 |---|---|---|
@@ -816,6 +952,38 @@ three-quarter angle, single object floating with nothing under it. A soft glowin
 of [#FF8F85 cho heal / #D4F236 cho tool] around the silhouette. Transparent background,
 no ground shadow, no text, no numbers, no labels.
 ```
+
+### 8.1 `gun-1..5` — 5 tấm · **cần gen**
+
+Đây là **vũ khí**, không phải buff — nên phải đọc ra là một khẩu súng ngay cả ở
+`36×36px`. Ba luật riêng cho nhóm này, khác nhóm `tool`:
+
+- **Nòng chỉ sang phải.** Cả năm tấm cùng hướng, engine không lật icon.
+- **Bóng phải rõ ở cỡ nhỏ.** Thân ngang + tay cầm chúc xuống, đúng bóng chữ L ngược.
+  Đừng vẽ chi tiết máy móc — ở `36px` thành một cục.
+- **Viền phát sáng xanh `#9FD8FF`**, để không lẫn với `tool` viền lime.
+
+| Ải | `gun` | Mô tả |
+|---|---|---|
+| 1 | Súng quét mã vỏ | a rugged dockside barcode scanner gun with a thick rubber bumper and a stubby antenna |
+| 2 | Súng bắn mã vạch | a warehouse pistol-grip barcode gun with a coiled cable stub and a small screen on top |
+| 3 | Súng quét mã đơn | a slim courier handheld scanner with a phone-sized screen on its back and a trigger grip |
+| 4 | Con trỏ truy vấn | a chunky sci-fi query pointer pistol, its muzzle shaped like a blinking text cursor bar |
+| 5 | Súng dán nhãn SKU | a label-applicator gun with a small roll of blank stickers mounted on top |
+
+```
+A cute chunky game pickup item icon: [MÔ TẢ TỪ BẢNG]. Seen in flat side view with the
+barrel pointing to the RIGHT, so the silhouette reads as a gun shape at very small
+size: a horizontal body with a grip hanging down beneath it. Keep it simple and bold
+with no fine mechanical detail. Hand-painted cartoon, bold dark outline, flat cel
+shading with two tones plus one soft highlight. Pale blue body (#9FD8FF) with dark grey
+grip, and a soft glowing pale blue rim (#9FD8FF) around the silhouette. Single object
+floating with nothing under it, transparent background, no ground shadow, no hand, no
+arm, no text, no numbers, no labels.
+```
+
+Sau khi gen: `ASSETS.gunArt = true`. Bật cờ này còn thay luôn cái icon đạn vẽ bằng code
+trên HUD — engine dùng `item/gun-N.png` y như cách nó dùng `item/tool-N.png`.
 
 ---
 
@@ -834,17 +1002,26 @@ nên gen dở dang cũng không sinh ra một tràng 404. Gen tới đâu sửa 
 | **`run-1..8` — ĐÃ XONG** | `playerRun: 8` | đủ 8 khung |
 | **`attack-1..3` — ĐÃ XONG** | `playerAttack: 3` | đủ 3 khung |
 | **`jump-rise`/`jump-fall`/`land` — ĐÃ XONG** | `playerJump: "split"` | đủ 3 khung |
-| Quái 4 khung | `mobFrames.<loại>: 4` | đủ 4 khung cho loại đó, ở **mọi ải** có nó |
+| **Quái 4 khung — ĐÃ XONG** | `mobFrames.<loại>: 4` | đủ 4 khung cho loại đó, ở **mọi ải** có nó |
 | **Trùm có `bX-hit.png` — ĐÃ XONG** | `bossFrames: 3` | không — thiếu ải nào ải đó dùng khung đứng |
+| `bX-walk-1..4` cả 5 ải | `bossWalk: 4` | **cả nhóm trùm** — thiếu ải nào ải đó nhấp nháy |
+| `bX-atk` cả 5 ải | `bossAtk: true` | không — thiếu thì dùng khung đứng |
+| `item/gun-1..5` | `gunArt: true` | cả 5 ải — thiếu ải nào ải đó vẽ khẩu súng bằng code |
+| `player/shoot-1..2` | `playerShoot: 2` | đủ số khung khai — thiếu thì mượn khung chém |
+| `player/guard.png` | `playerGuard: true` | không |
+| `player/gun-held.png` | `gunHeldArt: true` | không |
+| `fx/bullet.png` | `bulletArt: true` | không |
+| `fx/muzzle.png` | `muzzleArt: true` | không |
+| `fx/shield.png` | `shieldArt: true` | không |
 | **Ảnh rider — ĐÃ XONG** | `riderArt: true` | đủ số khung khai trong `mobFrames.rider` |
 | **`fx/slash-1..3` — ĐÃ XONG** | `slashFx: 3` | không — thiếu thì rơi về vệt vẽ bằng code |
 | Nền `mX-sky.png` | `bgSky: true` | không — thiếu ải nào ải đó dùng dốc màu code |
 | **Nền `mX-far.png` — ĐÃ XONG** | `bgFar: true` | không — thiếu ải nào ải đó dùng silhouette code |
 | Nền `mX-near.png` | `bgNear: true` | không — thiếu thì bỏ qua lớp đó |
 
-`mobFrames` khai theo từng loại (`{ default: 2, rider: 4 }`) chứ không phải một số
-chung, vì rider đã có 4 khung trong khi mười lăm loại còn lại mới có 2. Khai 4 cho một
-loại mà thiếu file thì con đó nhấp nháy qua lại giữa ảnh thật và hình khối xám.
+`mobFrames` khai theo từng loại (`{ default: 4, rider: 4 }`) chứ không phải một số
+chung, để gen lại được từng loại một. Khai 4 cho một loại mà thiếu file thì con đó
+nhấp nháy qua lại giữa ảnh thật và hình khối xám.
 
 Cột thứ ba là chỗ dễ sập nhất. Chỗ ghi "bắt buộc trọn bộ" nghĩa là engine **không có
 đường lùi** cho khung thiếu: bật `mobFrames: 4` mà một loại quái chỉ có 2 khung thì
@@ -861,7 +1038,9 @@ Gen lại nhóm quái hoặc trùm thì làm y hệt nhân vật: `normalize` �
 báo cáo của script vô nghĩa.
 
 Những thứ **không cần gen** vì engine vẽ bằng code: mặt đất, bệ nhảy, tim máu, khung
-máu trùm, cửa ải, icon đồ nghề, đếm quái, bảng tạm dừng, thẻ giải nghĩa vật phẩm.
+máu trùm, cửa ải, đếm quái, thanh thể lực đỡ, số đạn trên HUD, bảng tạm dừng, bảng túi
+đồ, thẻ giải nghĩa vật phẩm. Toàn bộ HUD và mọi bảng đều là DOM hoặc `fillText` —
+thành ảnh là vừa nặng vừa mờ, mà chữ trong ảnh thì không sửa được bằng file content.
 
 ---
 
@@ -893,7 +1072,7 @@ không thấy, và nó sẽ im lặng rơi về hình vẽ bằng code chứ kh�
 ```
 public/game/
   player/  idle-1..3.png  run-1..8.png  jump-rise.png  jump-fall.png  land.png
-           attack-1..3.png  hurt.png
+           attack-1..3.png  hurt.png  shoot-1..2.png  guard.png  gun-held.png
   mob/     m1-walker-1..4.png   m1-flyer-1..4.png
            m2-walker-1..4.png   m2-charger-1..4.png  m2-flyer-1..4.png
            m3-walker-1..4.png   m3-flyer-1..4.png    m3-shooter-1..4.png
@@ -902,9 +1081,11 @@ public/game/
            m5-walker-1..4.png   m5-charger-1..4.png  m5-flyer-1..4.png
            m5-shooter-1..4.png
   boss/    b1..b5.png  b1..b5-tel.png  b1..b5-hit.png
+           b1..b5-walk-1..4.png  b1..b5-atk.png
   trap/    spike.png  saw.png  pulse-jet.png  pulse-vent.png
-  item/    heal-1..5.png  tool-1..5.png
+  item/    heal-1..5.png  tool-1..5.png  gun-1..5.png
   fx/      slash-1..3.png  hit.png  dust.png  ring.png  shot.png
+           bullet.png  muzzle.png  shield.png
   bg/      m1..m5-sky.png  m1..m5-far.png  m1..m5-mid.png  m1..m5-near.png
 ```
 
@@ -921,3 +1102,40 @@ containers, warm morning light. Leave the upper middle area visually calm and
 uncluttered for a title to be placed later. Hand-painted cartoon, bold outlines, flat
 cel shading, no text anywhere.
 ```
+
+---
+
+## 12. Luật khi thêm thứ nhìn thấy được vào game
+
+Đây là quy tắc của repo, không phải gợi ý. Nó nằm ở file tracked này (không nằm ở
+`CLAUDE.md` — file đó bị `.gitignore`) để còn nguyên khi sang máy khác.
+
+**Vấn đề nó chặn:** thêm một cơ chế mới vào engine thì phần hình luôn xong sau phần
+chơi. Nếu không ghi lại ngay, cái hình vẽ tạm bằng code sẽ nằm đó vô thời hạn — không
+ai đọc diff để phát hiện, và người quyết định gen ảnh thì không biết là có việc.
+
+### Bốn việc, làm trong CÙNG lần sửa
+
+1. **Vẽ bằng code một bản đủ đọc được.** Game phải chạy ngay, không chờ ảnh. Engine
+   không bao giờ tải một file chưa tồn tại — chưa khai trong `ASSETS` thì không gọi
+   `img()`, vì mỗi lần gọi thiếu file là một cái 404 trong console.
+2. **Khai cờ** ở `ASSETS` đầu `components/game/engine.ts`, mặc định **tắt**, cộng
+   nhánh `if` dùng ảnh khi bật. Ghi rõ trong comment cờ đó cần bao nhiêu tấm và có
+   bắt buộc trọn bộ hay không.
+3. **Ghi vào tài liệu này**, ba chỗ: một dòng ở **Bảng việc còn phải gen** ở đầu file,
+   một mục prompt đầy đủ, một dòng ở bảng bật cờ mục 9.
+4. **Báo cho người dùng ngay trong câu trả lời của lượt đó**: tên file, số tấm, hiện
+   đang vẽ bằng gì, và **dán thẳng prompt ra chat**. Đừng bắt họ mở file docs ra tìm.
+
+Việc 4 là bắt buộc, không phải phần thêm cho đẹp.
+
+### Prompt phải theo tài liệu này
+
+Sáu luật khung ở mục 1.3 · khối khoá mặt mục 3.2 cho mọi khung nhân vật · bảng rig
+mục 1.2. Màu quy ước, đừng thêm màu thứ tư mà không có lý do:
+
+| Màu | Nghĩa |
+|---|---|
+| `#E0563F` đỏ | mọi thứ của địch và mọi thứ gây sát thương |
+| `#D4F236` lime | đòn chém của người chơi, đồ nghề, mọi thứ "tốt" |
+| `#9FD8FF` xanh nhạt | súng quét và khiên đỡ của người chơi |

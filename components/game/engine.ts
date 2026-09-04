@@ -207,6 +207,26 @@ const ASSETS = {
   mobFrames: { default: 4, rider: 4 } as Record<string, number>,
   /** boss/bX.png + bX-tel.png; 3 = có thêm bX-hit.png */
   bossFrames: 3,
+  /**
+   * boss/bX-walk-1..N.png — chu kỳ đi của trùm. 0 = chỉ có khung đứng, engine
+   * tự nhún người theo quãng đường đi được. Bật lên thì phải đủ N khung cho
+   * MỌI ải, thiếu ải nào ải đó nhấp nháy về khung đứng.
+   */
+  bossWalk: 0,
+  /** boss/bX-atk.png — khung lúc đòn đã bung ra (giậm, nhả loạt, lao) */
+  bossAtk: false,
+  /** player/shoot-1..N.png — khung bắn. 0 = mượn khung chém. */
+  playerShoot: 0,
+  /** player/guard.png — khung giơ đỡ. Chưa có thì engine hạ thấp khung đứng. */
+  playerGuard: false,
+  /** player/gun-held.png — khẩu súng vẽ đè lên tay khi còn đạn */
+  gunHeldArt: false,
+  /** fx/bullet.png — tia đạn của người chơi */
+  bulletArt: false,
+  /** fx/muzzle.png — chớp đầu nòng */
+  muzzleArt: false,
+  /** fx/shield.png — cung khiên trước mặt lúc đỡ */
+  shieldArt: false,
   /** Đã có ảnh cho quái rider chưa. Chưa có thì engine vẽ bằng code. */
   riderArt: true,
   /** fx/slash-1..N.png. 0 = vẽ vệt chém bằng code. */
@@ -304,6 +324,8 @@ const P_IDLE =
     : ["player/idle.png"];
 const P_RUN = Array.from({ length: ASSETS.playerRun }, (_, i) => `player/run-${i + 1}.png`);
 const P_ATK = Array.from({ length: ASSETS.playerAttack }, (_, i) => `player/attack-${i + 1}.png`);
+const P_SHOOT = Array.from({ length: ASSETS.playerShoot }, (_, i) => `player/shoot-${i + 1}.png`);
+const P_GUARD = "player/guard.png";
 const P_RISE = ASSETS.playerJump === "split" ? "player/jump-rise.png" : "player/jump.png";
 const P_FALL = ASSETS.playerJump === "split" ? "player/jump-fall.png" : "player/jump.png";
 const P_LAND = ASSETS.playerJump === "split" ? "player/land.png" : "player/jump.png";
@@ -312,6 +334,14 @@ const SCENE_SPRITES = {
   platform: "bg/platform.png", ground: "bg/ground.png", gate: "ui/gate.png",
   heart: "ui/heart-full.png", bossbar: "ui/bossbar.png", aura: "fx/aura.png",
   shot: "fx/shot.png", hit: "fx/hit.png", dust: "fx/dust.png", ring: "fx/ring.png",
+};
+
+/** Ảnh cho súng và đỡ đòn. Chưa gen thì engine vẽ bằng code, xem ASSETS. */
+const GEAR_SPRITES = {
+  gunHeld: "player/gun-held.png",
+  bullet: "fx/bullet.png",
+  muzzle: "fx/muzzle.png",
+  shield: "fx/shield.png",
 };
 
 const TRAP_SPRITES = {
@@ -335,6 +365,16 @@ function bossSprite(mapIndex: number, state: "idle" | "tel" | "hit") {
     if (hit) return hit;
   }
   return img(`boss/b${n}${state === "tel" ? "-tel" : ""}.png`);
+}
+/** Khung đi của trùm, `frame` đếm từ 1. null khi chưa gen bộ này. */
+function bossWalkSprite(mapIndex: number, frame: number) {
+  if (!ASSETS.bossWalk) return null;
+  return img(`boss/b${mapIndex + 1}-walk-${frame}.png`);
+}
+/** Khung lúc đòn đã bung ra. null khi chưa gen. */
+function bossAtkSprite(mapIndex: number) {
+  if (!ASSETS.bossAtk) return null;
+  return img(`boss/b${mapIndex + 1}-atk.png`);
 }
 function pickupSprite(mapIndex: number, kind: Pickup["kind"]) {
   // Chưa gen ảnh súng thì đừng gọi img() — mỗi lần gọi là một cái 404
@@ -460,6 +500,15 @@ interface Boss {
   x: number; y: number; w: number; h: number;
   hp: number; mhp: number; dir: number;
   hurt: number; tel: number; cd: number; bob: number; dash: number;
+  /**
+   * Pha chu kỳ bước, 0..1, cộng theo QUÃNG ĐƯỜNG đi được chứ không theo thời
+   * gian — trùm đi chậm thì bước chậm, lao thì bước dồn, không bị trượt chân.
+   */
+  walkPhase: number;
+  /** Bước gần nhất, để mỗi bước chỉ nhả bụi một lần */
+  stepPhase: number;
+  /** Đếm ngược khung "đòn đã bung ra", đặt đúng lúc đòn nổ */
+  act: number;
 }
 interface Trap {
   kind: "spike" | "saw" | "pulse";
@@ -677,6 +726,7 @@ export function createGame(
       x: WORLD - 190, y: GY - 82, w: 72, h: 82,
       hp: 16, mhp: 16, dir: -1,
       hurt: 0, tel: 0, cd: 2.2, bob: 0, dash: 0,
+      walkPhase: 0, stepPhase: 0, act: 0,
     };
     say(labels.bossAppear.replace("{boss}", maps[lv].boss), 1.6);
     flash = 0.5;
@@ -1124,15 +1174,39 @@ export function createGame(
     }
   }
 
+  /**
+   * Nhịp bước của trùm: 96px một chu kỳ hai bước. Trùm cao gấp đôi nhân vật
+   * nên sải chân dài hơn (nhân vật 150px một chu kỳ), mà đi chậm hơn ba lần
+   * nên nhìn ra là bước nặng chứ không phải trượt.
+   */
+  const BOSS_STRIDE = 96;
+
+  /** Cộng pha bước theo quãng đường vừa đi, và nhả bụi mỗi lần chân chạm đất */
+  function bossStride(b: Boss, moved: number) {
+    if (Math.abs(moved) < 0.01) return;
+    b.walkPhase = wrap(b.walkPhase + Math.abs(moved) / BOSS_STRIDE, 1);
+    // Hai lần chân chạm đất mỗi chu kỳ, ở pha 0 và 0,5
+    const step = Math.floor(b.walkPhase * 2);
+    if (step !== b.stepPhase) {
+      b.stepPhase = step;
+      dust(b.x + b.w / 2 - b.dir * 10, b.y + b.h, 3, 1.3);
+      // Rung nhẹ dưới chân: trùm nặng thì mỗi bước phải cảm được
+      shake = Math.max(shake, 1.4);
+    }
+  }
+
   function stepBoss(b: Boss, dt: number) {
     const kind = maps[lv].bossKind;
     b.hurt = Math.max(0, b.hurt - dt);
+    b.act = Math.max(0, b.act - dt);
     b.bob += dt * 3;
 
     if (b.dash > 0) {
       b.dash -= dt;
+      const from = b.x;
       b.x += b.dir * 9 * dt * 60;
       b.x = Math.max(60, Math.min(WORLD - b.w - 20, b.x));
+      bossStride(b, b.x - from);
       if (Math.random() < 0.5) dust(b.x + b.w / 2, b.y + b.h, 2, 1.4);
       if (b.dash <= 0) b.cd = 1.8;
       return;
@@ -1142,6 +1216,7 @@ export function createGame(
       b.tel -= dt;
       if (b.tel <= 0) {
         shake = 8;
+        b.act = 0.3;
         if (kind === "slam") {
           fire(b.x + 8, GY - 16, -4.2, 0);
           fire(b.x + b.w - 8, GY - 16, 4.2, 0);
@@ -1166,7 +1241,9 @@ export function createGame(
       return;
     }
     b.dir = player.x < b.x ? -1 : 1;
+    const from = b.x;
     b.x = Math.max(60, Math.min(WORLD - b.w - 20, b.x + b.dir * 0.85 * dt * 60));
+    bossStride(b, b.x - from);
   }
 
   function step(dt: number) {
@@ -2181,19 +2258,29 @@ export function createGame(
       rot = -player.face * 0.22;
       dy = 1;
     } else if (player.guarding) {
-      // Chưa có khung đỡ riêng: lấy khung đứng, hạ thấp và nghiêng người vào
-      // đòn. Cái khiên vẽ bằng code ở drawPlayer mới là thứ đọc ra "đang đỡ".
-      src = P_IDLE[0];
-      rot = player.face * 0.1;
-      sy = 0.95;
-      sx = 1.04;
-      dy = 1.5;
+      // Có player/guard.png thì dùng; chưa có thì lấy khung đứng, hạ thấp và
+      // nghiêng người vào đòn — cái khiên vẽ bằng code mới là thứ đọc ra "đỡ".
+      if (ASSETS.playerGuard) {
+        src = P_GUARD;
+      } else {
+        src = P_IDLE[0];
+        rot = player.face * 0.1;
+        sy = 0.95;
+        sx = 1.04;
+        dy = 1.5;
+      }
     } else if (player.shootT > 0) {
-      // Bắn: mượn khung vung tay của đòn chém, giữ nguyên tư thế suốt phát bắn
-      src = P_ATK[Math.min(P_ATK.length - 1, 1)];
       const kick = player.shootT / 0.2;
-      rot = -player.face * kick * 0.06;
-      sx = 1 + kick * 0.02;
+      if (P_SHOOT.length) {
+        // Khung 1 là lúc nảy nòng, khung sau là lúc thu về
+        const i = Math.min(P_SHOOT.length - 1, Math.floor((1 - kick) * P_SHOOT.length));
+        src = P_SHOOT[i];
+      } else {
+        // Chưa có khung bắn: mượn khung vung tay của đòn chém
+        src = P_ATK[Math.min(P_ATK.length - 1, 1)];
+        rot = -player.face * kick * 0.06;
+        sx = 1 + kick * 0.02;
+      }
     } else if (player.atk > 0) {
       // Chia đòn theo tiến độ: vung → tới đích → thu về
       const p = 1 - player.atk / player.atkDur;
@@ -2290,31 +2377,46 @@ export function createGame(
     }
 
     // Khẩu súng trong tay: chỉ vẽ khi còn đạn, và giấu đi lúc đang chém hoặc
-    // đang đỡ — hai tay đang bận việc khác thì cầm súng nhìn rất sai.
-    if (player.ammo > 0 && player.atk <= 0 && !player.guarding && player.breakT <= 0) {
+    // đang đỡ — hai tay đang bận việc khác thì cầm súng nhìn rất sai. Khi bộ
+    // khung bắn đã có ảnh, khẩu súng nằm trong ảnh rồi nên bỏ luôn lớp đè này.
+    const gunInFrame = P_SHOOT.length > 0 && player.shootT > 0;
+    if (
+      player.ammo > 0 && player.atk <= 0 && !player.guarding &&
+      player.breakT <= 0 && !gunInFrame
+    ) {
       const gx = cx + player.face * (player.shootT > 0 ? 16 : 11);
       const gy = player.y + (player.shootT > 0 ? 17 : 21);
       g!.save();
       g!.translate(gx, gy);
       g!.scale(player.face, 1);
-      g!.fillStyle = "#3f4a55";
-      g!.beginPath();
-      g!.roundRect(-6, -3, 17, 6, 2);
-      g!.fill();
-      g!.fillStyle = "#9fd8ff";
-      g!.fillRect(-2, -2, 8, 2);
-      g!.fillStyle = "#2b333c";
-      g!.beginPath();
-      g!.roundRect(-5, 2, 5, 7, 2);
-      g!.fill();
+      const held = ASSETS.gunHeldArt ? img(GEAR_SPRITES.gunHeld) : null;
+      if (held) {
+        drawFit(g!, held, 3, 6, 26, 20);
+      } else {
+        g!.fillStyle = "#3f4a55";
+        g!.beginPath();
+        g!.roundRect(-6, -3, 17, 6, 2);
+        g!.fill();
+        g!.fillStyle = "#9fd8ff";
+        g!.fillRect(-2, -2, 8, 2);
+        g!.fillStyle = "#2b333c";
+        g!.beginPath();
+        g!.roundRect(-5, 2, 5, 7, 2);
+        g!.fill();
+      }
       if (player.shootT > 0) {
         // Chớp đầu nòng, to nhất ở khung đầu rồi tắt nhanh
         const k = player.shootT / 0.2;
         g!.globalAlpha = k;
-        g!.fillStyle = "#f2ffc4";
-        g!.beginPath();
-        g!.ellipse(13 + k * 3, 0, 5 + k * 7, 3 + k * 4, 0, 0, Math.PI * 2);
-        g!.fill();
+        const muzzle = ASSETS.muzzleArt ? img(GEAR_SPRITES.muzzle) : null;
+        if (muzzle) {
+          drawFit(g!, muzzle, 16, 12 + k * 6, 16 + k * 18, 12 + k * 14);
+        } else {
+          g!.fillStyle = "#f2ffc4";
+          g!.beginPath();
+          g!.ellipse(13 + k * 3, 0, 5 + k * 7, 3 + k * 4, 0, 0, Math.PI * 2);
+          g!.fill();
+        }
       }
       g!.restore();
     }
@@ -2329,6 +2431,14 @@ export function createGame(
       g!.save();
       g!.translate(sx0, sy0);
       g!.scale(player.face, 1);
+      const shield = ASSETS.shieldArt ? img(GEAR_SPRITES.shield) : null;
+      if (shield) {
+        g!.globalAlpha = parry ? 1 : 0.45 + t * 0.5;
+        if (parry) g!.filter = "brightness(1.5) saturate(1.4)";
+        drawFit(g!, shield, 6, 22, 34, 44);
+        g!.restore();
+        return;
+      }
       g!.strokeStyle = parry ? LIME : `rgba(159,216,255,${0.35 + t * 0.5})`;
       g!.lineWidth = parry ? 5 : 3;
       g!.beginPath();
@@ -2429,11 +2539,40 @@ export function createGame(
     }
 
     if (boss) {
-      const by = boss.y + Math.sin(boss.bob) * 2;
-      // Trong 0,55s trước đòn, dùng khung "báo đòn" riêng thay vì tô màu đè
+      /**
+       * Hoạt ảnh đi của trùm.
+       *
+       * Bộ ảnh trùm chỉ có khung đứng, nên toàn bộ cảm giác "đang bước" phải
+       * do code sinh ra — và phải sinh từ PHA BƯỚC (theo quãng đường) chứ
+       * không từ đồng hồ, không thì trùm dừng lại mà chân vẫn đạp.
+       *
+       * Ba thành phần, đúng thứ tự người ta nhìn ra: nhấc người hai lần mỗi
+       * chu kỳ (bước nặng nên nhấc thấp, 3px), bóp dọc đúng lúc chân chạm đất,
+       * và lắc thân quanh trục đứng để không phải là một khối trượt ngang.
+       * Khi đã có bX-walk-1..N thì ảnh lo phần dáng, code chỉ còn giữ nhịp.
+       */
+      const walking = boss.dash <= 0 && boss.tel <= 0 && boss.act <= 0;
+      const cyc = boss.walkPhase * Math.PI * 4;
+      const lift = walking ? Math.abs(Math.sin(cyc / 2)) : 0;
+      const stepHit = walking ? Math.max(0, -Math.cos(cyc)) : 0;
+      const by =
+        boss.y +
+        Math.sin(boss.bob) * 2 -
+        (ASSETS.bossWalk ? 0 : lift * 3);
       const telegraphing = boss.tel > 0 && Math.floor(boss.tel * 14) % 2 === 0;
       const hitFrame = boss.hurt > 0 && ASSETS.bossFrames >= 3;
-      const sprite = bossSprite(lv, hitFrame ? "hit" : telegraphing ? "tel" : "idle");
+      // Ưu tiên khung: trúng đòn → báo đòn → đang bung đòn → đang đi → đứng
+      const walkFrame =
+        walking && ASSETS.bossWalk
+          ? bossWalkSprite(lv, 1 + (Math.floor(boss.walkPhase * ASSETS.bossWalk) % ASSETS.bossWalk))
+          : null;
+      const actFrame = boss.act > 0 || boss.dash > 0 ? bossAtkSprite(lv) : null;
+      const sprite =
+        (hitFrame ? bossSprite(lv, "hit") : null) ??
+        (telegraphing ? bossSprite(lv, "tel") : null) ??
+        actFrame ??
+        walkFrame ??
+        bossSprite(lv, "idle");
       drawShadow(boss.x + boss.w / 2, GY, boss.w * 1.5, 0.3);
 
       // Vòng báo đòn dưới chân trùm — đọc được kể cả khi mắt đang dán vào nhân vật
@@ -2450,10 +2589,14 @@ export function createGame(
 
       const telScale = boss.tel > 0 ? 1 + (1 - boss.tel / 0.6) * 0.06 : 1;
       if (sprite) {
+        // Bóp dọc lúc chân chạm đất; ảnh đi (nếu có) đã tự có nhịp nên nhẹ hơn
+        const squash = stepHit * (ASSETS.bossWalk ? 0.02 : 0.05);
         drawRig(g!, sprite, bossRig(), BOSS_PX, boss.x + boss.w / 2, by + boss.h + 2, {
           flip: boss.dir < 0,
-          sx: boss.dash > 0 ? 1.1 : telScale,
-          sy: boss.dash > 0 ? 0.93 : telScale,
+          sx: boss.dash > 0 ? 1.1 : telScale * (1 + squash),
+          sy: boss.dash > 0 ? 0.93 : telScale * (1 - squash),
+          // Lắc thân theo bước — nhỏ thôi, 2,5 độ là đủ để hết cảm giác trượt
+          rot: walking && !ASSETS.bossWalk ? Math.sin(cyc / 2) * 0.044 * boss.dir : 0,
           filter: boss.hurt > 0 && !hitFrame ? "brightness(2) saturate(0.3)" : undefined,
         });
       } else {
@@ -2510,6 +2653,15 @@ export function createGame(
     // hẳn màu đạn của quái (đỏ) — nhìn một phần giây phải biết đạn của ai.
     for (const b of bullets) {
       const s = Math.sign(b.vx) || 1;
+      const art = ASSETS.bulletArt ? img(GEAR_SPRITES.bullet) : null;
+      if (art) {
+        g!.save();
+        g!.translate(b.x, b.y);
+        g!.scale(s, 1);
+        drawFit(g!, art, 0, 7, 38, 14);
+        g!.restore();
+        continue;
+      }
       const grad = g!.createLinearGradient(b.x - s * 30, b.y, b.x, b.y);
       grad.addColorStop(0, "rgba(159,216,255,0)");
       grad.addColorStop(1, "rgba(159,216,255,.9)");
@@ -2637,16 +2789,21 @@ export function createGame(
 
     if (player.ammo > 0) {
       // Đạn đếm bằng số chứ không bằng vạch: 14 vạch nhỏ thì đếm không kịp
-      g!.save();
-      g!.translate(22, hy + 8);
-      g!.fillStyle = "#9fd8ff";
-      g!.beginPath();
-      g!.roundRect(-8, -3, 15, 6, 2);
-      g!.fill();
-      g!.beginPath();
-      g!.roundRect(-6, 2, 5, 6, 2);
-      g!.fill();
-      g!.restore();
+      const gunIcon = pickupSprite(lv, "gun");
+      if (gunIcon) {
+        drawFit(g!, gunIcon, 24, hy + 20, 26, 26);
+      } else {
+        g!.save();
+        g!.translate(22, hy + 8);
+        g!.fillStyle = "#9fd8ff";
+        g!.beginPath();
+        g!.roundRect(-8, -3, 15, 6, 2);
+        g!.fill();
+        g!.beginPath();
+        g!.roundRect(-6, 2, 5, 6, 2);
+        g!.fill();
+        g!.restore();
+      }
       g!.font = `800 13px ${FONT_DISPLAY}`;
       g!.textAlign = "left";
       g!.fillStyle = player.ammo <= 3 ? "#ffcf5c" : "#c8e9ff";
@@ -2853,9 +3010,14 @@ export function createGame(
   // dùng — img() chỉ tạo phần tử <img> khi được gọi lần đầu, nên nếu để tới
   // lúc nhảy/chạy mới gọi thì khung hình đầu tiên sẽ không có gì để vẽ.
   // Chỉ tải những file ASSETS khai báo là có thật, tránh 404 rác.
-  [...P_IDLE, ...P_RUN, ...P_ATK, P_RISE, P_FALL, P_LAND, P_HURT].forEach(img);
+  [...P_IDLE, ...P_RUN, ...P_ATK, ...P_SHOOT, P_RISE, P_FALL, P_LAND, P_HURT].forEach(img);
+  if (ASSETS.playerGuard) img(P_GUARD);
   Object.values(TRAP_SPRITES).forEach(img);
   Object.values(SCENE_SPRITES).forEach(img);
+  if (ASSETS.gunHeldArt) img(GEAR_SPRITES.gunHeld);
+  if (ASSETS.bulletArt) img(GEAR_SPRITES.bullet);
+  if (ASSETS.muzzleArt) img(GEAR_SPRITES.muzzle);
+  if (ASSETS.shieldArt) img(GEAR_SPRITES.shield);
   for (let i = 1; i <= ASSETS.slashFx; i++) img(`fx/slash-${i}.png`);
   maps.forEach((m, i) => {
     img(`boss/b${i + 1}.png`);
@@ -2864,6 +3026,8 @@ export function createGame(
     if (ASSETS.bgSky) img(`bg/m${i + 1}-sky.png`);
     if (ASSETS.bgFar) img(`bg/m${i + 1}-far.png`);
     if (ASSETS.bossFrames >= 3) img(`boss/b${i + 1}-hit.png`);
+    if (ASSETS.bossAtk) img(`boss/b${i + 1}-atk.png`);
+    for (let f = 1; f <= ASSETS.bossWalk; f++) img(`boss/b${i + 1}-walk-${f}.png`);
     if (ASSETS.bgNear) img(`bg/m${i + 1}-near.png`);
     img(`item/heal-${i + 1}.png`);
     img(`item/tool-${i + 1}.png`);
