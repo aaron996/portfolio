@@ -30,7 +30,7 @@ CÁCH DÙNG
     python scripts/sprites.py check --emit-rig            # in bảng rig cho engine
     python scripts/sprites.py normalize raw/ out/ --kind player --fit none
     python scripts/sprites.py normalize raw/ out/ --kind player --fit head
-    python scripts/sprites.py normalize raw/ out/ --kind mob --dry-run
+    python scripts/sprites.py normalize raw/ out/ --kind mob --fit none --group
     python scripts/sprites.py pack raw/bg public/game/bg      # dọn alpha + nén
 
 Cần Pillow:  pip install pillow
@@ -39,6 +39,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import sys
 from collections import deque
 from pathlib import Path
@@ -65,6 +66,8 @@ SPEC = {
     # sát mặt làm lệch, xem chú thích head_height(). Cỡ nhân vật thật phải soi
     # bằng mắt trên strip đầu, không tin số này một mình.
     "player": dict(canvas=1024, unit=350, ax=512, ay=960, tol_unit=60, tol_xy=14),
+    # `unit` của quái chỉ là hằng số rig của engine (MOB_RIG_V2), không phải
+    # luật bắt mọi con cao bằng nhau — xem check_mob_group().
     "mob": dict(canvas=512, unit=440, ax=256, ay=476, tol_unit=8, tol_xy=10),
     "boss": dict(canvas=768, unit=660, ax=384, ay=714, tol_unit=12, tol_xy=14),
     # Bộ trùm vẫn đời 1 (khung 446², thân 416px). Khung -hit gen mới ở 768²
@@ -74,7 +77,7 @@ SPEC = {
 
 # Nhóm nào đang dùng bộ asset đời nào. Phải khớp RIG_SET và PLAYER_RIG trong
 # components/game/engine.ts, nếu không thì báo cáo của script vô nghĩa.
-ASSET_SET = {"player": "v2", "mob": "v1", "boss": "v1"}
+ASSET_SET = {"player": "v2", "mob": "v2", "boss": "v1"}
 
 ALPHA_MIN = 16
 
@@ -185,6 +188,31 @@ def measure(im: Image.Image, kind: str):
     )
 
 
+def check_mob_group(m, k: float, spec, g) -> list[str]:
+    """Kiểm một khung quái theo nhóm khung của nó, không theo riêng nó.
+
+    Hai chỗ khác nhân vật:
+
+    * **Không kiểm thước đo.** Nhân vật chỉ có một, mọi khung phải cùng cỡ.
+      Quái thì mỗi con một hình dạng — con giấy A4 nhỏ hơn chồng chứng từ, con
+      hoá đơn thì bẹt và dài — nên cỡ là quyết định của tranh, không phải của
+      spec. Ép cả 16 loại về thân cao 440px thì con bẹt bị kéo rộng tràn khung.
+    * **Mặt sàn tính cho cả nhóm.** Bốn khung của một chu kỳ đi có khung nhấc
+      chân, khung rạp người — đáy khung nào cũng khác nhau, và cái khác nhau
+      đó CHÍNH LÀ hoạt ảnh. Chỗ phải nằm đúng mặt sàn là đáy thấp nhất của cả
+      nhóm; khung còn lại chỉ cần không thấp hơn thế.
+    """
+    bad = []
+    if abs(g["ay"] - spec["ay"]) > spec["tol_xy"]:
+        bad.append(f"cả nhóm lệch mặt sàn {g['ay'] - spec['ay']:+.0f}px")
+    elif m["ay"] * k > spec["ay"] + spec["tol_xy"]:
+        bad.append(f"khung này thụt dưới mặt sàn {m['ay'] * k - spec['ay']:+.0f}px")
+    gax = sum(g["axs"]) / len(g["axs"])
+    if abs(gax - spec["ax"]) > spec["tol_xy"]:
+        bad.append(f"cả nhóm lệch tâm thân {gax - spec['ax']:+.0f}px")
+    return bad
+
+
 # ── check ───────────────────────────────────────────────
 
 
@@ -192,8 +220,12 @@ def cmd_check(args):
     if not GAME.exists():
         sys.exit(f"Không thấy {GAME}")
 
+    # gun-held là lớp đè vẽ bằng drawFit (hộp riêng), không đi qua rig — kiểm
+    # nó theo spec nhân vật thì báo đỏ vĩnh viễn, mà báo đỏ vĩnh viễn thì
+    # người đọc bắt đầu bỏ qua cả bảng.
+    not_rigged = {"gun-held.png"}
     groups = [
-        ("player", sorted((GAME / "player").glob("*.png"))),
+        ("player", [p for p in sorted((GAME / "player").glob("*.png")) if p.name not in not_rigged]),
         ("mob", sorted((GAME / "mob").glob("*.png"))),
         ("boss", sorted((GAME / "boss").glob("*.png"))),
     ]
@@ -204,7 +236,6 @@ def cmd_check(args):
         rig_set = args.rig_set or ASSET_SET[kind]
         print(f"\n{kind.upper()} — {len(paths)} tấm")
         print(f"  {'file':22s} {'khung':>12s} {'thân':>6s} {'thước đo':>9s} {'ax':>6s} {'ay':>6s}  ghi chú")
-        bad_count = 0
         rows = []
         for p in paths:
             im = Image.open(p).convert("RGBA")
@@ -213,6 +244,19 @@ def cmd_check(args):
                 print(f"  !! {p.name}: ảnh trống hoàn toàn")
                 continue
             rows.append((p, m))
+
+        # Quái được kiểm THEO NHÓM khung, không theo từng khung. Lý do ở
+        # check_mob_group().
+        gmax = {}
+        if kind == "mob":
+            for p, m in rows:
+                k = spec["canvas"] / m["h"] if m["h"] else 1
+                g = gmax.setdefault(group_key(p.name), dict(ay=0.0, axs=[]))
+                g["ay"] = max(g["ay"], m["ay"] * k)
+                g["axs"].append((m["ax"] if m["ax"] else (m["left"] + m["right"]) / 2) * k)
+
+        bad_count = 0
+        for p, m in rows:
             if rig_set == "v2":
                 bad = []
                 # Khung nhỏ hơn spec vẫn đạt, miễn là vuông: quy mọi số đo về
@@ -222,17 +266,20 @@ def cmd_check(args):
                     bad.append(f"khung phải vuông, đang {m['w']}x{m['h']}")
                 elif m["h"] > spec["canvas"]:
                     bad.append(f"khung lớn hơn spec {spec['canvas']}²")
-                # Thước đo của nhân vật chỉ để tham khảo: chin tìm bằng vệt
-                # màu da nên khung nào có cẳng tay sát mặt là số phồng lên.
-                # Chỉ báo khi lệch xa tới mức chắc chắn là vẽ sai cỡ thật.
-                if m["unit"] and abs(m["unit"] * k - spec["unit"]) > spec["tol_unit"] * 3:
-                    bad.append(
-                        f"thước đo lệch {m['unit'] * k - spec['unit']:+.0f}px — soi lại bằng mắt"
-                    )
-                if m["ax"] and abs(m["ax"] * k - spec["ax"]) > spec["tol_xy"]:
-                    bad.append(f"tâm thân lệch {m['ax'] * k - spec['ax']:+.0f}px")
-                if abs(m["ay"] * k - spec["ay"]) > spec["tol_xy"]:
-                    bad.append(f"mặt sàn lệch {m['ay'] * k - spec['ay']:+.0f}px")
+                if kind == "mob":
+                    bad += check_mob_group(m, k, spec, gmax[group_key(p.name)])
+                else:
+                    # Thước đo của nhân vật chỉ để tham khảo: chin tìm bằng vệt
+                    # màu da nên khung nào có cẳng tay sát mặt là số phồng lên.
+                    # Chỉ báo khi lệch xa tới mức chắc chắn là vẽ sai cỡ thật.
+                    if m["unit"] and abs(m["unit"] * k - spec["unit"]) > spec["tol_unit"] * 3:
+                        bad.append(
+                            f"thước đo lệch {m['unit'] * k - spec['unit']:+.0f}px — soi lại bằng mắt"
+                        )
+                    if m["ax"] and abs(m["ax"] * k - spec["ax"]) > spec["tol_xy"]:
+                        bad.append(f"tâm thân lệch {m['ax'] * k - spec['ax']:+.0f}px")
+                    if abs(m["ay"] * k - spec["ay"]) > spec["tol_xy"]:
+                        bad.append(f"mặt sàn lệch {m['ay'] * k - spec['ay']:+.0f}px")
                 note = "OK" if not bad else " · ".join(bad)
                 bad_count += bool(bad)
             else:
@@ -274,6 +321,15 @@ def cmd_check(args):
 # ── normalize ───────────────────────────────────────────
 
 
+def group_key(name: str) -> str:
+    """Tên nhóm của một khung: bỏ hậu tố "-1", "-2"... ở cuối.
+
+    `m3-walker-2.png` → `m3-walker`. Khung không có hậu tố số thì tự nó là một
+    nhóm (`b3-atk.png` → `b3-atk`).
+    """
+    return re.sub(r"-\d+$", "", Path(name).stem)
+
+
 def cmd_normalize(args):
     src = Path(args.src)
     dst = Path(args.dst)
@@ -288,8 +344,13 @@ def cmd_normalize(args):
 
     fit = args.fit
     how = f"thước đo {spec['unit']}px" if fit == "head" else "giữ nguyên cỡ"
+    scope = "cả nhóm chung một phép canh" if args.group else "từng khung một"
     print(f"{args.kind}: {len(files)} tấm → khung {spec['canvas']}², "
-          f"{how}, neo ({spec['ax']}, {spec['ay']})")
+          f"{how}, neo ({spec['ax']}, {spec['ay']}), {scope}")
+
+    # Đo trước, canh sau: ở chế độ --group phải biết cả nhóm rồi mới tính được
+    # phép canh chung
+    shots = []
     for p in files:
         im = Image.open(p).convert("RGBA")
         # Làm sạch TRƯỚC khi đo: lớp mờ sót lại làm phình bbox nên điểm neo lệch
@@ -299,50 +360,74 @@ def cmd_normalize(args):
         if not m:
             print(f"  !! {p.name}: ảnh trống, bỏ qua")
             continue
-        unit = m["unit"]
+        shots.append((p, im, m))
+
+    groups: dict[str, list] = {}
+    for shot in shots:
+        key = group_key(shot[0].name) if args.group else shot[0].stem
+        groups.setdefault(key, []).append(shot)
+
+    for key, group in groups.items():
+        # Một phép canh cho cả nhóm — đó là điểm mấu chốt của --group. Canh
+        # từng khung riêng thì chân khung nào cũng bị dí xuống sàn, tức là xoá
+        # sạch hoạt ảnh: bước nhấc chân, cú rạp người khi lao, nhịp vỗ cánh.
+        units = [m["unit"] or float(m["body"]) for _, _, m in group]
         if fit == "none":
-            # Chỉ canh vị trí, không đụng tới cỡ. Dùng khi bộ ảnh đã nhất quán
-            # cỡ nhân vật — phóng lại theo số đo chỉ làm mờ và làm lệch.
             scale = 1.0
         else:
-            if not unit:
-                # Không tìm được mặt (mũ trùm kín, quái không có da) — dùng chiều
-                # cao thân, nhưng phải nói ra vì con số này kém tin hơn
-                unit = float(m["body"])
-                print(f"  ~  {p.name}: không thấy mặt, đo theo chiều cao thân")
-            scale = spec["unit"] / unit
-        nw, nh = max(1, round(im.width * scale)), max(1, round(im.height * scale))
-        scaled = im.resize((nw, nh), Image.LANCZOS)
-
-        anchor_x = (m["ax"] if m["ax"] else (m["left"] + m["right"]) / 2) * scale
-        anchor_y = m["ay"] * scale
+            # Lấy khung CAO NHẤT nhóm làm chuẩn: đó là dáng đứng thẳng, các
+            # dáng còn lại thấp hơn là do tư thế chứ không phải vẽ nhỏ hơn.
+            scale = spec["unit"] / max(units)
+        # Mặt sàn của nhóm là mép dưới thấp nhất trong nhóm — chỗ bàn chân
+        # thật sự chạm đất. Tâm thân lấy trung bình để đỡ lệch trái phải.
+        anchor_y = max(m["ay"] for _, _, m in group) * scale
+        axs = [m["ax"] if m["ax"] else (m["left"] + m["right"]) / 2 for _, _, m in group]
+        anchor_x = sum(axs) / len(axs) * scale
         ox = round(spec["ax"] - anchor_x)
         oy = round(spec["ay"] - anchor_y)
+        # Kéo lại nếu phép canh đẩy nét vẽ ra ngoài khung. Thà lệch neo vài px
+        # còn hơn mất một đầu nòng hay một chóp cánh — mà mất thì im lặng, chỉ
+        # lúc chơi mới thấy.
+        lo_x = -min(m["left"] * scale for _, _, m in group)
+        hi_x = spec["canvas"] - max(m["right"] * scale for _, _, m in group)
+        lo_y = -min(m["top"] * scale for _, _, m in group)
+        hi_y = spec["canvas"] - max(m["ay"] * scale for _, _, m in group)
+        cx = round(min(max(ox, lo_x), hi_x)) if lo_x <= hi_x else ox
+        cy = round(min(max(oy, lo_y), hi_y)) if lo_y <= hi_y else oy
+        clamp = "" if (cx, cy) == (ox, oy) else f" — kéo lại vào khung từ ({ox:+d},{oy:+d})"
+        ox, oy = cx, cy
+        if args.group and len(group) > 1:
+            print(f"  [{key}] x{scale:5.3f} lệch ({ox:+5d},{oy:+5d}) — {len(group)} khung{clamp}")
 
-        canvas = Image.new("RGBA", (spec["canvas"], spec["canvas"]), (0, 0, 0, 0))
-        canvas.alpha_composite(scaled, (ox, oy))
-        if args.out_size and args.out_size != spec["canvas"]:
-            # Thu về khung nhỏ hơn cho nhẹ trang. Làm SAU khi đã canh neo để
-            # điểm neo vẫn nằm đúng tỉ lệ.
-            canvas = canvas.resize((args.out_size, args.out_size), Image.LANCZOS)
+        for p, im, m in group:
+            nw, nh = max(1, round(im.width * scale)), max(1, round(im.height * scale))
+            # Phóng đúng bằng 1 thì đừng resample: giữ nguyên từng pixel
+            scaled = im if (nw, nh) == im.size else im.resize((nw, nh), Image.LANCZOS)
 
-        # Cảnh báo khi nhân vật bị khung cắt: thà biết ngay còn hơn phát hiện
-        # lúc chơi thấy mất một cánh tay
-        cut = []
-        if ox + m["left"] * scale < 0:
-            cut.append("trái")
-        if ox + m["right"] * scale > spec["canvas"]:
-            cut.append("phải")
-        if oy + m["top"] * scale < 0:
-            cut.append("trên")
-        if oy + m["ay"] * scale > spec["canvas"]:
-            cut.append("dưới")
-        note = f"  !! bị cắt mép {', '.join(cut)}" if cut else ""
-        u = f" đầu={unit:.0f}" if unit else ""
-        print(f"  {p.name:22s} x{scale:5.3f} lệch ({ox:+5d},{oy:+5d}){u}{note}")
+            canvas = Image.new("RGBA", (spec["canvas"], spec["canvas"]), (0, 0, 0, 0))
+            canvas.alpha_composite(scaled, (ox, oy))
+            if args.out_size and args.out_size != spec["canvas"]:
+                # Thu về khung nhỏ hơn cho nhẹ trang. Làm SAU khi đã canh neo để
+                # điểm neo vẫn nằm đúng tỉ lệ.
+                canvas = canvas.resize((args.out_size, args.out_size), Image.LANCZOS)
 
-        if not args.dry_run:
-            canvas.save(dst / p.name, optimize=True)
+            # Cảnh báo khi nhân vật bị khung cắt: thà biết ngay còn hơn phát hiện
+            # lúc chơi thấy mất một cánh tay
+            cut = []
+            if ox + m["left"] * scale < 0:
+                cut.append("trái")
+            if ox + m["right"] * scale > spec["canvas"]:
+                cut.append("phải")
+            if oy + m["top"] * scale < 0:
+                cut.append("trên")
+            if oy + m["ay"] * scale > spec["canvas"]:
+                cut.append("dưới")
+            note = f"  !! bị cắt mép {', '.join(cut)}" if cut else ""
+            u = f" đo={m['unit']:.0f}" if m["unit"] else ""
+            print(f"  {p.name:22s} x{scale:5.3f} lệch ({ox:+5d},{oy:+5d}){u}{note}")
+
+            if not args.dry_run:
+                canvas.save(dst / p.name, optimize=True)
 
     if args.dry_run:
         print("(dry-run — chưa ghi file nào)")
@@ -450,6 +535,12 @@ def main():
         "--raw-alpha",
         action="store_true",
         help="giữ nguyên alpha thô, không ép hai đầu về 0/255",
+    )
+    n.add_argument(
+        "--group",
+        action="store_true",
+        help="gom các khung cùng một hoạt ảnh (bỏ hậu tố -1, -2...) rồi canh "
+             "chung một phép: giữ nguyên nhịp nhấc chân, vỗ cánh, rạp người",
     )
     n.add_argument("--dry-run", action="store_true", help="chỉ in, không ghi file")
     n.set_defaults(func=cmd_normalize)
