@@ -1181,7 +1181,8 @@ export const content: SiteContent = {
       "Năm bản đồ là năm nơi mình từng làm việc. Chạy sang phải, dọn sạch quái, hạ trùm cuối bản đồ để nhận hai kỹ năng. Hết năm ải là xong sáu năm.",
     note:
       "Game này mình dựng bằng AI-assisted coding. Phần khó không nằm ở code — nó nằm ở chỗ quyết định cái gì đáng đưa vào và cái gì nên bỏ.",
-    controlsHint: "← → di chuyển · ↑ hoặc Space nhảy · J đánh · trên điện thoại dùng nút bên dưới",
+    controlsHint:
+      "← → di chuyển · ↑ hoặc Space nhảy · J đánh · P tạm dừng để xem hướng dẫn · trên điện thoại dùng nút bên dưới",
     startLabel: "Bắt đầu",
     nextLabel: "Vào ải {n} →",
     clearHeading: "Hạ trùm ải {n}",
@@ -1190,6 +1191,27 @@ export const content: SiteContent = {
     skillsLabel: "Túi kỹ năng",
     pickupTool: "Nhặt được {name}",
     pickupHeal: "Hồi một máu",
+    pickupKindLabel: { heal: "Hồi máu", tool: "Đồ nghề · 12 giây" },
+    pauseHint: "P hoặc Esc — tạm dừng & hướng dẫn",
+    pause: {
+      heading: "Tạm dừng",
+      controlsHeading: "Điều khiển",
+      controls: [
+        { keys: "← →  ·  A D", label: "Di chuyển" },
+        { keys: "↑  ·  W  ·  Space", label: "Nhảy — bấm sớm lúc đang rơi vẫn được ghi nhận" },
+        { keys: "J  ·  Z  ·  X", label: "Chém — ba nhát liền nhau thành combo, nhát thứ ba mạnh nhất" },
+        { keys: "Bấm vào màn chơi", label: "Cũng là chém, dùng khi chơi bằng chuột" },
+        { keys: "P  ·  Esc", label: "Tạm dừng và mở lại bảng này" },
+      ],
+      /** Thay cho bảng phím trên màn hình hẹp — ở đó chơi bằng nút ảo */
+      mobileControls: "Chơi bằng nút ◀ ▶ ▲ và ĐÁNH ở dưới màn chơi.",
+      objectiveHeading: "Mục tiêu ải này",
+      tipHeading: "Mẹo",
+      progressMobs: "Còn {left}/{total} quái thường phải dọn",
+      progressBoss: "Quái thường đã sạch — trùm đang chờ ở cuối bản đồ",
+      resumeLabel: "Chơi tiếp",
+      restartLabel: "Chơi lại ải này",
+    },
     finish: {
       heading: "Hết ải",
       body: "Mười kỹ năng, sáu năm, năm con trùm. Không cái nào tự rơi xuống.",
@@ -1205,10 +1227,13 @@ export const content: SiteContent = {
         boss: "Trùm Sai Mã Container",
         bossKind: "slam",
         line: "Hai lô lệch một ký tự. Không ai chết, nhưng hàng đi nhầm nước.",
+        objective:
+          "Dọn hết chứng từ lệch dọc cầu cảng, rồi hạ Trùm Sai Mã Container ở cuối bãi.",
+        tip: "Quái bay cao hơn tầm chém. Nhảy lên ngang tầm nó rồi mới bấm chém.",
         skills: ["Master data", "Đối chiếu chứng từ"],
         palette: {
           sky: "#A9DCF0", far: "#7BB9D4", mid: "#4E8FAE",
-          ground: "#2F5F78", groundEdge: "#24485C",
+          ground: "#0D4158", groundEdge: "#115572",
           mob: "#FAF6E8", boss: "#E0563F",
         },
         deco: "container",
@@ -1224,8 +1249,14 @@ export const content: SiteContent = {
         ],
         traps: [{ kind: "spike", x: 1010, w: 70 }],
         pickups: [
-          { kind: "heal", x: 900, y: 266, name: "Ly cà phê" },
-          { kind: "tool", x: 1740, y: 256, name: "Máy quét mã vỏ" },
+          {
+            kind: "heal", x: 900, y: 266, name: "Ly cà phê",
+            desc: "Hồi một máu. Ca ở cảng bắt đầu lúc năm giờ sáng — không có nó thì không có ca nào.",
+          },
+          {
+            kind: "tool", x: 1740, y: 256, name: "Máy quét mã vỏ",
+            desc: "12 giây chém nhanh hơn, xa hơn, sát thương gấp đôi. Quét mã vỏ container thay vì đọc bằng mắt: sai số về gần không.",
+          },
         ],
       },
 
@@ -1237,10 +1268,13 @@ export const content: SiteContent = {
         boss: "Băng Chuyền Kẹt",
         bossKind: "volley",
         line: "Ba trăm nghìn đơn một ngày. Băng chuyền không chờ ai.",
+        objective:
+          "Leo hết ba tầng thùng, dọn sạch kiện lạc tuyến, rồi hạ Băng Chuyền Kẹt.",
+        tip: "Lưỡi cưa chỉ chạy dưới đất. Đường an toàn là leo bệ, không phải chạy thẳng.",
         skills: ["Vận hành quy mô lớn", "Chuẩn hoá chỉ số"],
         palette: {
           sky: "#FFDFAF", far: "#F0BE7E", mid: "#CF8B45",
-          ground: "#8C5A2B", groundEdge: "#6E4520",
+          ground: "#22232A", groundEdge: "#2D2E36",
           mob: "#FFF3DC", boss: "#C0392B",
         },
         deco: "crate",
@@ -1261,8 +1295,14 @@ export const content: SiteContent = {
           { kind: "spike", x: 1240, w: 60 },
         ],
         pickups: [
-          { kind: "heal", x: 700, y: 166, name: "Bữa trưa ca đêm" },
-          { kind: "tool", x: 1610, y: 158, name: "Súng bắn mã" },
+          {
+            kind: "heal", x: 700, y: 166, name: "Bữa trưa ca đêm",
+            desc: "Hồi một máu. Ca đêm ở kho ăn lúc hai giờ sáng, ăn xong chạy tiếp tới sáng.",
+          },
+          {
+            kind: "tool", x: 1610, y: 158, name: "Súng bắn mã",
+            desc: "12 giây chém nhanh hơn, xa hơn, sát thương gấp đôi. Ba trăm nghìn đơn một ngày thì tốc độ quét là tốc độ cả kho.",
+          },
         ],
       },
 
@@ -1274,10 +1314,13 @@ export const content: SiteContent = {
         boss: "Trùm 90,1%",
         bossKind: "dash",
         line: "Con trùm này có thật. Hạ được nó mất hơn một năm, không phải một phút.",
+        objective:
+          "Dọn hết đơn trễ, hub báo đỏ và hai rider giao gấp, rồi hạ Trùm 90,1% ở cuối sàn.",
+        tip: "Rider rú ga nửa giây trước khi lao. Nghe tiếng là nhảy — đứng chắn đường nó là mất máu.",
         skills: ["Quản trị đối tác", "KPI on-time"],
         palette: {
           sky: "#FFCDB4", far: "#FBA981", mid: "#EE7A4D",
-          ground: "#B4482A", groundEdge: "#8E351E",
+          ground: "#4D4748", groundEdge: "#645D5E",
           mob: "#FFEDD8", boss: "#7A2E9D",
         },
         deco: "tower",
@@ -1291,6 +1334,9 @@ export const content: SiteContent = {
           { kind: "flyer", name: "Đơn trễ pickup", x: 1520, y: 200 },
           { kind: "walker", name: "Đơn dồn ca", x: 1780 },
           { kind: "shooter", name: "Hub báo đỏ", x: 1880, y: 250 },
+          /* Rider chỉ có ở ải Shopee. Vùng tuần rộng vì nó lao hết đà mới quay lại. */
+          { kind: "rider", name: "Rider giao gấp", x: 1080, range: 130 },
+          { kind: "rider", name: "Rider giao gấp", x: 1700, range: 150 },
         ],
         traps: [
           { kind: "pulse", x: 620 },
@@ -1299,8 +1345,14 @@ export const content: SiteContent = {
           { kind: "spike", x: 1340, w: 80 },
         ],
         pickups: [
-          { kind: "heal", x: 900, y: 190, name: "Nghỉ giữa ca" },
-          { kind: "tool", x: 1680, y: 196, name: "Dashboard realtime" },
+          {
+            kind: "heal", x: 900, y: 190, name: "Nghỉ giữa ca",
+            desc: "Hồi một máu. Mười lăm phút giữa ca cao điểm, đủ để ngồi xuống một lần.",
+          },
+          {
+            kind: "tool", x: 1680, y: 196, name: "Dashboard realtime",
+            desc: "12 giây chém nhanh hơn, xa hơn, sát thương gấp đôi. Thấy hub đỏ ngay lúc nó đỏ, không phải sáng mai mới biết.",
+          },
         ],
       },
 
@@ -1312,10 +1364,13 @@ export const content: SiteContent = {
         boss: "Đơn Vô Chủ",
         bossKind: "volley",
         line: "Đơn trễ mà không kho nào nhận. Phải chỉ đúng tên nó mới chịu ngã.",
+        objective:
+          "Dọn hết query lỗi và join nhân dòng giữa rừng gai, rồi hạ Đơn Vô Chủ.",
+        tip: "Đạn bay ngang tầm ngực. Nhảy sớm một nhịp thì đạn lọt dưới chân.",
         skills: ["SQL / Trino", "Quy trách nhiệm"],
         palette: {
           sky: "#C8CCF2", far: "#9BA2DE", mid: "#6C74BE",
-          ground: "#454C8E", groundEdge: "#343A70",
+          ground: "#18264D", groundEdge: "#203264",
           mob: "#E8EAFF", boss: "#2C3E75",
         },
         deco: "server",
@@ -1338,8 +1393,14 @@ export const content: SiteContent = {
           { kind: "pulse", x: 1900 },
         ],
         pickups: [
-          { kind: "heal", x: 700, y: 206, name: "Nghỉ năm phút" },
-          { kind: "tool", x: 1800, y: 206, name: "Câu SQL đúng" },
+          {
+            kind: "heal", x: 700, y: 206, name: "Nghỉ năm phút",
+            desc: "Hồi một máu. Query chạy mười phút thì con người được nghỉ năm phút.",
+          },
+          {
+            kind: "tool", x: 1800, y: 206, name: "Câu SQL đúng",
+            desc: "12 giây chém nhanh hơn, xa hơn, sát thương gấp đôi. Một câu query đúng thay được cả buổi tranh nhau ai làm trễ.",
+          },
         ],
       },
 
@@ -1351,10 +1412,13 @@ export const content: SiteContent = {
         boss: "CATEGORY.SKU",
         bossKind: "dash",
         line: "Con trùm cuối là một cái tên cột. Tách sai một dấu chấm là vỡ cả bảng.",
+        objective:
+          "Đủ bốn loại quái, đủ ba loại bẫy. Dọn sạch xưởng rồi hạ CATEGORY.SKU.",
+        tip: "Chém ba nhát liền nhau thì nhát thứ ba mạnh gấp đôi. Giữ nhịp, đừng bấm loạn.",
         skills: ["Data modeling", "Ship sản phẩm"],
         palette: {
           sky: "#C6EBD9", far: "#93D6B8", mid: "#5FB18E",
-          ground: "#3B7A61", groundEdge: "#2C5E4A",
+          ground: "#6A4727", groundEdge: "#8A5C33",
           mob: "#EFFBF4", boss: "#1F6E52",
         },
         deco: "gear",
@@ -1377,8 +1441,14 @@ export const content: SiteContent = {
           { kind: "saw", x: 1780, w: 200 },
         ],
         pickups: [
-          { kind: "heal", x: 1000, y: 190, name: "Cà phê lần ba" },
-          { kind: "tool", x: 1460, y: 186, name: "Data contract" },
+          {
+            kind: "heal", x: 1000, y: 190, name: "Cà phê lần ba",
+            desc: "Hồi một máu. Ly thứ ba trong ngày, chỗ này ai cũng biết vị của nó.",
+          },
+          {
+            kind: "tool", x: 1460, y: 186, name: "Data contract",
+            desc: "12 giây chém nhanh hơn, xa hơn, sát thương gấp đôi. Thoả thuận trước tên cột và kiểu dữ liệu, đỡ phải sửa sau khi vỡ.",
+          },
         ],
       },
     ],

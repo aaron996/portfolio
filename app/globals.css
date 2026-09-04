@@ -122,6 +122,15 @@ body {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
+
+/* Thẻ giải nghĩa vật phẩm trong minigame — trượt lên một nhịp rồi đứng yên */
+@keyframes pickup-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.pickup-card {
+  animation: pickup-in 0.22s ease-out both;
+}
 .marquee-track {
   display: flex;
   width: max-content;
