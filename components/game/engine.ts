@@ -11,7 +11,7 @@
  * ĐỌC MỤC "RIG" BÊN DƯỚI TRƯỚC KHI THÊM ASSET MỚI. Đó là chỗ giữ cho nhân vật
  * không phình to nhỏ giữa các khung hình — lỗi nặng nhất của bản trước.
  */
-import type { GameMap, MobKind } from "@/content/types";
+import type { GameMap, GameMobSpawn, MobKind } from "@/content/types";
 import mobSpriteMetrics from "./mob-sprite-metrics.json";
 
 export type GameKey = "left" | "right" | "jump" | "atk" | "shoot" | "guard";
@@ -92,6 +92,37 @@ const W = 800;
 const H = 420;
 const GY = 344;
 const WORLD = 2200;
+
+/** Hộp thân nhân vật. Ảnh vẽ to hơn hộp này, xem mục RIG. */
+const PLAYER_W = 26;
+const PLAYER_H = 40;
+
+/**
+ * Nhảy và trọng lực. Hai số này quyết định đỉnh nhảy, và đỉnh nhảy quyết định
+ * cái gì trong game với tới được — nên `warnUnreachableFlyers` phải tính từ
+ * chính chúng, không được chép lại số. Sửa một trong hai là tầm với đổi theo.
+ */
+const JUMP_V = 684;
+const GRAVITY = 2232;
+/** Độ cao đỉnh nhảy: v^2 / 2g, hiện ~105px */
+const JUMP_PEAK = (JUMP_V * JUMP_V) / (2 * GRAVITY);
+
+/**
+ * Hộp đòn chém vươn lên trên đỉnh đầu bấy nhiêu pixel.
+ *
+ * Trước đây hộp đòn là `y = player.y + 2, h = 34` — nằm gọn trong thân người,
+ * nghĩa là **không có cách nào chém lên trên**. Nhưng vệt chém vẽ ra thì quét
+ * từ góc -1,3 rad, tức đầu lưỡi lên tới khoảng 19px trên đỉnh đầu (xem
+ * `drawSlash`). Người chơi thấy lưỡi quét qua con quái bay mà không ăn đòn.
+ *
+ * 18px là cho hộp đòn khớp với chỗ lưỡi thật sự quét tới. Trên mặt đất số này
+ * không đổi gì — chẳng có gì đứng lơ lửng ngay trên đầu — nhưng cộng với đỉnh
+ * nhảy 105px thì nó là thứ làm quái bay chém được.
+ */
+const ATTACK_UP = 18;
+
+/** Biên độ nhấp nhô của quái bay, tính từ `floor` của nó */
+const FLYER_BOB = 16;
 
 /** Màu chung cho mọi thứ gây sát thương, để người chơi học một lần là nhớ */
 const HAZARD = "#E0563F";
@@ -608,7 +639,7 @@ export function createGame(
   let bag: PickupInfo[] = [];
 
   const player = {
-    x: 60, y: GY - 40, w: 26, h: 40,
+    x: 60, y: GY - PLAYER_H, w: PLAYER_W, h: PLAYER_H,
     vx: 0, vy: 0, face: 1,
     hp: 5, mhp: 5, inv: 0, atk: 0, atkDur: 0.28, cd: 0, ground: false,
     tool: 0, hurtT: 0,
@@ -660,11 +691,84 @@ export function createGame(
     return { w: 30, h: 30 };
   }
 
+  /**
+   * Kiểm quái bay có chém tới được không. Chỉ chạy ở dev.
+   *
+   * `y` của quái bay trong content là số gõ tay, không có gì kiểm lại. Đặt cao
+   * quá thì con đó không chết được, mà `spawnBoss()` đòi sạch hết quái mới hiện
+   * trùm — một con đặt sai là tắc cứng cả ải. Bố cục hiện tại không có con nào
+   * như vậy; hàm này để lần sau thêm quái thì biết ngay lúc vào ải.
+   *
+   * PHÉP TÍNH. Đứng trên mặt sàn cao `s`, `player.y` chạy liên tục từ
+   * `s - PLAYER_H` (đứng) tới `s - PLAYER_H - JUMP_PEAK` (đỉnh nhảy). Không
+   * được chỉ xét đúng đỉnh nhảy: đòn ăn được cả trên đường bay lên, và bỏ sót
+   * chuyện đó là ra kết luận sai hẳn về việc con nào chém tới được.
+   *
+   * Gọi `u` là sin của pha nhấp nhô, con bay có đỉnh đầu ở `floor - h + BOB*u`
+   * và đáy ở `floor + BOB*u`. Ăn đòn cần một `player.y` thoả cả hai:
+   *
+   *     player.y + 2 - ATTACK_UP  <  floor + BOB*u        (hộp đòn đủ cao)
+   *     player.y + 36             >  floor - h + BOB*u    (chưa vọt qua nó)
+   *
+   * Ghép với khoảng `player.y` ở trên ra khoảng `u` chém được, rồi quy về phần
+   * trăm thời gian của chu kỳ nhấp nhô. Đó là con số nói lên "khó tới mức nào",
+   * chứ không phải chỉ có/không.
+   */
+  function flyerReach(m: GameMap, sp: GameMobSpawn) {
+    const { h } = mobBox("flyer");
+    const floor = sp.y ?? GY;
+    const range = sp.range ?? 70;
+    const surfaces = [
+      GY,
+      ...m.plats
+        .filter(([px, , pw]) => px < sp.x + range && px + pw > sp.x - range)
+        .map(([, py]) => py),
+    ];
+    /** Phần chu kỳ nhấp nhô (0..1) chém tới được khi đứng trên mặt sàn `s` */
+    const share = (s: number) => {
+      const lo = (s - PLAYER_H - JUMP_PEAK + 2 - ATTACK_UP - floor) / FLYER_BOB;
+      const hi = (s - PLAYER_H + 36 - floor + h) / FLYER_BOB;
+      const l = Math.max(lo, -1);
+      const r = Math.min(hi, 1);
+      if (r <= l) return 0;
+      // u = sin(pha), nên thời gian không chia đều theo u — phải qua arcsin
+      return (Math.asin(r) - Math.asin(l)) / Math.PI;
+    };
+    return { floor, range, ground: share(GY), best: Math.max(...surfaces.map(share)) };
+  }
+
+  /** Ngưỡng "chật": dưới một phần tư chu kỳ nhấp nhô là canh mù, không phải kỹ năng */
+  const REACH_MIN = 0.25;
+
+  function warnFlyerReach(m: GameMap, index: number) {
+    for (const sp of m.mobs) {
+      if (sp.kind !== "flyer") continue;
+      const { floor, range, ground, best } = flyerReach(m, sp);
+      if (best >= REACH_MIN) continue;
+      const where = `ải ${index + 1}, quái bay "${sp.name}" ở x=${sp.x}, y=${floor}`;
+      const fix =
+        `Hạ nó xuống, hoặc thêm một bệ trong khoảng x ${sp.x - range}..${sp.x + range}.`;
+      if (best <= 0) {
+        console.error(
+          `[Ải Vận Hành] ${where}: KHÔNG có chỗ nào chém tới. Trùm chỉ hiện khi ` +
+            `sạch hết quái, nên con này là tắc cả ải. ${fix}`,
+        );
+      } else {
+        console.warn(
+          `[Ải Vận Hành] ${where}: chỉ chém tới trong ${Math.round(best * 100)}% chu kỳ ` +
+            `nhấp nhô (từ mặt đất: ${Math.round(ground * 100)}%). Dưới ` +
+            `${REACH_MIN * 100}% là canh mù. ${fix}`,
+        );
+      }
+    }
+  }
+
   function loadMap(index: number) {
     lv = index;
     const m = maps[lv];
+    if (process.env.NODE_ENV !== "production") warnFlyerReach(m, index);
     Object.assign(player, {
-      x: 60, y: GY - 40, vx: 0, vy: 0, face: 1,
+      x: 60, y: GY - PLAYER_H, vx: 0, vy: 0, face: 1,
       hp: 5, inv: 0, atk: 0, cd: 0, ground: false, tool: 0, hurtT: 0,
       toolName: null, ammo: 0, gunName: null, shootT: 0, gunCd: 0,
       guarding: false, guardT: 0, stam: 1, stamDelay: 0, breakT: 0,
@@ -755,7 +859,7 @@ export function createGame(
   function tryJump() {
     if (phase !== "play" || busy()) return;
     if (!player.ground && player.coyote <= 0) return;
-    player.vy = -684;
+    player.vy = -JUMP_V;
     player.ground = false;
     player.coyote = 0;
     player.jumpBuf = 0;
@@ -805,10 +909,12 @@ export function createGame(
       heavy,
     });
 
-    // Tầm chém rộng hơn thân người, để đánh được trước khi bị quái chạm vào
+    // Tầm chém rộng hơn thân người, để đánh được trước khi bị quái chạm vào.
+    // Nới lên trên đỉnh đầu ATTACK_UP px cho khớp vệt chém — đó là thứ làm
+    // quái bay chém được khi đang ở trên không.
     const hb = {
       x: player.face > 0 ? player.x + player.w - 6 : player.x + 6 - reach,
-      y: player.y + 2, w: reach, h: 34,
+      y: player.y + 2 - ATTACK_UP, w: reach, h: 34 + ATTACK_UP,
     };
     const m = maps[lv];
     let hitAny = false;
@@ -1107,7 +1213,7 @@ export function createGame(
       o.x += o.dir * 0.75 * dt * 60;
       if (o.x < o.a) { o.x = o.a; o.dir = 1; }
       if (o.x > o.b) { o.x = o.b; o.dir = -1; }
-      o.y = o.floor - o.h + Math.sin(o.bob * 0.5) * 16;
+      o.y = o.floor - o.h + Math.sin(o.bob * 0.5) * FLYER_BOB;
     } else if (o.kind === "charger") {
       o.y = o.floor - o.h;
       if (o.dash > 0) {
@@ -1298,7 +1404,7 @@ export function createGame(
     const wasGround = player.ground;
     const prevBottom = player.y + player.h;
     player.fallSpeed = player.vy;
-    player.vy += 2232 * dt;
+    player.vy += GRAVITY * dt;
     player.y += player.vy * dt;
     player.ground = false;
     if (player.y + player.h >= GY) {

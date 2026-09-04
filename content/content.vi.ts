@@ -1259,7 +1259,7 @@ export const content: SiteContent = {
         line: "Hai lô lệch một ký tự. Không ai chết, nhưng hàng đi nhầm nước.",
         objective:
           "Dọn hết chứng từ lệch dọc cầu cảng, rồi hạ Trùm Sai Mã Container ở cuối bãi.",
-        tip: "Quái bay cao hơn tầm chém. Nhảy lên ngang tầm nó rồi mới bấm chém — hoặc nhặt súng quét ở bệ thứ hai rồi đứng dưới bắn lên.",
+        tip: "Đứng dưới đất thì quái bay cao hơn tầm chém. Nhảy lên rồi bấm chém — đòn trên không quét cả khoảng trên đầu. Bấm sớm một nhịp, vì lưỡi chỉ tới đích một lúc sau tiếng bấm.",
         skills: ["Master data", "Đối chiếu chứng từ"],
         palette: {
           sky: "#A9DCF0", far: "#7BB9D4", mid: "#4E8FAE",
@@ -1289,7 +1289,7 @@ export const content: SiteContent = {
           },
           {
             kind: "gun", x: 600, y: 262, name: "Súng quét mã vỏ",
-            desc: "Vũ khí tầm xa, bấm K để bắn, 14 viên. Đứng dưới bắn con bay trên đầu — thứ mà nhát chém không với tới.",
+            desc: "Vũ khí tầm xa, bấm K để bắn, 14 viên. Đạn bay thẳng ngang tầm ngực, không chếch lên được — để dành cho thứ đứng cùng tầm với mình ở đầu bên kia cầu cảng.",
           },
         ],
       },
@@ -1339,7 +1339,7 @@ export const content: SiteContent = {
           },
           {
             kind: "gun", x: 940, y: 214, name: "Súng bắn mã vạch",
-            desc: "Vũ khí tầm xa, bấm K để bắn, 14 viên. Bắn kiện văng ra từ bệ bên kia, không phải nhảy sang tận nơi mới chém được.",
+            desc: "Vũ khí tầm xa, bấm K để bắn, 14 viên. Bắn kiện văng ra từ đầu bên kia lối đi, không phải chờ nó lao tới mới chém được.",
           },
         ],
       },
