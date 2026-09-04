@@ -50,8 +50,9 @@ chiếu, (3) spec seamless + tả cảnh cụ thể theo từng nơi làm việc
 
 Cả ba lỗi giờ đã chữa xong ở phần đã gen: bộ nhân vật v2 giữ đúng một khuôn mặt và
 một cỡ đầu qua cả 18 khung; chín lớp nền mới đều lặp liền mép (`check` báo lệch 0) và
-mỗi ải có hai lớp cảnh thật thay vì một mảng màu. Phần chưa gen — quái — vẫn là bộ
-đời 1 hai khung, và engine vẫn hiệu chuẩn riêng cho nó.
+mỗi ải có hai lớp cảnh thật thay vì một mảng màu. Bộ quái v2 (64 khung) cũng đã canh
+xong bằng `normalize --group` nên cả 16 loại đứng đúng mặt sàn; chỉ bộ trùm còn là
+đời 1 (khung 446², cắt sát alpha) và vẫn đúng cỡ nhờ rig riêng của nó.
 
 ---
 
@@ -78,6 +79,20 @@ python scripts/sprites.py check
   Dùng khi bộ ảnh đã nhất quán cỡ nhân vật.
 - `--fit head` — thêm việc phóng từng khung cho chiều cao đầu bằng spec. Chỉ dùng khi
   bộ ảnh thật sự lệch cỡ giữa các khung (như bộ đời 1, lệch 23%).
+
+Và một cờ nữa quyết định canh theo **khung** hay theo **nhóm khung**:
+
+- `--group` — gom các tấm cùng một hoạt ảnh (bỏ hậu tố `-1`, `-2`... ở cuối tên) rồi
+  canh cả nhóm bằng **một** phép dịch chung, lấy mép dưới thấp nhất trong nhóm làm
+  mặt sàn. **Bắt buộc cho quái.** Canh riêng từng khung nghĩa là dí chân khung nào
+  cũng xuống sàn, mà khung nhấc chân giữa nhịp bước thì "chân" đang ở lưng chừng —
+  dí nó xuống sàn là cả thân tụt xuống, con quái đi thành ra nhấp nhô như bị sụt hố.
+  Cái chênh nhau giữa bốn khung **chính là** hoạt ảnh, đừng xoá nó đi.
+- Không có `--group` — mỗi tấm canh riêng. Đúng cho nhân vật (18 khung, mỗi khung một
+  dáng độc lập, khung nào cũng có chân chạm đất).
+
+Nếu phép canh đẩy nét vẽ ra ngoài khung thì script tự kéo lại và in `kéo lại vào khung`
+— thà lệch neo vài px còn hơn mất một đầu nòng hay một chóp cánh.
 
 **Bài học từ đợt gen bộ nhân vật v2:** bộ đo tự động tìm chin bằng vệt màu da liền
 khối, nên khung nào có cẳng tay hoặc bàn tay chạm vào mặt/cổ thì vệt da nối liền
@@ -291,7 +306,14 @@ scattering from the hand.
 
 ## 4. Quái — 16 loại × 4 khung = 64 tấm
 
-Sprite hiển thị `44px` (quái bay `32px`, rider `46px`). Vẽ `512×512`, không crop.
+Sprite hiển thị `44px` (quái bay `32px`, rider `52px`). Vẽ `512×512`, không crop.
+
+**Cỡ con quái là quyết định của tranh, không phải của spec.** Engine phóng cả khung
+512² theo một tỉ lệ cố định rồi đặt neo, nên con nào vẽ nhỏ trong khung thì hiện ra
+nhỏ. Đó là cố ý: tờ A4 lẻ ở ải 1 phải nhỏ hơn chồng chứng từ ở ải 3, con hoá đơn ở ải
+5 thì bẹt và dài. Ép cả 16 loại về thân cao đúng `440px` là kéo con bẹt rộng gấp đôi
+khung, mà hộp va chạm thì vẫn `30×30`. `440px` trong bảng rig chỉ là **hằng số của
+engine**, không phải chiều cao bắt buộc của mọi con.
 
 ### 4.1 Bốn khung nghĩa là gì
 
@@ -989,7 +1011,7 @@ nên gen dở dang cũng không sinh ra một tràng 404. Gen tới đâu sửa 
 | Gen xong | Sửa | Bắt buộc trọn bộ? |
 |---|---|---|
 | **Cả 18 khung nhân vật — ĐÃ XONG** | `PLAYER_RIG.unit` = chiều cao đầu đo được | cả nhóm nhân vật |
-| Cả 64 khung quái | `RIG_SET.mob: "v2"` | cả nhóm quái |
+| **Cả 64 khung quái — ĐÃ XONG** | `RIG_SET.mob: "v2"` | cả nhóm quái |
 | Cả 15 khung trùm | `RIG_SET.boss: "v2"` | cả nhóm trùm |
 | **`idle-1..3` — ĐÃ XONG** | `playerIdle: 3` | đủ 3 khung |
 | **`run-1..8` — ĐÃ XONG** | `playerRun: 8` | đủ 8 khung |
@@ -1026,6 +1048,12 @@ sang v2 nên không còn công tắc, cả 18 khung dùng chung `PLAYER_RIG`. B�
 từng khung của bộ nhân vật đời 1 đã bỏ khỏi engine; cần lại thì
 `python scripts/sprites.py check --emit-rig` in ra được.
 
+Bộ quái cũng từng có một bảng neo từng khung riêng (`mob-sprite-metrics.json`, đọc đè
+lên `mobRig()`). Đã bỏ: nó phóng mỗi loại quái theo khung cao nhất của loại đó nên con
+bẹt bị kéo rộng tới `105px` trong khi hộp va chạm chỉ `30px`, và nó dí chân từng khung
+xuống sàn nên mất nhịp bước. Canh một lần vào chính file ảnh bằng `normalize --group`
+làm được cả hai việc mà engine không phải mang thêm một bảng số.
+
 Gen lại nhóm quái hoặc trùm thì làm y hệt nhân vật: `normalize` → `check` → đổi
 `RIG_SET` của nhóm đó → sửa `ASSET_SET` trong `scripts/sprites.py` cho khớp, không thì
 báo cáo của script vô nghĩa.
@@ -1046,7 +1074,10 @@ python scripts/sprites.py check --set v2
 - [ ] Mọi khung nhân vật: khung vuông (≤ `1024²`), neo `(512±14, 960±14)` quy về khung
       tham chiếu — script tự quy đổi nếu xuất ở 512²
 - [ ] Cỡ đầu nhất quán giữa các khung: **soi bằng mắt**, đừng tin một mình cột thước đo
-- [ ] Mọi khung quái: khung `512²`, thân `440±8px`, neo `(256±10, 476±10)`
+- [ ] `guard`, `shoot-1`, `shoot-2` bị báo `tâm thân lệch ~20px` là **đúng, bỏ qua**:
+      ba dáng đó đứng tấn, hông dịch hẳn sang một bên. Chân vẫn đúng mặt sàn
+- [ ] Mọi khung quái: khung `512²`, **cả nhóm** neo `(256±10, 476±10)` — script kiểm
+      theo nhóm, không kiểm chiều cao thân từng con (xem mục 4)
 - [ ] Mọi khung trùm: khung `768²`, thân `660±12px`, neo `(384±14, 714±14)`
 - [ ] Nền `far`/`mid`/`near`: mép trái khớp mép phải (script báo `OK`)
 - [ ] Không tấm nào bị crop sát người

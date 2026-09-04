@@ -12,7 +12,6 @@
  * không phình to nhỏ giữa các khung hình — lỗi nặng nhất của bản trước.
  */
 import type { GameMap, GameMobSpawn, MobKind } from "@/content/types";
-import mobSpriteMetrics from "./mob-sprite-metrics.json";
 
 export type GameKey = "left" | "right" | "jump" | "atk" | "shoot" | "guard";
 export type GamePhase = "title" | "play" | "paused" | "clear" | "end";
@@ -210,13 +209,14 @@ const MID_H = 150;
  * docs/game-assets.md — khung 1024² cố định, không crop, cỡ nhân vật nhất
  * quán, nên cả bộ dùng chung một rig.
  *
- * Khai riêng từng nhóm để gen lại được từng nhóm một: nhân vật đã sang v2
- * (18 khung), quái và trùm vẫn đời 1 và vẫn đúng cỡ nhờ rig riêng của chúng.
- * Một công tắc chung cho cả ba là cách chắc chắn làm lệch nhóm chưa gen lại.
+ * Khai riêng từng nhóm để gen lại được từng nhóm một: nhân vật và quái đã
+ * sang v2, trùm vẫn đời 1 (khung 446², cắt sát alpha) và vẫn đúng cỡ nhờ rig
+ * riêng của nó. Một công tắc chung cho cả ba là cách chắc chắn làm lệch nhóm
+ * chưa gen lại.
  */
 type RigSet = "v1" | "v2";
 const RIG_SET: Record<"mob" | "boss", RigSet> = {
-  mob: "v1",
+  mob: "v2",
   boss: "v1",
 };
 
@@ -318,13 +318,6 @@ const FLYER_RIG_V1: Rig = { unit: 160 / 172, ax: 0.5, ay: 166 / 172 };
 const BOSS_RIG_V1: Rig = { unit: 416 / 446, ax: 0.5, ay: 431 / 446 };
 /** Quái đúng spec: khung 512×512, thân cao 440px, chân ở y = 476 */
 const MOB_RIG_V2: Rig = { unit: 440 / 512, ax: 0.5, ay: 476 / 512 };
-/**
- * Rider là loại quái duy nhất đã có ảnh đời 2, nên nó có rig riêng thay vì
- * dùng rig của bộ quái cũ. `unit` lấy theo khung 1 (thân cao 428/512) chứ
- * không phải khung cao nhất: bốn khung rider cố ý cao thấp khác nhau — lúc
- * lao thì người rạp xuống — và engine phải giữ nguyên cái khác nhau đó.
- */
-const RIDER_RIG: Rig = { unit: 428 / 512, ax: 0.5, ay: 476 / 512 };
 /** Trùm đúng spec: khung 768×768, thân cao 660px, chân ở y = 714 */
 const BOSS_RIG_V2: Rig = { unit: 660 / 768, ax: 0.5, ay: 714 / 768 };
 
@@ -334,7 +327,9 @@ function playerRig(): Rig {
   return PLAYER_RIG;
 }
 function mobRig(kind: MobKind): Rig {
-  if (kind === "rider") return RIDER_RIG;
+  // Cả bộ quái v2 dùng chung một rig, kể cả rider: bốn khung của một loại đã
+  // được canh chung một phép ở scripts/sprites.py --group, nên chênh lệch cao
+  // thấp còn lại giữa các khung chính là hoạt ảnh, engine không đụng vào.
   if (RIG_SET.mob === "v2") return MOB_RIG_V2;
   return kind === "flyer" ? FLYER_RIG_V1 : MOB_RIG_V1;
 }
@@ -2034,10 +2029,7 @@ export function createGame(
     const frame = mobFrame(o);
     const sprite = useArt ? mobSprite(lv, o.kind, frame) : null;
     if (sprite) {
-      const metrics = (mobSpriteMetrics as Record<string, {width:number;height:number;frames:Record<string,{x:number;y:number}>}>)[`m${lv + 1}-${o.kind}`];
-      const anchor = metrics?.frames[String(frame)];
-      const rig = anchor ? {unit:metrics.height / 512, ax:anchor.x / 512, ay:anchor.y / 512} : mobRig(o.kind);
-      drawRig(g!, sprite, rig, mobRef(o.kind), cx, floor + dy, {
+      drawRig(g!, sprite, mobRig(o.kind), mobRef(o.kind), cx, floor + dy, {
         flip: o.dir < 0,
         rot, sx, sy,
         alpha: deadFade,
