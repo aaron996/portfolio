@@ -2,16 +2,39 @@
  * Engine cho minigame "Ải Vận Hành".
  *
  * Không phụ thuộc React. Chỉ nhận một <canvas> cùng dữ liệu bản đồ, rồi
- * bắn ra event khi có chuyện đáng để giao diện biết (qua ải, nhặt kỹ năng,
- * hết game). HUD máu và thanh máu trùm vẽ thẳng trong canvas — nếu đẩy
- * chúng lên React thì mỗi khung hình phải re-render một lần, không đáng.
+ * bắn ra event khi có chuyện đáng để giao diện biết (qua ải, nhặt vật phẩm,
+ * tạm dừng, hết game). HUD máu và thanh máu trùm vẽ thẳng trong canvas — nếu
+ * đẩy chúng lên React thì mỗi khung hình phải re-render một lần, không đáng.
  *
  * Toàn bộ bố cục, tên quái, bẫy và vật phẩm đến từ content/content.vi.ts.
+ *
+ * ĐỌC MỤC "RIG" BÊN DƯỚI TRƯỚC KHI THÊM ASSET MỚI. Đó là chỗ giữ cho nhân vật
+ * không phình to nhỏ giữa các khung hình — lỗi nặng nhất của bản trước.
  */
 import type { GameMap, MobKind } from "@/content/types";
 
 export type GameKey = "left" | "right" | "jump" | "atk";
-export type GamePhase = "title" | "play" | "clear" | "end";
+export type GamePhase = "title" | "play" | "paused" | "clear" | "end";
+
+/** Thông tin đủ để giao diện dựng thẻ giải nghĩa vật phẩm vừa nhặt */
+export interface PickupInfo {
+  kind: "heal" | "tool";
+  name: string;
+  desc: string;
+  /** Số giây buff còn hiệu lực, 0 với vật phẩm hồi máu */
+  seconds: number;
+}
+
+/** Ảnh chụp trạng thái ải, để bảng tạm dừng nói đúng việc còn phải làm */
+export interface GameStatus {
+  mapIndex: number;
+  mobsLeft: number;
+  mobsTotal: number;
+  bossAlive: boolean;
+  bossHpPct: number;
+  hp: number;
+  mhp: number;
+}
 
 export interface GameHandlers {
   /** Đổi bản đồ — giao diện cập nhật tên ải trên HUD */
@@ -20,6 +43,10 @@ export interface GameHandlers {
   onCleared?: (index: number, skills: string[]) => void;
   /** Hạ trùm ải cuối */
   onFinished?: () => void;
+  /** Vào/ra trạng thái tạm dừng — kể cả khi engine tự dừng vì mất focus */
+  onPause?: (paused: boolean) => void;
+  /** Nhặt được vật phẩm, kèm câu giải nghĩa để dựng thẻ */
+  onPickup?: (info: PickupInfo) => void;
 }
 
 export interface GameLabels {
@@ -29,6 +56,8 @@ export interface GameLabels {
   /** Có {name} */
   pickupTool: string;
   pickupHeal: string;
+  /** Gợi ý phím tạm dừng, vẽ ở góc dưới canvas */
+  pauseHint: string;
 }
 
 /** Kích thước thế giới, cố định để bố cục trong content luôn đúng */
@@ -45,12 +74,90 @@ const LIME = "#d4f236";
 const TOOL_SECONDS = 12;
 
 /**
- * Ảnh asset, tải bất đồng bộ, có fallback về hình khối khi chưa có.
+ * Bố cục ba lớp nền, chốt bằng cách ghép thử cả năm ải rồi soi.
  *
- * Nhân vật, quái, trùm, bẫy, lớp nền giữa và vật phẩm dùng ảnh thật; nền
- * trời/xa/đất/bệ, hiệu ứng và giao diện vẫn vẽ bằng code. Hàm draw giữ sẵn
- * fallback hình khối để game không trống trong lúc ảnh đang tải.
+ * Ảnh nền đã được cắt hết hàng trong suốt trên dưới (`sprites.py pack
+ * --trim-v`), nên chiều cao vẽ ở đây chính là chiều cao phần có hình: lớp giữa
+ * cao 150 nghĩa là mái che chợ hàng ở ải Shopee cao đúng 150px, gấp đôi nhân
+ * vật. Chân lớp xa nằm cao hơn mặt đất 70px để phần dưới khuất sau lớp giữa —
+ * vật ở xa phải nằm cao hơn trên màn hình thì mới ra chiều sâu.
  */
+const FAR_H = 230;
+const FAR_BOTTOM_UP = 70;
+const MID_H = 150;
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ASSET — danh mục và RIG
+
+   1. MANIFEST khai báo đúng những file CÓ THẬT trong public/game. Engine
+      không đoán, không thử tải file chưa khai báo — nếu đoán thì mỗi lần
+      load game là một tràng 404 trong console. Gen thêm khung mới thì sửa số
+      ở đây, engine dùng ngay, không cần sửa chỗ khác.
+
+   2. RIG là cơ chế cố định tỷ lệ. Bản trước vẽ sprite theo kiểu "ép vừa một
+      cái hộp maxW × maxH", nên mỗi khung có tỉ lệ riêng: khung chém lọt hộp
+      104×74 thì cao 74px, khung đứng lọt hộp 54×70 thì cao 70px — nhân vật
+      phình lên 6% đúng lúc tung đòn, và vì asset đời 1 bị crop sát alpha rồi
+      normalize về cùng chiều cao, đầu nhân vật to nhỏ khác nhau từng khung.
+
+      Cách sửa: KHÔNG ép vừa hộp nữa. Mỗi khung khai báo ba số:
+        unit — phần chiều cao ảnh mà "thước đo" chiếm. Với nhân vật thước đo
+               là chiều cao ĐẦU (đỉnh tóc → chin); với quái là chiều cao thân.
+        ax   — hoành độ neo, tính theo bề rộng ảnh. Lấy ở hông, không lấy ở
+               giữa ảnh: khung chém có tay vung ra ngoài nên giữa ảnh lệch
+               khỏi thân người.
+        ay   — tung độ neo, tính theo chiều cao ảnh. Lấy ở gan bàn chân.
+      Engine phóng ảnh sao cho thước đo luôn bằng một số px cố định
+      (HEAD_PX / MOB_PX / BOSS_PX), rồi đặt điểm neo (ax, ay) đúng vào
+      (tâm thân, mặt sàn). Đầu không đổi cỡ, chân không trượt, dù khung nào.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Đời asset đang dùng, khai riêng cho từng nhóm. "v1" là bộ ảnh đời đầu, bị
+ * crop sát alpha nên phải hiệu chuẩn từng khung. "v2" là bộ gen theo spec ở
+ * docs/game-assets.md — khung 1024² cố định, không crop, cỡ nhân vật nhất
+ * quán, nên cả bộ dùng chung một rig.
+ *
+ * Khai riêng từng nhóm để gen lại được từng nhóm một: nhân vật đã sang v2
+ * (18 khung), quái và trùm vẫn đời 1 và vẫn đúng cỡ nhờ rig riêng của chúng.
+ * Một công tắc chung cho cả ba là cách chắc chắn làm lệch nhóm chưa gen lại.
+ */
+type RigSet = "v1" | "v2";
+const RIG_SET: Record<"mob" | "boss", RigSet> = {
+  mob: "v1",
+  boss: "v1",
+};
+
+/** File nào đã có thật. Xem khối chú thích trên trước khi sửa. */
+const ASSETS = {
+  /** player/idle.png, hoặc player/idle-1..N.png khi N > 1 */
+  playerIdle: 3,
+  /** player/run-1..N.png — 4 khung là tối thiểu, 8 khung mới thật mượt */
+  playerRun: 8,
+  /** player/attack-1..N.png — 2 khung (vung, tới đích), 3 khung có cả thu đòn */
+  playerAttack: 3,
+  /** "split" = có jump-rise/jump-fall/land riêng; "single" = chỉ có jump.png */
+  playerJump: "split" as "single" | "split",
+  /**
+   * mob/mX-kind-1..N.png — khai theo từng loại vì số khung không đều nhau.
+   * `default` áp cho loại không khai riêng. Khai 4 mà thiếu file thì con đó
+   * nhấp nháy về hình khối, nên chỉ tăng khi đã đủ khung cho MỌI ải có loại đó.
+   */
+  mobFrames: { default: 2, rider: 4 } as Record<string, number>,
+  /** boss/bX.png + bX-tel.png; 3 = có thêm bX-hit.png */
+  bossFrames: 3,
+  /** Đã có ảnh cho quái rider chưa. Chưa có thì engine vẽ bằng code. */
+  riderArt: true,
+  /** fx/slash-1..N.png. 0 = vẽ vệt chém bằng code. */
+  slashFx: 3,
+  /** bg/mX-sky.png — lớp trời vẽ bằng ảnh thay vì dốc màu code */
+  bgSky: false,
+  /** bg/mX-far.png — lớp xa vẽ bằng ảnh thay vì bằng code */
+  bgFar: true,
+  /** bg/mX-near.png — lớp tiền cảnh phủ trước nhân vật */
+  bgNear: false,
+};
+
 const ASSET_BASE = "/game";
 const imageCache = new Map<string, HTMLImageElement>();
 
@@ -64,56 +171,170 @@ function img(src: string): HTMLImageElement | null {
   return el.complete && el.naturalWidth > 0 ? el : null;
 }
 
-const PLAYER_SPRITES = {
-  idle: "player/idle.png",
-  run: ["player/run-1.png", "player/run-2.png", "player/run-3.png", "player/run-4.png"],
-  jump: "player/jump.png",
-  attack: ["player/attack-1.png", "player/attack-2.png"],
-  hurt: "player/hurt.png",
-};
+/** Ba số hiệu chuẩn của một khung hình. Xem khối chú thích RIG. */
+interface Rig {
+  unit: number;
+  ax: number;
+  ay: number;
+}
 
-/** Quái chỉ có ảnh cho tổ hợp ải × loại thực sự xuất hiện trong content.vi.ts */
-function mobSprite(mapIndex: number, kind: MobKind, frame: 1 | 2) {
-  return img(`mob/m${mapIndex + 1}-${kind}-${frame}.png`);
+/** Thước đo hiển thị — cố định, mọi khung đều bị phóng về đúng các số này */
+const HEAD_PX = 30;
+const MOB_PX = 44;
+const FLYER_PX = 32;
+const RIDER_PX = 52;
+const BOSS_PX = 100;
+
+/**
+ * Rig của bộ nhân vật v2, dùng cho cả 18 khung.
+ *
+ * Khung 1024×1024, tâm thân ở x = 512, gan bàn chân ở y = 960 — hai số này do
+ * `scripts/sprites.py normalize` đóng vào từng file nên đúng tuyệt đối.
+ *
+ * `unit` là chiều cao đầu chia chiều cao khung. 353px là số đo bằng mắt trên
+ * năm khung mà bộ đo tự động không bị cánh tay làm lệch (idle-1 356, idle-3
+ * 350, run-7 350, run-8 350, attack-2 356). Muốn nhân vật to/nhỏ hơn thì sửa
+ * HEAD_PX, đừng sửa số này — nó là thuộc tính của ảnh, không phải của game.
+ */
+const PLAYER_RIG: Rig = { unit: 353 / 1024, ax: 0.5, ay: 960 / 1024 };
+
+/** Quái đời 1: file 188×188 (bay 343×172), nội dung đệm 6px mỗi phía */
+const MOB_RIG_V1: Rig = { unit: 176 / 188, ax: 0.5, ay: 182 / 188 };
+const FLYER_RIG_V1: Rig = { unit: 160 / 172, ax: 0.5, ay: 166 / 172 };
+const BOSS_RIG_V1: Rig = { unit: 416 / 446, ax: 0.5, ay: 431 / 446 };
+/** Quái đúng spec: khung 512×512, thân cao 440px, chân ở y = 476 */
+const MOB_RIG_V2: Rig = { unit: 440 / 512, ax: 0.5, ay: 476 / 512 };
+/**
+ * Rider là loại quái duy nhất đã có ảnh đời 2, nên nó có rig riêng thay vì
+ * dùng rig của bộ quái cũ. `unit` lấy theo khung 1 (thân cao 428/512) chứ
+ * không phải khung cao nhất: bốn khung rider cố ý cao thấp khác nhau — lúc
+ * lao thì người rạp xuống — và engine phải giữ nguyên cái khác nhau đó.
+ */
+const RIDER_RIG: Rig = { unit: 428 / 512, ax: 0.5, ay: 476 / 512 };
+/** Trùm đúng spec: khung 768×768, thân cao 660px, chân ở y = 714 */
+const BOSS_RIG_V2: Rig = { unit: 660 / 768, ax: 0.5, ay: 714 / 768 };
+
+function playerRig(): Rig {
+  // Cả 18 khung cùng một rig. Bảng hiệu chuẩn từng khung của bộ đời 1 đã bỏ —
+  // cần lại thì `python scripts/sprites.py check --emit-rig` in ra được.
+  return PLAYER_RIG;
 }
-function bossSprite(mapIndex: number, telegraph: boolean) {
-  return img(`boss/b${mapIndex + 1}${telegraph ? "-tel" : ""}.png`);
+function mobRig(kind: MobKind): Rig {
+  if (kind === "rider") return RIDER_RIG;
+  if (RIG_SET.mob === "v2") return MOB_RIG_V2;
+  return kind === "flyer" ? FLYER_RIG_V1 : MOB_RIG_V1;
 }
+/** Số khung của một loại quái, xem chú thích ASSETS.mobFrames */
+const mobFrameCount = (kind: MobKind) => ASSETS.mobFrames[kind] ?? ASSETS.mobFrames.default;
+function mobRef(kind: MobKind): number {
+  if (kind === "flyer") return FLYER_PX;
+  if (kind === "rider") return RIDER_PX;
+  return MOB_PX;
+}
+const bossRig = () => (RIG_SET.boss === "v2" ? BOSS_RIG_V2 : BOSS_RIG_V1);
+
+/* ── tên file ─────────────────────────────────────────── */
+
+const P_IDLE =
+  ASSETS.playerIdle > 1
+    ? Array.from({ length: ASSETS.playerIdle }, (_, i) => `player/idle-${i + 1}.png`)
+    : ["player/idle.png"];
+const P_RUN = Array.from({ length: ASSETS.playerRun }, (_, i) => `player/run-${i + 1}.png`);
+const P_ATK = Array.from({ length: ASSETS.playerAttack }, (_, i) => `player/attack-${i + 1}.png`);
+const P_RISE = ASSETS.playerJump === "split" ? "player/jump-rise.png" : "player/jump.png";
+const P_FALL = ASSETS.playerJump === "split" ? "player/jump-fall.png" : "player/jump.png";
+const P_LAND = ASSETS.playerJump === "split" ? "player/land.png" : "player/jump.png";
+const P_HURT = "player/hurt.png";
+
 const TRAP_SPRITES = {
   spike: "trap/spike.png",
   saw: "trap/saw.png",
   pulseJet: "trap/pulse-jet.png",
   pulseVent: "trap/pulse-vent.png",
 };
-function bgMidSprite(mapIndex: number) {
-  return img(`bg/m${mapIndex + 1}-mid.png`);
+
+function mobSprite(mapIndex: number, kind: MobKind, frame: number) {
+  return img(`mob/m${mapIndex + 1}-${kind}-${frame}.png`);
+}
+/**
+ * Khung trùm: "-tel" cho lúc báo đòn, "-hit" cho lúc vừa trúng đòn (chỉ khi
+ * ASSETS.bossFrames >= 3, chưa có thì engine tô sáng lên bằng filter).
+ */
+function bossSprite(mapIndex: number, state: "idle" | "tel" | "hit") {
+  const n = mapIndex + 1;
+  if (state === "hit" && ASSETS.bossFrames >= 3) {
+    const hit = img(`boss/b${n}-hit.png`);
+    if (hit) return hit;
+  }
+  return img(`boss/b${n}${state === "tel" ? "-tel" : ""}.png`);
 }
 function pickupSprite(mapIndex: number, kind: Pickup["kind"]) {
   return img(`item/${kind}-${mapIndex + 1}.png`);
 }
 
-/** Vẽ ảnh theo đúng tỉ lệ, neo giữa ở chân thay vì ép vừa hitbox. */
-function drawSpriteAtFeet(
+/* ── vẽ ảnh ───────────────────────────────────────────── */
+
+interface DrawOpts {
+  flip?: boolean;
+  /** Nghiêng người, radian, quay quanh điểm neo */
+  rot?: number;
+  /** Bóp/giãn quanh điểm neo — dùng cho squash & stretch */
+  sx?: number;
+  sy?: number;
+  alpha?: number;
+  filter?: string;
+}
+
+/**
+ * Vẽ một khung theo rig: phóng ảnh sao cho thước đo bằng đúng `ref` px, rồi
+ * đặt điểm neo của ảnh vào (x, y). Không có tham số maxW/maxH — chiều rộng
+ * hoàn toàn tự do, đó chính là điểm khác so với bản trước.
+ */
+function drawRig(
   g: CanvasRenderingContext2D,
-  sprite: HTMLImageElement,
-  centerX: number,
-  feetY: number,
-  maxW: number,
-  maxH: number,
-  flip = false,
+  im: HTMLImageElement,
+  rig: Rig,
+  ref: number,
+  x: number,
+  y: number,
+  o: DrawOpts = {},
 ) {
-  const scale = Math.min(maxW / sprite.naturalWidth, maxH / sprite.naturalHeight);
-  const w = sprite.naturalWidth * scale;
-  const h = sprite.naturalHeight * scale;
+  const h = ref / rig.unit;
+  const w = h * (im.naturalWidth / im.naturalHeight);
   g.save();
-  g.translate(centerX, feetY);
-  if (flip) g.scale(-1, 1);
-  g.drawImage(sprite, -w / 2, -h, w, h);
+  if (o.alpha != null) g.globalAlpha = o.alpha;
+  if (o.filter) g.filter = o.filter;
+  g.translate(x, y);
+  if (o.rot) g.rotate(o.rot);
+  g.scale((o.flip ? -1 : 1) * (o.sx ?? 1), o.sy ?? 1);
+  g.drawImage(im, -rig.ax * w, -rig.ay * h, w, h);
   g.restore();
 }
 
+/** Vẽ đồ vật (vật phẩm, bẫy) — ép vừa hộp là đủ, chúng không có tỉ lệ cơ thể */
+function drawFit(
+  g: CanvasRenderingContext2D,
+  im: HTMLImageElement,
+  centerX: number,
+  bottomY: number,
+  maxW: number,
+  maxH: number,
+) {
+  const scale = Math.min(maxW / im.naturalWidth, maxH / im.naturalHeight);
+  const w = im.naturalWidth * scale;
+  const h = im.naturalHeight * scale;
+  g.drawImage(im, centerX - w / 2, bottomY - h, w, h);
+}
+
 /** Vẽ một ảnh lặp ngang để lấp đầy bề rộng `w`, cắt tấm cuối nếu dư */
-function drawTiled(g: CanvasRenderingContext2D, im: HTMLImageElement, x: number, y: number, w: number, h: number) {
+function drawTiled(
+  g: CanvasRenderingContext2D,
+  im: HTMLImageElement,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+) {
   const tileW = h * (im.naturalWidth / im.naturalHeight);
   let cx = x;
   while (cx < x + w) {
@@ -124,6 +345,28 @@ function drawTiled(g: CanvasRenderingContext2D, im: HTMLImageElement, x: number,
   }
 }
 
+/* ── màu ──────────────────────────────────────────────── */
+
+function hexRgb(hex: string): [number, number, number] {
+  const h = hex.replace("#", "");
+  const n = parseInt(h.length === 3 ? h.replace(/./g, (c) => c + c) : h, 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+/** Trộn hai màu hex, t = 0 lấy a, t = 1 lấy b */
+function mix(a: string, b: string, t: number): string {
+  const [r1, g1, b1] = hexRgb(a);
+  const [r2, g2, b2] = hexRgb(b);
+  const r = Math.round(r1 + (r2 - r1) * t);
+  const g = Math.round(g1 + (g2 - g1) * t);
+  const bl = Math.round(b1 + (b2 - b1) * t);
+  return `rgb(${r},${g},${bl})`;
+}
+/** Lặp toạ độ về đoạn [0, n) — % của JS trả số âm với số âm */
+const wrap = (v: number, n: number) => ((v % n) + n) % n;
+const easeOut = (t: number) => 1 - (1 - t) * (1 - t);
+
+/* ── thực thể ─────────────────────────────────────────── */
+
 interface Mob {
   kind: MobKind;
   name: string;
@@ -131,8 +374,17 @@ interface Mob {
   hp: number; dir: number;
   a: number; b: number;
   floor: number;
-  hurt: number; bob: number; anim: number; dead: boolean;
+  hurt: number; bob: number; anim: number;
+  dead: boolean;
+  /** Đếm lên sau khi chết, để chạy hoạt ảnh tan biến rồi mới thôi vẽ */
+  deadT: number;
   cd: number; dash: number;
+  /** Báo đòn: rider rú ga, charger rùng mình trước khi lao */
+  tel: number;
+  /** Giật lùi sau khi bắn, giảm dần về 0 */
+  recoil: number;
+  /** Bước chân gần nhất, để chỉ nhả bụi một lần mỗi bước */
+  stepPhase: number;
 }
 interface Boss {
   x: number; y: number; w: number; h: number;
@@ -147,16 +399,34 @@ interface Trap {
 interface Pickup {
   kind: "heal" | "tool";
   name: string;
+  desc: string;
   x: number; y: number;
   taken: boolean; bob: number;
 }
-interface Particle { x: number; y: number; vx: number; vy: number; life: number; color: string }
-interface Shot { x: number; y: number; vx: number; vy: number; r: number }
+interface Particle {
+  x: number; y: number; vx: number; vy: number;
+  life: number; max: number; color: string;
+  /** "spark" bay theo trọng lực, "dust" nở ra rồi tan, "ring" là vòng loang */
+  kind: "spark" | "dust" | "ring";
+  size: number;
+}
+interface Shot { x: number; y: number; vx: number; vy: number; r: number; t: number }
+/** Một nhát chém đã bay ra khỏi tay — vẽ vệt lưỡi liềm rồi tự tan */
+interface Slash {
+  x: number; y: number; face: number;
+  t: number; dur: number;
+  reach: number; thick: number; color: string;
+  /** Nhát thứ ba của combo vẽ to và sáng hơn */
+  heavy: boolean;
+}
 
 export interface GameInstance {
   loadMap(index: number): void;
   resume(): void;
   pause(): void;
+  togglePause(): void;
+  isPaused(): boolean;
+  status(): GameStatus;
   press(key: GameKey): void;
   release(key: GameKey): void;
   destroy(): void;
@@ -188,31 +458,60 @@ export function createGame(
   let last = 0;
   let shake = 0;
   let fade = 0;
+  let flash = 0;
   let msg = "";
   let msgT = 0;
   let worldTime = 0;
   let accumulator = 0;
+  /**
+   * Đứng hình vài chục ms đúng lúc đòn trúng. Đây là mẹo cũ của thể loại
+   * này: cùng một sát thương, có hit-stop thì đòn "nặng" hẳn lên.
+   */
+  let freeze = 0;
 
   const keys: Record<GameKey, boolean> = { left: false, right: false, jump: false, atk: false };
 
   const player = {
     x: 60, y: GY - 40, w: 26, h: 40,
     vx: 0, vy: 0, face: 1,
-    hp: 5, mhp: 5, inv: 0, atk: 0, cd: 0, ground: false,
-    tool: 0, hurtT: 0, runFrame: 0,
+    hp: 5, mhp: 5, inv: 0, atk: 0, atkDur: 0.28, cd: 0, ground: false,
+    tool: 0, hurtT: 0,
+    /** Pha chu kỳ chạy, 0..1 — quy ra khung hình và cả nhịp nhún */
+    runPhase: 0,
     attackActive: 0, attackHit: false, attackBuffed: false,
+    /** Combo ba nhát: đánh tiếp trong 0,55s thì lên nhát kế */
+    combo: 0, comboT: 0,
+    /** Đếm ngược hoạt ảnh chạm đất, để bóp người một nhịp */
+    landT: 0,
+    /** Thời gian còn được nhảy sau khi rời mặt đất (coyote time) */
+    coyote: 0,
+    /** Bấm nhảy sớm trước khi chạm đất vẫn được ghi nhận */
+    jumpBuf: 0,
+    /** Tốc độ rơi khung trước, để biết đáp đất mạnh hay nhẹ */
+    fallSpeed: 0,
   };
   let mobs: Mob[] = [];
   let traps: Trap[] = [];
   let pickups: Pickup[] = [];
   let parts: Particle[] = [];
   let shots: Shot[] = [];
+  let slashes: Slash[] = [];
   let boss: Boss | null = null;
   let cam = 0;
 
   /* ── vòng đời ải ─────────────────────────────────────── */
 
-  const MOB_HP: Record<MobKind, number> = { walker: 2, flyer: 2, charger: 3, shooter: 2 };
+  const MOB_HP: Record<MobKind, number> = {
+    walker: 2, flyer: 2, charger: 3, shooter: 2, rider: 3,
+  };
+
+  /** Hộp thân quái theo loại. Rider ngồi xe nên rộng và thấp hơn. */
+  function mobBox(kind: MobKind) {
+    if (kind === "flyer") return { w: 30, h: 28 };
+    // Rider ngồi trên xe: hộp rộng và cao hơn để phủ cả thân người, không chỉ cái xe
+    if (kind === "rider") return { w: 42, h: 40 };
+    return { w: 30, h: 30 };
+  }
 
   function loadMap(index: number) {
     lv = index;
@@ -220,30 +519,36 @@ export function createGame(
     Object.assign(player, {
       x: 60, y: GY - 40, vx: 0, vy: 0, face: 1,
       hp: 5, inv: 0, atk: 0, cd: 0, ground: false, tool: 0, hurtT: 0,
-      runFrame: 0, attackActive: 0, attackHit: false, attackBuffed: false,
+      runPhase: 0, attackActive: 0, attackHit: false, attackBuffed: false,
+      combo: 0, comboT: 0, landT: 0, coyote: 0, jumpBuf: 0, fallSpeed: 0,
     });
     parts = [];
     shots = [];
+    slashes = [];
     boss = null;
     cam = 0;
     shake = 0;
     fade = 0;
+    flash = 0;
+    freeze = 0;
     msg = "";
     msgT = 0;
 
     mobs = m.mobs.map((sp) => {
       const floor = sp.y ?? GY;
       const range = sp.range ?? 70;
-      const h = sp.kind === "flyer" ? 28 : 30;
+      const { w, h } = mobBox(sp.kind);
       return {
         kind: sp.kind, name: sp.name,
-        x: sp.x, y: floor - h, w: 30, h,
+        x: sp.x, y: floor - h, w, h,
         hp: MOB_HP[sp.kind],
         dir: Math.random() < 0.5 ? -1 : 1,
         a: sp.x - range, b: sp.x + range,
         floor,
-        hurt: 0, bob: Math.random() * 6, anim: Math.random(), dead: false,
-        cd: 1 + Math.random(), dash: 0,
+        hurt: 0, bob: Math.random() * 6, anim: Math.random(),
+        dead: false, deadT: 0,
+        cd: 1 + Math.random(), dash: 0, tel: 0, recoil: 0,
+        stepPhase: 0,
       };
     });
 
@@ -258,7 +563,7 @@ export function createGame(
     }));
 
     pickups = m.pickups.map((p) => ({
-      kind: p.kind, name: p.name, x: p.x, y: p.y,
+      kind: p.kind, name: p.name, desc: p.desc, x: p.x, y: p.y,
       taken: false, bob: Math.random() * 6,
     }));
 
@@ -272,43 +577,78 @@ export function createGame(
       hurt: 0, tel: 0, cd: 2.2, bob: 0, dash: 0,
     };
     say(labels.bossAppear.replace("{boss}", maps[lv].boss), 1.6);
+    flash = 0.5;
+    shake = 7;
   }
 
   function clearMap() {
     phase = "clear";
     fade = 0;
     const m = maps[lv];
-    if (boss) puff(boss.x + boss.w / 2, boss.y + boss.h / 2, LIME, 40);
+    if (boss) {
+      puff(boss.x + boss.w / 2, boss.y + boss.h / 2, LIME, 40);
+      ring(boss.x + boss.w / 2, boss.y + boss.h / 2, LIME);
+    }
     boss = null;
+    flash = 0.6;
     handlers.onCleared?.(lv, m.skills);
     if (lv + 1 >= maps.length) handlers.onFinished?.();
   }
 
   /* ── hành động ───────────────────────────────────────── */
 
-  function jump() {
-    if (phase !== "play" || !player.ground) return;
+  function tryJump() {
+    if (phase !== "play") return;
+    if (!player.ground && player.coyote <= 0) return;
     player.vy = -684;
     player.ground = false;
-    puff(player.x + player.w / 2, player.y + player.h, "#ffffff", 4);
+    player.coyote = 0;
+    player.jumpBuf = 0;
+    dust(player.x + player.w / 2, player.y + player.h, 6, 1);
   }
 
   function attack() {
     if (phase !== "play" || player.cd > 0) return;
     const buffed = player.tool > 0;
-    player.atk = buffed ? 0.2 : 0.28;
-    player.attackActive = buffed ? 0.085 : 0.12;
+    // Combo ba nhát: hai nhát đầu nhanh, nhát ba chậm hơn nhưng nặng
+    player.combo = player.comboT > 0 ? (player.combo + 1) % 3 : 0;
+    player.comboT = 0.55;
+    const heavy = player.combo === 2;
+
+    player.atkDur = heavy ? 0.34 : buffed ? 0.2 : 0.28;
+    player.atk = player.atkDur;
+    player.attackActive = heavy ? 0.14 : buffed ? 0.085 : 0.12;
     player.attackHit = false;
     player.attackBuffed = buffed;
-    player.cd = buffed ? 0.23 : 0.34;
+    player.cd = heavy ? 0.42 : buffed ? 0.23 : 0.34;
+
+    // Nhích người theo hướng chém — đòn có lực đẩy thì mới thấy "ăn"
+    if (player.ground) player.vx += player.face * (heavy ? 130 : 70);
   }
 
   /** Sát thương rơi đúng vào khung chém, không xảy ra ngay lúc người chơi bấm. */
   function resolveAttack() {
     if (player.attackHit) return;
     player.attackHit = true;
-    const reach = player.attackBuffed ? 84 : 58;
-    const dmg = player.attackBuffed ? 2 : 1;
+    const heavy = player.combo === 2;
+    const buffed = player.attackBuffed;
+    const reach = (buffed ? 84 : 58) * (heavy ? 1.22 : 1);
+    const dmg = (buffed ? 2 : 1) + (heavy ? 1 : 0);
+
+    // Vệt chém bay ra khỏi tay, sống độc lập với khung hình nhân vật
+    slashes.push({
+      // Tâm cung đặt trước thân người, không đặt ở giữa ngực — để lưỡi quét
+      // trong khoảng trống phía trước chứ không quét xuyên qua chính mình
+      x: player.x + player.w / 2 + player.face * 16,
+      y: player.y + 16,
+      face: player.face,
+      t: 0,
+      dur: heavy ? 0.3 : 0.22,
+      reach: reach * 0.62,
+      thick: heavy ? 20 : buffed ? 16 : 12,
+      color: buffed ? LIME : "#f2ffc4",
+      heavy,
+    });
 
     // Tầm chém rộng hơn thân người, để đánh được trước khi bị quái chạm vào
     const hb = {
@@ -316,26 +656,38 @@ export function createGame(
       y: player.y + 2, w: reach, h: 34,
     };
     const m = maps[lv];
+    let hitAny = false;
 
     for (const o of mobs) {
       if (o.dead || !overlap(hb, o)) continue;
+      hitAny = true;
       o.hp -= dmg;
       o.hurt = 0.18;
-      o.x += player.face * 14;
-      shake = Math.max(shake, 3);
+      o.x += player.face * (heavy ? 22 : 14);
+      o.tel = 0;
+      o.dash = 0;
+      spark(o.x + o.w / 2, o.y + o.h / 2, player.face);
       puff(o.x + o.w / 2, o.y + o.h / 2, m.palette.mob, 6);
       if (o.hp <= 0) {
         o.dead = true;
-        puff(o.x + o.w / 2, o.y + o.h / 2, LIME, 14);
+        o.deadT = 0;
+        puff(o.x + o.w / 2, o.y + o.h / 2, LIME, 16);
+        ring(o.x + o.w / 2, o.y + o.h / 2, LIME);
       }
     }
 
     if (boss && overlap(hb, boss)) {
+      hitAny = true;
       boss.hp -= dmg;
       boss.hurt = 0.16;
-      shake = Math.max(shake, 5);
+      spark(boss.x + boss.w / 2, boss.y + boss.h / 2, player.face);
       puff(boss.x + boss.w / 2, boss.y + boss.h / 2, m.palette.boss, 8);
       if (boss.hp <= 0) clearMap();
+    }
+
+    if (hitAny) {
+      shake = Math.max(shake, heavy ? 7 : 4);
+      freeze = reduced ? 0 : heavy ? 0.075 : 0.045;
     }
   }
 
@@ -346,12 +698,16 @@ export function createGame(
     player.hurtT = 0.35;
     player.vy = -360;
     player.vx = dir * 450;
+    player.combo = 0;
+    player.comboT = 0;
     shake = 6;
+    flash = 0.25;
+    freeze = reduced ? 0 : 0.06;
     puff(player.x + player.w / 2, player.y + player.h / 2, "#ff6b5e", 8);
     if (player.hp <= 0) {
       say(labels.deathLine, 1.4);
       window.setTimeout(() => {
-        if (phase === "play") loadMap(lv);
+        if (phase === "play" || phase === "paused") loadMap(lv);
       }, 700);
     }
   }
@@ -365,19 +721,49 @@ export function createGame(
   function puff(x: number, y: number, color: string, n: number) {
     for (let i = 0; i < n; i++) {
       parts.push({
-        x, y, color,
+        x, y, color, kind: "spark", size: 5,
         vx: (Math.random() - 0.5) * 300,
         vy: -Math.random() * 240 - 60,
-        life: 0.55,
+        life: 0.55, max: 0.55,
       });
     }
+  }
+  /** Bụi: nở ra, bay chậm, không rơi. Dùng cho bước chân và lúc đáp đất. */
+  function dust(x: number, y: number, n: number, spread = 1) {
+    for (let i = 0; i < n; i++) {
+      parts.push({
+        x: x + (Math.random() - 0.5) * 8 * spread,
+        y, color: "rgba(255,255,255,.7)", kind: "dust",
+        size: 3 + Math.random() * 4,
+        vx: (Math.random() - 0.5) * 90 * spread,
+        vy: -Math.random() * 40 - 10,
+        life: 0.4, max: 0.4,
+      });
+    }
+  }
+  /** Tia trắng bắn ra đúng chỗ lưỡi chém ăn vào thân quái */
+  function spark(x: number, y: number, face: number) {
+    for (let i = 0; i < 7; i++) {
+      const a = (Math.random() - 0.5) * 1.6;
+      const sp = 260 + Math.random() * 300;
+      parts.push({
+        x, y, color: "#ffffff", kind: "spark", size: 4,
+        vx: Math.cos(a) * sp * face,
+        vy: Math.sin(a) * sp,
+        life: 0.22, max: 0.22,
+      });
+    }
+  }
+  /** Vòng sáng loang ra — đánh dấu chỗ vừa có gì đó nổ */
+  function ring(x: number, y: number, color: string) {
+    parts.push({ x, y, vx: 0, vy: 0, life: 0.4, max: 0.4, color, kind: "ring", size: 10 });
   }
   function say(text: string, seconds: number) {
     msg = text;
     msgT = seconds;
   }
   function fire(x: number, y: number, vx: number, vy: number) {
-    shots.push({ x, y, vx, vy, r: 9 });
+    shots.push({ x, y, vx, vy, r: 9, t: 0 });
   }
 
   /** Hộp gây sát thương của một cái bẫy tại thời điểm hiện tại, null nếu đang tắt */
@@ -393,15 +779,25 @@ export function createGame(
 
   function stepMob(o: Mob, dt: number) {
     o.hurt = Math.max(0, o.hurt - dt);
+    o.recoil = Math.max(0, o.recoil - dt * 4);
     o.bob += dt * 6;
     o.anim += dt;
     if (o.hurt > 0) return;
+
+    const dx = player.x + player.w / 2 - (o.x + o.w / 2);
+    const dy = player.y - o.y;
 
     if (o.kind === "walker") {
       o.x += o.dir * 0.92 * dt * 60;
       if (o.x < o.a) { o.x = o.a; o.dir = 1; }
       if (o.x > o.b) { o.x = o.b; o.dir = -1; }
       o.y = o.floor - o.h;
+      // Nhả bụi mỗi lần chân chạm đất, lấy nhịp từ chính chu kỳ khung hình
+      const ph = Math.floor(o.anim * 6);
+      if (ph !== o.stepPhase) {
+        o.stepPhase = ph;
+        if (Math.random() < 0.5) dust(o.x + o.w / 2, o.y + o.h, 1, 0.5);
+      }
     } else if (o.kind === "flyer") {
       o.x += o.dir * 0.75 * dt * 60;
       if (o.x < o.a) { o.x = o.a; o.dir = 1; }
@@ -412,27 +808,63 @@ export function createGame(
       if (o.dash > 0) {
         o.dash -= dt;
         o.x += o.dir * 4.4 * dt * 60;
+        if (Math.random() < 0.4) dust(o.x + o.w / 2, o.y + o.h, 1, 0.6);
         if (o.dash <= 0) o.cd = 1.3;
+      } else if (o.tel > 0) {
+        // Rùng mình 0,25s trước khi lao — đủ để người chơi kịp nhảy
+        o.tel -= dt;
+        if (o.tel <= 0) {
+          o.dash = 0.75;
+          puff(o.x + o.w / 2, o.y + o.h, HAZARD, 5);
+        }
       } else {
         o.cd -= dt;
-        const near = Math.abs(player.x - o.x) < 240 && Math.abs(player.y - o.y) < 70;
-        if (near && o.cd <= 0) {
-          o.dir = player.x < o.x ? -1 : 1;
-          o.dash = 0.75;
-          puff(o.x + o.w / 2, o.y, HAZARD, 4);
+        if (Math.abs(dx) < 240 && Math.abs(dy) < 70 && o.cd <= 0) {
+          o.dir = dx < 0 ? -1 : 1;
+          o.tel = 0.25;
         }
       }
       // Không cho lao ra khỏi vùng của nó quá xa
       o.x = Math.max(o.a - 140, Math.min(o.b + 140, o.x));
+    } else if (o.kind === "rider") {
+      // Rider: nhìn xa nhất, báo đòn rõ nhất, lao nhanh nhất
+      o.y = o.floor - o.h;
+      if (o.dash > 0) {
+        o.dash -= dt;
+        o.x += o.dir * 8.2 * dt * 60;
+        dust(o.x + o.w / 2 - o.dir * 14, o.y + o.h, 1, 1.2);
+        if (o.dash <= 0) {
+          o.cd = 1.5;
+          o.dir = -o.dir;
+        }
+      } else if (o.tel > 0) {
+        o.tel -= dt;
+        if (o.tel <= 0) {
+          o.dash = 0.85;
+          puff(o.x + o.w / 2, o.y + o.h, "#EE4D2D", 8);
+          shake = Math.max(shake, 3);
+        }
+      } else {
+        o.cd -= dt;
+        o.x += o.dir * 0.55 * dt * 60;
+        if (o.x < o.a) { o.x = o.a; o.dir = 1; }
+        if (o.x > o.b) { o.x = o.b; o.dir = -1; }
+        if (Math.abs(dx) < 430 && Math.abs(dy) < 90 && o.cd <= 0) {
+          o.dir = dx < 0 ? -1 : 1;
+          o.tel = 0.5;
+        }
+      }
+      o.x = Math.max(o.a - 420, Math.min(o.b + 420, o.x));
     } else {
       // shooter: đứng im, nhả đạn về phía người chơi
       o.y = o.floor - o.h;
       o.cd -= dt;
       if (o.cd <= 0) {
         o.cd = 2.2;
-        const dir = player.x < o.x ? -1 : 1;
-        o.dir = dir;
-        fire(o.x + o.w / 2, o.y + o.h / 2, dir * 3.4, 0);
+        o.dir = dx < 0 ? -1 : 1;
+        o.recoil = 1;
+        fire(o.x + o.w / 2, o.y + o.h / 2, o.dir * 3.4, 0);
+        puff(o.x + o.w / 2 + o.dir * 14, o.y + o.h * 0.5, HAZARD, 3);
       }
     }
   }
@@ -446,6 +878,7 @@ export function createGame(
       b.dash -= dt;
       b.x += b.dir * 9 * dt * 60;
       b.x = Math.max(60, Math.min(WORLD - b.w - 20, b.x));
+      if (Math.random() < 0.5) dust(b.x + b.w / 2, b.y + b.h, 2, 1.4);
       if (b.dash <= 0) b.cd = 1.8;
       return;
     }
@@ -457,6 +890,7 @@ export function createGame(
         if (kind === "slam") {
           fire(b.x + 8, GY - 16, -4.2, 0);
           fire(b.x + b.w - 8, GY - 16, 4.2, 0);
+          dust(b.x + b.w / 2, b.y + b.h, 10, 2.2);
         } else if (kind === "volley") {
           const dir = player.x < b.x ? -1 : 1;
           fire(b.x + b.w / 2, b.y + 20, dir * 4.4, -1.1);
@@ -486,6 +920,7 @@ export function createGame(
     worldTime += dt;
 
     player.cd = Math.max(0, player.cd - dt);
+    player.comboT = Math.max(0, player.comboT - dt);
     const previousAttack = player.atk;
     player.atk = Math.max(0, player.atk - dt);
     if (
@@ -496,23 +931,34 @@ export function createGame(
     player.inv = Math.max(0, player.inv - dt);
     player.tool = Math.max(0, player.tool - dt);
     player.hurtT = Math.max(0, player.hurtT - dt);
+    player.landT = Math.max(0, player.landT - dt);
+    player.coyote = Math.max(0, player.coyote - dt);
+    player.jumpBuf = Math.max(0, player.jumpBuf - dt);
     msgT = Math.max(0, msgT - dt);
+    flash = Math.max(0, flash - dt * 2.6);
     shake *= Math.exp(-9 * dt);
 
     const dir = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
     if (dir) {
       player.vx += dir * 2300 * dt;
-      player.face = dir;
+      // Đang chém thì không cho quay người — quay giữa đòn trông như trượt
+      if (player.atk <= 0) player.face = dir;
     }
     player.vx *= Math.exp(-12 * dt);
     player.vx = Math.max(-360, Math.min(360, player.vx));
     const moveX = player.vx * dt;
     player.x = Math.max(0, Math.min(WORLD - player.w, player.x + moveX));
     if (player.ground && Math.abs(moveX) > 0.01) {
-      player.runFrame += Math.abs(moveX) / 32;
+      // Chu kỳ chạy tính theo quãng đường, không theo thời gian: chạy chậm thì
+      // chân bước chậm, không bị hiện tượng trượt chân. 150px một chu kỳ hai
+      // sải chân — ở tốc độ tối đa 360px/s là 0,42 giây một chu kỳ, đúng nhịp
+      // chạy của người. Đặt ngắn hơn là chân đạp như xe đạp.
+      player.runPhase = wrap(player.runPhase + Math.abs(moveX) / 150, 1);
     }
 
+    const wasGround = player.ground;
     const prevBottom = player.y + player.h;
+    player.fallSpeed = player.vy;
     player.vy += 2232 * dt;
     player.y += player.vy * dt;
     player.ground = false;
@@ -533,10 +979,21 @@ export function createGame(
         player.ground = true;
       }
     }
+    if (player.ground && !wasGround) {
+      // Vừa đáp đất: bóp người một nhịp, nhả bụi theo độ mạnh cú rơi
+      const hard = Math.min(1, player.fallSpeed / 700);
+      player.landT = 0.06 + hard * 0.1;
+      if (hard > 0.25) dust(player.x + player.w / 2, player.y + player.h, 2 + Math.round(hard * 6));
+      if (player.jumpBuf > 0) tryJump();
+    }
+    if (!player.ground && wasGround && player.vy > 0) player.coyote = 0.09;
 
     let alive = 0;
     for (const o of mobs) {
-      if (o.dead) continue;
+      if (o.dead) {
+        o.deadT += dt;
+        continue;
+      }
       alive++;
       stepMob(o, dt);
       if (overlap(player, o)) hurtPlayer(player.x < o.x ? -1 : 1);
@@ -562,6 +1019,7 @@ export function createGame(
       const box = { x: p.x, y: p.y - 26, w: 24, h: 24 };
       if (!overlap(player, box)) continue;
       p.taken = true;
+      ring(p.x + 12, p.y - 14, p.kind === "tool" ? LIME : "#ff8f85");
       if (p.kind === "heal") {
         player.hp = Math.min(player.mhp, player.hp + 1);
         say(labels.pickupHeal, 1.2);
@@ -571,6 +1029,12 @@ export function createGame(
         say(labels.pickupTool.replace("{name}", p.name), 1.6);
         puff(p.x + 12, p.y - 14, LIME, 16);
       }
+      handlers.onPickup?.({
+        kind: p.kind,
+        name: p.name,
+        desc: p.desc,
+        seconds: p.kind === "tool" ? TOOL_SECONDS : 0,
+      });
     }
 
     if (boss) {
@@ -579,6 +1043,7 @@ export function createGame(
     }
 
     shots = shots.filter((s) => {
+      s.t += dt;
       s.x += s.vx * dt * 60;
       s.y += s.vy * dt * 60;
       if (overlap(player, { x: s.x - s.r, y: s.y - s.r, w: s.r * 2, h: s.r * 2 })) {
@@ -588,64 +1053,294 @@ export function createGame(
       return s.x > -30 && s.x < WORLD + 30 && s.y > -30 && s.y < H + 60;
     });
 
+    slashes = slashes.filter((s) => {
+      s.t += dt;
+      return s.t < s.dur;
+    });
+
     parts = parts.filter((p) => {
       p.life -= dt;
-      p.vy += 1260 * dt;
+      if (p.kind === "spark") {
+        p.vy += 1260 * dt;
+      } else if (p.kind === "dust") {
+        p.vx *= Math.exp(-3 * dt);
+        p.vy *= Math.exp(-2 * dt);
+      }
       p.x += p.vx * dt;
       p.y += p.vy * dt;
       return p.life > 0;
     });
 
-    const want = Math.max(0, Math.min(WORLD - W, player.x + player.w / 2 - W / 2));
-    cam += (want - cam) * Math.min(1, dt * 7);
+    // Camera nhìn trước một đoạn theo hướng chạy — thấy quái sớm hơn nửa nhịp
+    const lead = player.face * 54 * Math.min(1, Math.abs(player.vx) / 300);
+    const want = Math.max(0, Math.min(WORLD - W, player.x + player.w / 2 + lead - W / 2));
+    cam += (want - cam) * Math.min(1, dt * 6);
     if (phase === "clear") fade += dt;
   }
 
-  /* ── vẽ ──────────────────────────────────────────────── */
+  /* ── vẽ: nền ─────────────────────────────────────────── */
 
-  function drawBackground(m: GameMap) {
+  /**
+   * Lớp xa vẽ bằng code, mỗi ải một dàn bóng đổ riêng theo `deco`. Nền chỉ có
+   * tông màu thì ải nào cũng như ải nào — có silhouette thì nhìn một giây là
+   * biết đang ở cảng, ở kho hay ở phòng dữ liệu. Khi đã gen được lớp xa vẽ
+   * tay (ASSETS.bgFar) thì ảnh thắng, hàm này chỉ còn là dự phòng.
+   */
+  function drawFar(m: GameMap) {
     const p = m.palette;
-    g!.fillStyle = p.sky;
-    g!.fillRect(0, 0, W, H);
+    // Lớp giữa (ảnh vẽ tay) phủ dải GY-150 → GY, nên mọi thứ vẽ ở đây chỉ
+    // đọc được ở phần cao hơn y = 194. Vì vậy chân của kết cấu đặt ở B, thấp
+    // hơn mép lớp giữa một chút, và chỉ phần trên nhô lên trời mới thấy —
+    // đúng kiểu đường chân trời phía sau một hàng container.
+    const B = GY - 144;
+    // Càng xa càng nhạt về phía trời: đó là cách rẻ nhất để có chiều sâu
+    const near = mix(p.far, p.sky, 0.18);
+    const back = mix(p.far, p.sky, 0.5);
+    const glass = mix(p.sky, "#ffffff", 0.55);
+    const step = 320;
 
-    g!.fillStyle = p.far;
-    for (let i = 0; i < 9; i++) {
-      const x = ((i * 300 - cam * 0.25) % (W + 300)) - 150;
-      const h = 70 + ((i * 53) % 60);
-      g!.fillRect(x, GY - h - 40, 150, h + 40);
-    }
+    g!.save();
+    g!.globalAlpha = 0.92;
 
-    const mid = bgMidSprite(lv);
-    if (mid) {
-      // Lớp giữa vẽ bằng ảnh thật, lặp ngang liên tục theo camera
-      const midH = 150;
-      const tileW = midH * (mid.naturalWidth / mid.naturalHeight);
-      const offset = ((cam * 0.55) % tileW + tileW) % tileW;
-      drawTiled(g!, mid, -offset, GY - midH, W + tileW, midH);
-    } else {
-      for (let i = 0; i < 11; i++) {
-        const x = ((i * 220 - cam * 0.55) % (W + 220)) - 110;
-        const h = 48 + ((i * 71) % 54);
-        g!.fillStyle = p.mid;
-        if (m.deco === "container") {
-          g!.fillRect(x, GY - h, 120, h);
-          g!.fillStyle = p.far;
-          g!.fillRect(x + 8, GY - h + 9, 104, 5);
-        } else if (m.deco === "gear") {
+    for (let i = -1; i < 4; i++) {
+      const x = i * step - wrap(cam * 0.25, step);
+      const seed = wrap(i + Math.floor((cam * 0.25) / step), 7);
+
+      if (m.deco === "container") {
+        // Cảng: tàu container, cần cẩu giàn, chồng container xếp cao
+        g!.fillStyle = back;
+        // thân tàu, cabin và ống khói — nhô lên trên hàng container
+        g!.beginPath();
+        g!.moveTo(x + 22, B - 34);
+        g!.lineTo(x + 214, B - 34);
+        g!.lineTo(x + 196, B + 6);
+        g!.lineTo(x + 44, B + 6);
+        g!.closePath();
+        g!.fill();
+        g!.fillRect(x + 150, B - 66, 44, 32);
+        g!.fillRect(x + 166, B - 84, 13, 18);
+        g!.fillStyle = glass;
+        for (let wy = 0; wy < 2; wy++) g!.fillRect(x + 156, B - 60 + wy * 11, 32, 5);
+
+        // cần cẩu giàn: hai chân, dầm ngang, tay chìa ra phía tàu, buồng lái
+        const craneH = 126 + seed * 7;
+        g!.fillStyle = near;
+        g!.fillRect(x + 232, B - craneH, 9, craneH);
+        g!.fillRect(x + 296, B - craneH, 9, craneH);
+        g!.fillRect(x + 214, B - craneH, 104, 10);
+        g!.fillRect(x + 120, B - craneH + 1, 96, 7);
+        g!.fillRect(x + 258, B - craneH - 24, 22, 24);
+        // xe con treo dây và móc
+        g!.fillRect(x + 160, B - craneH + 8, 18, 5);
+        g!.fillRect(x + 167, B - craneH + 13, 3, 26);
+        g!.fillRect(x + 156, B - craneH + 39, 26, 12);
+
+        // chồng container: đọc rõ nhất khi cao thấp so le
+        for (let c = 0; c < 7; c++) {
+          const stack = 2 + ((c * 3 + seed) % 3);
+          for (let s = 0; s < stack; s++) {
+            g!.fillStyle = (c + s) % 2 ? back : near;
+            g!.fillRect(x + 6 + c * 44, B - 4 - (s + 1) * 15, 40, 14);
+          }
+        }
+      } else if (m.deco === "crate") {
+        // Kho phân loại: vì kèo mái, đèn treo, băng chuyền trên cao, chồng thùng
+        g!.fillStyle = back;
+        g!.fillRect(x, 62, step, 9);
+        for (let t = 0; t < 6; t++) {
+          const tx = x + t * 54;
           g!.beginPath();
-          g!.arc(x + 60, GY - h, 30, 0, Math.PI * 2);
+          g!.moveTo(tx, 71);
+          g!.lineTo(tx + 27, 116);
+          g!.lineTo(tx + 54, 71);
+          g!.closePath();
           g!.fill();
-        } else {
-          g!.fillRect(x, GY - h, 90, h);
+        }
+        for (let l = 0; l < 3; l++) {
+          g!.fillRect(x + 60 + l * 100, 71, 5, 30);
+          g!.beginPath();
+          g!.arc(x + 62 + l * 100, 106, 11, 0, Math.PI * 2);
+          g!.fill();
+        }
+        // băng chuyền treo, chạy chéo qua cả bề rộng
+        g!.fillStyle = near;
+        g!.fillRect(x + 10, B - 116, step - 20, 13);
+        for (let s = 0; s < 5; s++) g!.fillRect(x + 40 + s * 60, B - 103, 6, 18);
+        // thùng đang trôi trên băng chuyền
+        for (let c = 0; c < 4; c++) {
+          g!.fillStyle = back;
+          const cx = x + wrap(c * 80 + worldTime * 16, step);
+          g!.fillRect(cx, B - 132, 18, 16);
+        }
+        // chồng thùng xếp dưới sàn
+        for (let c = 0; c < 6; c++) {
+          const ch = 42 + ((c * 23 + seed * 5) % 46);
+          g!.fillStyle = c % 2 ? back : near;
+          g!.fillRect(x + 12 + c * 52, B - ch, 44, ch + 8);
+          g!.fillStyle = mix(p.far, p.ground, 0.25);
+          g!.fillRect(x + 16 + c * 52, B - ch + 8, 36, 4);
+        }
+      } else if (m.deco === "tower") {
+        // Sàn điều phối: nhà cao tầng có cửa sổ sáng, mái che hàng, bảng hiệu
+        for (let t = 0; t < 4; t++) {
+          const th = 116 + ((t * 61 + seed * 13) % 96);
+          g!.fillStyle = t % 2 ? back : near;
+          g!.fillRect(x + t * 82, B - th, 64, th + 8);
+          g!.fillStyle = glass;
+          for (let wy = 0; wy < Math.floor(th / 24); wy++) {
+            for (let wx = 0; wx < 3; wx++) {
+              if ((wx + wy * 2 + t) % 4 === 0) continue;
+              g!.fillRect(x + t * 82 + 9 + wx * 18, B - th + 12 + wy * 24, 11, 12);
+            }
+          }
+          // bảng hiệu trên nóc, chỉ là khối, không chữ
+          if (t % 2) {
+            g!.fillStyle = near;
+            g!.fillRect(x + t * 82 + 14, B - th - 16, 36, 14);
+          }
+        }
+        // mái che dãy hàng, nhô lên trên mép lớp giữa
+        g!.fillStyle = near;
+        for (let c = 0; c < 4; c++) {
+          const cx = x + 12 + c * 84;
+          g!.beginPath();
+          g!.moveTo(cx, B - 34);
+          g!.lineTo(cx + 34, B - 62);
+          g!.lineTo(cx + 68, B - 34);
+          g!.closePath();
+          g!.fill();
+        }
+      } else if (m.deco === "server") {
+        // Phòng dữ liệu: máng cáp trên trần, dãy rack, đèn trạng thái nháy
+        g!.fillStyle = back;
+        g!.fillRect(x, 84, step, 11);
+        for (let c = 0; c < 4; c++) {
+          g!.fillRect(x + 30 + c * 80, 95, 6, 24);
+          // bó cáp buông xuống
+          g!.beginPath();
+          g!.moveTo(x + 33 + c * 80, 119);
+          g!.quadraticCurveTo(x + 60 + c * 80, 150, x + 90 + c * 80, 119);
+          g!.lineWidth = 3;
+          g!.strokeStyle = back;
+          g!.stroke();
+        }
+        for (let r = 0; r < 4; r++) {
+          const rx = x + 16 + r * 78;
+          const rh = 104 + ((r * 29 + seed * 6) % 44);
+          g!.fillStyle = r % 2 ? near : back;
+          g!.fillRect(rx, B - rh, 58, rh + 8);
+          g!.fillStyle = mix(p.sky, "#ffffff", 0.3);
+          for (let u = 0; u < Math.floor(rh / 16); u++) {
+            g!.fillRect(rx + 6, B - rh + 8 + u * 16, 40, 5);
+          }
+          // đèn nháy lệch pha nhau, đủ để thấy phòng đang "sống"
+          for (let u = 0; u < Math.floor(rh / 16); u++) {
+            const on = Math.sin(worldTime * 3 + r * 1.7 + u) > 0.2;
+            g!.fillStyle = on ? LIME : mix(p.far, p.ground, 0.5);
+            g!.fillRect(rx + 49, B - rh + 8 + u * 16, 4, 4);
+          }
+        }
+      } else {
+        // Xưởng sản phẩm: bánh răng quay chậm, kệ hàng, bảng điều khiển
+        for (let c = 0; c < 3; c++) {
+          const cx = x + 54 + c * 108;
+          const cy = B - 96 - ((c * 37 + seed * 8) % 44);
+          const r = 28 + ((c * 13) % 16);
+          g!.fillStyle = c % 2 ? near : back;
+          g!.save();
+          g!.translate(cx, cy);
+          g!.rotate((worldTime * 0.25 + c) * (c % 2 ? 1 : -1));
+          g!.beginPath();
+          g!.arc(0, 0, r, 0, Math.PI * 2);
+          g!.fill();
+          for (let t = 0; t < 8; t++) {
+            const a = (t / 8) * Math.PI * 2;
+            g!.fillRect(Math.cos(a) * r - 5, Math.sin(a) * r - 5, 10, 10);
+          }
+          g!.restore();
+        }
+        for (let s = 0; s < 4; s++) {
+          const sx = x + 18 + s * 82;
+          g!.fillStyle = near;
+          g!.fillRect(sx, B - 74, 64, 6);
+          g!.fillRect(sx, B - 40, 64, 6);
+          g!.fillRect(sx, B - 74, 5, 82);
+          g!.fillRect(sx + 59, B - 74, 5, 82);
+          g!.fillStyle = s % 2 ? back : near;
+          g!.fillRect(sx + 10, B - 68, 20, 26);
+          g!.fillRect(sx + 36, B - 34, 20, 26);
         }
       }
     }
+    g!.restore();
+  }
 
-    g!.fillStyle = p.ground;
+  function drawBackground(m: GameMap) {
+    const p = m.palette;
+
+    // Lớp trời: có ảnh vẽ tay thì kéo phủ khung (nó đứng yên theo camera),
+    // chưa có thì dốc màu nhạt dần về chân trời cộng mấy mảng mây trôi chậm.
+    const skyImg = ASSETS.bgSky ? img(`bg/m${lv + 1}-sky.png`) : null;
+    if (skyImg) {
+      g!.drawImage(skyImg, 0, 0, W, H);
+    } else {
+      const sky = g!.createLinearGradient(0, 0, 0, GY);
+      sky.addColorStop(0, mix(p.sky, "#0a0a0a", 0.12));
+      sky.addColorStop(0.72, p.sky);
+      sky.addColorStop(1, mix(p.sky, "#ffffff", 0.42));
+      g!.fillStyle = sky;
+      g!.fillRect(0, 0, W, H);
+
+      // Mây chỉ là mảng mờ, không tranh nhìn với quái
+      g!.fillStyle = "rgba(255,255,255,.3)";
+      for (let i = 0; i < 5; i++) {
+        const cw = 150 + i * 34;
+        const x = i * 210 - wrap(cam * 0.08 + i * 60, W + cw) + 40;
+        const y = 40 + ((i * 47) % 90);
+        g!.beginPath();
+        g!.ellipse(x, y, cw * 0.5, 15 + (i % 3) * 5, 0, 0, Math.PI * 2);
+        g!.ellipse(x + cw * 0.22, y - 9, cw * 0.3, 12 + (i % 2) * 5, 0, 0, Math.PI * 2);
+        g!.fill();
+      }
+    }
+
+    const far = ASSETS.bgFar ? img(`bg/m${lv + 1}-far.png`) : null;
+    if (far) {
+      // Chân lớp xa đặt CAO hơn mặt đất 90px, tức nằm khuất sau lớp giữa. Vật
+      // ở xa thì phải cao hơn trên màn hình mới ra chiều sâu — mà cũng chỉ có
+      // cách đó thì cần cẩu với tàu mới nhô lên khỏi bãi container để nhìn
+      // thấy. Đặt chân lớp xa ngay mặt đất là gần như bị lớp giữa che sạch.
+      const tileW = FAR_H * (far.naturalWidth / far.naturalHeight);
+      drawTiled(g!, far, -wrap(cam * 0.25, tileW), GY - FAR_BOTTOM_UP - FAR_H, W + tileW, FAR_H);
+    } else {
+      drawFar(m);
+    }
+
+    const mid = img(`bg/m${lv + 1}-mid.png`);
+    if (mid) {
+      // Lớp giữa vẽ bằng ảnh thật, lặp ngang liên tục theo camera
+      const tileW = MID_H * (mid.naturalWidth / mid.naturalHeight);
+      drawTiled(g!, mid, -wrap(cam * 0.55, tileW), GY - MID_H, W + tileW, MID_H);
+    }
+
+    // Đất: dốc màu nhẹ cho có khối, thêm vạch kẻ chạy theo camera cho thấy đang di chuyển
+    const gr = g!.createLinearGradient(0, GY, 0, H);
+    gr.addColorStop(0, p.ground);
+    gr.addColorStop(1, mix(p.ground, "#0a0a0a", 0.3));
+    g!.fillStyle = gr;
     g!.fillRect(0, GY, W, H - GY);
     g!.fillStyle = p.groundEdge;
     g!.fillRect(0, GY, W, 7);
+    // Vạch kẻ chạy theo camera. Từ lúc có nền vẽ tay thì chuyển động đã đọc
+    // được qua parallax, nên vạch chỉ còn là gợi ý rất mờ.
+    g!.fillStyle = "rgba(255,255,255,.04)";
+    for (let i = 0; i < 12; i++) {
+      const x = i * 80 - wrap(cam, 80);
+      g!.fillRect(x, GY + 16, 44, 3);
+    }
   }
+
+  /* ── vẽ: thực thể ────────────────────────────────────── */
 
   function drawLabel(text: string, x: number, y: number, color = "#ffffff") {
     g!.font = `500 10px ${FONT_SANS}`;
@@ -669,34 +1364,232 @@ export function createGame(
     g!.fillRect(x + w * 0.34, y + h * 0.66, w * 0.32, 2.5);
   }
 
+  /** Bóng mềm dưới chân — thứ rẻ nhất để nhân vật không như dán lên nền */
+  function drawShadow(cx: number, floorY: number, w: number, alpha = 0.28) {
+    g!.fillStyle = `rgba(10,10,10,${alpha})`;
+    g!.beginPath();
+    g!.ellipse(cx, floorY - 1, w / 2, w / 7, 0, 0, Math.PI * 2);
+    g!.fill();
+  }
+
   /**
-   * Khung nào đang cần cho quái, theo đúng ý nghĩa của mục 3b trong
-   * docs/game-assets.md: walker/flyer đảo khung theo nhịp bước, charger
-   * đứng yên ở khung 1 tới lúc lao (dash>0) mới sang khung 2, shooter ở
-   * khung 2 ngay trước khi bắn (cd<0.4) — đúng lúc code đang tô đỏ nòng.
+   * Khung nào đang cần cho quái. walker/flyer đảo khung theo nhịp bước,
+   * charger đứng khung 1 tới lúc lao (dash>0) mới sang khung 2, shooter sang
+   * khung 2 ngay trước khi bắn — đúng lúc code đang tô đỏ nòng. Có nhiều hơn
+   * hai khung thì chạy vòng đủ số khung khai báo trong ASSETS.mobFrames.
    */
-  function mobFrame(o: Mob): 1 | 2 {
-    if (o.kind === "charger") return o.dash > 0 ? 2 : 1;
-    if (o.kind === "shooter") return o.cd < 0.4 ? 2 : 1;
-    const fps = o.kind === "flyer" ? 8 : 6;
-    return Math.floor(o.anim * fps) % 2 === 0 ? 1 : 2;
+  function mobFrame(o: Mob): number {
+    const n = mobFrameCount(o.kind);
+    const cycle = (count: number, fps: number) =>
+      (Math.floor(o.anim * fps) % Math.max(1, count)) + 1;
+
+    if (o.kind === "walker") return cycle(n, 6);
+    if (o.kind === "flyer") return cycle(n, 8);
+
+    if (o.kind === "charger" || o.kind === "rider") {
+      // Có 4 khung thì tách được: đứng nhấp nhô (1–2), rùng mình (3), lao (4)
+      if (n >= 4) return o.dash > 0 ? 4 : o.tel > 0 ? 3 : cycle(2, 3);
+      return o.dash > 0 || o.tel > 0 ? Math.min(2, n) : 1;
+    }
+
+    // shooter: đứng (1–2), nhắm (3), vừa nhả đạn (4)
+    if (n >= 4) return o.recoil > 0.55 ? 4 : o.cd < 0.4 ? 3 : cycle(2, 3);
+    return o.cd < 0.4 || o.recoil > 0 ? Math.min(2, n) : 1;
+  }
+
+  /**
+   * Rider vẽ bằng code khi chưa có ảnh: bóng người gập trên xe, áo cam
+   * Shopee, mũ bảo hiểm không mặt — chỉ một vạch kính sáng. Đủ để chơi và
+   * đủ để biết nó là ai; có ảnh vẽ tay thì thay ngay bằng ASSETS.riderArt.
+   */
+  function drawRiderShape(o: Mob) {
+    const cx = o.x + o.w / 2;
+    const floor = o.y + o.h;
+    const f = o.dir;
+    const charging = o.tel > 0;
+    const dashing = o.dash > 0;
+    const ORANGE = "#EE4D2D";
+
+    g!.save();
+    g!.translate(cx, floor);
+    g!.scale(f, 1);
+    if (dashing) g!.scale(1.1, 0.94);
+
+    // vệt gió khi đang lao
+    if (dashing) {
+      g!.strokeStyle = "rgba(255,255,255,.55)";
+      g!.lineWidth = 2;
+      for (let i = 0; i < 4; i++) {
+        const y = -8 - i * 7;
+        g!.beginPath();
+        g!.moveTo(-24 - i * 9, y);
+        g!.lineTo(-52 - i * 13, y);
+        g!.stroke();
+      }
+    }
+
+    // bánh xe
+    g!.fillStyle = "#141414";
+    g!.beginPath();
+    g!.arc(-15, -7, 7.5, 0, Math.PI * 2);
+    g!.arc(16, -7, 7.5, 0, Math.PI * 2);
+    g!.fill();
+    g!.strokeStyle = "rgba(255,255,255,.3)";
+    g!.lineWidth = 1.4;
+    g!.beginPath();
+    g!.arc(-15, -7, 3.4, 0, Math.PI * 2);
+    g!.arc(16, -7, 3.4, 0, Math.PI * 2);
+    g!.stroke();
+
+    // thân xe và thùng hàng sau yên
+    g!.fillStyle = "#2A2A28";
+    g!.beginPath();
+    g!.roundRect(-19, -18, 38, 9, 3);
+    g!.fill();
+    g!.fillStyle = ORANGE;
+    g!.beginPath();
+    g!.roundRect(-25, -30, 15, 13, 2);
+    g!.fill();
+    g!.fillStyle = "rgba(10,10,10,.35)";
+    g!.fillRect(-24, -25, 13, 2);
+
+    // đèn pha, sáng bùng lúc rú ga
+    const beam = charging ? 0.9 : 0.45;
+    g!.fillStyle = `rgba(255,236,170,${beam})`;
+    g!.beginPath();
+    g!.arc(22, -20, charging ? 5 : 3.6, 0, Math.PI * 2);
+    g!.fill();
+    if (charging) {
+      g!.fillStyle = "rgba(255,236,170,.22)";
+      g!.beginPath();
+      g!.moveTo(24, -20);
+      g!.lineTo(74, -32);
+      g!.lineTo(74, -6);
+      g!.closePath();
+      g!.fill();
+    }
+
+    // người: gập về trước, áo cam, tay với tới ghi đông
+    g!.fillStyle = ORANGE;
+    g!.beginPath();
+    g!.moveTo(-12, -22);
+    g!.lineTo(-2, -44);
+    g!.lineTo(10, -40);
+    g!.lineTo(6, -20);
+    g!.closePath();
+    g!.fill();
+    g!.strokeStyle = ORANGE;
+    g!.lineWidth = 4;
+    g!.lineCap = "round";
+    g!.beginPath();
+    g!.moveTo(6, -38);
+    g!.lineTo(19, -26);
+    g!.stroke();
+    g!.strokeStyle = "#1E1E1C";
+    g!.beginPath();
+    g!.moveTo(-8, -24);
+    g!.lineTo(-4, -14);
+    g!.stroke();
+
+    // mũ bảo hiểm không mặt — khối tối, một vạch kính
+    g!.fillStyle = "#17171A";
+    g!.beginPath();
+    g!.arc(3, -48, 9, 0, Math.PI * 2);
+    g!.fill();
+    g!.fillStyle = "rgba(10,10,10,.95)";
+    g!.beginPath();
+    g!.roundRect(2, -52, 11, 7, 2);
+    g!.fill();
+    g!.fillStyle = charging ? "rgba(255,120,80,.95)" : "rgba(180,200,220,.75)";
+    g!.fillRect(4, -50, 8, 1.8);
+    g!.restore();
   }
 
   function drawMob(o: Mob, color: string) {
-    const sprite = mobSprite(lv, o.kind, mobFrame(o));
+    // Hoạt ảnh chung: nhún theo bước, nghiêng theo hướng, giãn khi lao
+    let sx = 1;
+    let sy = 1;
+    let rot = 0;
+    let dy = 0;
+
+    if (!reduced) {
+      if (o.kind === "walker") {
+        const ph = o.anim * 6 * Math.PI;
+        dy = -Math.abs(Math.sin(ph)) * 2.2;
+        sy = 1 + Math.sin(ph) * 0.05;
+        sx = 1 - Math.sin(ph) * 0.04;
+        rot = o.dir * 0.05;
+      } else if (o.kind === "flyer") {
+        // Vỗ cánh: bóp ngang thay vì đảo khung, cánh trông có nhịp hơn
+        const ph = o.anim * 12;
+        sx = 1 + Math.sin(ph) * 0.1;
+        sy = 1 - Math.sin(ph) * 0.06;
+        rot = Math.sin(ph * 0.34) * 0.06;
+      } else if (o.kind === "charger" || o.kind === "rider") {
+        if (o.tel > 0) {
+          const t = o.tel * 40;
+          dy = Math.sin(t) * 1.4;
+          sx = 1 + Math.sin(t * 1.3) * 0.06;
+          sy = 1 - Math.sin(t * 1.3) * 0.05;
+        } else if (o.dash > 0) {
+          sx = 1.16;
+          sy = 0.9;
+        }
+      } else if (o.kind === "shooter") {
+        sx = 1 + o.recoil * 0.1;
+        sy = 1 - o.recoil * 0.08;
+      }
+    }
+
+    const cx = o.x + o.w / 2 - (o.kind === "shooter" ? o.dir * o.recoil * 5 : 0);
+    const floor = o.y + o.h + 3;
+    const deadFade = o.dead ? Math.max(0, 1 - o.deadT / 0.45) : 1;
+    if (o.dead) {
+      // Tan biến: xoay, teo lại, mờ dần. Bản trước quái biến mất đột ngột.
+      const t = 1 - deadFade;
+      rot += t * 1.4 * o.dir;
+      sx *= 1 - t * 0.5;
+      sy *= 1 - t * 0.5;
+      dy -= t * 22;
+    }
+
+    if (o.kind !== "flyer" && !o.dead) drawShadow(o.x + o.w / 2, o.floor, o.w * 1.3, 0.22);
+
+    const useArt = o.kind !== "rider" || ASSETS.riderArt;
+    const sprite = useArt ? mobSprite(lv, o.kind, mobFrame(o)) : null;
     if (sprite) {
-      g!.filter = o.hurt > 0 ? "brightness(2.2) saturate(0.3)" : "none";
-      const maxW = o.kind === "flyer" ? 68 : 48;
-      const maxH = o.kind === "flyer" ? 40 : 48;
-      drawSpriteAtFeet(g!, sprite, o.x + o.w / 2, o.y + o.h + 3, maxW, maxH, o.dir < 0);
-      g!.filter = "none";
+      drawRig(g!, sprite, mobRig(o.kind), mobRef(o.kind), cx, floor + dy, {
+        flip: o.dir < 0,
+        rot, sx, sy,
+        alpha: deadFade,
+        filter: o.hurt > 0 ? "brightness(2.2) saturate(0.3)" : undefined,
+      });
+      // Báo đòn: viền sáng nhấp nháy quanh con quái sắp lao
+      if (o.tel > 0 && Math.floor(o.tel * 18) % 2 === 0) {
+        g!.strokeStyle = HAZARD;
+        g!.lineWidth = 2;
+        g!.beginPath();
+        g!.roundRect(o.x - 3, o.y - 3, o.w + 6, o.h + 6, 6);
+        g!.stroke();
+      }
       return;
     }
 
+    if (o.kind === "rider") {
+      g!.save();
+      g!.globalAlpha = deadFade;
+      if (o.hurt > 0) g!.filter = "brightness(2.4) saturate(0.2)";
+      drawRiderShape(o);
+      g!.restore();
+      return;
+    }
+
+    // Dự phòng hình khối, chỉ chạy khi ảnh chưa tải xong
     const body = o.hurt > 0 ? "#ffffff" : color;
+    g!.save();
+    g!.globalAlpha = deadFade;
 
     if (o.kind === "flyer") {
-      // Cánh đập nhẹ hai bên
       g!.fillStyle = body;
       const flap = Math.sin(o.bob * 2) * 4;
       g!.beginPath();
@@ -711,12 +1604,11 @@ export function createGame(
 
     g!.fillStyle = body;
     g!.beginPath();
-    g!.roundRect(o.x, o.y, o.w, o.h, o.kind === "charger" ? 4 : 9);
+    g!.roundRect(o.x, o.y + dy, o.w, o.h, o.kind === "charger" ? 4 : 9);
     g!.fill();
 
     if (o.kind === "charger") {
-      // Mũi nhọn quay về hướng sắp lao tới
-      g!.fillStyle = o.dash > 0 ? HAZARD : body;
+      g!.fillStyle = o.dash > 0 || o.tel > 0 ? HAZARD : body;
       g!.beginPath();
       const tip = o.dir > 0 ? o.x + o.w + 11 : o.x - 11;
       g!.moveTo(o.dir > 0 ? o.x + o.w : o.x, o.y + 6);
@@ -725,12 +1617,12 @@ export function createGame(
       g!.fill();
     }
     if (o.kind === "shooter") {
-      // Nòng chĩa về phía người chơi, đỏ dần khi sắp bắn
       g!.fillStyle = o.cd < 0.4 ? HAZARD : "rgba(10,10,10,.55)";
       g!.fillRect(o.dir > 0 ? o.x + o.w : o.x - 10, o.y + o.h * 0.42, 10, 6);
     }
 
-    drawFace(o.x, o.y, o.w, o.h);
+    drawFace(o.x, o.y + dy, o.w, o.h);
+    g!.restore();
   }
 
   function drawTrap(t: Trap) {
@@ -786,12 +1678,26 @@ export function createGame(
     }
 
     // pulse: lúc tắt còn thấy miệng phun, để biết đường mà tránh
-    const on = t.t % 2.6 < 1.1;
+    const cycle = t.t % 2.6;
+    const on = cycle < 1.1;
+    // Nửa giây trước khi phun thì miệng vòi rung và nhả khói — báo trước
+    const warn = cycle > 2.1;
     const jet = img(TRAP_SPRITES.pulseJet);
     const vent = img(TRAP_SPRITES.pulseVent);
     if (jet && vent) {
-      if (on) g!.drawImage(jet, t.x, t.y - 74, 26, 74);
-      g!.drawImage(vent, t.x - 2, t.y - 8, 30, 8);
+      if (on) {
+        // Luồng vọt lên nhanh rồi giữ: cắt bớt chiều cao ở đầu chu kỳ
+        const rise = Math.min(1, cycle / 0.12);
+        const h = 74 * rise;
+        g!.drawImage(jet, 0, 0, jet.naturalWidth, jet.naturalHeight, t.x, t.y - h, 26, h);
+      }
+      g!.drawImage(vent, t.x - 2 + (warn ? Math.sin(t.t * 60) * 1.2 : 0), t.y - 8, 30, 8);
+      if (warn) {
+        g!.fillStyle = "rgba(255,255,255,.35)";
+        g!.beginPath();
+        g!.arc(t.x + 13, t.y - 12 - Math.sin(t.t * 6) * 4, 4, 0, Math.PI * 2);
+        g!.fill();
+      }
       return;
     }
     g!.fillStyle = on ? HAZARD : "rgba(10,10,10,.35)";
@@ -802,12 +1708,21 @@ export function createGame(
   function drawPickup(p: Pickup) {
     const y = p.y - 26 + Math.sin(p.bob) * 3;
     const tool = p.kind === "tool";
+    const glow = tool ? "rgba(212,242,54," : "rgba(255,143,133,";
+
+    // Vòng sáng dưới vật phẩm để nó nổi khỏi nền, kể cả nền sáng
+    const pulse = 0.5 + Math.sin(p.bob * 1.4) * 0.5;
+    g!.fillStyle = `${glow}${0.1 + pulse * 0.12})`;
+    g!.beginPath();
+    g!.ellipse(p.x + 12, p.y - 12, 20, 8, 0, 0, Math.PI * 2);
+    g!.fill();
+
     const sprite = pickupSprite(lv, p.kind);
     if (sprite) {
       g!.save();
-      g!.shadowColor = tool ? "rgba(212,242,54,.85)" : "rgba(255,143,133,.85)";
+      g!.shadowColor = `${glow}.85)`;
       g!.shadowBlur = 11;
-      drawSpriteAtFeet(g!, sprite, p.x + 12, y + 28, 36, 36);
+      drawFit(g!, sprite, p.x + 12, y + 28, 36, 36);
       g!.restore();
       drawLabel(p.name, p.x + 12, y - 8, tool ? LIME : "#ffd2ce");
       return;
@@ -827,6 +1742,216 @@ export function createGame(
     }
     drawLabel(p.name, p.x + 12, y - 6, tool ? LIME : "#ffd2ce");
   }
+
+  /**
+   * Vệt chém hình lưỡi liềm.
+   *
+   * Không stroke một cung tròn — cung tròn stroke ra dải dày đều, trông như
+   * cái vòng. Ở đây dựng path hai mép: mép ngoài phình ở giữa, mép trong
+   * lõm vào, nên hai đầu nhọn lại đúng kiểu lưỡi trăng.
+   */
+  function crescentPath(
+    cx: number, cy: number, r: number,
+    a0: number, a1: number, thick: number,
+  ) {
+    const steps = 20;
+    g!.beginPath();
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const a = a0 + (a1 - a0) * t;
+      const rr = r + Math.sin(t * Math.PI) * thick * 0.55;
+      const x = cx + Math.cos(a) * rr;
+      const y = cy + Math.sin(a) * rr;
+      if (i) g!.lineTo(x, y); else g!.moveTo(x, y);
+    }
+    for (let i = steps; i >= 0; i--) {
+      const t = i / steps;
+      const a = a0 + (a1 - a0) * t;
+      const rr = r - Math.sin(t * Math.PI) * thick * 0.45;
+      g!.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr);
+    }
+    g!.closePath();
+  }
+
+  function drawSlash(s: Slash) {
+    const p = Math.min(1, s.t / s.dur);
+    const e = easeOut(p);
+    // Lưỡi quét từ trên chéo xuống trước mặt. Đuôi vệt bị kẹp không cho lùi
+    // quá A0 — nếu không, đầu đòn sẽ có một cung quét ngược ra sau đầu.
+    const A0 = -1.3;
+    const A1 = 1.15;
+    const span = 1.45;
+    const face = s.face;
+    const ang = (a: number) => (face > 0 ? a : Math.PI - a);
+    const head = A0 + (A1 - A0) * e;
+
+    const sprite = ASSETS.slashFx
+      ? img(`fx/slash-${Math.min(ASSETS.slashFx, 1 + Math.floor(p * ASSETS.slashFx))}.png`)
+      : null;
+    if (sprite) {
+      /**
+       * Ảnh vệt chém phải neo ở TÂM CUNG, không phải mép ảnh. Lưỡi liềm trong
+       * ảnh cong quanh một tâm nằm khoảng 27% chiều rộng tính từ mép trái và
+       * 48% chiều cao — neo vào đó thì cung quét quanh ngực nhân vật; neo vào
+       * mép ảnh thì cả vệt văng lên góc trên bên phải, cách người cả thân.
+       * Ba số dưới đây dò bằng cách ghép thử ảnh với khung chém rồi soi.
+       */
+      const size = s.reach * 1.55;
+      g!.save();
+      g!.globalAlpha = Math.max(0, 1 - p * p);
+      g!.translate(s.x, s.y);
+      g!.scale(face, 1);
+      g!.rotate(head * 0.5);
+      g!.drawImage(sprite, -size * 0.27, -size * 0.48, size, size);
+      g!.restore();
+      return;
+    }
+
+    g!.save();
+    // "lighter" để ba lớp cộng sáng vào nhau chứ không đè chết lớp dưới
+    g!.globalCompositeOperation = "lighter";
+    // Ba lớp: hai bóng mờ tụt lại phía sau làm đuôi, lớp cuối là thân lưỡi
+    for (let i = 2; i >= 0; i--) {
+      const t = e - i * 0.16;
+      if (t <= 0) continue;
+      const head2 = A0 + (A1 - A0) * t;
+      const tail = Math.max(A0, head2 - span);
+      if (head2 - tail < 0.12) continue;
+      const alpha = (1 - p) * (i === 0 ? 0.95 : i === 1 ? 0.4 : 0.18);
+      crescentPath(
+        s.x, s.y,
+        s.reach * (1 - i * 0.06),
+        ang(tail), ang(head2),
+        s.thick * (1 - i * 0.18),
+      );
+      g!.globalAlpha = alpha;
+      g!.fillStyle = s.color;
+      g!.fill();
+      g!.globalAlpha = 1;
+    }
+    // Mép dẫn: một nét trắng mảnh ở đầu lưỡi, đây là thứ làm nó "sắc"
+    g!.globalAlpha = (1 - p) * 0.9;
+    g!.strokeStyle = "#ffffff";
+    g!.lineWidth = s.heavy ? 3 : 2;
+    g!.lineCap = "round";
+    g!.beginPath();
+    const hr = s.reach;
+    g!.arc(s.x, s.y, hr + s.thick * 0.25, ang(head) - 0.28 * face, ang(head) + 0.05 * face, face < 0);
+    g!.stroke();
+    g!.restore();
+  }
+
+  /** Khung hình và biến dạng của nhân vật ở trạng thái hiện tại */
+  function playerFrame(): { src: string; rot: number; sx: number; sy: number; dy: number } {
+    let src: string;
+    let rot = 0;
+    let sx = 1;
+    let sy = 1;
+    let dy = 0;
+
+    if (player.hurtT > 0) {
+      src = P_HURT;
+      rot = -player.face * 0.12;
+    } else if (player.atk > 0) {
+      // Chia đòn theo tiến độ: vung → tới đích → thu về
+      const p = 1 - player.atk / player.atkDur;
+      const i = Math.min(P_ATK.length - 1, Math.floor(p * P_ATK.length));
+      src = P_ATK[i];
+      // Rướn người theo đòn rồi kéo về, không đứng im vẽ hai khung
+      const lunge = Math.sin(Math.min(1, p * 1.4) * Math.PI);
+      sx = 1 + lunge * 0.05;
+      sy = 1 - lunge * 0.04;
+      rot = player.face * lunge * 0.07;
+    } else if (player.landT > 0) {
+      src = P_LAND;
+      const t = player.landT / 0.16;
+      sx = 1 + t * 0.14;
+      sy = 1 - t * 0.16;
+    } else if (!player.ground) {
+      const rising = player.vy < -40;
+      src = rising ? P_RISE : P_FALL;
+      // Vươn lên khi bốc, hơi bẹp lại khi rơi nhanh
+      const v = Math.max(-1, Math.min(1, player.vy / 600));
+      sy = 1 - v * 0.07;
+      sx = 1 + v * 0.05;
+      rot = player.face * 0.04 * (rising ? -1 : 1);
+    } else if (Math.abs(player.vx) > 8) {
+      const i = Math.floor(player.runPhase * P_RUN.length) % P_RUN.length;
+      src = P_RUN[i];
+      /**
+       * Nhún người: một lần lên xuống mỗi sải chân, tức hai lần mỗi chu kỳ.
+       *
+       * Chu kỳ 8 khung xếp theo docs/game-assets.md: 1 chạm đất, 2 hạ thấp
+       * nhất, 3 qua chân, 4 bốc cao nhất, rồi 5–8 lặp lại với chân kia. Nên
+       * đỉnh nhún nằm ở giữa khung 4 (pha 0,4375) và giữa khung 8 (0,9375);
+       * cos chu kỳ 0,5 lệch pha 0,4375 cho đúng hai mốc đó.
+       *
+       * Ảnh đã được canh về cùng một mặt sàn (normalize --fit none), nên toàn
+       * bộ chuyển động dọc phải do code sinh ra. Công thức cũ dùng |sin| tần
+       * số đôi nên nhún bốn lần mỗi chu kỳ — nhìn như đạp xe.
+       */
+      const bounce = Math.cos(4 * Math.PI * (player.runPhase - 0.4375));
+      dy = -bounce * 2.1;
+      sy = 1 + bounce * 0.03;
+      sx = 1 - bounce * 0.025;
+      rot = player.face * 0.045 * Math.min(1, Math.abs(player.vx) / 300);
+    } else {
+      const i = Math.floor(worldTime * 3) % P_IDLE.length;
+      src = P_IDLE[i];
+      // Thở: chỉ 1% nhưng đứng yên mà không có nó là thấy ngay
+      sy = 1 + Math.sin(worldTime * 3.2) * 0.012;
+      dy = Math.sin(worldTime * 3.2) * 0.8;
+    }
+
+    if (reduced) return { src, rot: 0, sx: 1, sy: 1, dy: 0 };
+    return { src, rot, sx, sy, dy };
+  }
+
+  function drawPlayer() {
+    const frame = playerFrame();
+    const sprite = img(frame.src) ?? img(P_IDLE[0]);
+    const cx = player.x + player.w / 2;
+    const feet = player.y + player.h + 3;
+
+    drawShadow(cx, Math.min(GY, player.y + player.h), player.w * 1.5, player.ground ? 0.3 : 0.16);
+
+    if (sprite) {
+      drawRig(g!, sprite, playerRig(), HEAD_PX, cx, feet + frame.dy, {
+        flip: player.face < 0,
+        rot: frame.rot,
+        sx: frame.sx,
+        sy: frame.sy,
+        filter: player.hurtT > 0 ? "brightness(1.5) saturate(.6)" : undefined,
+      });
+    } else {
+      // Dự phòng hình khối, chỉ thấy trong vài khung hình đầu lúc tải ảnh
+      g!.fillStyle = "#1e1e1c";
+      g!.beginPath();
+      g!.roundRect(player.x, player.y, player.w, player.h, 7);
+      g!.fill();
+      g!.fillStyle = "#ffd8ae";
+      g!.beginPath();
+      g!.roundRect(player.x + 3, player.y - 9, player.w - 6, 16, 6);
+      g!.fill();
+      g!.fillStyle = "#0a0a0a";
+      g!.fillRect(player.x + (player.face > 0 ? 15 : 6), player.y - 4, 4, 4);
+    }
+
+    if (player.tool > 0) {
+      // Đang cầm đồ nghề: hào quang mờ quanh người, nhạt dần lúc gần hết giờ
+      const left = Math.min(1, player.tool / 2);
+      g!.save();
+      g!.globalAlpha = 0.5 * left * (0.6 + 0.4 * Math.sin(worldTime * 9));
+      g!.strokeStyle = LIME;
+      g!.lineWidth = 2;
+      g!.beginPath();
+      g!.roundRect(player.x - 4, player.y - 14, player.w + 8, player.h + 16, 10);
+      g!.stroke();
+      g!.restore();
+    }
+  }
+
+  /* ── vẽ: khung hình ──────────────────────────────────── */
 
   function draw() {
     const m = maps[lv];
@@ -850,39 +1975,77 @@ export function createGame(
     drawBackground(m);
     g!.translate(-cam, 0);
 
+    // Bệ nhảy: thân tối, mép trên sáng — cố ý KHÔNG lấy màu theo bảng màu ải.
+    // Nền vẽ tay chi tiết và nhiều màu, bệ tô theo palette là chìm nghỉm vào
+    // tranh; mà đây là thứ người chơi phải nhìn ra trong một phần giây để
+    // quyết định có nhảy hay không.
     for (const [px, py, pw] of m.plats) {
-      g!.fillStyle = m.palette.groundEdge;
+      g!.fillStyle = "rgba(16,16,20,.88)";
       g!.beginPath();
       g!.roundRect(px, py, pw, 13, 5);
       g!.fill();
-      g!.fillStyle = "rgba(255,255,255,.22)";
-      g!.fillRect(px + 4, py + 2, pw - 8, 3);
+      g!.fillStyle = "rgba(242,241,236,.82)";
+      g!.beginPath();
+      g!.roundRect(px + 2, py + 1.5, pw - 4, 3.5, 2);
+      g!.fill();
+      g!.fillStyle = "rgba(242,241,236,.16)";
+      g!.fillRect(px + 4, py + 6, pw - 8, 1);
+      // Bóng đổ mỏng dưới bệ cho nó tách khỏi nền, đỡ như dán decal
+      g!.fillStyle = "rgba(10,10,10,.3)";
+      g!.fillRect(px + 3, py + 13, pw - 6, 4);
     }
 
     for (const t of traps) drawTrap(t);
     for (const p of pickups) if (!p.taken) drawPickup(p);
 
-    // Cửa ải ở cuối bản đồ
-    g!.fillStyle = "rgba(255,255,255,.5)";
+    // Cửa ải ở cuối bản đồ, sáng lên khi đã hạ hết quái thường
+    const opened = !mobs.some((o) => !o.dead);
+    g!.fillStyle = opened ? "rgba(212,242,54,.5)" : "rgba(255,255,255,.5)";
     g!.fillRect(WORLD - 70, GY - 96, 46, 96);
     g!.fillStyle = m.palette.groundEdge;
     g!.fillRect(WORLD - 64, GY - 88, 34, 88);
+    if (opened) {
+      g!.globalAlpha = 0.35 + Math.sin(worldTime * 4) * 0.2;
+      g!.fillStyle = LIME;
+      g!.fillRect(WORLD - 64, GY - 88, 34, 88);
+      g!.globalAlpha = 1;
+    }
 
     for (const o of mobs) {
-      if (o.dead) continue;
+      if (o.dead && o.deadT > 0.45) continue;
       drawMob(o, m.palette.mob);
-      drawLabel(o.name, o.x + o.w / 2, o.y - 7);
+      // Rider vẽ cao hơn hộp thân nên nhãn phải nhấc lên, không thì đè lên mũ
+      if (!o.dead) drawLabel(o.name, o.x + o.w / 2, o.y - (o.kind === "rider" ? 22 : 7));
     }
 
     if (boss) {
       const by = boss.y + Math.sin(boss.bob) * 2;
       // Trong 0,55s trước đòn, dùng khung "báo đòn" riêng thay vì tô màu đè
       const telegraphing = boss.tel > 0 && Math.floor(boss.tel * 14) % 2 === 0;
-      const sprite = bossSprite(lv, telegraphing);
+      const hitFrame = boss.hurt > 0 && ASSETS.bossFrames >= 3;
+      const sprite = bossSprite(lv, hitFrame ? "hit" : telegraphing ? "tel" : "idle");
+      drawShadow(boss.x + boss.w / 2, GY, boss.w * 1.5, 0.3);
+
+      // Vòng báo đòn dưới chân trùm — đọc được kể cả khi mắt đang dán vào nhân vật
+      if (boss.tel > 0) {
+        const t = 1 - boss.tel / 0.6;
+        g!.strokeStyle = HAZARD;
+        g!.lineWidth = 3;
+        g!.globalAlpha = 0.8 * (1 - t * 0.4);
+        g!.beginPath();
+        g!.ellipse(boss.x + boss.w / 2, GY - 4, 50 + t * 40, 14 + t * 10, 0, 0, Math.PI * 2);
+        g!.stroke();
+        g!.globalAlpha = 1;
+      }
+
+      const telScale = boss.tel > 0 ? 1 + (1 - boss.tel / 0.6) * 0.06 : 1;
       if (sprite) {
-        g!.filter = boss.hurt > 0 ? "brightness(2) saturate(0.3)" : "none";
-        drawSpriteAtFeet(g!, sprite, boss.x + boss.w / 2, by + boss.h + 2, 104, 108, boss.dir < 0);
-        g!.filter = "none";
+        drawRig(g!, sprite, bossRig(), BOSS_PX, boss.x + boss.w / 2, by + boss.h + 2, {
+          flip: boss.dir < 0,
+          sx: boss.dash > 0 ? 1.1 : telScale,
+          sy: boss.dash > 0 ? 0.93 : telScale,
+          filter: boss.hurt > 0 && !hitFrame ? "brightness(2) saturate(0.3)" : undefined,
+        });
       } else {
         g!.fillStyle = boss.hurt > 0 ? "#ffffff" : telegraphing ? "#ffe9a8" : m.palette.boss;
         g!.beginPath();
@@ -900,106 +2063,90 @@ export function createGame(
       }
     }
 
-    g!.fillStyle = HAZARD;
+    // Đạn: nhân lõi sáng, đuôi mờ kéo lại phía sau
     for (const s of shots) {
+      const len = Math.min(26, Math.abs(s.vx) * 5);
+      const grad = g!.createLinearGradient(s.x - Math.sign(s.vx) * len, s.y, s.x, s.y);
+      grad.addColorStop(0, "rgba(224,86,63,0)");
+      grad.addColorStop(1, HAZARD);
+      g!.fillStyle = grad;
+      g!.beginPath();
+      g!.moveTo(s.x - Math.sign(s.vx) * len, s.y - s.r * 0.35);
+      g!.lineTo(s.x, s.y - s.r * 0.9);
+      g!.lineTo(s.x, s.y + s.r * 0.9);
+      g!.lineTo(s.x - Math.sign(s.vx) * len, s.y + s.r * 0.35);
+      g!.closePath();
+      g!.fill();
+      g!.fillStyle = HAZARD;
       g!.beginPath();
       g!.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      g!.fill();
+      g!.fillStyle = "rgba(255,255,255,.75)";
+      g!.beginPath();
+      g!.arc(s.x - Math.sign(s.vx) * 2, s.y - 2, s.r * 0.38, 0, Math.PI * 2);
       g!.fill();
     }
 
     // Nhấp nháy khi đang bất tử sau lúc trúng đòn
-    if (player.inv <= 0 || Math.floor(player.inv * 16) % 2 === 0) {
-      const idleImg = img(PLAYER_SPRITES.idle);
-      if (idleImg) {
-        // Chọn khung theo trạng thái: trúng đòn > đang chém > đang nhảy >
-        // đang chạy > đứng yên. Khung chém rộng hơn thân (168x196 gốc,
-        // hitbox chém vẫn tính riêng ở attack() — sprite chỉ là hình vẽ).
-        let sprite: HTMLImageElement | null;
-        let maxW = 54, maxH = 70;
-        if (player.hurtT > 0) {
-          sprite = img(PLAYER_SPRITES.hurt);
-          maxW = 76;
-        } else if (player.atk > 0) {
-          const i = player.atk > player.attackActive ? 0 : 1;
-          sprite = img(PLAYER_SPRITES.attack[i]);
-          maxW = 104;
-          maxH = 74;
-        } else if (!player.ground) {
-          sprite = img(PLAYER_SPRITES.jump);
-          maxW = 66;
-        } else if (Math.abs(player.vx) > 0.5) {
-          const i = Math.floor(player.runFrame) % 4;
-          sprite = img(PLAYER_SPRITES.run[i]);
-          maxW = 64;
-        } else {
-          sprite = idleImg;
-        }
-        // Khung riêng cho trạng thái này có thể chưa tải kịp — vẽ tạm idle
-        // (đã chắc chắn có ở đây) thay vì để nhân vật biến mất một khung hình
-        if (!sprite) {
-          sprite = idleImg;
-          maxW = 54;
-          maxH = 70;
-        }
-        const idleBob = !reduced && player.ground && Math.abs(player.vx) < 8
-          ? Math.sin(worldTime * 3.2) * 0.8
-          : 0;
-        drawSpriteAtFeet(
-          g!, sprite,
-          player.x + player.w / 2,
-          player.y + player.h + 3 + idleBob,
-          maxW, maxH,
-          player.face < 0,
-        );
-      } else {
-        g!.fillStyle = "#1e1e1c";
-        g!.beginPath();
-        g!.roundRect(player.x, player.y, player.w, player.h, 7);
-        g!.fill();
-        g!.fillStyle = "#ffd8ae";
-        g!.beginPath();
-        g!.roundRect(player.x + 3, player.y - 9, player.w - 6, 16, 6);
-        g!.fill();
-        g!.fillStyle = "#0a0a0a";
-        g!.fillRect(player.x + (player.face > 0 ? 15 : 6), player.y - 4, 4, 4);
-      }
-
-      if (player.tool > 0) {
-        // Đang cầm đồ nghề: viền sáng quanh người
-        g!.strokeStyle = LIME;
-        g!.lineWidth = 2;
-        g!.beginPath();
-        g!.roundRect(player.x - 3, player.y - 12, player.w + 6, player.h + 14, 9);
-        g!.stroke();
-      }
-
-      if (player.atk > 0) {
-        const reach = player.tool > 0 ? 40 : 32;
-        const progress = 1 - player.atk / (player.attackBuffed ? 0.2 : 0.28);
-        const alpha = Math.max(0, 1 - Math.abs(progress - 0.72) * 3.3);
-        g!.strokeStyle = `rgba(212,242,54,${0.82 * alpha})`;
-        g!.lineWidth = player.attackBuffed ? 8 : 6;
-        g!.lineCap = "round";
-        g!.beginPath();
-        g!.arc(
-          player.face > 0 ? player.x + player.w + 10 : player.x - 10,
-          player.y + 18, reach,
-          player.face > 0 ? -1.1 : 2.0,
-          player.face > 0 ? 1.1 : 4.3
-        );
-        g!.stroke();
-      }
-    }
+    if (player.inv <= 0 || Math.floor(player.inv * 16) % 2 === 0) drawPlayer();
+    for (const s of slashes) drawSlash(s);
 
     for (const p of parts) {
-      g!.globalAlpha = Math.max(0, p.life / 0.55);
-      g!.fillStyle = p.color;
-      g!.fillRect(p.x - 2.5, p.y - 2.5, 5, 5);
+      const t = Math.max(0, p.life / p.max);
+      g!.globalAlpha = t;
+      if (p.kind === "ring") {
+        const r = (1 - t) * 34;
+        g!.strokeStyle = p.color;
+        g!.lineWidth = 3 * t + 0.5;
+        g!.beginPath();
+        g!.arc(p.x, p.y, r, 0, Math.PI * 2);
+        g!.stroke();
+      } else if (p.kind === "dust") {
+        g!.fillStyle = p.color;
+        g!.beginPath();
+        g!.arc(p.x, p.y, p.size * (1.4 - t * 0.5), 0, Math.PI * 2);
+        g!.fill();
+      } else {
+        g!.fillStyle = p.color;
+        const s = p.size * (0.5 + t * 0.5);
+        g!.fillRect(p.x - s / 2, p.y - s / 2, s, s);
+      }
     }
     g!.globalAlpha = 1;
+
+    const nearImg = ASSETS.bgNear ? img(`bg/m${lv + 1}-near.png`) : null;
+    if (nearImg) {
+      // Tiền cảnh phủ trước nhân vật, chạy nhanh hơn camera cho có chiều sâu
+      g!.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
+      const nh = 120;
+      const tileW = nh * (nearImg.naturalWidth / nearImg.naturalHeight);
+      drawTiled(g!, nearImg, -wrap(cam * 0.9, tileW), H - nh, W + tileW, nh);
+    }
     g!.restore();
 
-    // HUD trong canvas
+    drawHud(m);
+
+    if (flash > 0.01) {
+      g!.globalAlpha = Math.min(0.5, flash);
+      g!.fillStyle = "#ffffff";
+      g!.fillRect(0, 0, W, H);
+      g!.globalAlpha = 1;
+    }
+    if (phase === "clear" && fade < 1) {
+      g!.globalAlpha = Math.min(0.75, fade);
+      g!.fillStyle = "#0a0a0a";
+      g!.fillRect(0, 0, W, H);
+      g!.globalAlpha = 1;
+    }
+    if (phase === "paused") {
+      // Bảng hướng dẫn do React vẽ ở trên; canvas chỉ tối xuống và đứng hình
+      g!.fillStyle = "rgba(10,10,10,.55)";
+      g!.fillRect(0, 0, W, H);
+    }
+    g!.setTransform(1, 0, 0, 1, 0, 0);
+  }
+
+  function drawHud(m: GameMap) {
     for (let i = 0; i < player.mhp; i++) {
       g!.fillStyle = i < player.hp ? "#ff6b5e" : "rgba(242,241,236,.22)";
       g!.beginPath();
@@ -1008,11 +2155,29 @@ export function createGame(
     }
     if (player.tool > 0) {
       const activeTool = pickupSprite(lv, "tool");
-      if (activeTool) drawSpriteAtFeet(g!, activeTool, 28, 68, 30, 30);
+      if (activeTool) drawFit(g!, activeTool, 28, 68, 30, 30);
       g!.fillStyle = "rgba(242,241,236,.2)";
       g!.fillRect(48, 47, 95, 6);
       g!.fillStyle = LIME;
       g!.fillRect(48, 47, 95 * (player.tool / TOOL_SECONDS), 6);
+    }
+
+    // Đếm quái còn lại — không có nó thì không biết còn phải dọn bao nhiêu
+    if (!boss) {
+      const total = mobs.length;
+      const left = mobs.filter((o) => !o.dead).length;
+      g!.font = `700 13px ${FONT_DISPLAY}`;
+      g!.textAlign = "right";
+      g!.fillStyle = "rgba(10,10,10,.5)";
+      g!.beginPath();
+      g!.roundRect(W - 88, 12, 74, 20, 6);
+      g!.fill();
+      g!.fillStyle = left ? "#f2f1ec" : LIME;
+      g!.fillText(`${total - left}/${total}`, W - 22, 27);
+      g!.fillStyle = left ? HAZARD : LIME;
+      g!.beginPath();
+      g!.arc(W - 78, 22, 4, 0, Math.PI * 2);
+      g!.fill();
     }
 
     if (boss) {
@@ -1024,12 +2189,22 @@ export function createGame(
       g!.fill();
       g!.fillStyle = HAZARD;
       g!.beginPath();
-      g!.roundRect(bx, 14, bw * (boss.hp / boss.mhp), 14, 4);
+      g!.roundRect(bx, 14, bw * Math.max(0, boss.hp / boss.mhp), 14, 4);
       g!.fill();
       g!.font = `600 12px ${FONT_SANS}`;
       g!.textAlign = "center";
       g!.fillStyle = "#f2f1ec";
       g!.fillText(m.boss, W / 2, 45);
+    }
+
+    // Combo: chỉ hiện khi đang có chuỗi, nằm ngay cạnh nhân vật
+    if (player.comboT > 0 && player.combo > 0) {
+      g!.font = `800 14px ${FONT_DISPLAY}`;
+      g!.textAlign = "center";
+      g!.globalAlpha = Math.min(1, player.comboT * 3);
+      g!.fillStyle = LIME;
+      g!.fillText(`x${player.combo + 1}`, player.x + player.w / 2 - cam, player.y - 22);
+      g!.globalAlpha = 1;
     }
 
     if (msgT > 0) {
@@ -1044,13 +2219,12 @@ export function createGame(
       g!.globalAlpha = 1;
     }
 
-    if (phase === "clear" && fade < 1) {
-      g!.globalAlpha = Math.min(0.75, fade);
-      g!.fillStyle = "#0a0a0a";
-      g!.fillRect(0, 0, W, H);
-      g!.globalAlpha = 1;
+    if (phase === "play") {
+      g!.font = `500 10px ${FONT_SANS}`;
+      g!.textAlign = "right";
+      g!.fillStyle = "rgba(242,241,236,.45)";
+      g!.fillText(labels.pauseHint, W - 14, H - 12);
     }
-    g!.setTransform(1, 0, 0, 1, 0, 0);
   }
 
   /* ── vòng lặp và input ───────────────────────────────── */
@@ -1058,11 +2232,16 @@ export function createGame(
   function frame(t: number) {
     const dt = Math.min(0.05, (t - last) / 1000 || 0.016);
     last = t;
-    accumulator = Math.min(0.1, accumulator + dt);
-    const fixedStep = 1 / 120;
-    while (accumulator >= fixedStep) {
-      step(fixedStep);
-      accumulator -= fixedStep;
+    if (freeze > 0) {
+      // Hit-stop: vẫn vẽ, chỉ không cho thế giới chạy
+      freeze -= dt;
+    } else {
+      accumulator = Math.min(0.1, accumulator + dt);
+      const fixedStep = 1 / 120;
+      while (accumulator >= fixedStep) {
+        step(fixedStep);
+        accumulator -= fixedStep;
+      }
     }
     draw();
     raf = requestAnimationFrame(frame);
@@ -1077,50 +2256,96 @@ export function createGame(
 
   function press(k: GameKey) {
     keys[k] = true;
-    if (k === "jump") jump();
+    if (k === "jump") {
+      // Ghi nhận cú bấm sớm: chạm đất là nhảy luôn, không bị "ăn" mất phím
+      player.jumpBuf = 0.12;
+      tryJump();
+    }
     if (k === "atk") attack();
   }
   function release(k: GameKey) {
     keys[k] = false;
   }
 
+  function setPaused(next: boolean) {
+    if (next && phase === "play") {
+      phase = "paused";
+      // Nhả hết phím, không thì lúc quay lại nhân vật tự chạy
+      keys.left = keys.right = keys.jump = keys.atk = false;
+      handlers.onPause?.(true);
+    } else if (!next && phase === "paused") {
+      phase = "play";
+      last = performance.now();
+      accumulator = 0;
+      handlers.onPause?.(false);
+    }
+  }
+
+  /**
+   * e.code là chuẩn (không phụ thuộc layout) nhưng có bàn phím ảo và bộ nhập
+   * tiếng Việt không điền trường này. Rơi về e.key để không mất phím.
+   */
+  const KEY_ALIAS: Record<string, string> = {
+    ArrowLeft: "ArrowLeft", ArrowRight: "ArrowRight", ArrowUp: "ArrowUp",
+    a: "KeyA", d: "KeyD", w: "KeyW", j: "KeyJ", z: "KeyZ", x: "KeyX", p: "KeyP",
+    " ": "Space", Escape: "Escape",
+  };
+  const codeOf = (e: KeyboardEvent) =>
+    e.code || KEY_ALIAS[e.key] || KEY_ALIAS[e.key?.toLowerCase()] || "";
+
   function onKeyDown(e: KeyboardEvent) {
-    const k = KEYMAP[e.code];
+    const code = codeOf(e);
+    if (code === "KeyP" || code === "Escape") {
+      if (phase === "play" || phase === "paused") {
+        e.preventDefault();
+        setPaused(phase === "play");
+      }
+      return;
+    }
+    const k = KEYMAP[code];
     if (!k) return;
     e.preventDefault();
+    if (phase === "paused") return;
     press(k);
   }
   function onKeyUp(e: KeyboardEvent) {
-    const k = KEYMAP[e.code];
+    const k = KEYMAP[codeOf(e)];
     if (k) release(k);
   }
   function onPointer() {
     if (phase === "play") attack();
   }
+  /** Rời tab giữa lúc chơi thì tự dừng, đừng để bị quái ăn máu oan */
+  function onBlur() {
+    setPaused(true);
+  }
 
   window.addEventListener("keydown", onKeyDown);
   window.addEventListener("keyup", onKeyUp);
+  window.addEventListener("blur", onBlur);
   canvas.addEventListener("pointerdown", onPointer);
 
   // Bắt đầu tải mọi ảnh có thể cần ngay từ lúc dựng game, không chờ tới lúc
   // dùng — img() chỉ tạo phần tử <img> khi được gọi lần đầu, nên nếu để tới
   // lúc nhảy/chạy mới gọi thì khung hình đầu tiên sẽ không có gì để vẽ.
-  img(PLAYER_SPRITES.idle);
-  img(PLAYER_SPRITES.jump);
-  img(PLAYER_SPRITES.hurt);
-  PLAYER_SPRITES.run.forEach(img);
-  PLAYER_SPRITES.attack.forEach(img);
+  // Chỉ tải những file ASSETS khai báo là có thật, tránh 404 rác.
+  [...P_IDLE, ...P_RUN, ...P_ATK, P_RISE, P_FALL, P_LAND, P_HURT].forEach(img);
   Object.values(TRAP_SPRITES).forEach(img);
+  for (let i = 1; i <= ASSETS.slashFx; i++) img(`fx/slash-${i}.png`);
   maps.forEach((m, i) => {
     img(`boss/b${i + 1}.png`);
     img(`boss/b${i + 1}-tel.png`);
     img(`bg/m${i + 1}-mid.png`);
+    if (ASSETS.bgSky) img(`bg/m${i + 1}-sky.png`);
+    if (ASSETS.bgFar) img(`bg/m${i + 1}-far.png`);
+    if (ASSETS.bossFrames >= 3) img(`boss/b${i + 1}-hit.png`);
+    if (ASSETS.bgNear) img(`bg/m${i + 1}-near.png`);
     img(`item/heal-${i + 1}.png`);
     img(`item/tool-${i + 1}.png`);
     const kinds = new Set(m.mobs.map((sp) => sp.kind));
     kinds.forEach((k) => {
-      img(`mob/m${i + 1}-${k}-1.png`);
-      img(`mob/m${i + 1}-${k}-2.png`);
+      if (k === "rider" && !ASSETS.riderArt) return;
+      for (let f = 1; f <= mobFrameCount(k); f++) img(`mob/m${i + 1}-${k}-${f}.png`);
     });
   });
 
@@ -1134,13 +2359,25 @@ export function createGame(
       last = performance.now();
       accumulator = 0;
     },
-    pause() { if (phase === "play") phase = "title"; },
+    pause() { setPaused(true); },
+    togglePause() { setPaused(phase === "play"); },
+    isPaused: () => phase === "paused",
+    status: (): GameStatus => ({
+      mapIndex: lv,
+      mobsLeft: mobs.filter((o) => !o.dead).length,
+      mobsTotal: mobs.length,
+      bossAlive: !!boss,
+      bossHpPct: boss ? Math.max(0, boss.hp / boss.mhp) : 0,
+      hp: player.hp,
+      mhp: player.mhp,
+    }),
     press,
     release,
     destroy() {
       cancelAnimationFrame(raf);
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("blur", onBlur);
       canvas.removeEventListener("pointerdown", onPointer);
     },
   };
