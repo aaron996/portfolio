@@ -1,0 +1,34 @@
+<meta charset="utf-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1600px; }
+  body { background:#111110; font-family:'Inter'; color:#F2F1EC; }
+  #root {
+    width:1600px; background:#111110;
+    display:flex; align-items:stretch; gap:0; padding:44px 56px;
+  }
+  .node {
+    flex:1; min-width:0; background:#181816; border:2px solid #26261F; border-radius:10px;
+    padding:26px 24px; display:flex; flex-direction:column;
+  }
+  .node.out { border-color:#D4F236; background:rgba(212,242,54,.07); }
+  .step {
+    font-size:16px; font-weight:600; letter-spacing:.16em; color:#6E6E68; margin-bottom:16px;
+  }
+  .node.out .step { color:#A8C22B; }
+  .title { font-family:'Archivo'; font-weight:700; font-size:26px; line-height:1.15; letter-spacing:-.02em; }
+  .node.out .title { color:#D4F236; }
+  .sub { margin-top:12px; font-size:17px; line-height:1.35; color:#8C8C86; }
+  .arrow { width:44px; flex:0 0 44px; display:flex; align-items:center; justify-content:center; color:#4a4a44; font-size:26px; }
+</style>
+<div id="root">
+<div class="node"><div class="step">01</div><div class="title">Log ra/vào kho</div><div class="sub">quét trùng · quét thiếu · thứ tự không chuẩn</div></div>
+<div class="arrow">→</div>
+<div class="node"><div class="step">02</div><div class="title">Gom episode</div><div class="sub">chuẩn hoá event trước khi suy luận</div></div>
+<div class="arrow">→</div>
+<div class="node"><div class="step">03</div><div class="title">Chạy 4 quy tắc</div><div class="sub">vét cạn mọi đơn, không lọc theo nhóm khiếu nại</div></div>
+<div class="arrow">→</div>
+<div class="node"><div class="step">04</div><div class="title">Thứ tự ưu tiên</div><div class="sub">chạy lại luôn ra cùng kết quả</div></div>
+<div class="arrow">→</div>
+<div class="node out"><div class="step">KẾT QUẢ</div><div class="title">Đúng một kho</div><div class="sub">1 dòng/đơn · số ngày tồn · số quy tắc cùng vi phạm</div></div>
+</div>
