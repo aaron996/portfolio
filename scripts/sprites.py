@@ -33,6 +33,11 @@ CÁCH DÙNG
     python scripts/sprites.py normalize raw/ out/ --kind mob --dry-run
     python scripts/sprites.py pack raw/bg public/game/bg      # dọn alpha + nén
 
+    # Bộ có hoạt ảnh nhún người (chu kỳ đi của trùm, khung lao): phóng cả bộ
+    # theo MỘT hệ số để giữ nguyên chênh lệch cao thấp giữa các khung, tính
+    # riêng cho từng con, và ép nội dung vào khung thay vì để mép chặt mất tay.
+    python scripts/sprites.py normalize raw/boss public/game/boss         --kind boss_v1 --fit uniform --group prefix --fit-canvas
+
 Cần Pillow:  pip install pillow
 """
 from __future__ import annotations
@@ -287,9 +292,20 @@ def cmd_normalize(args):
         dst.mkdir(parents=True, exist_ok=True)
 
     fit = args.fit
-    how = f"thước đo {spec['unit']}px" if fit == "head" else "giữ nguyên cỡ"
+    how = {
+        "head": f"thước đo {spec['unit']}px",
+        "none": "giữ nguyên cỡ",
+        "uniform": f"một hệ số cho cả bộ, khung cao nhất về {spec['unit']}px",
+    }[fit]
     print(f"{args.kind}: {len(files)} tấm → khung {spec['canvas']}², "
           f"{how}, neo ({spec['ax']}, {spec['ay']})")
+
+    def group_of(name):
+        return name.split("-")[0] if args.group == "prefix" else ""
+
+    # Đọc và đo trước toàn bộ, vì --fit uniform cần biết cả bộ mới tính được
+    # hệ số. Cách này cũng tránh mở file hai lần.
+    loaded = []
     for p in files:
         im = Image.open(p).convert("RGBA")
         # Làm sạch TRƯỚC khi đo: lớp mờ sót lại làm phình bbox nên điểm neo lệch
@@ -299,11 +315,30 @@ def cmd_normalize(args):
         if not m:
             print(f"  !! {p.name}: ảnh trống, bỏ qua")
             continue
+        loaded.append((p, im, m))
+
+    # Hệ số dùng chung, tính theo khung CAO NHẤT của mỗi nhóm: khung cao nhất
+    # là khung đứng thẳng nhất, tức khung tương ứng với dáng đứng đã có trong
+    # game. Lấy trung bình thì cả bộ bị thu nhỏ lại theo mấy khung rạp người.
+    uniform = {}
+    if fit == "uniform":
+        for p, _im, m in loaded:
+            u = m["unit"] or float(m["body"])
+            g = group_of(p.stem)
+            uniform[g] = max(uniform.get(g, 0.0), u)
+        for g, ref in sorted(uniform.items()):
+            label = g or "cả bộ"
+            print(f"  ~  nhóm {label}: khung cao nhất {ref:.0f}px "
+                  f"→ hệ số x{spec['unit'] / ref:.3f}")
+
+    for p, im, m in loaded:
         unit = m["unit"]
         if fit == "none":
             # Chỉ canh vị trí, không đụng tới cỡ. Dùng khi bộ ảnh đã nhất quán
             # cỡ nhân vật — phóng lại theo số đo chỉ làm mờ và làm lệch.
             scale = 1.0
+        elif fit == "uniform":
+            scale = spec["unit"] / uniform[group_of(p.stem)]
         else:
             if not unit:
                 # Không tìm được mặt (mũ trùm kín, quái không có da) — dùng chiều
@@ -311,12 +346,40 @@ def cmd_normalize(args):
                 unit = float(m["body"])
                 print(f"  ~  {p.name}: không thấy mặt, đo theo chiều cao thân")
             scale = spec["unit"] / unit
+
+        # Dáng nằm ngang (trùm lao, trùm giậm) rộng hơn dáng đứng, mà neo lại
+        # ép tâm hông về giữa khung — thế là tay chân phía sau bị khung chặt
+        # mất. Ở đây chữa theo đúng thứ tự thiệt hại: ĐẨY NGANG trước, vì lệch
+        # tâm vài pixel gần như không thấy; chỉ khi nội dung rộng hơn cả khung
+        # mới THU NHỎ, và thu đúng mức tối thiểu. Cả hai đều in ra để soi.
+        shift = 0
+        if args.fit_canvas:
+            cx = m["ax"] if m["ax"] else (m["left"] + m["right"]) / 2
+            # Chừa 3px mỗi bên: --out-size thu ảnh bằng LANCZOS, mà lọc này
+            # trải điểm ra một hai pixel, nên nội dung nằm sát mép 0 vẫn bị
+            # liếm mất một sợi sau khi thu.
+            edge = 3
+            for _ in range(8):
+                left = spec["ax"] - cx * scale + m["left"] * scale
+                right = spec["ax"] - cx * scale + m["right"] * scale
+                over_l = max(0.0, edge - left)
+                over_r = max(0.0, right - (spec["canvas"] - edge))
+                if over_l < 0.5 and over_r < 0.5:
+                    break
+                span = right - left
+                room = spec["canvas"] - edge * 2
+                if span > room:
+                    scale *= room / span
+                    continue
+                shift = round(over_l - over_r)
+                break
+
         nw, nh = max(1, round(im.width * scale)), max(1, round(im.height * scale))
         scaled = im.resize((nw, nh), Image.LANCZOS)
 
         anchor_x = (m["ax"] if m["ax"] else (m["left"] + m["right"]) / 2) * scale
         anchor_y = m["ay"] * scale
-        ox = round(spec["ax"] - anchor_x)
+        ox = round(spec["ax"] - anchor_x) + shift
         oy = round(spec["ay"] - anchor_y)
 
         canvas = Image.new("RGBA", (spec["canvas"], spec["canvas"]), (0, 0, 0, 0))
@@ -338,6 +401,8 @@ def cmd_normalize(args):
         if oy + m["ay"] * scale > spec["canvas"]:
             cut.append("dưới")
         note = f"  !! bị cắt mép {', '.join(cut)}" if cut else ""
+        if shift:
+            note += f"  (đẩy ngang {shift:+d}px cho vừa khung)"
         u = f" đầu={unit:.0f}" if unit else ""
         print(f"  {p.name:22s} x{scale:5.3f} lệch ({ox:+5d},{oy:+5d}){u}{note}")
 
@@ -434,10 +499,20 @@ def main():
     n.add_argument("--kind", choices=tuple(SPEC), required=True)
     n.add_argument(
         "--fit",
-        choices=("head", "none"),
+        choices=("head", "none", "uniform"),
         default="head",
-        help='"head" phóng từng khung cho thước đo bằng spec (bộ ảnh lệch cỡ); '
-             '"none" giữ nguyên cỡ, chỉ canh điểm neo (bộ ảnh đã nhất quán)',
+        help='"head" phóng TỪNG khung cho thước đo bằng spec (bộ ảnh lệch cỡ); '
+             '"none" giữ nguyên cỡ, chỉ canh điểm neo (bộ ảnh đã đúng khung); '
+             '"uniform" phóng CẢ BỘ theo một hệ số duy nhất, giữ nguyên chênh '
+             'lệch cao thấp giữa các khung (bộ có hoạt ảnh cố ý nhún người)',
+    )
+    n.add_argument(
+        "--group",
+        choices=("prefix",),
+        default=None,
+        help='chỉ dùng với --fit uniform: "prefix" tính hệ số riêng cho từng '
+             'nhóm theo phần tên file trước dấu gạch đầu tiên (b1-walk-1.png '
+             '→ nhóm "b1"), để năm con trùm không bị kéo theo cùng một số',
     )
     n.add_argument(
         "--out-size",
@@ -450,6 +525,13 @@ def main():
         "--raw-alpha",
         action="store_true",
         help="giữ nguyên alpha thô, không ép hai đầu về 0/255",
+    )
+    n.add_argument(
+        "--fit-canvas",
+        action="store_true",
+        help="ép nội dung nằm trong khung thay vì để mép khung chặt mất tay "
+             "chân: đẩy ngang trước, chỉ thu nhỏ khi nội dung rộng hơn cả "
+             "khung. Dùng cho bộ có dáng nằm ngang (trùm lao, trùm giậm).",
     )
     n.add_argument("--dry-run", action="store_true", help="chỉ in, không ghi file")
     n.set_defaults(func=cmd_normalize)

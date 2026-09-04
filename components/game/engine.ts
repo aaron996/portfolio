@@ -212,27 +212,27 @@ const ASSETS = {
    * tự nhún người theo quãng đường đi được. Bật lên thì phải đủ N khung cho
    * MỌI ải, thiếu ải nào ải đó nhấp nháy về khung đứng.
    */
-  bossWalk: 0,
+  bossWalk: 4,
   /** boss/bX-atk.png — khung lúc đòn đã bung ra (giậm, nhả loạt, lao) */
-  bossAtk: false,
+  bossAtk: true,
   /** player/shoot-1..N.png — khung bắn. 0 = mượn khung chém. */
-  playerShoot: 0,
+  playerShoot: 2,
   /** player/guard.png — khung giơ đỡ. Chưa có thì engine hạ thấp khung đứng. */
-  playerGuard: false,
+  playerGuard: true,
   /** player/gun-held.png — khẩu súng vẽ đè lên tay khi còn đạn */
-  gunHeldArt: false,
+  gunHeldArt: true,
   /** fx/bullet.png — tia đạn của người chơi */
-  bulletArt: false,
+  bulletArt: true,
   /** fx/muzzle.png — chớp đầu nòng */
-  muzzleArt: false,
+  muzzleArt: true,
   /** fx/shield.png — cung khiên trước mặt lúc đỡ */
-  shieldArt: false,
+  shieldArt: true,
   /** Đã có ảnh cho quái rider chưa. Chưa có thì engine vẽ bằng code. */
   riderArt: true,
   /** fx/slash-1..N.png. 0 = vẽ vệt chém bằng code. */
   slashFx: 3,
   /** item/gun-X.png đã có chưa. Chưa thì engine vẽ khẩu súng bằng code. */
-  gunArt: false,
+  gunArt: true,
   /** bg/mX-sky.png — lớp trời vẽ bằng ảnh thay vì dốc màu code */
   bgSky: false,
   /** bg/mX-far.png — lớp xa vẽ bằng ảnh thay vì bằng code */
@@ -338,7 +338,9 @@ const SCENE_SPRITES = {
 
 /** Ảnh cho súng và đỡ đòn. Chưa gen thì engine vẽ bằng code, xem ASSETS. */
 const GEAR_SPRITES = {
-  gunHeld: "player/gun-held.png",
+  // Nằm ở fx/ chứ không phải player/: `sprites.py check` quét player/ như
+  // khung nhân vật có rig, mà đây là một cái vật, khung 256x192 không vuông
+  gunHeld: "fx/gun-held.png",
   bullet: "fx/bullet.png",
   muzzle: "fx/muzzle.png",
   shield: "fx/shield.png",
