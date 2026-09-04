@@ -7,6 +7,7 @@ import {
   type GameInstance,
   type GameKey,
   type GameStatus,
+  type PauseReason,
   type PickupInfo,
 } from "./engine";
 
@@ -18,16 +19,36 @@ type Phase = "title" | "play" | "clear" | "end";
 /** Thẻ giải nghĩa vật phẩm nằm trên màn hình bao lâu rồi tự tắt */
 const PICKUP_CARD_MS = 5200;
 
+/**
+ * Lựa chọn "đừng dừng game khi nhặt vật phẩm nữa" lưu ngay trên máy người
+ * chơi. Không phải thiết lập tài khoản, không đáng gửi đi đâu cả — mà bỏ vào
+ * localStorage thì lần sau mở lại trang vẫn còn.
+ */
+const PAUSE_ON_PICKUP_KEY = "opsgame:pause-on-pickup";
+
+function readPauseOnPickup() {
+  try {
+    return localStorage.getItem(PAUSE_ON_PICKUP_KEY) !== "0";
+  } catch {
+    // Trình duyệt chặn lưu trữ (chế độ riêng tư, cookie bị khoá) — cứ dừng
+    return true;
+  }
+}
+
 export function OpsGame() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameRef = useRef<GameInstance | null>(null);
   const pickupTimer = useRef<number | null>(null);
+  /** Engine đọc cờ này qua setPauseOnPickup; ref để handler không bị đóng băng giá trị cũ */
+  const pauseOnPickupRef = useRef(true);
 
   const [phase, setPhase] = useState<Phase>("title");
   const [mapIndex, setMapIndex] = useState(0);
   const [got, setGot] = useState<string[]>([]);
   const [lastClear, setLastClear] = useState<{ index: number; skills: string[] } | null>(null);
   const [paused, setPaused] = useState(false);
+  const [pauseWhy, setPauseWhy] = useState<PauseReason>("manual");
+  const [pauseOnPickup, setPauseOnPickupState] = useState(true);
   /** Ảnh chụp lúc bấm tạm dừng — bảng hướng dẫn đọc từ đây, không đọc mỗi khung hình */
   const [status, setStatus] = useState<GameStatus | null>(null);
   const [pickup, setPickup] = useState<PickupInfo | null>(null);
@@ -44,6 +65,10 @@ export function OpsGame() {
         deathLine: game.deathLine,
         pickupTool: game.pickupTool,
         pickupHeal: game.pickupHeal,
+        pickupGun: game.pickupGun,
+        noAmmo: game.noAmmo,
+        parryLine: game.parryLine,
+        guardBreakLine: game.guardBreakLine,
         pauseHint: game.pauseHint,
       },
       {
@@ -56,18 +81,29 @@ export function OpsGame() {
             setPhase(i + 1 >= game.maps.length ? "end" : "clear");
           }, 900);
         },
-        onPause: (next) => {
+        onPause: (next, reason) => {
           setPaused(next);
+          setPauseWhy(reason);
           if (next) setStatus(gameRef.current?.status() ?? null);
+          // Đọc xong thì thẻ vật phẩm đi cùng bảng đó cũng biến mất theo
+          else if (reason === "pickup") setPickup(null);
         },
         onPickup: (info) => {
           setPickup(info);
           if (pickupTimer.current) window.clearTimeout(pickupTimer.current);
-          pickupTimer.current = window.setTimeout(() => setPickup(null), PICKUP_CARD_MS);
+          // Khi game dừng hẳn để đọc thì thẻ không được tự tắt — người chơi
+          // đóng bảng lúc nào là xong lúc đó.
+          if (!pauseOnPickupRef.current) {
+            pickupTimer.current = window.setTimeout(() => setPickup(null), PICKUP_CARD_MS);
+          }
         },
       }
     );
     gameRef.current = instance;
+    const saved = readPauseOnPickup();
+    pauseOnPickupRef.current = saved;
+    setPauseOnPickupState(saved);
+    instance.setPauseOnPickup(saved);
     return () => {
       if (pickupTimer.current) window.clearTimeout(pickupTimer.current);
       instance.destroy();
@@ -96,6 +132,19 @@ export function OpsGame() {
   }, [enterPlay]);
   const restartMap = useCallback(() => enterPlay(mapIndex), [enterPlay, mapIndex]);
   const togglePause = useCallback(() => gameRef.current?.togglePause(), []);
+  const toggleBag = useCallback(() => gameRef.current?.toggleInventory(), []);
+
+  /** Tích "đừng dừng nữa": ghi vào máy, báo xuống engine ngay trong ván này */
+  const setPauseOnPickup = useCallback((on: boolean) => {
+    pauseOnPickupRef.current = on;
+    setPauseOnPickupState(on);
+    gameRef.current?.setPauseOnPickup(on);
+    try {
+      localStorage.setItem(PAUSE_ON_PICKUP_KEY, on ? "1" : "0");
+    } catch {
+      // Không lưu được thì thôi, lựa chọn vẫn có hiệu lực trong phiên này
+    }
+  }, []);
 
   // Nút ảo cho điện thoại — giữ nút thì nhân vật chạy, thả thì dừng
   const padProps = (key: GameKey) => ({
@@ -113,6 +162,8 @@ export function OpsGame() {
 
   const map = game.maps[mapIndex];
   const pause = game.pause;
+  const bag = game.inventory;
+  const panel = game.pickupPanel;
 
   return (
     <div className="mx-auto w-full max-w-4xl">
@@ -146,14 +197,24 @@ export function OpsGame() {
               })}
             </ul>
             {phase === "play" ? (
-              <button
-                type="button"
-                onClick={togglePause}
-                aria-label={paused ? pause.resumeLabel : pause.heading}
-                className="shrink-0 rounded-lg border border-ink-700 px-3 py-1.5 font-display text-xs font-bold uppercase tracking-wide text-mute transition-colors hover:border-lime hover:text-lime"
-              >
-                {paused ? "▶" : "❚❚"}
-              </button>
+              <div className="flex shrink-0 gap-2">
+                <button
+                  type="button"
+                  onClick={toggleBag}
+                  aria-label={bag.heading}
+                  className="rounded-lg border border-ink-700 px-3 py-1.5 font-display text-xs font-bold uppercase tracking-wide text-mute transition-colors hover:border-lime hover:text-lime"
+                >
+                  🎒
+                </button>
+                <button
+                  type="button"
+                  onClick={togglePause}
+                  aria-label={paused ? pause.resumeLabel : pause.heading}
+                  className="rounded-lg border border-ink-700 px-3 py-1.5 font-display text-xs font-bold uppercase tracking-wide text-mute transition-colors hover:border-lime hover:text-lime"
+                >
+                  {paused ? "▶" : "❚❚"}
+                </button>
+              </div>
             ) : null}
           </div>
         </div>
@@ -175,7 +236,7 @@ export function OpsGame() {
             >
               <p
                 className={`font-display text-[10px] font-bold uppercase tracking-widest ${
-                  pickup.kind === "tool" ? "text-lime" : "text-[#ff8f85]"
+                  PICKUP_ACCENT[pickup.kind]
                 }`}
               >
                 {game.pickupKindLabel[pickup.kind]}
@@ -257,8 +318,127 @@ export function OpsGame() {
           ) : null}
         </div>
 
+        {/* Bảng vật phẩm vừa nhặt — game dừng hẳn cho tới khi đọc xong */}
+        {phase === "play" && paused && pauseWhy === "pickup" && pickup ? (
+          <div className="absolute inset-0 grid place-items-center bg-ink-950/88 p-4">
+            <div
+              className="w-full max-w-md rounded-2xl border border-ink-700 bg-ink-900 p-4 sm:p-5"
+              role="dialog"
+              aria-label={panel.heading}
+            >
+              <p className="font-display text-[10px] font-bold uppercase tracking-widest text-mute-3">
+                {panel.heading}
+              </p>
+              <p
+                className={`mt-2 font-display text-[10px] font-bold uppercase tracking-widest ${
+                  PICKUP_ACCENT[pickup.kind]
+                }`}
+              >
+                {game.pickupKindLabel[pickup.kind]}
+              </p>
+              <p className="mt-1 font-display text-xl font-bold text-paper">{pickup.name}</p>
+              <p className="mt-2 text-[13px] leading-relaxed text-mute">{pickup.desc}</p>
+
+              <label className="mt-4 flex cursor-pointer items-start gap-2.5 text-[12px] leading-snug text-mute-2">
+                <input
+                  type="checkbox"
+                  checked={!pauseOnPickup}
+                  onChange={(e) => setPauseOnPickup(!e.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 accent-lime"
+                />
+                {panel.dontPauseLabel}
+              </label>
+              <p className="mt-1.5 text-[11px] leading-snug text-mute-3">{panel.inventoryHint}</p>
+
+              <button
+                type="button"
+                onClick={togglePause}
+                autoFocus
+                className="mt-4 w-full rounded-lg bg-lime px-5 py-2.5 font-display text-xs font-bold uppercase tracking-wide text-ink-950 transition-transform hover:scale-[1.02]"
+              >
+                {panel.resumeLabel}
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        {/* Túi đồ — mở bằng B hoặc nút 🎒, đọc từ ảnh chụp lúc dừng */}
+        {phase === "play" && paused && pauseWhy === "inventory" ? (
+          <div className="absolute inset-0 overflow-y-auto bg-ink-950/88 p-3 sm:p-5">
+            <div className="flex items-baseline justify-between gap-3">
+              <h2 className="display text-xl text-paper sm:text-2xl">{bag.heading}</h2>
+              <p className="text-[11px] tracking-wide text-mute-3">
+                Ải {mapIndex + 1} · {map.name}
+              </p>
+            </div>
+
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <StatRow label={bag.hpLabel} value={status ? `${status.hp}/${status.mhp}` : "—"} />
+              <StatRow
+                label={bag.guardLabel}
+                value={status ? `${Math.round(status.guard * 100)}%` : "—"}
+              />
+              <StatRow
+                label={bag.toolLabel}
+                value={
+                  status?.toolName
+                    ? `${status.toolName} · ${bag.toolLeft.replace(
+                        "{n}",
+                        String(Math.ceil(status.toolLeft))
+                      )}`
+                    : bag.noneLabel
+                }
+                accent={status?.toolName ? "tool" : undefined}
+              />
+              <StatRow
+                label={bag.gunLabel}
+                value={
+                  status?.gunName
+                    ? `${status.gunName} · ${bag.ammoLeft.replace("{n}", String(status.ammo))}`
+                    : bag.noneLabel
+                }
+                accent={status?.gunName ? "gun" : undefined}
+              />
+            </div>
+
+            <p className="mt-4 font-display text-[10px] font-bold uppercase tracking-widest text-mute-3">
+              {bag.itemsHeading}
+            </p>
+            {status && status.items.length ? (
+              <ul className="mt-1.5 space-y-1.5">
+                {status.items.map((it, i) => (
+                  <li
+                    key={`${it.name}-${i}`}
+                    className="rounded-xl border border-ink-800 bg-ink-900/70 px-3 py-2"
+                  >
+                    <span
+                      className={`font-display text-[10px] font-bold uppercase tracking-widest ${
+                        PICKUP_ACCENT[it.kind]
+                      }`}
+                    >
+                      {game.pickupKindLabel[it.kind]}
+                    </span>
+                    <p className="font-display text-[13px] font-bold text-paper">{it.name}</p>
+                    <p className="mt-0.5 text-[11px] leading-snug text-mute">{it.desc}</p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-1.5 text-[12px] text-mute">{bag.emptyLabel}</p>
+            )}
+
+            <button
+              type="button"
+              onClick={toggleBag}
+              className="mt-4 rounded-lg bg-lime px-5 py-2 font-display text-xs font-bold uppercase tracking-wide text-ink-950 transition-transform hover:scale-[1.04]"
+            >
+              {bag.closeLabel}
+            </button>
+          </div>
+        ) : null}
+
         {/* Bảng tạm dừng: hướng dẫn điều khiển + mục tiêu ải hiện tại */}
-        {phase === "play" && paused ? (
+        {phase === "play" && paused && pauseWhy === "manual" ? (
           <div className="absolute inset-0 overflow-y-auto bg-ink-950/85 p-3 sm:p-5">
             <div className="flex items-baseline justify-between gap-3">
               <h2 className="display text-xl text-paper sm:text-2xl">{pause.heading}</h2>
@@ -333,9 +513,11 @@ export function OpsGame() {
         ) : null}
       </div>
 
-      {/* Nút ảo — chỉ hiện trên màn hình cảm ứng hoặc màn hình hẹp */}
-      <div className="mt-3 flex items-center justify-between gap-3 md:hidden">
-        <div className="flex gap-3">
+      {/* Nút ảo — chỉ hiện trên màn hình cảm ứng hoặc màn hình hẹp.
+          Sáu hành động không nhét vừa một hàng, nên cụm phải xếp hai tầng:
+          tầng trên là né (nhảy, đỡ), tầng dưới là đánh (chém, bắn). */}
+      <div className="mt-3 flex items-end justify-between gap-2 md:hidden">
+        <div className="flex gap-2">
           <button type="button" aria-label="Sang trái" {...padProps("left")} className={PAD}>
             ◀
           </button>
@@ -343,25 +525,53 @@ export function OpsGame() {
             ▶
           </button>
         </div>
-        <button
-          type="button"
-          aria-label={pause.heading}
-          onClick={togglePause}
-          className="grid h-11 w-11 shrink-0 touch-none select-none place-items-center rounded-xl border border-ink-700 bg-ink-850 text-sm text-mute active:border-lime active:text-lime"
-        >
-          {paused ? "▶" : "❚❚"}
-        </button>
-        <div className="flex gap-3">
+
+        <div className="flex shrink-0 flex-col gap-2">
+          <button
+            type="button"
+            aria-label={bag.heading}
+            onClick={toggleBag}
+            className="grid h-10 w-10 touch-none select-none place-items-center rounded-xl border border-ink-700 bg-ink-850 text-sm text-mute active:border-lime active:text-lime"
+          >
+            🎒
+          </button>
+          <button
+            type="button"
+            aria-label={pause.heading}
+            onClick={togglePause}
+            className="grid h-10 w-10 touch-none select-none place-items-center rounded-xl border border-ink-700 bg-ink-850 text-xs text-mute active:border-lime active:text-lime"
+          >
+            {paused ? "▶" : "❚❚"}
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            aria-label="Đỡ đòn"
+            {...padProps("guard")}
+            className={`${ACT} border-[#9fd8ff] text-[#9fd8ff]`}
+          >
+            Đỡ
+          </button>
           <button type="button" aria-label="Nhảy" {...padProps("jump")} className={PAD}>
             ▲
           </button>
           <button
             type="button"
-            aria-label="Đánh"
-            {...padProps("atk")}
-            className="h-16 w-24 touch-none select-none rounded-2xl border-2 border-lime bg-lime font-display text-sm font-extrabold uppercase text-ink-950 active:scale-95"
+            aria-label="Bắn"
+            {...padProps("shoot")}
+            className={`${ACT} border-[#9fd8ff] bg-[#9fd8ff] text-ink-950`}
           >
-            Đánh
+            Bắn
+          </button>
+          <button
+            type="button"
+            aria-label="Chém"
+            {...padProps("atk")}
+            className={`${ACT} border-lime bg-lime text-ink-950`}
+          >
+            Chém
           </button>
         </div>
       </div>
@@ -369,5 +579,38 @@ export function OpsGame() {
   );
 }
 
+/** Một dòng chỉ số trong túi đồ: nhãn bên trái, giá trị bên phải */
+function StatRow({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: string;
+  accent?: PickupInfo["kind"];
+}) {
+  return (
+    <div className="flex items-baseline justify-between gap-3 rounded-xl border border-ink-800 bg-ink-900/70 px-3 py-2">
+      <span className="font-display text-[10px] font-bold uppercase tracking-widest text-mute-3">
+        {label}
+      </span>
+      <span className={`text-[12px] ${accent ? PICKUP_ACCENT[accent] : "text-paper"}`}>
+        {value}
+      </span>
+    </div>
+  );
+}
+
+/** Màu nhận dạng ba loại vật phẩm, khớp với màu engine vẽ trong canvas */
+const PICKUP_ACCENT: Record<PickupInfo["kind"], string> = {
+  heal: "text-[#ff8f85]",
+  tool: "text-lime",
+  gun: "text-[#9fd8ff]",
+};
+
 const PAD =
-  "grid h-16 w-16 touch-none select-none place-items-center rounded-2xl border-2 border-ink-700 bg-ink-850 font-display text-xl text-paper active:border-lime active:text-lime";
+  "grid h-14 w-14 touch-none select-none place-items-center rounded-2xl border-2 border-ink-700 bg-ink-850 font-display text-lg text-paper active:border-lime active:text-lime";
+
+/** Nút hành động trên điện thoại — to hơn nút hướng vì bấm nhiều hơn */
+const ACT =
+  "h-14 w-[4.5rem] touch-none select-none rounded-2xl border-2 font-display text-[11px] font-extrabold uppercase tracking-wide active:scale-95";
