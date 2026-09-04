@@ -9,6 +9,7 @@
  * Toàn bộ bố cục, tên quái, bẫy và vật phẩm đến từ content/content.vi.ts.
  */
 import type { GameMap, MobKind } from "@/content/types";
+import mobSpriteMetrics from "./mob-sprite-metrics.json";
 
 export type GameKey = "left" | "right" | "jump" | "atk";
 export type GamePhase = "title" | "play" | "clear" | "end";
@@ -47,9 +48,8 @@ const TOOL_SECONDS = 12;
 /**
  * Ảnh asset, tải bất đồng bộ, có fallback về hình khối khi chưa có.
  *
- * Nhân vật, quái, trùm, bẫy, lớp nền giữa và vật phẩm dùng ảnh thật; nền
- * trời/xa/đất/bệ, hiệu ứng và giao diện vẫn vẽ bằng code. Hàm draw giữ sẵn
- * fallback hình khối để game không trống trong lúc ảnh đang tải.
+ * Sprite V2, nền xa/giữa, mặt đất, bệ, cổng và hiệu ứng đều dùng PNG.
+ * Trời và thanh tiến độ vẫn là hình học; fallback chỉ dùng khi tải ảnh lỗi.
  */
 const ASSET_BASE = "/game";
 const imageCache = new Map<string, HTMLImageElement>();
@@ -65,19 +65,30 @@ function img(src: string): HTMLImageElement | null {
 }
 
 const PLAYER_SPRITES = {
-  idle: "player/idle.png",
-  run: ["player/run-1.png", "player/run-2.png", "player/run-3.png", "player/run-4.png"],
-  jump: "player/jump.png",
-  attack: ["player/attack-1.png", "player/attack-2.png"],
+  idle: ["player/idle-1.png", "player/idle-2.png", "player/idle-3.png"],
+  run: Array.from({ length: 8 }, (_, i) => `player/run-${i + 1}.png`),
+  jumpRise: "player/jump-rise.png",
+  jumpFall: "player/jump-fall.png",
+  land: "player/land.png",
+  attack: ["player/attack-1.png", "player/attack-2.png", "player/attack-3.png"],
   hurt: "player/hurt.png",
 };
+const SCENE_SPRITES = {
+  platform: "bg/platform.png", ground: "bg/ground.png", gate: "ui/gate.png",
+  heart: "ui/heart-full.png", bossbar: "ui/bossbar.png",
+  aura: "fx/aura.png", shot: "fx/shot.png", hit: "fx/hit.png",
+  dust: "fx/dust.png", ring: "fx/ring.png",
+};
+const SLASH_SPRITES = ["fx/slash-1.png", "fx/slash-2.png", "fx/slash-3.png"];
 
 /** Quái chỉ có ảnh cho tổ hợp ải × loại thực sự xuất hiện trong content.vi.ts */
-function mobSprite(mapIndex: number, kind: MobKind, frame: 1 | 2) {
-  return img(`mob/m${mapIndex + 1}-${kind}-${frame}.png`);
+function mobSprite(mapIndex: number, kind: MobKind, frame: number) {
+  return img(`mob/m${mapIndex + 1}-${kind}-${frame}.png`)
+    ?? img(`mob/m${mapIndex + 1}-${kind}-1.png`);
 }
-function bossSprite(mapIndex: number, telegraph: boolean) {
-  return img(`boss/b${mapIndex + 1}${telegraph ? "-tel" : ""}.png`);
+function bossSprite(mapIndex: number, telegraph: boolean, hurt: boolean) {
+  return img(`boss/b${mapIndex + 1}${hurt ? "-hit" : telegraph ? "-tel" : ""}.png`)
+    ?? img(`boss/b${mapIndex + 1}.png`);
 }
 const TRAP_SPRITES = {
   spike: "trap/spike.png",
@@ -124,6 +135,20 @@ function drawTiled(g: CanvasRenderingContext2D, im: HTMLImageElement, x: number,
   }
 }
 
+/** Preserve the end caps; repeat only the centre of the platform beam. */
+function drawLedge(g: CanvasRenderingContext2D, im: HTMLImageElement, x: number, y: number, w: number, h: number) {
+  const sourceCap = Math.round(im.naturalWidth * 0.1);
+  const cap = Math.min(w / 2, h * sourceCap / im.naturalHeight);
+  g.drawImage(im, 0, 0, sourceCap, im.naturalHeight, x, y, cap, h);
+  const middle = im.naturalWidth - sourceCap * 2;
+  const tile = h * middle / im.naturalHeight;
+  for (let dx = cap; dx < w - cap; dx += tile) {
+    const width = Math.min(tile, w - cap - dx);
+    g.drawImage(im, sourceCap, 0, middle * width / tile, im.naturalHeight, x + dx, y, width, h);
+  }
+  g.drawImage(im, im.naturalWidth-sourceCap, 0, sourceCap, im.naturalHeight, x+w-cap, y, cap, h);
+}
+
 interface Mob {
   kind: MobKind;
   name: string;
@@ -132,7 +157,7 @@ interface Mob {
   a: number; b: number;
   floor: number;
   hurt: number; bob: number; anim: number; dead: boolean;
-  cd: number; dash: number;
+  cd: number; dash: number; tel: number;
 }
 interface Boss {
   x: number; y: number; w: number; h: number;
@@ -199,7 +224,7 @@ export function createGame(
     x: 60, y: GY - 40, w: 26, h: 40,
     vx: 0, vy: 0, face: 1,
     hp: 5, mhp: 5, inv: 0, atk: 0, cd: 0, ground: false,
-    tool: 0, hurtT: 0, runFrame: 0,
+    tool: 0, hurtT: 0, runFrame: 0, landT: 0,
     attackActive: 0, attackHit: false, attackBuffed: false,
   };
   let mobs: Mob[] = [];
@@ -207,12 +232,13 @@ export function createGame(
   let pickups: Pickup[] = [];
   let parts: Particle[] = [];
   let shots: Shot[] = [];
+  let effects: { kind: "hit" | "dust"; x: number; y: number; life: number; duration: number }[] = [];
   let boss: Boss | null = null;
   let cam = 0;
 
   /* ── vòng đời ải ─────────────────────────────────────── */
 
-  const MOB_HP: Record<MobKind, number> = { walker: 2, flyer: 2, charger: 3, shooter: 2 };
+  const MOB_HP: Record<MobKind, number> = { walker: 2, flyer: 2, charger: 3, rider: 3, shooter: 2 };
 
   function loadMap(index: number) {
     lv = index;
@@ -220,10 +246,11 @@ export function createGame(
     Object.assign(player, {
       x: 60, y: GY - 40, vx: 0, vy: 0, face: 1,
       hp: 5, inv: 0, atk: 0, cd: 0, ground: false, tool: 0, hurtT: 0,
-      runFrame: 0, attackActive: 0, attackHit: false, attackBuffed: false,
+      runFrame: 0, landT: 0, attackActive: 0, attackHit: false, attackBuffed: false,
     });
     parts = [];
     shots = [];
+    effects = [];
     boss = null;
     cam = 0;
     shake = 0;
@@ -237,13 +264,13 @@ export function createGame(
       const h = sp.kind === "flyer" ? 28 : 30;
       return {
         kind: sp.kind, name: sp.name,
-        x: sp.x, y: floor - h, w: 30, h,
+        x: sp.x, y: floor - h, w: sp.kind === "rider" ? 48 : 30, h,
         hp: MOB_HP[sp.kind],
         dir: Math.random() < 0.5 ? -1 : 1,
         a: sp.x - range, b: sp.x + range,
         floor,
         hurt: 0, bob: Math.random() * 6, anim: Math.random(), dead: false,
-        cd: 1 + Math.random(), dash: 0,
+        cd: 1 + Math.random(), dash: 0, tel: 0,
       };
     });
 
@@ -290,6 +317,8 @@ export function createGame(
     if (phase !== "play" || !player.ground) return;
     player.vy = -684;
     player.ground = false;
+    player.landT = 0;
+    effect("dust", player.x + player.w / 2, player.y + player.h);
     puff(player.x + player.w / 2, player.y + player.h, "#ffffff", 4);
   }
 
@@ -321,6 +350,7 @@ export function createGame(
       if (o.dead || !overlap(hb, o)) continue;
       o.hp -= dmg;
       o.hurt = 0.18;
+      effect("hit", o.x + o.w / 2, o.y + o.h / 2);
       o.x += player.face * 14;
       shake = Math.max(shake, 3);
       puff(o.x + o.w / 2, o.y + o.h / 2, m.palette.mob, 6);
@@ -333,6 +363,7 @@ export function createGame(
     if (boss && overlap(hb, boss)) {
       boss.hp -= dmg;
       boss.hurt = 0.16;
+      effect("hit", boss.x + boss.w / 2, boss.y + boss.h / 2);
       shake = Math.max(shake, 5);
       puff(boss.x + boss.w / 2, boss.y + boss.h / 2, m.palette.boss, 8);
       if (boss.hp <= 0) clearMap();
@@ -379,6 +410,10 @@ export function createGame(
   function fire(x: number, y: number, vx: number, vy: number) {
     shots.push({ x, y, vx, vy, r: 9 });
   }
+  function effect(kind: "hit" | "dust", x: number, y: number) {
+    const duration = kind === "hit" ? 0.22 : 0.28;
+    effects.push({ kind, x, y, duration, life: duration });
+  }
 
   /** Hộp gây sát thương của một cái bẫy tại thời điểm hiện tại, null nếu đang tắt */
   function trapBox(t: Trap): Box | null {
@@ -407,32 +442,43 @@ export function createGame(
       if (o.x < o.a) { o.x = o.a; o.dir = 1; }
       if (o.x > o.b) { o.x = o.b; o.dir = -1; }
       o.y = o.floor - o.h + Math.sin(o.bob * 0.5) * 16;
-    } else if (o.kind === "charger") {
+    } else if (o.kind === "charger" || o.kind === "rider") {
       o.y = o.floor - o.h;
       if (o.dash > 0) {
         o.dash -= dt;
         o.x += o.dir * 4.4 * dt * 60;
         if (o.dash <= 0) o.cd = 1.3;
+      } else if (o.tel > 0) {
+        o.tel = Math.max(0, o.tel - dt);
+        if (o.tel === 0) o.dash = 0.75;
       } else {
         o.cd -= dt;
         const near = Math.abs(player.x - o.x) < 240 && Math.abs(player.y - o.y) < 70;
         if (near && o.cd <= 0) {
           o.dir = player.x < o.x ? -1 : 1;
-          o.dash = 0.75;
+          o.tel = o.kind === "rider" ? 0.5 : 0.25;
           puff(o.x + o.w / 2, o.y, HAZARD, 4);
         }
       }
       // Không cho lao ra khỏi vùng của nó quá xa
       o.x = Math.max(o.a - 140, Math.min(o.b + 140, o.x));
     } else {
-      // shooter: đứng im, nhả đạn về phía người chơi
+      // Shooter: hai khung đứng, rồi ngắm trước khi bắn và giật lùi sau phát bắn.
       o.y = o.floor - o.h;
-      o.cd -= dt;
-      if (o.cd <= 0) {
-        o.cd = 2.2;
+      if (o.dash > 0) {
+        o.dash = Math.max(0, o.dash - dt);
+      } else if (o.tel > 0) {
+        o.tel = Math.max(0, o.tel - dt);
         const dir = player.x < o.x ? -1 : 1;
         o.dir = dir;
-        fire(o.x + o.w / 2, o.y + o.h / 2, dir * 3.4, 0);
+        if (o.tel === 0) {
+          fire(o.x + o.w / 2, o.y + o.h / 2, dir * 3.4, 0);
+          o.dash = 0.16; // recoil window; frame 4
+          o.cd = 2.2;
+        }
+      } else {
+        o.cd -= dt;
+        if (o.cd <= 0) o.tel = 0.35;
       }
     }
   }
@@ -496,6 +542,8 @@ export function createGame(
     player.inv = Math.max(0, player.inv - dt);
     player.tool = Math.max(0, player.tool - dt);
     player.hurtT = Math.max(0, player.hurtT - dt);
+    player.landT = Math.max(0, player.landT - dt);
+    effects = effects.filter(e => { e.life -= dt; return e.life > 0; });
     msgT = Math.max(0, msgT - dt);
     shake *= Math.exp(-9 * dt);
 
@@ -509,10 +557,11 @@ export function createGame(
     const moveX = player.vx * dt;
     player.x = Math.max(0, Math.min(WORLD - player.w, player.x + moveX));
     if (player.ground && Math.abs(moveX) > 0.01) {
-      player.runFrame += Math.abs(moveX) / 32;
+      player.runFrame += Math.abs(moveX) / 16;
     }
 
     const prevBottom = player.y + player.h;
+    const wasGrounded = player.ground;
     player.vy += 2232 * dt;
     player.y += player.vy * dt;
     player.ground = false;
@@ -532,6 +581,11 @@ export function createGame(
         player.vy = 0;
         player.ground = true;
       }
+    }
+
+    if (!wasGrounded && player.ground) {
+      player.landT = 0.1;
+      effect("dust", player.x + player.w / 2, player.y + player.h);
     }
 
     let alive = 0;
@@ -605,14 +659,20 @@ export function createGame(
 
   function drawBackground(m: GameMap) {
     const p = m.palette;
-    g!.fillStyle = p.sky;
+    const sky = g!.createLinearGradient(0, 0, 0, GY);
+    sky.addColorStop(0, p.sky);
+    sky.addColorStop(1, p.far);
+    g!.fillStyle = sky;
     g!.fillRect(0, 0, W, H);
 
-    g!.fillStyle = p.far;
-    for (let i = 0; i < 9; i++) {
-      const x = ((i * 300 - cam * 0.25) % (W + 300)) - 150;
-      const h = 70 + ((i * 53) % 60);
-      g!.fillRect(x, GY - h - 40, 150, h + 40);
+    const far = img(`bg/m${lv + 1}-far.png`);
+    if (far) {
+      const h = 210;
+      const tileW = h * far.naturalWidth / far.naturalHeight;
+      const offset = ((cam * 0.25) % tileW + tileW) % tileW;
+      g!.globalAlpha = 0.65;
+      drawTiled(g!, far, -offset, GY - h - 10, W + tileW, h);
+      g!.globalAlpha = 1;
     }
 
     const mid = bgMidSprite(lv);
@@ -621,7 +681,9 @@ export function createGame(
       const midH = 150;
       const tileW = midH * (mid.naturalWidth / mid.naturalHeight);
       const offset = ((cam * 0.55) % tileW + tileW) % tileW;
+      g!.globalAlpha = 0.75;
       drawTiled(g!, mid, -offset, GY - midH, W + tileW, midH);
+      g!.globalAlpha = 1;
     } else {
       for (let i = 0; i < 11; i++) {
         const x = ((i * 220 - cam * 0.55) % (W + 220)) - 110;
@@ -645,6 +707,12 @@ export function createGame(
     g!.fillRect(0, GY, W, H - GY);
     g!.fillStyle = p.groundEdge;
     g!.fillRect(0, GY, W, 7);
+    const ground = img(SCENE_SPRITES.ground);
+    if (ground) {
+      const tileW = (H - GY) * ground.naturalWidth / ground.naturalHeight;
+      const offset = cam % tileW;
+      drawTiled(g!, ground, -offset, GY, W + tileW, H - GY);
+    }
   }
 
   function drawLabel(text: string, x: number, y: number, color = "#ffffff") {
@@ -670,25 +738,45 @@ export function createGame(
   }
 
   /**
-   * Khung nào đang cần cho quái, theo đúng ý nghĩa của mục 3b trong
-   * docs/game-assets.md: walker/flyer đảo khung theo nhịp bước, charger
-   * đứng yên ở khung 1 tới lúc lao (dash>0) mới sang khung 2, shooter ở
-   * khung 2 ngay trước khi bắn (cd<0.4) — đúng lúc code đang tô đỏ nòng.
+   * Dùng đủ bốn khung của mỗi quái. Walker/flyer chạy tuần tự 1–4;
+   * charger/rider dùng 3 để lấy đà và 4 để lao; shooter dùng 3 để ngắm
+   * và 4 cho nhịp giật lùi sau khi bắn. Khung 1–2 giữ chuyển động chờ.
    */
-  function mobFrame(o: Mob): 1 | 2 {
-    if (o.kind === "charger") return o.dash > 0 ? 2 : 1;
-    if (o.kind === "shooter") return o.cd < 0.4 ? 2 : 1;
+  function mobFrame(o: Mob): number {
+    if (o.kind === "rider" || o.kind === "charger") {
+      if (o.dash > 0) return 4;
+      if (o.tel > 0) return 3;
+      return Math.floor(o.anim * 6) % 2 + 1;
+    }
+    if (o.kind === "shooter") {
+      if (o.dash > 0) return 4;
+      if (o.tel > 0) return 3;
+      return Math.floor(o.anim * 4) % 2 + 1;
+    }
     const fps = o.kind === "flyer" ? 8 : 6;
-    return Math.floor(o.anim * fps) % 2 === 0 ? 1 : 2;
+    return Math.floor(o.anim * fps) % 4 + 1;
   }
 
   function drawMob(o: Mob, color: string) {
-    const sprite = mobSprite(lv, o.kind, mobFrame(o));
+    const frame = mobFrame(o);
+    const sprite = mobSprite(lv, o.kind, frame);
     if (sprite) {
       g!.filter = o.hurt > 0 ? "brightness(2.2) saturate(0.3)" : "none";
-      const maxW = o.kind === "flyer" ? 68 : 48;
-      const maxH = o.kind === "flyer" ? 40 : 48;
-      drawSpriteAtFeet(g!, sprite, o.x + o.w / 2, o.y + o.h + 3, maxW, maxH, o.dir < 0);
+      const maxW = o.kind === "rider" ? 76 : o.kind === "flyer" ? 68 : 48;
+      const maxH = o.kind === "rider" ? 46 : o.kind === "flyer" ? 40 : 48;
+      const metrics = (mobSpriteMetrics as Record<string, {width:number;height:number;frames:Record<string,{x:number;y:number}>}>)[`m${lv + 1}-${o.kind}`];
+      if (metrics) {
+        const anchor = metrics.frames[String(frame)];
+        const scale = Math.min(maxW / metrics.width, maxH / metrics.height);
+        g!.save();
+        g!.translate(o.x + o.w / 2, o.y + o.h + 3);
+        if (o.dir < 0) g!.scale(-1, 1);
+        g!.drawImage(sprite, -anchor.x * scale, -anchor.y * scale,
+          sprite.naturalWidth * scale, sprite.naturalHeight * scale);
+        g!.restore();
+      } else {
+        drawSpriteAtFeet(g!, sprite, o.x + o.w / 2, o.y + o.h + 3, maxW, maxH, o.dir < 0);
+      }
       g!.filter = "none";
       return;
     }
@@ -851,6 +939,11 @@ export function createGame(
     g!.translate(-cam, 0);
 
     for (const [px, py, pw] of m.plats) {
+      const platform = img(SCENE_SPRITES.platform);
+      if (platform) {
+        drawLedge(g!, platform, px, py, pw, 16);
+        continue;
+      }
       g!.fillStyle = m.palette.groundEdge;
       g!.beginPath();
       g!.roundRect(px, py, pw, 13, 5);
@@ -863,24 +956,28 @@ export function createGame(
     for (const p of pickups) if (!p.taken) drawPickup(p);
 
     // Cửa ải ở cuối bản đồ
-    g!.fillStyle = "rgba(255,255,255,.5)";
-    g!.fillRect(WORLD - 70, GY - 96, 46, 96);
-    g!.fillStyle = m.palette.groundEdge;
-    g!.fillRect(WORLD - 64, GY - 88, 34, 88);
+    const gate = img(SCENE_SPRITES.gate);
+    if (gate) drawSpriteAtFeet(g!, gate, WORLD - 47, GY, 58, 112);
 
     for (const o of mobs) {
       if (o.dead) continue;
       drawMob(o, m.palette.mob);
-      drawLabel(o.name, o.x + o.w / 2, o.y - 7);
+      const visualHeight = o.kind === "flyer" ? 40 : o.kind === "rider" ? 46 : 48;
+      drawLabel(o.name, o.x + o.w / 2, o.y + o.h - visualHeight - 5);
     }
 
     if (boss) {
       const by = boss.y + Math.sin(boss.bob) * 2;
       // Trong 0,55s trước đòn, dùng khung "báo đòn" riêng thay vì tô màu đè
       const telegraphing = boss.tel > 0 && Math.floor(boss.tel * 14) % 2 === 0;
-      const sprite = bossSprite(lv, telegraphing);
+      const sprite = bossSprite(lv, telegraphing, boss.hurt > 0);
+      const ring = img(SCENE_SPRITES.ring);
+      if (boss.tel > 0 && ring) {
+        g!.globalAlpha = 0.8;
+        drawSpriteAtFeet(g!, ring, boss.x + boss.w / 2, boss.y + boss.h + 8, 116, 24);
+        g!.globalAlpha = 1;
+      }
       if (sprite) {
-        g!.filter = boss.hurt > 0 ? "brightness(2) saturate(0.3)" : "none";
         drawSpriteAtFeet(g!, sprite, boss.x + boss.w / 2, by + boss.h + 2, 104, 108, boss.dir < 0);
         g!.filter = "none";
       } else {
@@ -902,55 +999,62 @@ export function createGame(
 
     g!.fillStyle = HAZARD;
     for (const s of shots) {
+      const shot = img(SCENE_SPRITES.shot);
+      if (shot) {
+        g!.save();
+        g!.translate(s.x, s.y);
+        g!.rotate(Math.atan2(s.vy, s.vx));
+        // Orb centre matches the collision circle; its tail extends behind it.
+        g!.drawImage(shot, -27, -12, 40, 24);
+        g!.restore();
+        continue;
+      }
       g!.beginPath();
       g!.arc(s.x, s.y, s.r, 0, Math.PI * 2);
       g!.fill();
     }
 
+    if (player.tool > 0) {
+      const aura = img(SCENE_SPRITES.aura);
+      if (aura) {
+        g!.globalAlpha = reduced ? 0.65 : 0.62 + Math.sin(worldTime * 4) * 0.1;
+        drawSpriteAtFeet(g!, aura, player.x + player.w / 2, player.y + player.h + 7, 76, 94);
+        g!.globalAlpha = 1;
+      }
+    }
+
     // Nhấp nháy khi đang bất tử sau lúc trúng đòn
     if (player.inv <= 0 || Math.floor(player.inv * 16) % 2 === 0) {
-      const idleImg = img(PLAYER_SPRITES.idle);
+      const idleImg = img(PLAYER_SPRITES.idle[Math.floor(worldTime * 3) % 3])
+        ?? img(PLAYER_SPRITES.idle[0]);
       if (idleImg) {
-        // Chọn khung theo trạng thái: trúng đòn > đang chém > đang nhảy >
-        // đang chạy > đứng yên. Khung chém rộng hơn thân (168x196 gốc,
-        // hitbox chém vẫn tính riêng ở attack() — sprite chỉ là hình vẽ).
+        // All 18 frames share a 512px canvas and feet anchor (256,470).
         let sprite: HTMLImageElement | null;
-        let maxW = 54, maxH = 70;
         if (player.hurtT > 0) {
           sprite = img(PLAYER_SPRITES.hurt);
-          maxW = 76;
         } else if (player.atk > 0) {
-          const i = player.atk > player.attackActive ? 0 : 1;
+          const i = player.atk > player.attackActive ? 0
+            : player.atk > player.attackActive * 0.4 ? 1 : 2;
           sprite = img(PLAYER_SPRITES.attack[i]);
-          maxW = 104;
-          maxH = 74;
         } else if (!player.ground) {
-          sprite = img(PLAYER_SPRITES.jump);
-          maxW = 66;
+          sprite = img(player.vy < 0 ? PLAYER_SPRITES.jumpRise : PLAYER_SPRITES.jumpFall);
+        } else if (player.landT > 0) {
+          sprite = img(PLAYER_SPRITES.land);
         } else if (Math.abs(player.vx) > 0.5) {
-          const i = Math.floor(player.runFrame) % 4;
+          const i = Math.floor(player.runFrame) % PLAYER_SPRITES.run.length;
           sprite = img(PLAYER_SPRITES.run[i]);
-          maxW = 64;
         } else {
           sprite = idleImg;
         }
         // Khung riêng cho trạng thái này có thể chưa tải kịp — vẽ tạm idle
         // (đã chắc chắn có ở đây) thay vì để nhân vật biến mất một khung hình
-        if (!sprite) {
-          sprite = idleImg;
-          maxW = 54;
-          maxH = 70;
-        }
-        const idleBob = !reduced && player.ground && Math.abs(player.vx) < 8
-          ? Math.sin(worldTime * 3.2) * 0.8
-          : 0;
-        drawSpriteAtFeet(
-          g!, sprite,
-          player.x + player.w / 2,
-          player.y + player.h + 3 + idleBob,
-          maxW, maxH,
-          player.face < 0,
-        );
+        sprite ??= idleImg;
+        const size = 112;
+        g!.save();
+        g!.translate(player.x + player.w / 2, player.y + player.h + 2);
+        if (player.face < 0) g!.scale(-1, 1);
+        g!.drawImage(sprite, -size / 2, -size * 470 / 512, size, size);
+        g!.restore();
       } else {
         g!.fillStyle = "#1e1e1c";
         g!.beginPath();
@@ -964,43 +1068,57 @@ export function createGame(
         g!.fillRect(player.x + (player.face > 0 ? 15 : 6), player.y - 4, 4, 4);
       }
 
-      if (player.tool > 0) {
-        // Đang cầm đồ nghề: viền sáng quanh người
-        g!.strokeStyle = LIME;
-        g!.lineWidth = 2;
-        g!.beginPath();
-        g!.roundRect(player.x - 3, player.y - 12, player.w + 6, player.h + 14, 9);
-        g!.stroke();
-      }
-
       if (player.atk > 0) {
-        const reach = player.tool > 0 ? 40 : 32;
-        const progress = 1 - player.atk / (player.attackBuffed ? 0.2 : 0.28);
-        const alpha = Math.max(0, 1 - Math.abs(progress - 0.72) * 3.3);
-        g!.strokeStyle = `rgba(212,242,54,${0.82 * alpha})`;
-        g!.lineWidth = player.attackBuffed ? 8 : 6;
-        g!.lineCap = "round";
-        g!.beginPath();
-        g!.arc(
-          player.face > 0 ? player.x + player.w + 10 : player.x - 10,
-          player.y + 18, reach,
-          player.face > 0 ? -1.1 : 2.0,
-          player.face > 0 ? 1.1 : 4.3
-        );
-        g!.stroke();
+        const active = player.atk <= player.attackActive;
+        const progress = 1 - player.atk / player.attackActive;
+        if (active) {
+          const frame = Math.min(2, Math.floor(progress * 3));
+          const slash = img(SLASH_SPRITES[frame]);
+          if (slash) {
+            const reach = player.attackBuffed ? 84 : 58;
+            g!.save();
+            g!.translate(player.x + player.w / 2, player.y + 18);
+            g!.scale(player.face, 1);
+            g!.globalAlpha = 0.95 - progress * 0.45;
+            g!.drawImage(slash, 12, -36, reach, 72);
+            g!.restore();
+          }
+        }
       }
     }
 
     for (const p of parts) {
       g!.globalAlpha = Math.max(0, p.life / 0.55);
-      g!.fillStyle = p.color;
-      g!.fillRect(p.x - 2.5, p.y - 2.5, 5, 5);
+      const spark = img(SCENE_SPRITES.hit);
+      if (spark) g!.drawImage(spark, p.x - 3, p.y - 3, 6, 6);
+      else {
+        g!.fillStyle = p.color;
+        g!.fillRect(p.x - 2.5, p.y - 2.5, 5, 5);
+      }
+    }
+    for (const e of effects) {
+      const sprite = img(SCENE_SPRITES[e.kind]);
+      if (!sprite) continue;
+      const progress = 1 - e.life / e.duration;
+      g!.globalAlpha = Math.min(1, e.life / e.duration * 2);
+      const w = (e.kind === "hit" ? 38 : 48) * (0.75 + progress * 0.5);
+      const h = e.kind === "hit" ? w : w * 0.3;
+      drawSpriteAtFeet(g!, sprite, e.x, e.kind === "hit" ? e.y + h / 2 : e.y + 3, w, h);
     }
     g!.globalAlpha = 1;
     g!.restore();
 
     // HUD trong canvas
     for (let i = 0; i < player.mhp; i++) {
+      const heart = img(SCENE_SPRITES.heart);
+      if (heart) {
+        g!.globalAlpha = i < player.hp ? 1 : 0.25;
+        g!.filter = i < player.hp ? "none" : "grayscale(1)";
+        drawSpriteAtFeet(g!, heart, 23 + i * 22, 31, 19, 18);
+        g!.globalAlpha = 1;
+        g!.filter = "none";
+        continue;
+      }
       g!.fillStyle = i < player.hp ? "#ff6b5e" : "rgba(242,241,236,.22)";
       g!.beginPath();
       g!.roundRect(14 + i * 20, 14, 15, 14, 4);
@@ -1026,8 +1144,13 @@ export function createGame(
       g!.beginPath();
       g!.roundRect(bx, 14, bw * (boss.hp / boss.mhp), 14, 4);
       g!.fill();
+      const bossbar = img(SCENE_SPRITES.bossbar);
+      if (bossbar) g!.drawImage(bossbar, bx - 12, 6, bw + 24, 30);
       g!.font = `600 12px ${FONT_SANS}`;
       g!.textAlign = "center";
+      g!.lineWidth = 3;
+      g!.strokeStyle = "rgba(10,10,10,.7)";
+      g!.strokeText(m.boss, W / 2, 45);
       g!.fillStyle = "#f2f1ec";
       g!.fillText(m.boss, W / 2, 45);
     }
@@ -1105,22 +1228,30 @@ export function createGame(
   // Bắt đầu tải mọi ảnh có thể cần ngay từ lúc dựng game, không chờ tới lúc
   // dùng — img() chỉ tạo phần tử <img> khi được gọi lần đầu, nên nếu để tới
   // lúc nhảy/chạy mới gọi thì khung hình đầu tiên sẽ không có gì để vẽ.
-  img(PLAYER_SPRITES.idle);
-  img(PLAYER_SPRITES.jump);
+  PLAYER_SPRITES.idle.forEach(img);
+  img(PLAYER_SPRITES.jumpRise);
+  img(PLAYER_SPRITES.jumpFall);
+  img(PLAYER_SPRITES.land);
   img(PLAYER_SPRITES.hurt);
   PLAYER_SPRITES.run.forEach(img);
   PLAYER_SPRITES.attack.forEach(img);
   Object.values(TRAP_SPRITES).forEach(img);
+  Object.values(SCENE_SPRITES).forEach(img);
+  SLASH_SPRITES.forEach(img);
   maps.forEach((m, i) => {
     img(`boss/b${i + 1}.png`);
     img(`boss/b${i + 1}-tel.png`);
+    img(`boss/b${i + 1}-hit.png`);
     img(`bg/m${i + 1}-mid.png`);
+    img(`bg/m${i + 1}-far.png`);
     img(`item/heal-${i + 1}.png`);
     img(`item/tool-${i + 1}.png`);
     const kinds = new Set(m.mobs.map((sp) => sp.kind));
     kinds.forEach((k) => {
       img(`mob/m${i + 1}-${k}-1.png`);
       img(`mob/m${i + 1}-${k}-2.png`);
+      img(`mob/m${i + 1}-${k}-3.png`);
+      img(`mob/m${i + 1}-${k}-4.png`);
     });
   });
 

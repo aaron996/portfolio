@@ -204,6 +204,8 @@ export type MobKind =
   | "flyer"
   /** Đứng im tới khi người chơi lại gần thì lao vào */
   | "charger"
+  /** Rider rú ga báo trước rồi lao ngang */
+  | "rider"
   /** Đứng im, bắn đạn về phía người chơi */
   | "shooter";
 

@@ -1287,6 +1287,7 @@ export const content: SiteContent = {
           { kind: "shooter", name: "Hub báo đỏ", x: 700, y: 250 },
           { kind: "flyer", name: "Đơn trễ pickup", x: 900, y: 150 },
           { kind: "walker", name: "Đơn dồn ca", x: 1150 },
+          { kind: "rider", name: "Rider trễ ca", x: 1380, range: 60 },
           { kind: "shooter", name: "Hub báo đỏ", x: 1280, y: 192 },
           { kind: "flyer", name: "Đơn trễ pickup", x: 1520, y: 200 },
           { kind: "walker", name: "Đơn dồn ca", x: 1780 },

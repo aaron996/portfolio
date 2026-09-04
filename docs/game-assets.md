@@ -1,5 +1,10 @@
 # Prompt sinh ảnh cho minigame "Ải Vận Hành"
 
+> Cập nhật tích hợp 04/09/2026: xem [game-art-integration.md](game-art-integration.md)
+> để biết bộ ảnh thực tế đang chạy. Các mục dưới là brief gốc; engine hiện dùng
+> 18 khung nhân vật V2, 64 khung quái (16 loại theo ải × 4), 15 khung trùm,
+> nền xa/giữa và ảnh thay thế bệ/đất/cổng/HUD/hiệu ứng.
+
 Toàn bộ prompt để tạo asset cho game ở route `/game`. Kích thước ghi trong tài liệu
 là **kích thước hiển thị logic**, không phải kích thước file PNG. Engine tự scale ảnh
 theo chiều cao và giữ nguyên tỉ lệ, tách riêng khỏi hitbox.

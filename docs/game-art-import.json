@@ -1,0 +1,800 @@
+[
+  {
+    "file": "boss/b1-tel.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\game-animation-additions\\masters\\boss\\b1-tel.png",
+    "width": 384,
+    "height": 390,
+    "alpha": true
+  },
+  {
+    "file": "boss/b2-tel.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\game-animation-additions\\masters\\boss\\b2-tel.png",
+    "width": 384,
+    "height": 401,
+    "alpha": true
+  },
+  {
+    "file": "boss/b3-tel.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\game-animation-additions\\masters\\boss\\b3-tel.png",
+    "width": 384,
+    "height": 420,
+    "alpha": true
+  },
+  {
+    "file": "boss/b4-tel.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\game-animation-additions\\masters\\boss\\b4-tel.png",
+    "width": 379,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "boss/b5-tel.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\game-animation-additions\\masters\\boss\\b5-tel.png",
+    "width": 384,
+    "height": 409,
+    "alpha": true
+  },
+  {
+    "file": "mob/m1-flyer-1.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m1-flyer-1.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m1-flyer-2.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m1-flyer-2.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m1-walker-1.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m1-walker-1.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m1-walker-2.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m1-walker-2.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m2-charger-1.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m2-charger-1.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m2-charger-2.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m2-charger-2.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m2-flyer-1.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m2-flyer-1.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m2-flyer-2.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m2-flyer-2.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m2-walker-1.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m2-walker-1.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m2-walker-2.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m2-walker-2.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m3-flyer-1.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m3-flyer-1.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m3-flyer-2.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m3-flyer-2.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m3-shooter-1.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m3-shooter-1.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m3-shooter-2.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m3-shooter-2.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m3-walker-1.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m3-walker-1.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m3-walker-2.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m3-walker-2.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m4-charger-1.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m4-charger-1.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m4-charger-2.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m4-charger-2.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m4-shooter-1.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m4-shooter-1.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m4-shooter-2.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m4-shooter-2.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m4-walker-1.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m4-walker-1.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m4-walker-2.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m4-walker-2.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m5-charger-1.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m5-charger-1.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m5-charger-2.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m5-charger-2.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m5-flyer-1.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m5-flyer-1.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m5-flyer-2.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m5-flyer-2.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m5-shooter-1.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m5-shooter-1.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m5-shooter-2.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m5-shooter-2.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m5-walker-1.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m5-walker-1.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m5-walker-2.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m5-walker-2.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "player/attack-1.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\player-v2-18-frames\\public\\game\\attack-1.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "player/attack-2.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\player-v2-18-frames\\public\\game\\attack-2.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "player/attack-3.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\player-v2-18-frames\\public\\game\\attack-3.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "player/hurt.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\player-v2-18-frames\\public\\game\\hurt.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "player/idle-1.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\player-v2-18-frames\\public\\game\\idle-1.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "player/idle-2.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\player-v2-18-frames\\public\\game\\idle-2.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "player/idle-3.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\player-v2-18-frames\\public\\game\\idle-3.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "player/jump-fall.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\player-v2-18-frames\\public\\game\\jump-fall.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "player/jump-rise.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\player-v2-18-frames\\public\\game\\jump-rise.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "player/land.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\player-v2-18-frames\\public\\game\\land.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "player/run-1.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\player-v2-18-frames\\public\\game\\run-1.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "player/run-2.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\player-v2-18-frames\\public\\game\\run-2.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "player/run-3.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\player-v2-18-frames\\public\\game\\run-3.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "player/run-4.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\player-v2-18-frames\\public\\game\\run-4.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "player/run-5.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\player-v2-18-frames\\public\\game\\run-5.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "player/run-6.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\player-v2-18-frames\\public\\game\\run-6.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "player/run-7.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\player-v2-18-frames\\public\\game\\run-7.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "player/run-8.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\player-v2-18-frames\\public\\game\\run-8.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "bg/m1-far.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\game-v2-batch2\\public\\game\\bg\\m1-far.png",
+    "width": 1280,
+    "height": 572,
+    "alpha": true
+  },
+  {
+    "file": "bg/m1-mid.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\game-v2-batch2\\public\\game\\bg\\m1-mid.png",
+    "width": 1280,
+    "height": 795,
+    "alpha": true
+  },
+  {
+    "file": "bg/m2-far.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\game-v2-batch2\\public\\game\\bg\\m2-far.png",
+    "width": 1280,
+    "height": 454,
+    "alpha": true
+  },
+  {
+    "file": "bg/m2-mid.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\game-v2-batch2\\public\\game\\bg\\m2-mid.png",
+    "width": 1280,
+    "height": 599,
+    "alpha": true
+  },
+  {
+    "file": "bg/m3-far.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\game-v2-batch2\\public\\game\\bg\\m3-far.png",
+    "width": 1280,
+    "height": 707,
+    "alpha": true
+  },
+  {
+    "file": "bg/m3-mid.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\game-v2-batch2\\public\\game\\bg\\m3-mid.png",
+    "width": 1280,
+    "height": 555,
+    "alpha": true
+  },
+  {
+    "file": "bg/m4-far.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\game-v2-batch2\\public\\game\\bg\\m4-far.png",
+    "width": 1280,
+    "height": 384,
+    "alpha": true
+  },
+  {
+    "file": "bg/m5-far.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\game-v2-batch2\\public\\game\\bg\\m5-far.png",
+    "width": 1280,
+    "height": 582,
+    "alpha": true
+  },
+  {
+    "file": "bg/m5-mid.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\game-v2-batch2\\public\\game\\bg\\m5-mid.png",
+    "width": 1280,
+    "height": 532,
+    "alpha": true
+  },
+  {
+    "file": "boss/b1-hit.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\game-v2-batch2\\public\\game\\boss\\b1-hit.png",
+    "width": 384,
+    "height": 486,
+    "alpha": true
+  },
+  {
+    "file": "boss/b2-hit.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\game-v2-batch2\\public\\game\\boss\\b2-hit.png",
+    "width": 384,
+    "height": 459,
+    "alpha": true
+  },
+  {
+    "file": "boss/b3-hit.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\game-v2-batch2\\public\\game\\boss\\b3-hit.png",
+    "width": 384,
+    "height": 409,
+    "alpha": true
+  },
+  {
+    "file": "boss/b4-hit.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\game-v2-batch2\\public\\game\\boss\\b4-hit.png",
+    "width": 345,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "boss/b5-hit.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\game-v2-batch2\\public\\game\\boss\\b5-hit.png",
+    "width": 384,
+    "height": 434,
+    "alpha": true
+  },
+  {
+    "file": "fx/slash-1.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\game-v2-batch2\\public\\game\\fx\\slash-1.png",
+    "width": 303,
+    "height": 432,
+    "alpha": true
+  },
+  {
+    "file": "fx/slash-2.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\game-v2-batch2\\public\\game\\fx\\slash-2.png",
+    "width": 340,
+    "height": 494,
+    "alpha": true
+  },
+  {
+    "file": "fx/slash-3.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\game-v2-batch2\\public\\game\\fx\\slash-3.png",
+    "width": 377,
+    "height": 468,
+    "alpha": true
+  },
+  {
+    "file": "mob/m3-rider-1.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m3-rider-1.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m3-rider-2.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m3-rider-2.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m3-rider-3.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m3-rider-3.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m3-rider-4.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m3-rider-4.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m1-flyer-3.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m1-flyer-3.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m1-flyer-4.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m1-flyer-4.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m1-walker-3.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m1-walker-3.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m1-walker-4.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m1-walker-4.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m2-charger-3.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m2-charger-3.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m2-charger-4.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m2-charger-4.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m2-flyer-3.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m2-flyer-3.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m2-flyer-4.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m2-flyer-4.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m2-walker-3.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m2-walker-3.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m2-walker-4.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m2-walker-4.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m3-flyer-3.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m3-flyer-3.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m3-flyer-4.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m3-flyer-4.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m3-shooter-3.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m3-shooter-3.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m3-shooter-4.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m3-shooter-4.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m3-walker-3.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m3-walker-3.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m3-walker-4.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m3-walker-4.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m4-charger-3.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m4-charger-3.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m4-charger-4.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m4-charger-4.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m4-shooter-3.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m4-shooter-3.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m4-shooter-4.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m4-shooter-4.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m4-walker-3.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m4-walker-3.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m4-walker-4.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m4-walker-4.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m5-charger-3.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m5-charger-3.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m5-charger-4.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m5-charger-4.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m5-flyer-3.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m5-flyer-3.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m5-flyer-4.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m5-flyer-4.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m5-shooter-3.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m5-shooter-3.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m5-shooter-4.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m5-shooter-4.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m5-walker-3.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m5-walker-3.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "mob/m5-walker-4.png",
+    "source": "C:\\Users\\admin\\Documents\\Codex\\2026-09-03\\files-pasted-by-the-user-prompt\\outputs\\mob-v2-additions\\complete-set\\public\\game\\mob\\m5-walker-4.png",
+    "width": 512,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "ui/gate.png",
+    "source": "C:\\Users\\admin\\.codex\\generated_images\\01a06a65-c42b-70b2-9fd0-d7699dadd429\\exec-78f3aaae-a5f1-4468-815b-b1e01b3b6756.png",
+    "width": 233,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "fx/aura.png",
+    "source": "C:\\Users\\admin\\.codex\\generated_images\\01a06a65-c42b-70b2-9fd0-d7699dadd429\\exec-1bc90c21-5d0b-4b63-843c-6d3935125b4a.png",
+    "width": 341,
+    "height": 512,
+    "alpha": true
+  },
+  {
+    "file": "bg/platform.png",
+    "source": "C:\\Users\\admin\\.codex\\generated_images\\01a06a65-c42b-70b2-9fd0-d7699dadd429\\exec-7a439e09-7542-412d-aff1-541f3512ff5c.png",
+    "width": 1024,
+    "height": 104,
+    "alpha": true
+  },
+  {
+    "file": "bg/ground.png",
+    "source": "C:\\Users\\admin\\.codex\\generated_images\\01a06a65-c42b-70b2-9fd0-d7699dadd429\\exec-1e5641a0-e506-44bf-a7cc-aa22cd388e69.png",
+    "width": 2172,
+    "height": 724,
+    "alpha": false
+  },
+  {
+    "file": "ui/heart-full.png",
+    "source": "C:\\Users\\admin\\.codex\\generated_images\\01a06a65-c42b-70b2-9fd0-d7699dadd429\\exec-0259ba34-37ce-4ba4-ae57-989531d15632.png",
+    "width": 384,
+    "height": 329,
+    "alpha": true
+  },
+  {
+    "file": "fx/shot.png",
+    "source": "C:\\Users\\admin\\.codex\\generated_images\\01a06a65-c42b-70b2-9fd0-d7699dadd429\\exec-7e909d49-c37e-4e78-8a33-9a580f56b452.png",
+    "width": 384,
+    "height": 176,
+    "alpha": true
+  },
+  {
+    "file": "fx/hit.png",
+    "source": "C:\\Users\\admin\\.codex\\generated_images\\01a06a65-c42b-70b2-9fd0-d7699dadd429\\exec-1f1152bf-d3ff-4781-a86a-aebe16c0de25.png",
+    "width": 384,
+    "height": 427,
+    "alpha": true
+  },
+  {
+    "file": "fx/dust.png",
+    "source": "C:\\Users\\admin\\.codex\\generated_images\\01a06a65-c42b-70b2-9fd0-d7699dadd429\\exec-d12b5244-b7d7-4457-8fdc-bb39d2f5a895.png",
+    "width": 384,
+    "height": 88,
+    "alpha": true
+  },
+  {
+    "file": "fx/ring.png",
+    "source": "C:\\Users\\admin\\.codex\\generated_images\\01a06a65-c42b-70b2-9fd0-d7699dadd429\\exec-3a125c28-5887-4834-8f77-a00e2f6ab6b4.png",
+    "width": 384,
+    "height": 63,
+    "alpha": true
+  },
+  {
+    "file": "ui/bossbar.png",
+    "source": "C:\\Users\\admin\\.codex\\generated_images\\01a06a65-c42b-70b2-9fd0-d7699dadd429\\exec-1c55dfb3-c360-452e-a663-8d41401a1c1b.png",
+    "width": 384,
+    "height": 35,
+    "alpha": true
+  }
+]
