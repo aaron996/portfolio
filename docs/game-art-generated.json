@@ -1,0 +1,62 @@
+[
+  {
+    "key": "gate",
+    "destination": "ui/gate.png",
+    "source": "C:\\Users\\admin\\.codex\\generated_images\\01a06a65-c42b-70b2-9fd0-d7699dadd429\\exec-78f3aaae-a5f1-4468-815b-b1e01b3b6756.png",
+    "prompt": "A single game sprite: tall narrow industrial portal gate for a cute 2D side scrolling logistics platformer. Dark teal steel arch with chunky bolts, warm ivory light inside the open doorway, small lime green light at the top, soft upward sparks. Front-on orthographic view, 1:2 width height, whole object with small margins. Bold dark outlines, clean cartoon cel shading, hand drawn polished art. Fully transparent background with real alpha. No ground, no scenery, no text, no border."
+  },
+  {
+    "key": "aura",
+    "destination": "fx/aura.png",
+    "source": "C:\\Users\\admin\\.codex\\generated_images\\01a06a65-c42b-70b2-9fd0-d7699dadd429\\exec-1bc90c21-5d0b-4b63-843c-6d3935125b4a.png",
+    "prompt": "Single power-up aura effect sprite for a cute 2D side scrolling game. A tall oval open ring of lime yellow magical energy, two flowing tapered arcs rising from a shallow ellipse at the feet, a few small four pointed sparkles. Centre completely empty transparent so a character can stand inside. Delicate clear silhouette, not a rectangle or UI frame. Clean hand drawn cartoon game effect, white inner highlights, lime #D4F236 edges, fully transparent background real alpha. No character, no scenery, no ground, no text."
+  },
+  {
+    "key": "platform",
+    "destination": "bg/platform.png",
+    "source": "C:\\Users\\admin\\.codex\\generated_images\\01a06a65-c42b-70b2-9fd0-d7699dadd429\\exec-7a439e09-7542-412d-aff1-541f3512ff5c.png",
+    "prompt": "One single floating industrial platform ledge sprite for a cute 2D side scrolling logistics game. Flat SIDE ELEVATION, orthographic, no perspective, long shallow steel beam with rounded dark teal end caps, continuous pale steel walkable top edge, inset panels, a few small bolts, dark teal underside. Width six times height. Straight horizontal walkable upper edge. Bold dark outline, simple hand painted cartoon cel shading. Whole object visible, centered with tight margin on genuinely transparent alpha background. No scenery, no supports, no ground, no character, no text."
+  },
+  {
+    "key": "ground",
+    "destination": "bg/ground.png",
+    "source": "C:\\Users\\admin\\.codex\\generated_images\\01a06a65-c42b-70b2-9fd0-d7699dadd429\\exec-1e5641a0-e506-44bf-a7cc-aa22cd388e69.png",
+    "prompt": "A single horizontally seamless ground texture tile for a polished cute 2D side-scrolling logistics game: dark desaturated steel blue industrial quay foundation, flat side elevation with absolutely straight continuous pale metal top rim at the VERY TOP image edge, dark teal stone/steel rectangular blocks below, simple two-tone cel shading, thin outlines, a few small bolts. Opaque rectangular image completely filled with texture edge to edge, no margin, no sky, no transparent area, no perspective, no props, no text. Wide 3:1 strip. Both left and right edges continuous so it tiles horizontally."
+  },
+  {
+    "key": "heart",
+    "destination": "ui/heart-full.png",
+    "source": "C:\\Users\\admin\\.codex\\generated_images\\01a06a65-c42b-70b2-9fd0-d7699dadd429\\exec-0259ba34-37ce-4ba4-ae57-989531d15632.png",
+    "prompt": "A single health heart icon for a cute hand drawn 2D platformer HUD. Chunky warm red #FF6B5E heart, thick charcoal outline, flat two-tone cel shading, one small cream highlight upper left. Strong simple symmetric silhouette readable at 16px. Centered filling square with small margin, transparent background real alpha, no text, no scenery, no shadow, no glow."
+  },
+  {
+    "key": "shot",
+    "destination": "fx/shot.png",
+    "source": "C:\\Users\\admin\\.codex\\generated_images\\01a06a65-c42b-70b2-9fd0-d7699dadd429\\exec-7e909d49-c37e-4e78-8a33-9a580f56b452.png",
+    "prompt": "A single projectile sprite for a cute hand drawn 2D platformer. A small hot brick red #E0563F energy orb with golden white centre and a short tapered flame tail pointing LEFT, traveling RIGHT. Clean chunky cartoon cel shading, strong red silhouette readable at 18px. Transparent background with real alpha, no text, no scenery, no border."
+  },
+  {
+    "key": "hit",
+    "destination": "fx/hit.png",
+    "source": "C:\\Users\\admin\\.codex\\generated_images\\01a06a65-c42b-70b2-9fd0-d7699dadd429\\exec-1f1152bf-d3ff-4781-a86a-aebe16c0de25.png",
+    "prompt": "One compact impact starburst sprite for a cute 2D action platformer. Six chunky tapered shards radiating from a white centre, lime #D4F236 tips, crisp cartoon edges with soft minimal halo. Transparent background real alpha. Symmetric square shape with margins. No text, character, scenery."
+  },
+  {
+    "key": "dust",
+    "destination": "fx/dust.png",
+    "source": "C:\\Users\\admin\\.codex\\generated_images\\01a06a65-c42b-70b2-9fd0-d7699dadd429\\exec-d12b5244-b7d7-4457-8fdc-bb39d2f5a895.png",
+    "prompt": "One low wide cartoon dust puff sprite for a cute 2D platformer landing. Two small rounded ivory white clouds spreading left and right from an empty centre, thin warm gray outline, two tone cel shading. Wide 2:1, transparent real alpha background, no ground line, no scenery, no text."
+  },
+  {
+    "key": "ring",
+    "destination": "fx/ring.png",
+    "source": "C:\\Users\\admin\\.codex\\generated_images\\01a06a65-c42b-70b2-9fd0-d7699dadd429\\exec-3a125c28-5887-4834-8f77-a00e2f6ab6b4.png",
+    "prompt": "One flat shallow elliptical red boss attack warning ring sprite for a cute 2D platformer, low side angle, thick brick red #E0563F outer rim, warm orange inner highlight and faint transparent red centre. Width three times height. Crisp hand drawn cartoon shape, transparent real alpha background, no boss, ground, scenery or text."
+  },
+  {
+    "key": "bossbar",
+    "destination": "ui/bossbar.png",
+    "source": "C:\\Users\\admin\\.codex\\generated_images\\01a06a65-c42b-70b2-9fd0-d7699dadd429\\exec-1c55dfb3-c360-452e-a663-8d41401a1c1b.png",
+    "prompt": "One long thin horizontal empty boss health bar frame for a cute 2D game. Dark gunmetal industrial border with simple beveled edge, small angular end caps with two tiny bolts, ivory metallic upper highlight. Completely empty transparent interior for drawing health fill underneath. Outer shape width twelve times height. Hand drawn clean cartoon cel shading, real transparent alpha background, no text, no numbers, no fill, no scenery."
+  }
+]

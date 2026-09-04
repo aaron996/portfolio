@@ -13,3 +13,5 @@ CLAUDE.md
 # Python bytecode của scripts/
 __pycache__/
 *.pyc
+output/playwright/
+.playwright-cli/

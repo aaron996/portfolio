@@ -12,6 +12,7 @@
  * không phình to nhỏ giữa các khung hình — lỗi nặng nhất của bản trước.
  */
 import type { GameMap, MobKind } from "@/content/types";
+import mobSpriteMetrics from "./mob-sprite-metrics.json";
 
 export type GameKey = "left" | "right" | "jump" | "atk";
 export type GamePhase = "title" | "play" | "paused" | "clear" | "end";
@@ -143,7 +144,7 @@ const ASSETS = {
    * `default` áp cho loại không khai riêng. Khai 4 mà thiếu file thì con đó
    * nhấp nháy về hình khối, nên chỉ tăng khi đã đủ khung cho MỌI ải có loại đó.
    */
-  mobFrames: { default: 2, rider: 4 } as Record<string, number>,
+  mobFrames: { default: 4, rider: 4 } as Record<string, number>,
   /** boss/bX.png + bX-tel.png; 3 = có thêm bX-hit.png */
   bossFrames: 3,
   /** Đã có ảnh cho quái rider chưa. Chưa có thì engine vẽ bằng code. */
@@ -245,6 +246,11 @@ const P_RISE = ASSETS.playerJump === "split" ? "player/jump-rise.png" : "player/
 const P_FALL = ASSETS.playerJump === "split" ? "player/jump-fall.png" : "player/jump.png";
 const P_LAND = ASSETS.playerJump === "split" ? "player/land.png" : "player/jump.png";
 const P_HURT = "player/hurt.png";
+const SCENE_SPRITES = {
+  platform: "bg/platform.png", ground: "bg/ground.png", gate: "ui/gate.png",
+  heart: "ui/heart-full.png", bossbar: "ui/bossbar.png", aura: "fx/aura.png",
+  shot: "fx/shot.png", hit: "fx/hit.png", dust: "fx/dust.png", ring: "fx/ring.png",
+};
 
 const TRAP_SPRITES = {
   spike: "trap/spike.png",
@@ -1338,6 +1344,11 @@ export function createGame(
       const x = i * 80 - wrap(cam, 80);
       g!.fillRect(x, GY + 16, 44, 3);
     }
+    const ground = img(SCENE_SPRITES.ground);
+    if (ground) {
+      const tileW = (H - GY) * ground.naturalWidth / ground.naturalHeight;
+      drawTiled(g!, ground, -wrap(cam, tileW), GY, W + tileW, H - GY);
+    }
   }
 
   /* ── vẽ: thực thể ────────────────────────────────────── */
@@ -1556,9 +1567,13 @@ export function createGame(
     if (o.kind !== "flyer" && !o.dead) drawShadow(o.x + o.w / 2, o.floor, o.w * 1.3, 0.22);
 
     const useArt = o.kind !== "rider" || ASSETS.riderArt;
-    const sprite = useArt ? mobSprite(lv, o.kind, mobFrame(o)) : null;
+    const frame = mobFrame(o);
+    const sprite = useArt ? mobSprite(lv, o.kind, frame) : null;
     if (sprite) {
-      drawRig(g!, sprite, mobRig(o.kind), mobRef(o.kind), cx, floor + dy, {
+      const metrics = (mobSpriteMetrics as Record<string, {width:number;height:number;frames:Record<string,{x:number;y:number}>}>)[`m${lv + 1}-${o.kind}`];
+      const anchor = metrics?.frames[String(frame)];
+      const rig = anchor ? {unit:metrics.height / 512, ax:anchor.x / 512, ay:anchor.y / 512} : mobRig(o.kind);
+      drawRig(g!, sprite, rig, mobRef(o.kind), cx, floor + dy, {
         flip: o.dir < 0,
         rot, sx, sy,
         alpha: deadFade,
@@ -1566,11 +1581,8 @@ export function createGame(
       });
       // Báo đòn: viền sáng nhấp nháy quanh con quái sắp lao
       if (o.tel > 0 && Math.floor(o.tel * 18) % 2 === 0) {
-        g!.strokeStyle = HAZARD;
-        g!.lineWidth = 2;
-        g!.beginPath();
-        g!.roundRect(o.x - 3, o.y - 3, o.w + 6, o.h + 6, 6);
-        g!.stroke();
+        const ring = img(SCENE_SPRITES.ring);
+        if (ring) drawFit(g!, ring, cx, floor + 7, 60, 18);
       }
       return;
     }
@@ -1941,12 +1953,9 @@ export function createGame(
       // Đang cầm đồ nghề: hào quang mờ quanh người, nhạt dần lúc gần hết giờ
       const left = Math.min(1, player.tool / 2);
       g!.save();
-      g!.globalAlpha = 0.5 * left * (0.6 + 0.4 * Math.sin(worldTime * 9));
-      g!.strokeStyle = LIME;
-      g!.lineWidth = 2;
-      g!.beginPath();
-      g!.roundRect(player.x - 4, player.y - 14, player.w + 8, player.h + 16, 10);
-      g!.stroke();
+      g!.globalAlpha = left * (0.75 + 0.15 * Math.sin(worldTime * 9));
+      const aura = img(SCENE_SPRITES.aura);
+      if (aura) drawFit(g!, aura, player.x + player.w / 2, player.y + player.h + 5, 78, 110);
       g!.restore();
     }
   }
@@ -1980,6 +1989,14 @@ export function createGame(
     // tranh; mà đây là thứ người chơi phải nhìn ra trong một phần giây để
     // quyết định có nhảy hay không.
     for (const [px, py, pw] of m.plats) {
+      const platform = img(SCENE_SPRITES.platform);
+      if (platform) {
+        const cap = 12, srcCap = platform.naturalHeight * 0.65;
+        g!.drawImage(platform, 0, 0, srcCap, platform.naturalHeight, px, py, cap, 16);
+        g!.drawImage(platform, srcCap, 0, platform.naturalWidth - srcCap * 2, platform.naturalHeight, px + cap, py, pw - cap * 2, 16);
+        g!.drawImage(platform, platform.naturalWidth - srcCap, 0, srcCap, platform.naturalHeight, px + pw - cap, py, cap, 16);
+        continue;
+      }
       g!.fillStyle = "rgba(16,16,20,.88)";
       g!.beginPath();
       g!.roundRect(px, py, pw, 13, 5);
@@ -2000,6 +2017,13 @@ export function createGame(
 
     // Cửa ải ở cuối bản đồ, sáng lên khi đã hạ hết quái thường
     const opened = !mobs.some((o) => !o.dead);
+    const gate = img(SCENE_SPRITES.gate);
+    if (gate) {
+      g!.save();
+      g!.filter = opened ? "brightness(1.2)" : "saturate(.55)";
+      drawFit(g!, gate, WORLD - 47, GY + 3, 66, 108);
+      g!.restore();
+    } else {
     g!.fillStyle = opened ? "rgba(212,242,54,.5)" : "rgba(255,255,255,.5)";
     g!.fillRect(WORLD - 70, GY - 96, 46, 96);
     g!.fillStyle = m.palette.groundEdge;
@@ -2009,6 +2033,7 @@ export function createGame(
       g!.fillStyle = LIME;
       g!.fillRect(WORLD - 64, GY - 88, 34, 88);
       g!.globalAlpha = 1;
+    }
     }
 
     for (const o of mobs) {
@@ -2065,6 +2090,15 @@ export function createGame(
 
     // Đạn: nhân lõi sáng, đuôi mờ kéo lại phía sau
     for (const s of shots) {
+      const shot = img(SCENE_SPRITES.shot);
+      if (shot) {
+        g!.save();
+        g!.translate(s.x, s.y);
+        g!.rotate(Math.atan2(s.vy, s.vx));
+        drawFit(g!, shot, 0, 10, 34, 20);
+        g!.restore();
+        continue;
+      }
       const len = Math.min(26, Math.abs(s.vx) * 5);
       const grad = g!.createLinearGradient(s.x - Math.sign(s.vx) * len, s.y, s.x, s.y);
       grad.addColorStop(0, "rgba(224,86,63,0)");
@@ -2094,6 +2128,12 @@ export function createGame(
     for (const p of parts) {
       const t = Math.max(0, p.life / p.max);
       g!.globalAlpha = t;
+      const sprite = img(p.kind === "ring" ? SCENE_SPRITES.ring : p.kind === "dust" ? SCENE_SPRITES.dust : SCENE_SPRITES.hit);
+      if (sprite) {
+        const size = p.kind === "ring" ? (1 - t) * 68 : p.size * (1.4 - t * .5) * 2;
+        drawFit(g!, sprite, p.x, p.y + size / 2, size, size);
+        continue;
+      }
       if (p.kind === "ring") {
         const r = (1 - t) * 34;
         g!.strokeStyle = p.color;
@@ -2148,6 +2188,14 @@ export function createGame(
 
   function drawHud(m: GameMap) {
     for (let i = 0; i < player.mhp; i++) {
+      const heart = img(SCENE_SPRITES.heart);
+      if (heart) {
+        g!.save();
+        g!.globalAlpha = i < player.hp ? 1 : .25;
+        drawFit(g!, heart, 23 + i * 22, 31, 19, 18);
+        g!.restore();
+        continue;
+      }
       g!.fillStyle = i < player.hp ? "#ff6b5e" : "rgba(242,241,236,.22)";
       g!.beginPath();
       g!.roundRect(14 + i * 20, 14, 15, 14, 4);
@@ -2191,6 +2239,8 @@ export function createGame(
       g!.beginPath();
       g!.roundRect(bx, 14, bw * Math.max(0, boss.hp / boss.mhp), 14, 4);
       g!.fill();
+      const bossbar = img(SCENE_SPRITES.bossbar);
+      if (bossbar) g!.drawImage(bossbar, bx - 12, 6, bw + 24, 30);
       g!.font = `600 12px ${FONT_SANS}`;
       g!.textAlign = "center";
       g!.fillStyle = "#f2f1ec";
@@ -2331,6 +2381,7 @@ export function createGame(
   // Chỉ tải những file ASSETS khai báo là có thật, tránh 404 rác.
   [...P_IDLE, ...P_RUN, ...P_ATK, P_RISE, P_FALL, P_LAND, P_HURT].forEach(img);
   Object.values(TRAP_SPRITES).forEach(img);
+  Object.values(SCENE_SPRITES).forEach(img);
   for (let i = 1; i <= ASSETS.slashFx; i++) img(`fx/slash-${i}.png`);
   maps.forEach((m, i) => {
     img(`boss/b${i + 1}.png`);

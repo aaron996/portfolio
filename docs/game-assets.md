@@ -1,5 +1,8 @@
 # Prompt sinh ảnh cho minigame "Ải Vận Hành" — bản 2
 
+> Cập nhật 04/09/2026: đã nối đủ 64 frame quái (16 loại × 4), điểm neo theo alpha,
+> và 10 ảnh thay placeholder. Xem [game-art-integration.md](game-art-integration.md).
+
 Toàn bộ prompt để tạo asset cho game ở route `/game`.
 
 **Bản 2 khác bản 1 ở đâu:** bản 1 đủ ảnh nhưng chơi lên thì thấy nhân vật phình to
