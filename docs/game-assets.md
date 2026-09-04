@@ -18,20 +18,12 @@ một thứ mới nhìn thấy được thì cập nhật bảng này ngay trong
 
 | Cần gen | Số tấm | Hiện đang là gì | Mục |
 |---|---|---|---|
-| `boss/bX-walk-1..4` | 20 | trùm trượt ngang, engine nhấc người 3px cho đỡ | [5.7](#57-chu-kỳ-đi-và-khung-ra-đòn--25-tấm--cần-gen) |
-| `boss/bX-atk` | 5 | dùng lại khung đứng lúc đòn bung ra | [5.7](#57-chu-kỳ-đi-và-khung-ra-đòn--25-tấm--cần-gen) |
-| `item/gun-1..5` | 5 | khẩu súng vẽ bằng ba cái `roundRect` | [8.1](#81-gun-15--5-tấm--cần-gen) |
-| `player/shoot-1..2` | 2 | mượn khung chém `attack-2` | [6.5](#65-súng-quét-và-đỡ-đòn--7-tấm--cần-gen) |
-| `player/guard` | 1 | khung đứng hạ thấp, nghiêng 6 độ | [6.5](#65-súng-quét-và-đỡ-đòn--7-tấm--cần-gen) |
-| `player/gun-held` | 1 | ba `roundRect` trong tay | [6.5](#65-súng-quét-và-đỡ-đòn--7-tấm--cần-gen) |
-| `fx/bullet` · `fx/muzzle` · `fx/shield` | 3 | gradient, ellipse và một cung `arc` | [6.5](#65-súng-quét-và-đỡ-đòn--7-tấm--cần-gen) |
-| `bg/mX-sky` | 5 | dốc màu vẽ bằng code — **tuỳ chọn** | [7](#7-nền--5-ải--4-lớp--20-tấm) |
-| `bg/mX-near` | 5 | không có lớp tiền cảnh — **tuỳ chọn** | [7](#7-nền--5-ải--4-lớp--20-tấm) |
+| — | 0 | Đã hoàn tất toàn bộ bộ asset v2 | — |
 
-**Đã xong (129 tấm):** 18 khung nhân vật · 64 khung quái (16 loại × 4) · 15 khung trùm
-(đứng, báo đòn, trúng đòn) · 10 lớp nền `far` + `mid` · 4 bẫy · 10 vật phẩm
-`heal`/`tool` · 3 khung vệt chém · `hit` `dust` `ring` `shot` · `ground` `platform` ·
-`gate` `heart-full` `bossbar`.
+**Đã xong (176 tấm):** 22 khung nhân vật · 64 khung quái (16 loại × 4) · 40 khung trùm
+(đứng, báo đòn, trúng đòn, đi, ra đòn) · 20 lớp nền · 4 bẫy · 15 vật phẩm
+`heal`/`tool`/`gun` · 3 khung vệt chém · `hit` `dust` `ring` `shot` `bullet` `muzzle`
+`shield` · `gun-held` · `ground` `platform` · `gate` `heart-full` `bossbar`.
 
 ---
 
@@ -532,11 +524,10 @@ Tám khung mỗi con:
 | `bX.png` | đứng yên | ✅ |
 | `bX-tel.png` | báo đòn, 0,55 giây trước khi ra đòn | ✅ |
 | `bX-hit.png` | vừa ăn đòn | ✅ |
-| `bX-walk-1..4.png` | đang đi tới chỗ người chơi | ❌ **cần gen** |
-| `bX-atk.png` | đòn đã bung ra (giậm / nhả loạt / lao) | ❌ **cần gen** |
+| `bX-walk-1..4.png` | đang đi tới chỗ người chơi | ✅ |
+| `bX-atk.png` | đòn đã bung ra (giậm / nhả loạt / lao) | ✅ |
 
-Khung `-hit` đã xong ở bản 2 (`ASSETS.bossFrames = 3`). Hai nhóm còn lại là phần
-**thiếu duy nhất của trùm** — xem mục 5.7.
+Toàn bộ khung trùm đã xong và được bật trong engine.
 
 ### 5.1 Trùm Sai Mã Container · ải 1, giậm đất
 
@@ -602,7 +593,7 @@ it takes a hit: body flinching back, head snapped away from the impact, eyes scr
 shut, mouth open in a grunt, whole silhouette flashed bright and desaturated.
 ```
 
-### 5.7 Chu kỳ đi và khung ra đòn — 25 tấm · **cần gen**
+### 5.7 Chu kỳ đi và khung ra đòn — 25 tấm · **ĐÃ XONG**
 
 Trùm đi tới chỗ người chơi ở tốc độ 51px/s trong suốt trận, mà chỉ có một khung đứng
 — nên nó **trượt ngang như đẩy tủ lạnh**. Engine đã có bản chữa tạm: nhấc người 3px
@@ -724,7 +715,7 @@ shot (256×256): a small round energy projectile for a 2D game, solid brick red 
 it, perfectly round, transparent background.
 ```
 
-### 6.5 Súng quét và đỡ đòn — 7 tấm · **cần gen**
+### 6.5 Súng quét và đỡ đòn — 7 tấm · **ĐÃ XONG**
 
 Hai cơ chế mới: bắn tầm xa (phím `K`, nhặt súng dọc đường, 14 viên) và đỡ đòn (giữ
 `L`, tốn thể lực, bấm đúng nhịp thì bật ngược đạn về). Cả hai đang chạy bằng hình vẽ
@@ -788,6 +779,8 @@ có ảnh thì khẩu súng nằm luôn trong khung, nên engine tự bỏ lớp
 
 Đây là phần bản 1 làm mỏng nhất: chỉ có lớp giữa, nên năm ải chỉ khác nhau ở bảng
 màu. Bản 2 chia bốn lớp và **tả cảnh cụ thể theo từng nơi từng làm việc**.
+
+**ĐÃ XONG:** đủ 20 lớp nền `sky`, `far`, `mid`, `near` cho cả 5 ải.
 
 ### 7.1 Luật chung của nền
 
@@ -953,7 +946,7 @@ of [#FF8F85 cho heal / #D4F236 cho tool] around the silhouette. Transparent back
 no ground shadow, no text, no numbers, no labels.
 ```
 
-### 8.1 `gun-1..5` — 5 tấm · **cần gen**
+### 8.1 `gun-1..5` — 5 tấm · **ĐÃ XONG**
 
 Đây là **vũ khí**, không phải buff — nên phải đọc ra là một khẩu súng ngay cả ở
 `36×36px`. Ba luật riêng cho nhóm này, khác nhóm `tool`:
@@ -1004,20 +997,20 @@ nên gen dở dang cũng không sinh ra một tràng 404. Gen tới đâu sửa 
 | **`jump-rise`/`jump-fall`/`land` — ĐÃ XONG** | `playerJump: "split"` | đủ 3 khung |
 | **Quái 4 khung — ĐÃ XONG** | `mobFrames.<loại>: 4` | đủ 4 khung cho loại đó, ở **mọi ải** có nó |
 | **Trùm có `bX-hit.png` — ĐÃ XONG** | `bossFrames: 3` | không — thiếu ải nào ải đó dùng khung đứng |
-| `bX-walk-1..4` cả 5 ải | `bossWalk: 4` | **cả nhóm trùm** — thiếu ải nào ải đó nhấp nháy |
-| `bX-atk` cả 5 ải | `bossAtk: true` | không — thiếu thì dùng khung đứng |
-| `item/gun-1..5` | `gunArt: true` | cả 5 ải — thiếu ải nào ải đó vẽ khẩu súng bằng code |
-| `player/shoot-1..2` | `playerShoot: 2` | đủ số khung khai — thiếu thì mượn khung chém |
-| `player/guard.png` | `playerGuard: true` | không |
-| `player/gun-held.png` | `gunHeldArt: true` | không |
-| `fx/bullet.png` | `bulletArt: true` | không |
-| `fx/muzzle.png` | `muzzleArt: true` | không |
-| `fx/shield.png` | `shieldArt: true` | không |
+| **`bX-walk-1..4` cả 5 ải — ĐÃ XONG** | `bossWalk: 4` | **cả nhóm trùm** — thiếu ải nào ải đó nhấp nháy |
+| **`bX-atk` cả 5 ải — ĐÃ XONG** | `bossAtk: true` | không — thiếu thì dùng khung đứng |
+| **`item/gun-1..5` — ĐÃ XONG** | `gunArt: true` | cả 5 ải — thiếu ải nào ải đó vẽ khẩu súng bằng code |
+| **`player/shoot-1..2` — ĐÃ XONG** | `playerShoot: 2` | đủ số khung khai — thiếu thì mượn khung chém |
+| **`player/guard.png` — ĐÃ XONG** | `playerGuard: true` | không |
+| **`player/gun-held.png` — ĐÃ XONG** | `gunHeldArt: true` | không |
+| **`fx/bullet.png` — ĐÃ XONG** | `bulletArt: true` | không |
+| **`fx/muzzle.png` — ĐÃ XONG** | `muzzleArt: true` | không |
+| **`fx/shield.png` — ĐÃ XONG** | `shieldArt: true` | không |
 | **Ảnh rider — ĐÃ XONG** | `riderArt: true` | đủ số khung khai trong `mobFrames.rider` |
 | **`fx/slash-1..3` — ĐÃ XONG** | `slashFx: 3` | không — thiếu thì rơi về vệt vẽ bằng code |
-| Nền `mX-sky.png` | `bgSky: true` | không — thiếu ải nào ải đó dùng dốc màu code |
+| **Nền `mX-sky.png` — ĐÃ XONG** | `bgSky: true` | không — thiếu ải nào ải đó dùng dốc màu code |
 | **Nền `mX-far.png` — ĐÃ XONG** | `bgFar: true` | không — thiếu ải nào ải đó dùng silhouette code |
-| Nền `mX-near.png` | `bgNear: true` | không — thiếu thì bỏ qua lớp đó |
+| **Nền `mX-near.png` — ĐÃ XONG** | `bgNear: true` | không — thiếu thì bỏ qua lớp đó |
 
 `mobFrames` khai theo từng loại (`{ default: 4, rider: 4 }`) chứ không phải một số
 chung, để gen lại được từng loại một. Khai 4 cho một loại mà thiếu file thì con đó
