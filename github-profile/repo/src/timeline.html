@@ -1,0 +1,62 @@
+<meta charset="utf-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1600px; background:#111110; }
+  body { font-family:'Inter'; color:#F2F1EC; }
+  #root { width:1600px; background:#111110; padding:46px 40px 48px; }
+  .grid { display:grid; grid-template-columns:repeat(5,1fr); }
+  .col { min-width:0; padding:0 20px; text-align:center; }
+
+  .per { font-size:17px; letter-spacing:.06em; color:#6E6E68; margin-bottom:18px; }
+  .col.now .per { color:#A8C22B; }
+
+  /* Đường thời gian là ::before của từng ô, cắt nửa ở ô đầu và ô cuối
+     để nó bắt đầu và kết thúc đúng ngay tại chấm, không thừa ra hai bên. */
+  .dotrow { position:relative; height:30px; display:flex; align-items:center; justify-content:center; margin-bottom:20px; }
+  .dotrow::before { content:''; position:absolute; left:-20px; right:-20px; top:50%; height:2px; background:#26261F; }
+  .col:first-child .dotrow::before { left:50%; }
+  .col:last-child  .dotrow::before { right:50%; }
+  .dot { position:relative; width:15px; height:15px; border-radius:50%; background:#3a3a33;
+         box-shadow:0 0 0 7px #111110; }
+  .col.now .dot { background:#D4F236; }
+
+  .co { font-family:'Archivo'; font-weight:800; font-size:25px; letter-spacing:-.025em; line-height:1.15; }
+  .ro { margin-top:10px; font-size:16px; line-height:1.4; color:#8C8C86; }
+  .tag { display:inline-block; margin-top:12px; font-size:13px; letter-spacing:.1em;
+         color:#A8C22B; border:1px solid #3f4a1a; border-radius:99px; padding:4px 11px; }
+</style>
+<div id="root">
+  <div class="grid">
+    <div class="col">
+      <div class="per">2019 – 2020</div>
+      <div class="dotrow"><span class="dot"></span></div>
+      <div class="co">Maersk</div>
+      <div class="ro">Export Care Business Partner</div>
+    </div>
+    <div class="col">
+      <div class="per">2020 – 2021</div>
+      <div class="dotrow"><span class="dot"></span></div>
+      <div class="co">J&amp;T Express</div>
+      <div class="ro">Key Account Specialist</div>
+    </div>
+    <div class="col">
+      <div class="per">2021 – 2025</div>
+      <div class="dotrow"><span class="dot"></span></div>
+      <div class="co">Shopee</div>
+      <div class="ro">Logistics Management Specialist</div>
+    </div>
+    <div class="col now">
+      <div class="per">2025 – nay</div>
+      <div class="dotrow"><span class="dot"></span></div>
+      <div class="co">GHN</div>
+      <div class="ro">Key Account Solution / Data Analyst</div>
+    </div>
+    <div class="col now">
+      <div class="per">T5/2026 – nay</div>
+      <div class="dotrow"><span class="dot"></span></div>
+      <div class="co">Interdist</div>
+      <div class="ro">Sở hữu dữ liệu &amp; sản phẩm</div>
+      <div class="tag">SONG SONG · BÁN THỜI GIAN</div>
+    </div>
+  </div>
+</div>

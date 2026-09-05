@@ -1,0 +1,43 @@
+<meta charset="utf-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1600px; background:#111110; }
+  body { font-family:'Inter'; }
+  /* Đường kẻ dọc là KHE HỞ để lộ nền #26261F, không phải border của ô.
+     Nhờ vậy ô tự cao theo nội dung và kẻ luôn đúng bằng chiều cao thật. */
+  #root {
+    width:1600px; background:#26261F;
+    display:grid; grid-template-columns:repeat(4, 1fr); gap:2px;
+  }
+  .cell { background:#111110; padding:48px 40px; }
+  .num {
+    font-family:'Archivo'; font-weight:800; letter-spacing:-.035em; line-height:1;
+    font-size:68px; color:#F2F1EC; margin-bottom:18px;
+  }
+  .num .suf { color:#D4F236; }
+  .label { font-size:21px; line-height:1.4; color:#A9A9A2; }
+  /* note = mốc thời gian / nguồn. Ghi rõ số nào thuộc thời kỳ nào thì số đáng tin
+     hơn, không kém đi — cùng lý do statBand[].note tồn tại trong content.vi.ts */
+  .note { margin-top:14px; font-size:17px; line-height:1.4; color:#6E6E68; }
+</style>
+<div id="root">
+  <div class="cell">
+    <div class="num">6<span class="suf">+</span></div>
+    <div class="label">năm vận hành &amp; phân tích dữ liệu</div>
+  </div>
+  <div class="cell">
+    <div class="num">97.5<span class="suf">%</span></div>
+    <div class="label">pickup on-time, từ 90.1%</div>
+    <div class="note">Shopee × Viettel Post · 2021–2025 · đã xác nhận</div>
+  </div>
+  <div class="cell">
+    <div class="num">4</div>
+    <div class="label">hệ thống dữ liệu đang chạy production</div>
+    <div class="note">GHN · Interdist · hiện tại</div>
+  </div>
+  <div class="cell">
+    <div class="num">300<span class="suf">k</span></div>
+    <div class="label">đơn/ngày từng vận hành</div>
+    <div class="note">J&amp;T Express × Shopee · 2020–2021</div>
+  </div>
+</div>

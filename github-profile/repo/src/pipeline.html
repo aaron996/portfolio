@@ -1,0 +1,35 @@
+<meta charset="utf-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1600px; background:#111110; }
+  body { font-family:'Inter'; color:#F2F1EC; }
+  #root { width:1600px; background:#111110; padding:44px 40px 46px; }
+  .rail { display:flex; gap:10px; align-items:stretch; }
+  .card {
+    flex:1; min-width:0; background:#181816; border:2px solid #26261F; border-radius:9px;
+    padding:20px 18px; display:flex; flex-direction:column;
+  }
+  /* Mắt duy nhất KHÔNG do mình nắm — tô khác để nhìn phát thấy ngay. */
+  .card.other { border-color:#5a4a1e; background:#1d1a12; }
+  .n { font-size:15px; font-weight:600; letter-spacing:.14em; color:#4a4a44; margin-bottom:12px; }
+  .card.other .n { color:#a08a3a; }
+  .lb { font-family:'Archivo'; font-weight:700; font-size:20px; line-height:1.2; letter-spacing:-.015em; }
+  .tl { margin-top:10px; font-size:14px; line-height:1.35; color:#8C8C86; }
+  .ow { margin-top:auto; padding-top:14px; font-size:13px; letter-spacing:.1em; color:#4a4a44; }
+  .card.other .ow { color:#D4A83A; }
+  .cons { margin-top:8px; font-size:13px; line-height:1.35; color:#6E6E68; }
+  .foot { margin-top:24px; font-size:17px; color:#8C8C86; }
+  .foot b { color:#D4F236; font-weight:600; }
+</style>
+<div id="root">
+  <div class="rail">
+    <div class="card"><div class="n">01</div><div class="lb">Chốt lại câu hỏi</div><div class="tl">Trao đổi với stakeholder</div><div class="ow">TÔI</div></div>
+    <div class="card"><div class="n">02</div><div class="lb">Tự viết query, tự kiểm output</div><div class="tl">Trino · Iceberg</div><div class="cons">chỉ có quyền đọc lakehouse</div><div class="ow">TÔI</div></div>
+    <div class="card other"><div class="n">03</div><div class="lb">Job định kỳ</div><div class="tl">Cronjob → Google Sheets</div><div class="cons">quyền tạo job thuộc team khác</div><div class="ow">TEAM BI</div></div>
+    <div class="card"><div class="n">04</div><div class="lb">Đồng bộ sang CSDL ứng dụng</div><div class="tl">Apps Script → Supabase</div><div class="cons">kênh chia sẻ file trực tiếp bị chặn</div><div class="ow">TÔI</div></div>
+    <div class="card"><div class="n">05</div><div class="lb">Mô hình hoá lại cho ứng dụng</div><div class="tl">PostgreSQL · RLS</div><div class="ow">TÔI</div></div>
+    <div class="card"><div class="n">06</div><div class="lb">Dựng ứng dụng</div><div class="tl">React · TypeScript</div><div class="ow">TÔI</div></div>
+    <div class="card"><div class="n">07</div><div class="lb">Deploy và vận hành</div><div class="tl">Vercel · phân quyền vai trò</div><div class="ow">TÔI</div></div>
+  </div>
+  <div class="foot">Tôi không sở hữu hạ tầng nào trong chuỗi này. <b>Mắt 03 nằm trong lịch của một team khác</b> — đó là ràng buộc tổ chức định hình kiến trúc, không phải lựa chọn kỹ thuật.</div>
+</div>

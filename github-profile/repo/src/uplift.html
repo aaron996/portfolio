@@ -1,0 +1,35 @@
+<meta charset="utf-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1600px; background:#111110; }
+  body { font-family:'Inter'; }
+  #root { width:1600px; background:#111110; padding:54px 64px 58px; }
+  .head { display:flex; align-items:baseline; gap:26px; margin-bottom:44px; }
+  .from { font-family:'Archivo'; font-weight:800; font-size:58px; letter-spacing:-.035em; color:#6E6E68; }
+  .to   { font-family:'Archivo'; font-weight:800; font-size:72px; letter-spacing:-.035em; color:#D4F236; }
+  .arw  { font-size:40px; color:#4a4a44; }
+  .cap  { font-size:22px; color:#A9A9A2; margin-left:14px; }
+
+  /* Thang 88–100%. Chỉ vẽ hai điểm ĐÃ BIẾT (đầu 2021, cuối 2025) — không nội suy
+     các năm ở giữa, vì không có số cho chúng và vẽ vào là bịa. */
+  .track { position:relative; height:26px; background:#1E1E1C; border-radius:13px; overflow:hidden; }
+  .fill  { position:absolute; left:0; top:0; bottom:0; width:17.5%; background:#3a3a33; }
+  .gain  { position:absolute; left:17.5%; top:0; bottom:0; width:62.5%;
+           background:linear-gradient(90deg, rgba(212,242,54,.32), #D4F236); }
+  .ticks { position:relative; height:64px; margin-top:14px; font-size:17px; color:#6E6E68; }
+  .tick  { position:absolute; transform:translateX(-50%); text-align:center; line-height:1.35; }
+  .tick b { display:block; color:#A9A9A2; font-weight:600; font-size:19px; margin-bottom:4px; }
+  .scale { display:flex; justify-content:space-between; margin-top:8px; font-size:15px; color:#4a4a44; }
+</style>
+<div id="root">
+  <div class="head">
+    <span class="from">90.1%</span><span class="arw">→</span><span class="to">97.5%</span>
+    <span class="cap">pickup on-time · Viettel Post · theo dõi 4 năm · Shopee và đối tác cùng xác nhận</span>
+  </div>
+  <div class="track"><div class="fill"></div><div class="gain"></div></div>
+  <div class="ticks">
+    <div class="tick" style="left:17.5%"><b>90.1%</b>2021<br>điểm xuất phát</div>
+    <div class="tick" style="left:80%"><b>97.5%</b>2025<br>đã xác nhận</div>
+  </div>
+  <div class="scale"><span>88%</span><span>thang đo pickup on-time</span><span>100%</span></div>
+</div>
