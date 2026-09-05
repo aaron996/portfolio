@@ -1,4 +1,4 @@
-# Kế hoạch làm game isometric đánh quái ("Ải Vận Hành" đời 2)
+# Kế hoạch làm game isometric phiêu lưu đánh quái — route `/quest`
 
 Ngày lập: 05/09/2026. Tài liệu này trả lời hai câu: **dùng công cụ gì để làm việc
 cùng AI coding agent**, và **làm theo thứ tự nào**.
@@ -236,14 +236,29 @@ combat không vui thì chưa mất gì.
 **Nghiệm thu:** mỗi model < 8k tam giác, GLB < 1,5 MB, `/quest/debug` chụp một tấm
 thấy đủ; asset chưa có thì bản lùi bằng khối hộp vẫn chạy được (cờ `ASSETS`).
 
-### M4 — Nội dung: map và kể chuyện (2 phiên)
+### M4 — Nội dung: thế giới và kể chuyện (2 phiên)
 
-- 3–5 màn, mỗi màn một chủ đề nghề như game cũ (kho, tuyến, trạm...).
-- Trùm cuối màn, câu chốt sau khi hạ trùm.
-- Cổng chuyển màn, điểm hồi sinh.
+Game này là **thế giới phiêu lưu riêng**, không nối vào mạch "ải vận hành" của game
+cũ. Hai game đứng độc lập, không nhân vật chung, không cốt truyện chung.
+
+- 3–5 vùng, mỗi vùng một kiểu địa hình rõ rệt và một loại quái đặc trưng. Khác biệt
+  phải **nhìn ra ngay trong ba giây**: bảng màu, độ cao địa hình, mật độ vật cản. Năm
+  vùng chỉ khác nhau ở màu nền là lỗi đã mắc một lần ở bộ art đời 1 (`game-assets.md`
+  mục 0), đừng lặp lại.
+- Trùm cuối mỗi vùng, có một cơ chế riêng buộc người chơi đổi cách đánh — không phải
+  con quái thường nhân máu lên.
+- Cổng chuyển vùng, điểm hồi sinh, bản đồ nhỏ ở góc.
+- Mạch truyện giữ mỏng: một câu mở đầu, một câu sau mỗi trùm, một câu kết. Game này
+  bán bằng cảm giác đánh đấm, không bán bằng cốt truyện — đừng viết dài.
 - **Toàn bộ chữ vào `content/quest.vi.ts`.** Kể cả `aria-label`.
 
-**Nghiệm thu:** đi hết 3 màn bằng sim headless; không có chuỗi tiếng Việt nào trong
+**Chốt chủ đề thế giới ở đầu mốc này**, vì nó quyết định model quái ở M3. Vài hướng
+để chọn (chọn một, đừng trộn): tàn tích công nghiệp bị thiên nhiên chiếm lại; quần đảo
+trôi trên mây; hang động pha lê dưới lòng đất. Tiêu chí chọn: vùng nào **dễ dựng bằng
+khối low-poly** nhất thì thắng — thế giới nào phải vẽ chi tiết mới đẹp là thế giới sẽ
+không bao giờ xong.
+
+**Nghiệm thu:** đi hết 3 vùng bằng sim headless; không có chuỗi tiếng Việt nào trong
 `components/quest/`. Kiểm bằng `grep`.
 
 ### M5 — Chiều sâu (2–3 phiên)
@@ -289,14 +304,19 @@ console; Lighthouse hiệu năng ≥ 70 trên `/quest`.
 
 ---
 
-## 7. Cần chốt trước khi bắt đầu M0
+## 7. Đã chốt và còn để mở
 
-1. **Look MapleStory 1 hay 2?** Bản 1 là 2D vẽ tay side-scroll; bản 2 là 3D chibi
-   isometric. Kế hoạch này viết cho bản 2. Nếu bạn muốn đúng vibe bản 1 thì đổi sang
-   đường B ở mục 2 và cộng thêm ~6 phiên.
-2. **Route:** `/quest` hay `/game/iso`? Ảnh hưởng đường dẫn, không ảnh hưởng gì khác.
-3. **Chủ đề:** giữ mạch "ải vận hành" của game cũ, hay là thế giới phiêu lưu riêng?
-   Ảnh hưởng M4, không ảnh hưởng M0–M3.
+**Đã chốt:**
 
-Ba câu này không chặn M0 — spike dựng được bất kể trả lời thế nào. Trả lời trước M3
-là kịp.
+- **Thế giới phiêu lưu riêng**, không nối vào mạch "ải vận hành" của game cũ. Xem M4.
+- **Route `/quest`.** Game cũ giữ nguyên ở `/game`, không đụng tới. Hai game là hai
+  mục riêng trong portfolio, không nên trông như bản mod của nhau.
+- **Đường C** ở mục 2: 3D toon + camera trực giao.
+
+**Còn để mở — M0 sẽ trả lời hộ:**
+
+- **Look MapleStory 1 hay 2?** Bản 1 là 2D vẽ tay side-scroll; bản 2 là 3D chibi
+  isometric. Kế hoạch này viết cho bản 2. Xem ảnh chụp cuối M0 rồi quyết: ưng thì đi
+  tiếp, không ưng thì đổi sang đường B ở mục 2 và cộng thêm ~6 phiên.
+- **Chủ đề thế giới cụ thể.** Không chặn M0–M3, nhưng phải chốt trước khi làm model
+  quái ở M3. Ba gợi ý ở M4.
