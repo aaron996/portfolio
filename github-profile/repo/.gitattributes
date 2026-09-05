@@ -1,0 +1,3 @@
+# src/ là nguồn HTML để vẽ lại các ảnh trong assets/, không phải mã của một trang web.
+# Không đánh dấu thì GitHub gắn nhãn ngôn ngữ "HTML" cho cả repo profile.
+src/** linguist-vendored

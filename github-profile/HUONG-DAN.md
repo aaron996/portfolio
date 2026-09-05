@@ -1,17 +1,21 @@
 # Đưa trang github.com/aaron996 thành portfolio
 
-Thư mục này là **khu vực dàn dựng**. `repo/` là bản sao đúng 1:1 của repo profile
-`aaron996/aaron996` — chép nguyên nó lên là xong. Sau khi phát hành thì xoá cả
-`github-profile/` khỏi repo portfolio, nó không còn việc gì ở đây nữa.
+**Đã phát hành.** Repo profile <https://github.com/aaron996/aaron996> đang chạy nội dung
+của `repo/`, nhánh `main`.
+
+Thư mục này là nguồn: `repo/` là bản sao đúng 1:1 của repo profile, `build-readme.mjs`
+sinh ra `repo/README.md` từ `content/content.vi.ts`. Giữ lại để còn cập nhật được —
+đừng xoá, vì xoá là mất luôn đường sinh lại README cho khớp với site.
 
 ```
 github-profile/
-├── HUONG-DAN.md        ← file này, KHÔNG chép lên
-├── build-readme.mjs    ← sinh repo/README.md, KHÔNG chép lên
-└── repo/               ← chép nguyên thư mục này thành nội dung aaron996/aaron996
-    ├── README.md
-    ├── assets/         ← 4 ảnh tự dựng + 8 screenshot + cv.pdf
-    └── src/            ← nguồn HTML của 4 ảnh tự dựng + render.sh
+├── HUONG-DAN.md        ← file này, KHÔNG đẩy lên repo profile
+├── build-readme.mjs    ← sinh repo/README.md, KHÔNG đẩy lên repo profile
+└── repo/               ← nội dung repo aaron996/aaron996, giữ khớp 1:1
+    ├── README.md          (sinh ra, đừng sửa tay)
+    ├── .gitattributes     (không tính src/ vào thống kê ngôn ngữ)
+    ├── assets/            6 ảnh tự dựng + 8 screenshot + cv.pdf
+    └── src/               nguồn HTML của 6 ảnh + render.sh
 ```
 
 ## Trang profile đứng độc lập
@@ -29,28 +33,20 @@ github-profile/
 Muốn thêm link sang site thì thêm một badge nữa ở khối `<p align="center">` đầu
 `build-readme.mjs`, nhưng khi đó trang lại phụ thuộc site — cân nhắc.
 
-## Ba bước phát hành
+## Cập nhật trang profile
 
-1. Tạo repo **public** tên đúng bằng username: `aaron996/aaron996`.
-   GitHub hiện dòng "You found a secret!" — đó là dấu hiệu đặt tên đúng.
-2. Chép toàn bộ nội dung `repo/` vào gốc repo đó (README.md, assets/, src/), commit, push
-   lên nhánh `main`.
-3. Mở <https://github.com/aaron996> kiểm tra ảnh đã lên.
-
-Ảnh chỉ hiện khi file đã nằm trên nhánh `main` của `aaron996/aaron996`. Trước đó README
-hiện ảnh vỡ — bình thường, không phải sai đường dẫn.
-
-## Sinh lại README
-
-README **được sinh ra**, đừng sửa tay — lần chạy sau sẽ ghi đè.
+Sửa nội dung ở `content/content.vi.ts` → sinh lại README → đẩy sang repo profile:
 
 ```bash
 node github-profile/build-readme.mjs
+git clone https://github.com/aaron996/aaron996 /tmp/prof
+cp -r github-profile/repo/. /tmp/prof/
+cd /tmp/prof && git add -A && git commit -m "cập nhật nội dung" && git push
 ```
 
-Script đọc thẳng `content/content.vi.ts` (transpile bằng `typescript` có sẵn trong
-devDependencies) rồi dựng markdown. Sửa nội dung thì sửa ở `content.vi.ts` như thường
-lệ, chạy lại script, chép `repo/README.md` sang repo profile.
+README **được sinh ra**, đừng sửa tay — lần chạy `build-readme.mjs` sau sẽ ghi đè. Script
+đọc thẳng `content/content.vi.ts` (transpile bằng `typescript` có sẵn trong
+devDependencies) rồi dựng markdown.
 
 Lý do sinh chứ không gõ tay: nguồn có 5 case, 23 quyết định, và mọi con số đều kèm
 trường `method` cùng cờ `verified`. Chép tay từng đó chữ là chép sai — mà sai ở đây
@@ -60,7 +56,7 @@ Chú thích ngắn dưới mỗi ảnh là phần **viết tay duy nhất** tron
 `CAPTIONS`, khoá theo `media.id`. Thêm ảnh mới vào `content.vi.ts` mà quên thêm chú
 thích thì ảnh vẫn lên, chỉ là không có dòng mô tả.
 
-## Vẽ lại 4 ảnh tự dựng
+## Vẽ lại 6 ảnh tự dựng
 
 `banner.png`, `stats.png`, `pipeline.png`, `timeline.png`, `case-sla-flow.png`,
 `case-3pl-uplift.png` được dựng bằng HTML + Chromium headless, nguồn ở `repo/src/`.
@@ -86,13 +82,23 @@ Bảng màu lấy đúng từ khối `@theme` trong `app/globals.css` (`#0A0A0A`
 `#1E1E1C`, `#26261F`, `#F2F1EC`, `#A9A9A2`, `#6E6E68`, `#D4F236`). Đổi màu site thì đổi
 luôn ở đây, nếu không hai bên lệch nhau.
 
-## Việc còn lại: dọn phần repo public
+## Việc còn lại
+
+### 1. Đặt mô tả cho repo profile
+
+Repo `aaron996/aaron996` hiện chưa có description (lúc tạo bỏ trống). Vào
+<https://github.com/aaron996/aaron996> → nút ⚙️ cạnh mục *About* → điền, ví dụ:
+
+> Lương Thế Vinh — BI &amp; Data Analyst. Define the metric. Automate the system. Solve the problem.
+
+### 2. Dọn phần repo public
 
 Trang profile không chỉ có README — bên dưới là danh sách repo, và đó là phần README
 không che được. Hiện có 5 repo public, phần lớn chưa có mô tả nên trang nhìn trống.
 
 | Repo | Mô tả nên đặt | Topics |
 |---|---|---|
+| `aaron996` | *(xem mục 1 ở trên)* | — |
 | `portfolio` | Portfolio cá nhân — Next.js 15, Tailwind v4, kèm minigame side-scroller | `nextjs` `typescript` `tailwindcss` `portfolio` |
 | `kas_shopee_performance` | Web app theo dõi ontime pickup/giao hàng theo Miền/Vùng/Hub | `react` `supabase` `dashboard` `logistics` |
 | `GHN` | *(đang là "All code GHN" — nên viết rõ hơn hoặc chuyển private)* | — |
