@@ -1,69 +1,95 @@
-# Đưa README này lên trang profile GitHub
+# Đưa trang github.com/aaron996 thành portfolio
 
-`README.md` ở thư mục này là **profile README** — nội dung hiện ở đầu trang
-<https://github.com/aaron996>. Nó không được dùng bởi site Next.js; để ở đây vì ảnh
-phải nằm trong một repo public thì GitHub mới hiện được.
+Thư mục này là **khu vực dàn dựng**. `repo/` là bản sao đúng 1:1 của repo profile
+`aaron996/aaron996` — chép nguyên nó lên là xong. Sau khi phát hành thì xoá cả
+`github-profile/` khỏi repo portfolio, nó không còn việc gì ở đây nữa.
 
-## Ảnh lấy từ đâu
+```
+github-profile/
+├── HUONG-DAN.md        ← file này, KHÔNG chép lên
+├── build-readme.mjs    ← sinh repo/README.md, KHÔNG chép lên
+└── repo/               ← chép nguyên thư mục này thành nội dung aaron996/aaron996
+    ├── README.md
+    ├── assets/         ← 4 ảnh tự dựng + 8 screenshot + cv.pdf
+    └── src/            ← nguồn HTML của 4 ảnh tự dựng + render.sh
+```
 
-Mọi `<img>` trong README trỏ về `raw.githubusercontent.com/aaron996/portfolio/main/...`:
+## Trang profile đứng độc lập
 
-| Ảnh | Đường dẫn trong repo này |
-|---|---|
-| Banner, dải số liệu, sơ đồ rule engine, biểu đồ 3PL | `github-profile/assets/` |
-| 8 screenshot sản phẩm | `public/` (đã có sẵn, dùng chung với site) |
+Đây là ràng buộc chính, đừng phá:
 
-**Vì trỏ vào nhánh `main`, ảnh chỉ hiện sau khi nhánh này được merge vào `main`.**
-Trước lúc đó README sẽ hiện ảnh vỡ — đó là bình thường, không phải sai đường dẫn.
+- **Mọi ảnh trỏ về `raw.githubusercontent.com/aaron996/aaron996/main/assets/`** — tức
+  chính repo profile, không phải repo `portfolio`. Vì vậy `repo/assets/` có bản sao của
+  8 screenshot và `cv.pdf` (gốc ở `public/` của repo này). Trùng lặp là cố ý: đổi lại là
+  trang profile không phụ thuộc repo nào khác.
+- **README không link sang site Vercel.** Toàn bộ chiều sâu — bối cảnh, 23 quyết định
+  thiết kế, bảng kết quả kèm cách tính — nằm trong các khối `<details>` gập lại ngay
+  trong README. Người đọc không phải rời trang GitHub.
+
+Muốn thêm link sang site thì thêm một badge nữa ở khối `<p align="center">` đầu
+`build-readme.mjs`, nhưng khi đó trang lại phụ thuộc site — cân nhắc.
 
 ## Ba bước phát hành
 
-1. Merge nhánh `claude/github-visual-portfolio-6v0du2` vào `main` (ảnh mới lên `main`).
-2. Tạo repo **public** tên đúng bằng username: `aaron996/aaron996`, tick "Add a README file".
-   GitHub sẽ hiện dòng "You found a secret!" — đó là dấu hiệu đặt tên đúng.
-3. Chép toàn bộ nội dung `github-profile/README.md` vào `README.md` của repo đó, commit.
+1. Tạo repo **public** tên đúng bằng username: `aaron996/aaron996`.
+   GitHub hiện dòng "You found a secret!" — đó là dấu hiệu đặt tên đúng.
+2. Chép toàn bộ nội dung `repo/` vào gốc repo đó (README.md, assets/, src/), commit, push
+   lên nhánh `main`.
+3. Mở <https://github.com/aaron996> kiểm tra ảnh đã lên.
 
-Sau này sửa chữ thì sửa ở cả hai nơi, hoặc coi file trong repo này là bản gốc rồi chép lại.
+Ảnh chỉ hiện khi file đã nằm trên nhánh `main` của `aaron996/aaron996`. Trước đó README
+hiện ảnh vỡ — bình thường, không phải sai đường dẫn.
 
-## Vẽ lại các ảnh tự dựng
+## Sinh lại README
 
-Bốn ảnh trong `assets/` được dựng bằng HTML + Chromium headless, nguồn ở `src/`.
+README **được sinh ra**, đừng sửa tay — lần chạy sau sẽ ghi đè.
+
+```bash
+node github-profile/build-readme.mjs
+```
+
+Script đọc thẳng `content/content.vi.ts` (transpile bằng `typescript` có sẵn trong
+devDependencies) rồi dựng markdown. Sửa nội dung thì sửa ở `content.vi.ts` như thường
+lệ, chạy lại script, chép `repo/README.md` sang repo profile.
+
+Lý do sinh chứ không gõ tay: nguồn có 5 case, 23 quyết định, và mọi con số đều kèm
+trường `method` cùng cờ `verified`. Chép tay từng đó chữ là chép sai — mà sai ở đây
+nghĩa là con số trên profile lệch với con số trên site.
+
+Chú thích ngắn dưới mỗi ảnh là phần **viết tay duy nhất** trong script, ở hằng
+`CAPTIONS`, khoá theo `media.id`. Thêm ảnh mới vào `content.vi.ts` mà quên thêm chú
+thích thì ảnh vẫn lên, chỉ là không có dòng mô tả.
+
+## Vẽ lại 4 ảnh tự dựng
+
+`banner.png`, `stats.png`, `pipeline.png`, `timeline.png`, `case-sla-flow.png`,
+`case-3pl-uplift.png` được dựng bằng HTML + Chromium headless, nguồn ở `repo/src/`.
 
 ```bash
 # cần: Chromium (sửa biến CHROME trong render.sh cho đúng máy), python3 + Pillow,
-# và font Archivo + Inter đặt trong ~/.fonts (Google Fonts: ofl/archivo, ofl/inter) rồi fc-cache -f
-cd github-profile/src
+# font Archivo và Inter đặt trong ~/.fonts (Google Fonts: ofl/archivo, ofl/inter) rồi fc-cache -f
+cd github-profile/repo/src
 ./render.sh banner.html   ../assets/banner.png          1600
 ./render.sh stats.html    ../assets/stats.png           1600
+./render.sh pipeline.html ../assets/pipeline.png        1600
+./render.sh timeline.html ../assets/timeline.png        1600
 ./render.sh sla-flow.html ../assets/case-sla-flow.png   1600
 ./render.sh uplift.html   ../assets/case-3pl-uplift.png 1600
 ```
 
 `render.sh` chụp ba lượt: đo `#root` cao bao nhiêu → chụp với viewport dư 400px → cắt
-xuống đúng chiều cao thật. Lượt dư là bắt buộc: Chrome headless **không vẽ phần đuôi
-nội dung** khi viewport vừa khít, ảnh sẽ mất một hai dòng chữ cuối mà không báo lỗi gì.
+xuống đúng chiều cao thật. Lượt dư là **bắt buộc**: Chrome headless không vẽ phần đuôi
+nội dung khi viewport vừa khít, ảnh sẽ mất một hai dòng chữ cuối mà không báo lỗi gì.
+Mọi phần tử phải nằm trong `<div id="root">` thì mới đo được.
 
 Bảng màu lấy đúng từ khối `@theme` trong `app/globals.css` (`#0A0A0A`, `#111110`,
-`#1E1E1C`, `#26261F`, `#F2F1EC`, `#A9A9A2`, `#6E6E68`, `#D4F236`). Đổi màu site thì
-đổi luôn ở đây, nếu không hai bên sẽ lệch nhau.
+`#1E1E1C`, `#26261F`, `#F2F1EC`, `#A9A9A2`, `#6E6E68`, `#D4F236`). Đổi màu site thì đổi
+luôn ở đây, nếu không hai bên lệch nhau.
 
-## Hai việc còn phải người quyết
+## Việc còn lại: dọn phần repo public
 
-### 1. Địa chỉ site đang bị khai hai kiểu
-
-| Nơi khai | Giá trị |
-|---|---|
-| `content/content.vi.ts` → `meta.url` (dùng cho thẻ OG) | `https://vinhluong-here.vercel.app` |
-| Trường *Website* của repo `aaron996/portfolio` trên GitHub | `https://portfolio-woad-nu-85.vercel.app` |
-
-README đang dùng `vinhluong-here.vercel.app` vì đó là giá trị site tự khai trong thẻ OG.
-Nếu địa chỉ thật là cái còn lại thì sửa 4 chỗ trong `README.md` (2 badge, 1 link trong
-khối NOTE, 2 link ở footer) và sửa `meta.url` cho khớp.
-
-### 2. Dọn phần repo public
-
-Trang profile không chỉ có README — bên dưới là danh sách repo. Hiện có 5 repo public,
-phần lớn chưa có mô tả nên trang nhìn trống. Đề xuất cho từng repo:
+Trang profile không chỉ có README — bên dưới là danh sách repo, và đó là phần README
+không che được. Hiện có 5 repo public, phần lớn chưa có mô tả nên trang nhìn trống.
 
 | Repo | Mô tả nên đặt | Topics |
 |---|---|---|
@@ -73,8 +99,9 @@ phần lớn chưa có mô tả nên trang nhìn trống. Đề xuất cho từn
 | `portfolio-assets` | Ảnh và tài nguyên dùng cho portfolio | — |
 | `Brown-Bear-Buddy-Releases` | *(repo rỗng — nên xoá hoặc đặt private)* | — |
 
-Chọn **Pinned repositories** (tối đa 6, nút *Customize your pins* ở trang profile) — pin
-những repo có mô tả tử tế, đừng pin repo rỗng.
+Rồi chọn **Pinned repositories** (tối đa 6, nút *Customize your pins* ở trang profile).
+Pin `aaron996` lên đầu, và chỉ pin repo có mô tả tử tế — đừng pin repo rỗng.
 
-Các repo còn lại đang private nên khách không thấy; README đã nói rõ điều đó trong khối
-NOTE ở đầu mục "Việc đã làm" thay vì để người đọc tự thắc mắc.
+Các repo còn lại đang private nên khách không thấy. README đã nói thẳng điều đó trong
+khối NOTE ở đầu mục "Việc đã làm", thay vì để người đọc tự thắc mắc vì sao một người
+viết mình ship 4 hệ thống mà trang GitHub trống trơn.
