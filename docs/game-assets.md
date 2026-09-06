@@ -19,6 +19,12 @@ một thứ mới nhìn thấy được thì cập nhật bảng này ngay trong
 | Cần gen | Số tấm | Hiện đang là gì | Mục |
 |---|---|---|---|
 | — | 0 | Đã hoàn tất toàn bộ bộ asset v2 | — |
+| `player/raise-gun.png` — đã tích hợp | 0 còn thiếu (1 tấm đã gen) | Khung nâng súng trước khi bắn, alpha thật, rig 1024² | 8 |
+| `player/armed-run-1..4.png`, `armed-jump-rise/fall.png` — đã tích hợp | 0 còn thiếu (6 tấm đã gen) | Chạy/nhảy vẫn nắm súng, alpha thật, rig 512² | 13 |
+| `ui/briefing-board.png`, `ui/supply-board.png` — đã tích hợp | 0 còn thiếu (2 tấm đã gen) | Nền bảng hướng dẫn và túi đồ, chữ vẫn là HTML | 13 |
+
+Bổ sung combat: `armed-idle.png` + `raise-gun.png` ngoài bộ gốc. Vòng báo hướng
+lao, vòng hồi sức xanh và viền đạn phản dùng canvas, không cần sinh thêm ảnh.
 
 **Đã xong (176 tấm):** 22 khung nhân vật · 64 khung quái (16 loại × 4) · 40 khung trùm
 (đứng, báo đòn, trúng đòn, đi, ra đòn) · 20 lớp nền · 4 bẫy · 15 vật phẩm
@@ -737,12 +743,11 @@ shot (256×256): a small round energy projectile for a 2D game, solid brick red 
 it, perfectly round, transparent background.
 ```
 
-### 6.5 Súng quét và đỡ đòn — 7 tấm · **ĐÃ XONG**
+### 6.5 Súng quét và đỡ đòn — 8 tấm · **ĐÃ XONG**
 
 Hai cơ chế mới: bắn tầm xa (phím `K`, nhặt súng dọc đường, 14 viên) và đỡ đòn (giữ
-`L`, tốn thể lực, bấm đúng nhịp thì bật ngược đạn về). Cả hai đang chạy bằng hình vẽ
-trong code — khẩu súng là ba cái `roundRect`, khiên là một cung `arc`, tia đạn là một
-dải gradient. Đọc được nhưng lệch hẳn khỏi phần còn lại của game.
+`L`, tốn thể lực, bấm đúng nhịp thì bật ngược đạn về). Cả hai đã có asset riêng;
+fallback vẽ bằng code chỉ còn dùng trong vài khung đầu lúc ảnh chưa tải.
 
 **Màu quy ước:** xanh nhạt `#9FD8FF` cho mọi thứ thuộc súng và khiên. Đỏ `#E0563F` là
 của địch, lime `#D4F236` là của đòn chém — thêm màu thứ ba để người chơi phân biệt
@@ -758,6 +763,46 @@ recoiling: torso rotated a few degrees back, gun arm snapped straight, rear foot
 braced, head steady and eyes on the target. No muzzle flash in this frame.
 shoot-2: the exact same pose one beat later, recoil absorbed — gun arm bent back in
 toward the chest, torso returning upright, weight settling onto the front foot.
+```
+
+Khung cầm súng khi chưa bắn phải là một pose nhân vật hoàn chỉnh, không phải
+khẩu súng rời vẽ đè lên khung idle:
+
+```
+armed-idle (player/armed-idle.png): the same character, same face and outfit as
+idle-1, standing side-on facing right and visibly gripping the pale-blue scanner gun
+in the lowered near hand. Fingers wrap around the handle; muzzle points safely down
+and forward. Full body, same head size and ground line, transparent background.
+```
+
+Khung mới `player/raise-gun.png` (1 tấm): chuyển tiếp 0,18 giây trước phát đầu;
+chỉ khi hoàn tất nâng súng mới trừ đạn và hiện chớp nòng. Giữ bắn giữ nguyên tư thế
+ngắm. Đỡ, chém, trúng đòn hoặc tạm dừng hủy phát đang chuẩn bị, không tốn đạn.
+Ảnh được tạo bằng imagegen built-in, rồi `sprites.py normalize --kind player
+--fit head --out-size 1024`. Kiểm tra riêng: RGBA, đầu 347px, neo (512, 960).
+
+Prompt đã dùng (reference: `player/shoot-1.png`):
+
+```
+Use case: identity-preserve. Asset: one intermediate 2D game sprite, raise-gun.png.
+Edit this exact chibi character frame: change ONLY the arms and pistol pose to halfway
+raising the SAME light-blue scanner pistol from hip to firing position, elbows bent,
+muzzle pointing diagonally down-right about 30 degrees below horizontal. Keep face,
+eyes, hairstyle, black office clothing, blue lanyard, proportions, line style, head
+position, feet stance and framing exactly identical. Both hands visibly grip/support
+the pistol. Full body, facing right. Actual transparent RGBA background, no checkerboard,
+no shadow, no text, no effects, no muzzle flash. One character only, generous transparent
+padding, square canvas. This frame sits between lowered gun and the supplied fully raised
+shooting pose; do not change the gun design.
+```
+
+Lượt đầu có nền caro giả nên đã chạy extraction qua built-in trước khi chuẩn hóa:
+
+```
+Background extraction ONLY. Remove the painted white and gray checkerboard completely
+and output actual transparent alpha pixels around and between the character. Keep every
+pixel of the chibi character, pose, gun, face and costume unchanged. No checkerboard
+pattern in output, no backdrop, no shadow. Transparent PNG cutout.
 ```
 
 ```
@@ -789,11 +834,13 @@ facets in the fill. The left side (the side against the character) fades to
 transparent.
 ```
 
-Cả bốn: nền trong suốt, không chữ, không số, không bóng đổ.
+Cả bốn: nền trong suốt, không chữ, không số, không bóng đổ. `gun-held` hiện là
+asset legacy để đối chiếu thiết kế; runtime dùng `armed-idle` để bàn tay và súng
+nằm trong cùng một khung.
 
-Sau khi gen bật cờ tương ứng ở mục 9. Bốn tấm này đều là loại **có đường lùi** — gen
-lẻ tấm nào bật tấm đó, tấm chưa có thì engine vẫn vẽ bằng code. Riêng `shoot-1..2`:
-có ảnh thì khẩu súng nằm luôn trong khung, nên engine tự bỏ lớp `gun-held` vẽ đè.
+Sau khi gen bật cờ tương ứng ở mục 9. Hiệu ứng nào chưa có thì engine vẫn vẽ bằng
+code. `armed-idle` và `shoot-1..2` đều chứa sẵn súng trong khung nhân vật, tuyệt đối
+không vẽ đè `gun-held` lên tay.
 
 ---
 
@@ -1024,7 +1071,12 @@ nên gen dở dang cũng không sinh ra một tràng 404. Gen tới đâu sửa 
 | **`item/gun-1..5` — ĐÃ XONG** | `gunArt: true` | cả 5 ải — thiếu ải nào ải đó vẽ khẩu súng bằng code |
 | **`player/shoot-1..2` — ĐÃ XONG** | `playerShoot: 2` | đủ số khung khai — thiếu thì mượn khung chém |
 | **`player/guard.png` — ĐÃ XONG** | `playerGuard: true` | không |
-| **`player/gun-held.png` — ĐÃ XONG** | `gunHeldArt: true` | không |
+| **`player/armed-idle.png` — ĐÃ XONG** | `playerArmedIdle: true` | không — giữ pose cầm súng khi còn đạn |
+| **`player/raise-gun.png` — ĐÃ XONG** | `playerRaiseGun: true` | 1 tấm — khung nâng súng; fallback dùng khung bắn có sẵn |
+| **`player/armed-run-1..4` — ĐÃ XONG** | `playerArmedRun: 4` | đủ cả bộ; thiếu thì giữ pose đứng cầm súng |
+| **`player/armed-jump-rise/fall` — ĐÃ XONG** | `playerArmedJump: true` | đủ 2 tấm; thiếu thì dùng khung nhảy thường |
+| **`ui/briefing-board`, `ui/supply-board` — ĐÃ XONG** | `guideBoards: true` | đủ 2 tấm; thiếu thì dùng nền giấy CSS |
+| **`player/gun-held.png` — LEGACY** | không còn dùng | giữ lại để đối chiếu thiết kế súng |
 | **`fx/bullet.png` — ĐÃ XONG** | `bulletArt: true` | không |
 | **`fx/muzzle.png` — ĐÃ XONG** | `muzzleArt: true` | không |
 | **`fx/shield.png` — ĐÃ XONG** | `shieldArt: true` | không |
@@ -1096,7 +1148,8 @@ không thấy, và nó sẽ im lặng rơi về hình vẽ bằng code chứ kh�
 ```
 public/game/
   player/  idle-1..3.png  run-1..8.png  jump-rise.png  jump-fall.png  land.png
-           attack-1..3.png  hurt.png  shoot-1..2.png  guard.png  gun-held.png
+           attack-1..3.png  hurt.png  armed-idle.png  armed-run-1..4.png
+           armed-jump-rise.png  armed-jump-fall.png  raise-gun.png  shoot-1..2.png  guard.png
   mob/     m1-walker-1..4.png   m1-flyer-1..4.png
            m2-walker-1..4.png   m2-charger-1..4.png  m2-flyer-1..4.png
            m3-walker-1..4.png   m3-flyer-1..4.png    m3-shooter-1..4.png
@@ -1111,6 +1164,7 @@ public/game/
   fx/      slash-1..3.png  hit.png  dust.png  ring.png  shot.png
            bullet.png  muzzle.png  shield.png
   bg/      m1..m5-sky.png  m1..m5-far.png  m1..m5-mid.png  m1..m5-near.png
+  ui/      briefing-board.png  supply-board.png
 ```
 
 Ảnh bìa trang `/game` để riêng ở `public/og-game.png`:
@@ -1152,6 +1206,48 @@ ai đọc diff để phát hiện, và người quyết định gen ảnh thì k
    đang vẽ bằng gì, và **dán thẳng prompt ra chat**. Đừng bắt họ mở file docs ra tìm.
 
 Việc 4 là bắt buộc, không phải phần thêm cho đẹp.
+
+## 13. Bổ sung pose cầm súng và bảng hướng dẫn — đã hoàn tất
+
+Sáu pose cầm súng dùng cùng một prompt chỉnh sửa chính xác, với ảnh tham chiếu lần
+lượt là `run-1`, `run-3`, `run-5`, `run-7`, `jump-rise`, `jump-fall`:
+
+> Use case: precise-object-edit, game sprite. Edit the supplied [REFERENCE] sprite
+> ONLY by replacing the rolled white paper held in the near hand with a compact pale
+> blue barcode-scanner pistol (#9FD8FF), visibly gripped by fingers, muzzle angled
+> down and forward. Keep EXACTLY the same pose, leg positions, hand position, face,
+> eyes, hairstyle, clothes, proportions, head size, pixel-art/cartoon outlines,
+> canvas framing and transparent padding as the input. Do not redraw or restyle the
+> character. The other hand remains unchanged. One full-body character facing right,
+> same animation phase as reference. No muzzle flash, no shadow, no added floor, no
+> motion trail, no writing. Output PNG with genuine transparent alpha background;
+> do not paint a checkerboard. Asset name [OUTPUT].
+
+Prompt `ui/briefing-board.png`:
+
+> Wide landscape 3:2 illustrated background for an in-game instruction board in a
+> cute 2D logistics adventure. Match the reference's hand-painted cartoon warehouse
+> materials and bold dark outlines. A large front-facing warm ivory paper briefing
+> sheet held inside a worn blue-steel noticeboard frame, tiny brass clips at top.
+> Paper covers the middle 82 percent, almost flat cream #F4E6CA, clean and empty for
+> readable HTML instructions. Around the outer edges only: small stacked cardboard
+> parcels, warehouse orange steel beams, pale blue scanner and folded delivery slips.
+> Strong simple silhouette, clean readable at mobile size, gentle painterly shading.
+> No words, letters, numbers, labels, logos, symbols, interface controls or character.
+> Opaque background, no transparency. This is actual game UI background art, not a mockup.
+
+Prompt `ui/supply-board.png`:
+
+> Wide landscape 3:2 illustrated background for an in-game inventory and pickup panel
+> in a cute 2D logistics adventure. Match the reference's hand-painted cartoon warehouse
+> materials and bold dark outlines. Front-facing open blue-steel supply locker with a
+> large empty pale ivory packing checklist clipped across its center. Quiet paper
+> #F4E6CA covers middle 82 percent for readable HTML text. Only at outer corners: pale
+> blue scanner gun, rolled paper tool, small red first-aid pouch, cardboard parcel,
+> worn brass hinge. Warm warehouse orange and cool navy steel frame. Corners carry the
+> detail; central writing area must remain blank and visually calm. No words, letters,
+> numbers, labels, logos, character or UI controls. Opaque background, no transparency.
+> Actual game UI background art, not a mockup.
 
 ### Prompt phải theo tài liệu này
 

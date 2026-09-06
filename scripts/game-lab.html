@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="vi"><meta charset="utf-8"><title>Game combat diagnostic</title>
+<style>body{background:#17191b;color:#f6f6f4;font:15px system-ui;max-width:1000px;margin:24px auto}button{padding:12px;margin:4px;background:#30353b;color:white;border:1px solid #63717f;border-radius:8px;cursor:pointer}canvas{width:100%;image-rendering:auto}pre{white-space:pre-wrap}</style>
+<h1>Game combat diagnostic — actual engine</h1>
+<div id="scenarios"><button data-scene="gun">Gun</button><button data-scene="drop">Drop</button><button data-scene="reflect">Reflect</button><button data-scene="rider">Rider</button></div>
+<div><button id="shoot">Shoot</button><button id="down">Down</button><button id="guard">Guard</button><button id="step">Step 0.1s</button><button id="half">Step 0.5s</button><button id="face">Turn</button></div>
+<canvas width="800" height="420"></canvas><pre id="state"></pre>
+<script type="module">
+import { createGame } from './engine.js';
+import { content } from './content.js';
+window.requestAnimationFrame = () => 0;
+let game;
+const canvas = document.querySelector('canvas');
+function render(){
+  game.lab.draw();
+  const p = game.lab.player;
+  document.querySelector('#state').textContent = JSON.stringify({pose:game.lab.playerFrame().src,x:p.x,y:p.y,ammo:p.ammo,hp:p.hp,raise:p.raiseT,ground:p.ground,bossHp:game.lab.boss?.hp,shots:game.lab.shots,mob:game.lab.mobs[0]}, null, 2);
+}
+function advance(seconds){for(let i=0;i<Math.round(seconds*120);i++) game.lab.step(1/120);render();}
+function scene(which){
+  game?.destroy();
+  const base = content.game.maps[which==='rider'?2:1];
+  const map = {...base, traps:[],pickups:[],plats:which==='drop'?[[160,240,160],[140,160,180]]:[],mobs:[{kind:'walker',name:'sentinel',x:2100,range:10}]};
+  if(which==='rider') map.mobs=[{kind:'rider',name:'Shipper',x:350,range:70}];
+  const index=which==='rider'?2:1;
+  const maps=content.game.maps.map((m,i)=>i===index?map:m);
+  game=createGame(canvas,maps,content.game);game.loadMap(index);game.resume();game.setPauseOnPickup(false);
+  Object.assign(game.lab.player,{x:200,ground:true,ammo:5});
+  if(which==='drop') game.lab.player.y=120;
+  if(which==='reflect'){
+    game.lab.spawnBoss();Object.assign(game.lab.boss,{x:400,y:262,cd:100});
+    game.lab.fire(250,game.lab.player.y+20,-4.4,1.1);
+  }
+  if(which==='rider')game.lab.mobs[0].cd=0;
+  render();
+}
+document.querySelector('#scenarios').onclick=e=>{if(e.target.dataset.scene)scene(e.target.dataset.scene)};
+document.querySelector('#shoot').onclick=()=>{game.press('shoot');game.release('shoot');render()};
+document.querySelector('#down').onclick=()=>{game.press('down');game.release('down');render()};
+document.querySelector('#guard').onclick=()=>{game.press('guard');advance(.008333)};
+document.querySelector('#step').onclick=()=>advance(.1);
+document.querySelector('#half').onclick=()=>advance(.5);
+document.querySelector('#face').onclick=()=>{game.lab.player.face*=-1;render()};
+scene('gun');setInterval(render,250);
+</script></html>

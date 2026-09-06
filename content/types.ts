@@ -318,6 +318,8 @@ export interface GameContent {
   /** Ghi chú thành thật về việc đây là bản nháp */
   note: string;
   controlsHint: string;
+  dropLabel: string;
+  rushHint: string;
   startLabel: string;
   /** Có {n} — số thứ tự ải kế tiếp */
   nextLabel: string;
@@ -327,6 +329,7 @@ export interface GameContent {
   bossAppear: string;
   deathLine: string;
   skillsLabel: string;
+  skillProgress: string;
   /** Có {name} — hiện khi nhặt được đồ nghề */
   pickupTool: string;
   pickupHeal: string;
@@ -338,6 +341,10 @@ export interface GameContent {
   noAmmo: string;
   /** Đỡ trúng nhịp — chặn đòn mà không tốn thể lực */
   parryLine: string;
+  /** Phản đạn trúng nhịp với đạn của trùm */
+  reflectLine: string;
+  /** Gợi ý ngắn luôn hiện khi đánh trùm bắn loạt */
+  volleyHint: string;
   /** Giữ đỡ tới cạn thể lực thì vỡ đỡ, đứng chịu trận một nhịp */
   guardBreakLine: string;
   /**
