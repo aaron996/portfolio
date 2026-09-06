@@ -13,7 +13,7 @@
  */
 import type { GameMap, GameMobSpawn, MobKind } from "@/content/types";
 
-export type GameKey = "left" | "right" | "jump" | "atk" | "shoot" | "guard";
+export type GameKey = "left" | "right" | "jump" | "down" | "atk" | "shoot" | "guard";
 export type GamePhase = "title" | "play" | "paused" | "clear" | "end";
 
 /**
@@ -80,6 +80,10 @@ export interface GameLabels {
   noAmmo: string;
   /** Đỡ trúng nhịp */
   parryLine: string;
+  /** Phản đạn của trùm bắn loạt */
+  reflectLine: string;
+  /** Gợi ý luôn hiện dưới thanh máu trùm bắn loạt */
+  volleyHint: string;
   /** Giữ đỡ tới cạn thể lực */
   guardBreakLine: string;
   /** Gợi ý phím tạm dừng, vẽ ở góc dưới canvas */
@@ -103,6 +107,7 @@ const PLAYER_H = 40;
  */
 const JUMP_V = 684;
 const GRAVITY = 2232;
+const RUN_SPEED = 300;
 /** Độ cao đỉnh nhảy: v^2 / 2g, hiện ~105px */
 const JUMP_PEAK = (JUMP_V * JUMP_V) / (2 * GRAVITY);
 
@@ -248,10 +253,17 @@ const ASSETS = {
   bossAtk: true,
   /** player/shoot-1..N.png — khung bắn. 0 = mượn khung chém. */
   playerShoot: 2,
+  /** player/armed-idle.png — cả người và súng trong cùng một khung */
+  playerArmedIdle: true,
+  // One intermediate raising pose; enable only after raise-gun.png is installed.
+  playerRaiseGun: true,
+  /** Four complete running poses plus rising/falling with the gun. */
+  playerArmedRun: 4,
+  playerArmedJump: true,
+  /** Two DOM board backgrounds in ui/, enabled after both PNGs exist. */
+  guideBoards: true,
   /** player/guard.png — khung giơ đỡ. Chưa có thì engine hạ thấp khung đứng. */
   playerGuard: true,
-  /** player/gun-held.png — khẩu súng vẽ đè lên tay khi còn đạn */
-  gunHeldArt: true,
   /** fx/bullet.png — tia đạn của người chơi */
   bulletArt: true,
   /** fx/muzzle.png — chớp đầu nòng */
@@ -273,12 +285,16 @@ const ASSETS = {
 };
 
 const ASSET_BASE = "/game";
+export const GAME_BOARD_ART = ASSETS.guideBoards ? {
+  briefing: "/game/ui/briefing-board.png", supply: "/game/ui/supply-board.png",
+} : null;
 const imageCache = new Map<string, HTMLImageElement>();
 
 function img(src: string): HTMLImageElement | null {
   let el = imageCache.get(src);
   if (!el) {
     el = new Image();
+    el.decoding = "async";
     el.src = `${ASSET_BASE}/${src}`;
     imageCache.set(src, el);
   }
@@ -321,9 +337,11 @@ const MOB_RIG_V2: Rig = { unit: 440 / 512, ax: 0.5, ay: 476 / 512 };
 /** Trùm đúng spec: khung 768×768, thân cao 660px, chân ở y = 714 */
 const BOSS_RIG_V2: Rig = { unit: 660 / 768, ax: 0.5, ay: 714 / 768 };
 
-function playerRig(): Rig {
-  // Cả 18 khung cùng một rig. Bảng hiệu chuẩn từng khung của bộ đời 1 đã bỏ —
-  // cần lại thì `python scripts/sprites.py check --emit-rig` in ra được.
+const ARMED_PASSING_RIG: Rig = { ...PLAYER_RIG, unit: PLAYER_RIG.unit / 1.1 };
+function playerRig(src?: string): Rig {
+  // Optical correction: the head detector included the shoulder on these two
+  // new poses. Keep the authored foot anchor; match head size, not body height.
+  if (src === "player/armed-run-2.png" || src === "player/armed-run-3.png") return ARMED_PASSING_RIG;
   return PLAYER_RIG;
 }
 function mobRig(kind: MobKind): Rig {
@@ -351,6 +369,12 @@ const P_IDLE =
 const P_RUN = Array.from({ length: ASSETS.playerRun }, (_, i) => `player/run-${i + 1}.png`);
 const P_ATK = Array.from({ length: ASSETS.playerAttack }, (_, i) => `player/attack-${i + 1}.png`);
 const P_SHOOT = Array.from({ length: ASSETS.playerShoot }, (_, i) => `player/shoot-${i + 1}.png`);
+const P_ARMED_IDLE = "player/armed-idle.png";
+const P_RAISE_GUN = "player/raise-gun.png";
+const P_ARMED_RUN = Array.from({ length: ASSETS.playerArmedRun }, (_, i) => `player/armed-run-${i + 1}.png`);
+const P_ARMED_RISE = "player/armed-jump-rise.png";
+const P_ARMED_FALL = "player/armed-jump-fall.png";
+const GUN_RAISE_TIME = 0.18;
 const P_GUARD = "player/guard.png";
 const P_RISE = ASSETS.playerJump === "split" ? "player/jump-rise.png" : "player/jump.png";
 const P_FALL = ASSETS.playerJump === "split" ? "player/jump-fall.png" : "player/jump.png";
@@ -364,7 +388,6 @@ const SCENE_SPRITES = {
 
 /** Ảnh cho súng và đỡ đòn. Chưa gen thì engine vẽ bằng code, xem ASSETS. */
 const GEAR_SPRITES = {
-  gunHeld: "player/gun-held.png",
   bullet: "fx/bullet.png",
   muzzle: "fx/muzzle.png",
   shield: "fx/shield.png",
@@ -517,6 +540,8 @@ interface Mob {
   cd: number; dash: number;
   /** Báo đòn: rider rú ga, charger rùng mình trước khi lao */
   tel: number;
+  /** Stationary, harmless recovery after a committed rush or interruption. */
+  recover: number;
   /** Giật lùi sau khi bắn, giảm dần về 0 */
   recoil: number;
   /** Bước chân gần nhất, để chỉ nhả bụi một lần mỗi bước */
@@ -555,7 +580,7 @@ interface Particle {
   kind: "spark" | "dust" | "ring";
   size: number;
 }
-interface Shot { x: number; y: number; vx: number; vy: number; r: number; t: number }
+interface Shot { x: number; y: number; vx: number; vy: number; r: number; t: number; reflected?: boolean }
 /** Tia súng quét của người chơi — bay thẳng, xuyên qua bẫy, tan khi trúng */
 interface Bullet { x: number; y: number; vx: number; t: number }
 /** Một nhát chém đã bay ra khỏi tay — vẽ vệt lưỡi liềm rồi tự tan */
@@ -611,6 +636,8 @@ export function createGame(
   let lv = 0;
   let phase: GamePhase = "title";
   let raf = 0;
+  let destroyed = false;
+  let deathTimer: number | null = null;
   let last = 0;
   let shake = 0;
   let fade = 0;
@@ -626,7 +653,7 @@ export function createGame(
   let freeze = 0;
 
   const keys: Record<GameKey, boolean> = {
-    left: false, right: false, jump: false, atk: false, shoot: false, guard: false,
+    left: false, right: false, jump: false, down: false, atk: false, shoot: false, guard: false,
   };
   let pauseWhy: PauseReason = "manual";
   let pauseOnPickup = true;
@@ -644,6 +671,9 @@ export function createGame(
     ammo: 0, gunName: null as string | null,
     /** Đếm ngược hoạt ảnh bắn, và nhịp nghỉ giữa hai phát */
     shootT: 0, gunCd: 0,
+    raiseT: 0, aimT: 0,
+    /** Ignore only the surface being left, not the next platform below it. */
+    dropY: null as number | null,
     /** Đang giơ đỡ hay không, và đã giơ được bao lâu (để tính parry) */
     guarding: false, guardT: 0,
     /** Thể lực đỡ, 0..1. Cạn thì vỡ đỡ. */
@@ -759,13 +789,19 @@ export function createGame(
   }
 
   function loadMap(index: number) {
+    if (destroyed) return;
+    if (deathTimer !== null) window.clearTimeout(deathTimer);
+    deathTimer = null;
+    for (const key of Object.keys(keys) as GameKey[]) keys[key] = false;
     lv = index;
     const m = maps[lv];
+    preloadMapAssets(index);
     if (process.env.NODE_ENV !== "production") warnFlyerReach(m, index);
     Object.assign(player, {
       x: 60, y: GY - PLAYER_H, vx: 0, vy: 0, face: 1,
       hp: 5, inv: 0, atk: 0, cd: 0, ground: false, tool: 0, hurtT: 0,
       toolName: null, ammo: 0, gunName: null, shootT: 0, gunCd: 0,
+      raiseT: 0, aimT: 0, dropY: null,
       guarding: false, guardT: 0, stam: 1, stamDelay: 0, breakT: 0,
       runPhase: 0, attackActive: 0, attackHit: false, attackBuffed: false,
       combo: 0, comboT: 0, landT: 0, coyote: 0, jumpBuf: 0, fallSpeed: 0,
@@ -786,18 +822,23 @@ export function createGame(
 
     mobs = m.mobs.map((sp) => {
       const floor = sp.y ?? GY;
-      const range = sp.range ?? 70;
+      const rushing = sp.kind === "charger" || sp.kind === "rider";
+      const range = rushing ? Math.max(sp.range ?? 70, sp.kind === "rider" ? 620 : 420) : sp.range ?? 70;
       const { w, h } = mobBox(sp.kind);
+      const platform = rushing && floor < GY
+        ? m.plats.find(([px, py, pw]) => py === floor && sp.x >= px && sp.x + w <= px + pw)
+        : undefined;
       return {
         kind: sp.kind, name: sp.name,
         x: sp.x, y: floor - h, w, h,
         hp: MOB_HP[sp.kind],
         dir: Math.random() < 0.5 ? -1 : 1,
-        a: sp.x - range, b: sp.x + range,
+        a: platform ? platform[0] : Math.max(0, sp.x - range),
+        b: platform ? platform[0] + platform[2] - w : Math.min(WORLD - w, sp.x + range),
         floor,
         hurt: 0, bob: Math.random() * 6, anim: Math.random(),
         dead: false, deadT: 0,
-        cd: 1 + Math.random(), dash: 0, tel: 0, recoil: 0,
+        cd: 1 + Math.random(), dash: 0, tel: 0, recover: 0, recoil: 0,
         stepPhase: 0,
       };
     });
@@ -843,6 +884,7 @@ export function createGame(
     boss = null;
     flash = 0.6;
     handlers.onCleared?.(lv, m.skills);
+    if (lv + 1 < maps.length) preloadMapAssets(lv + 1);
     if (lv + 1 >= maps.length) handlers.onFinished?.();
   }
 
@@ -852,7 +894,7 @@ export function createGame(
   const busy = () => player.breakT > 0 || player.guarding;
 
   function tryJump() {
-    if (phase !== "play" || busy()) return;
+    if (phase !== "play" || player.hp <= 0 || busy()) return;
     if (!player.ground && player.coyote <= 0) return;
     player.vy = -JUMP_V;
     player.ground = false;
@@ -861,8 +903,20 @@ export function createGame(
     dust(player.x + player.w / 2, player.y + player.h, 6, 1);
   }
 
+  function dropDown() {
+    if (phase !== "play" || !player.ground || player.breakT > 0) return;
+    const bottom = player.y + player.h;
+    if (!maps[lv].plats.some(([x, y, w]) => Math.abs(y - bottom) < 1 && player.x + player.w > x && player.x < x + w)) return;
+    player.dropY = bottom;
+    player.ground = false;
+    player.guarding = false;
+    player.guardT = player.coyote = player.jumpBuf = player.landT = 0;
+    player.vy = 80;
+  }
+
   function attack() {
-    if (phase !== "play" || player.cd > 0 || busy()) return;
+    if (phase !== "play" || player.hp <= 0 || player.cd > 0 || busy()) return;
+    player.raiseT = player.aimT = player.shootT = 0;
     const buffed = player.tool > 0;
     // Combo ba nhát: hai nhát đầu nhanh, nhát ba chậm hơn nhưng nặng
     player.combo = player.comboT > 0 ? (player.combo + 1) % 3 : 0;
@@ -919,9 +973,10 @@ export function createGame(
       hitAny = true;
       o.hp -= dmg;
       o.hurt = 0.18;
-      o.x += player.face * (heavy ? 22 : 14);
+      o.x = Math.max(o.a, Math.min(o.b, o.x + player.face * (heavy ? 22 : 14)));
       o.tel = 0;
       o.dash = 0;
+      interruptRush(o, 0.65);
       spark(o.x + o.w / 2, o.y + o.h / 2, player.face);
       puff(o.x + o.w / 2, o.y + o.h / 2, m.palette.mob, 6);
       if (o.hp <= 0) {
@@ -950,20 +1005,31 @@ export function createGame(
   /* ── súng quét: đòn tầm xa, bấm K ─────────────────────── */
 
   function shoot() {
-    if (phase !== "play" || busy() || player.gunCd > 0 || player.atk > 0) return;
+    if (phase !== "play" || player.hp <= 0 || busy() || player.hurtT > 0 || player.gunCd > 0 || player.atk > 0 || player.raiseT > 0) return;
     if (player.ammo <= 0) {
       // Không im lặng nuốt cú bấm: người chơi phải biết vì sao không có gì xảy ra
       say(labels.noAmmo, 1);
       player.gunCd = 0.3;
       return;
     }
+    if (player.aimT <= 0) {
+      player.raiseT = GUN_RAISE_TIME;
+      return;
+    }
+    fireGun();
+  }
+
+  function fireGun() {
+    if (phase !== "play" || busy() || player.hurtT > 0 || player.atk > 0 || player.ammo <= 0) return;
     player.ammo -= 1;
+    player.aimT = 0.48;
     player.gunCd = GUN_COOLDOWN;
     player.shootT = 0.2;
     // Giật lùi nhẹ — đòn tầm xa mà không có phản lực thì bấm như bấm chuột
     if (player.ground) player.vx -= player.face * 46;
-    const muzzleX = player.x + player.w / 2 + player.face * 20;
-    const muzzleY = player.y + 17;
+    // shoot-1 rig: muzzle is 26px forward, 43px above the feet anchor.
+    const muzzleX = player.x + player.w / 2 + player.face * 26;
+    const muzzleY = player.y - 3;
     bullets.push({ x: muzzleX, y: muzzleY, vx: player.face * GUN_SPEED, t: 0 });
     puff(muzzleX, muzzleY, LIME, 3);
     shake = Math.max(shake, 1.6);
@@ -973,11 +1039,13 @@ export function createGame(
   function bulletHits(b: Bullet, m: GameMap): boolean {
     const box = { x: b.x - 7, y: b.y - 5, w: 14, h: 10 };
     for (const o of mobs) {
-      if (o.dead || !overlap(box, o)) continue;
+      // The visible head extends above the compact body/contact box, like melee reach.
+      if (o.dead || !overlap(box, { x: o.x, y: o.y - ATTACK_UP, w: o.w, h: o.h + ATTACK_UP })) continue;
       o.hp -= GUN_DMG;
       o.hurt = 0.16;
       o.tel = 0;
       o.dash = 0;
+      interruptRush(o, 0.65);
       spark(b.x, b.y, Math.sign(b.vx) || 1);
       puff(o.x + o.w / 2, o.y + o.h / 2, m.palette.mob, 5);
       if (o.hp <= 0) {
@@ -1014,6 +1082,7 @@ export function createGame(
 
     const canRaise =
       keys.guard &&
+      player.hp > 0 &&
       player.breakT <= 0 &&
       player.ground &&
       player.atk <= 0 &&
@@ -1021,6 +1090,7 @@ export function createGame(
       player.stam >= (player.guarding ? 0 : GUARD_MIN_TO_RAISE);
 
     if (canRaise) {
+      player.raiseT = player.aimT = player.shootT = 0;
       if (!player.guarding) {
         player.guarding = true;
         player.guardT = 0;
@@ -1090,12 +1160,17 @@ export function createGame(
    * thì cả ải rút về việc giữ nút đỡ mà đi xuyên qua mọi thứ.
    */
   function hurtPlayer(dir: number, unblockable = false) {
-    if (player.inv > 0 || phase !== "play") return;
+    if (phase !== "play") return "ignored";
+    // Normal held blocks retain their cooldown; a fresh timed guard can reflect a volley.
+    if (player.inv > 0 && (unblockable || !blocks(dir) || player.guardT > PARRY_WINDOW)) return "ignored";
     if (!unblockable && blocks(dir)) {
-      onBlocked(player.guardT <= PARRY_WINDOW, player.x + player.w / 2 + player.face * 18);
+      const parry = player.guardT <= PARRY_WINDOW;
+      onBlocked(parry, player.x + player.w / 2 + player.face * 18);
       player.inv = 0.25;
-      return;
+      return parry ? "parried" : "blocked";
     }
+    if (player.inv > 0) return "ignored";
+    player.raiseT = player.aimT = player.shootT = 0;
     player.hp -= 1;
     player.inv = 1.35;
     player.hurtT = 0.35;
@@ -1112,8 +1187,9 @@ export function createGame(
     puff(player.x + player.w / 2, player.y + player.h / 2, "#ff6b5e", 8);
     if (player.hp <= 0) {
       say(labels.deathLine, 1.4);
-      window.setTimeout(() => {
-        if (phase === "play" || phase === "paused") loadMap(lv);
+      deathTimer = window.setTimeout(() => {
+        deathTimer = null;
+        if (!destroyed && (phase === "play" || phase === "paused")) loadMap(lv);
       }, 700);
     }
   }
@@ -1183,6 +1259,51 @@ export function createGame(
 
   /* ── cập nhật ────────────────────────────────────────── */
 
+  function interruptRush(o: Mob, seconds: number) {
+    if (o.kind !== "charger" && o.kind !== "rider") return;
+    o.tel = o.dash = 0;
+    o.recover = Math.max(o.recover, seconds);
+    o.cd = Math.max(o.cd, 0.65);
+  }
+
+  function stepRush(o: Mob, dx: number, dy: number, dt: number) {
+    const rider = o.kind === "rider";
+    o.y = o.floor - o.h;
+    if (o.recover > 0) {
+      o.recover = Math.max(0, o.recover - dt);
+      return;
+    }
+    if (o.dash > 0) {
+      const travel = Math.min(dt, o.dash);
+      o.dash = Math.max(0, o.dash - dt);
+      o.x = Math.max(o.a, Math.min(o.b, o.x + o.dir * (rider ? 390 : 264) * travel));
+      dust(o.x + o.w / 2 - o.dir * 14, o.floor, 1, rider ? 1.2 : 0.6);
+      if (o.dash <= 0 || o.x <= o.a || o.x >= o.b) {
+        interruptRush(o, rider ? 1.05 : 0.85);
+      }
+      return;
+    }
+    if (o.tel > 0) {
+      o.tel = Math.max(0, o.tel - dt);
+      // Direction is locked when the tell begins: jumping past it is valid counterplay.
+      if (o.tel <= 0) {
+        o.dash = rider ? 0.85 : 0.75;
+        puff(o.x + o.w / 2, o.floor, HAZARD, 6);
+      }
+      return;
+    }
+    o.cd = Math.max(0, o.cd - dt);
+    if (Math.abs(dx) < (rider ? 560 : 360) && Math.abs(dy) < 75 && o.cd <= 0) {
+      o.dir = dx < 0 ? -1 : 1;
+      o.tel = rider ? 0.75 : 0.6;
+      return;
+    }
+    // Turn at the same bounds used during the dash. Never snap back to the spawn patrol.
+    if (o.x <= o.a) o.dir = 1;
+    if (o.x >= o.b) o.dir = -1;
+    o.x = Math.max(o.a, Math.min(o.b, o.x + o.dir * (rider ? 42 : 28) * dt));
+  }
+
   function stepMob(o: Mob, dt: number) {
     o.hurt = Math.max(0, o.hurt - dt);
     o.recoil = Math.max(0, o.recoil - dt * 4);
@@ -1209,58 +1330,8 @@ export function createGame(
       if (o.x < o.a) { o.x = o.a; o.dir = 1; }
       if (o.x > o.b) { o.x = o.b; o.dir = -1; }
       o.y = o.floor - o.h + Math.sin(o.bob * 0.5) * FLYER_BOB;
-    } else if (o.kind === "charger") {
-      o.y = o.floor - o.h;
-      if (o.dash > 0) {
-        o.dash -= dt;
-        o.x += o.dir * 4.4 * dt * 60;
-        if (Math.random() < 0.4) dust(o.x + o.w / 2, o.y + o.h, 1, 0.6);
-        if (o.dash <= 0) o.cd = 1.3;
-      } else if (o.tel > 0) {
-        // Rùng mình 0,25s trước khi lao — đủ để người chơi kịp nhảy
-        o.tel -= dt;
-        if (o.tel <= 0) {
-          o.dash = 0.75;
-          puff(o.x + o.w / 2, o.y + o.h, HAZARD, 5);
-        }
-      } else {
-        o.cd -= dt;
-        if (Math.abs(dx) < 240 && Math.abs(dy) < 70 && o.cd <= 0) {
-          o.dir = dx < 0 ? -1 : 1;
-          o.tel = 0.25;
-        }
-      }
-      // Không cho lao ra khỏi vùng của nó quá xa
-      o.x = Math.max(o.a - 140, Math.min(o.b + 140, o.x));
-    } else if (o.kind === "rider") {
-      // Rider: nhìn xa nhất, báo đòn rõ nhất, lao nhanh nhất
-      o.y = o.floor - o.h;
-      if (o.dash > 0) {
-        o.dash -= dt;
-        o.x += o.dir * 8.2 * dt * 60;
-        dust(o.x + o.w / 2 - o.dir * 14, o.y + o.h, 1, 1.2);
-        if (o.dash <= 0) {
-          o.cd = 1.5;
-          o.dir = -o.dir;
-        }
-      } else if (o.tel > 0) {
-        o.tel -= dt;
-        if (o.tel <= 0) {
-          o.dash = 0.85;
-          puff(o.x + o.w / 2, o.y + o.h, "#EE4D2D", 8);
-          shake = Math.max(shake, 3);
-        }
-      } else {
-        o.cd -= dt;
-        o.x += o.dir * 0.55 * dt * 60;
-        if (o.x < o.a) { o.x = o.a; o.dir = 1; }
-        if (o.x > o.b) { o.x = o.b; o.dir = -1; }
-        if (Math.abs(dx) < 430 && Math.abs(dy) < 90 && o.cd <= 0) {
-          o.dir = dx < 0 ? -1 : 1;
-          o.tel = 0.5;
-        }
-      }
-      o.x = Math.max(o.a - 420, Math.min(o.b + 420, o.x));
+    } else if (o.kind === "charger" || o.kind === "rider") {
+      stepRush(o, dx, dy, dt);
     } else {
       // shooter: đứng im, nhả đạn về phía người chơi
       o.y = o.floor - o.h;
@@ -1355,6 +1426,7 @@ export function createGame(
     player.cd = Math.max(0, player.cd - dt);
     player.gunCd = Math.max(0, player.gunCd - dt);
     player.shootT = Math.max(0, player.shootT - dt);
+    player.aimT = Math.max(0, player.aimT - dt);
     player.comboT = Math.max(0, player.comboT - dt);
     const previousAttack = player.atk;
     player.atk = Math.max(0, player.atk - dt);
@@ -1374,17 +1446,27 @@ export function createGame(
     shake *= Math.exp(-9 * dt);
 
     stepGuard(dt);
+    if (player.raiseT > 0) {
+      player.raiseT = Math.max(0, player.raiseT - dt);
+      if (player.raiseT <= 0) fireGun();
+    }
     // Giữ nút bắn thì nhả đạn liên tục theo nhịp súng, không phải bấm từng phát
     if (keys.shoot) shoot();
 
     const dir = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
     // Đang đỡ hoặc vừa vỡ đỡ thì mất quyền điều khiển: đó là cái giá của đỡ
-    if (dir && !player.guarding && player.breakT <= 0) {
-      player.vx += dir * 2300 * dt;
+    if (dir && player.hp > 0 && !player.guarding && player.breakT <= 0) {
+      // Approach a real top speed. Applying friction after acceleration every tick
+      // used to cap speed at ~182px/s, making upper platforms on map 4 unreachable.
+      const target = dir * RUN_SPEED;
+      const gain = (player.ground ? 2600 : 1800) * dt;
+      player.vx += Math.max(-gain, Math.min(gain, target - player.vx));
       // Đang chém thì không cho quay người — quay giữa đòn trông như trượt
-      if (player.atk <= 0) player.face = dir;
+      if (player.atk <= 0 && player.raiseT <= 0 && player.shootT <= 0) player.face = dir;
+    } else if (!player.guarding) {
+      const brake = (player.ground ? 2800 : 1200) * dt;
+      player.vx -= Math.sign(player.vx) * Math.min(Math.abs(player.vx), brake);
     }
-    player.vx *= Math.exp(-12 * dt);
     player.vx = Math.max(-360, Math.min(360, player.vx));
     const moveX = player.vx * dt;
     player.x = Math.max(0, Math.min(WORLD - player.w, player.x + moveX));
@@ -1410,7 +1492,7 @@ export function createGame(
     // Bệ nhảy chỉ đỡ khi rơi từ trên xuống, để nhảy xuyên từ dưới lên được
     for (const [px, py, pw] of m.plats) {
       if (
-        player.vy > 0 && prevBottom <= py + 4 &&
+        py !== player.dropY && player.vy > 0 && prevBottom <= py + 4 &&
         player.y + player.h >= py &&
         player.x + player.w > px && player.x < px + pw
       ) {
@@ -1419,6 +1501,7 @@ export function createGame(
         player.ground = true;
       }
     }
+    if (player.dropY !== null && player.y > player.dropY + 4) player.dropY = null;
     if (player.ground && !wasGround) {
       // Vừa đáp đất: bóp người một nhịp, nhả bụi theo độ mạnh cú rơi
       const hard = Math.min(1, player.fallSpeed / 700);
@@ -1436,7 +1519,12 @@ export function createGame(
       }
       alive++;
       stepMob(o, dt);
-      if (overlap(player, o)) hurtPlayer(player.x < o.x ? -1 : 1);
+      if (o.recover <= 0 && o.hurt <= 0 && overlap(player, o)) {
+        const result = hurtPlayer(player.x + player.w / 2 < o.x + o.w / 2 ? -1 : 1);
+        if (result === "parried" || result === "blocked") {
+          interruptRush(o, result === "parried" ? 1.3 : 0.65);
+        }
+      }
     }
     if (!alive && !boss && phase === "play") spawnBoss();
 
@@ -1499,13 +1587,24 @@ export function createGame(
       s.t += dt;
       s.x += s.vx * dt * 60;
       s.y += s.vy * dt * 60;
+      if (s.reflected) {
+        if (bulletHits(s, m)) return false;
+        return s.t < 8 && s.x > -30 && s.x < WORLD + 30 && s.y > -30 && s.y < H + 60;
+      }
       if (overlap(player, { x: s.x - s.r, y: s.y - s.r, w: s.r * 2, h: s.r * 2 })) {
         const dir = s.vx > 0 ? 1 : -1;
         // Đỡ trúng nhịp thì đạn bật ngược lại thành đạn của mình. Đây là
         // phần thưởng cho việc bấm đỡ đúng lúc thay vì giữ đỡ suốt trận.
-        const parried = blocks(dir) && player.guardT <= PARRY_WINDOW;
-        hurtPlayer(dir);
-        if (parried) bullets.push({ x: s.x, y: s.y, vx: -s.vx * 60 * 1.4, t: 0 });
+        const result = hurtPlayer(dir);
+        if (result === "parried") {
+          // Keep this projectile and its vertical trajectory, reversing ownership and velocity.
+          s.vx *= -1.4;
+          s.vy *= -1.4;
+          s.reflected = true;
+          s.t = 0;
+          say(labels.reflectLine, 0.9);
+          return true;
+        }
         return false;
       }
       return s.x > -30 && s.x < WORLD + 30 && s.y > -30 && s.y < H + 60;
@@ -1976,6 +2075,24 @@ export function createGame(
   }
 
   function drawMob(o: Mob, color: string) {
+    if (!o.dead && (o.tel > 0 || o.recover > 0)) {
+      // Persistent directional tell / recovery ring, also readable with reduced motion.
+      g!.save();
+      g!.strokeStyle = o.recover > 0 ? LIME : HAZARD;
+      g!.lineWidth = 2;
+      g!.beginPath();
+      g!.ellipse(o.x + o.w / 2, o.floor - 2, o.w * 0.7, 5, 0, 0, Math.PI * 2);
+      g!.stroke();
+      if (o.tel > 0) {
+        const x = o.x + o.w / 2 + o.dir * (o.w / 2 + 16);
+        g!.beginPath();
+        g!.moveTo(x - o.dir * 8, o.floor - 24);
+        g!.lineTo(x, o.floor - 18);
+        g!.lineTo(x - o.dir * 8, o.floor - 12);
+        g!.stroke();
+      }
+      g!.restore();
+    }
     // Hoạt ảnh chung: nhún theo bước, nghiêng theo hướng, giãn khi lao
     let sx = 1;
     let sy = 1;
@@ -2367,6 +2484,10 @@ export function createGame(
         sx = 1.04;
         dy = 1.5;
       }
+    } else if (player.raiseT > 0) {
+      const progress = 1 - player.raiseT / GUN_RAISE_TIME;
+      src = progress < 0.2 ? P_ARMED_IDLE : ASSETS.playerRaiseGun ? P_RAISE_GUN : P_SHOOT[0];
+      sy = 1 - Math.sin(progress * Math.PI) * 0.025;
     } else if (player.shootT > 0) {
       const kick = player.shootT / 0.2;
       if (P_SHOOT.length) {
@@ -2389,6 +2510,35 @@ export function createGame(
       sx = 1 + lunge * 0.05;
       sy = 1 - lunge * 0.04;
       rot = player.face * lunge * 0.07;
+    } else if (player.aimT > 0) {
+      src = P_SHOOT[0];
+    } else if (player.ammo > 0 && ASSETS.playerArmedIdle) {
+      // Dùng nguyên một pose đã vẽ cả bàn tay nắm súng. Bản cũ chỉ đè PNG
+      // khẩu súng lên khung idle vẫn cầm cuộn giấy nên trông như súng lơ lửng.
+      src = P_ARMED_IDLE;
+      if (player.landT > 0) {
+        if (ASSETS.playerArmedJump) src = P_ARMED_FALL;
+        const t = player.landT / 0.16;
+        sx = 1 + t * 0.09;
+        sy = 1 - t * 0.1;
+      } else if (!player.ground) {
+        const rising = player.vy < -40;
+        if (ASSETS.playerArmedJump) src = rising ? P_ARMED_RISE : P_ARMED_FALL;
+        const v = Math.max(-1, Math.min(1, player.vy / 600));
+        sy = 1 - v * 0.06;
+        sx = 1 + v * 0.04;
+        rot = player.face * 0.035 * (rising ? -1 : 1);
+      } else if (Math.abs(player.vx) > 8) {
+        if (P_ARMED_RUN.length) src = P_ARMED_RUN[Math.floor(player.runPhase * P_ARMED_RUN.length) % P_ARMED_RUN.length];
+        const bounce = Math.cos(4 * Math.PI * (player.runPhase - 0.4375));
+        dy = -bounce * 1.7;
+        sy = 1 + bounce * 0.022;
+        sx = 1 - bounce * 0.018;
+        rot = player.face * 0.038 * Math.min(1, Math.abs(player.vx) / 300);
+      } else {
+        sy = 1 + Math.sin(worldTime * 3.2) * 0.01;
+        dy = Math.sin(worldTime * 3.2) * 0.7;
+      }
     } else if (player.landT > 0) {
       src = P_LAND;
       const t = player.landT / 0.16;
@@ -2443,7 +2593,7 @@ export function createGame(
     drawShadow(cx, Math.min(GY, player.y + player.h), player.w * 1.5, player.ground ? 0.3 : 0.16);
 
     if (sprite) {
-      drawRig(g!, sprite, playerRig(), HEAD_PX, cx, feet + frame.dy, {
+      drawRig(g!, sprite, playerRig(frame.src), HEAD_PX, cx, feet + frame.dy, {
         flip: player.face < 0,
         rot: frame.rot,
         sx: frame.sx,
@@ -2464,6 +2614,19 @@ export function createGame(
       g!.fillRect(player.x + (player.face > 0 ? 15 : 6), player.y - 4, 4, 4);
     }
 
+    if (player.shootT > 0.14) {
+      const muzzle = ASSETS.muzzleArt ? img(GEAR_SPRITES.muzzle) : null;
+      const mx = cx + player.face * 26;
+      const my = player.y - 3;
+      if (muzzle) {
+        g!.save();
+        g!.translate(mx, my);
+        g!.scale(player.face, 1);
+        drawFit(g!, muzzle, 0, 10, 22, 20);
+        g!.restore();
+      }
+    }
+
     if (player.tool > 0) {
       // Đang cầm đồ nghề: hào quang mờ quanh người, nhạt dần lúc gần hết giờ
       const left = Math.min(1, player.tool / 2);
@@ -2471,51 +2634,6 @@ export function createGame(
       g!.globalAlpha = left * (0.75 + 0.15 * Math.sin(worldTime * 9));
       const aura = img(SCENE_SPRITES.aura);
       if (aura) drawFit(g!, aura, player.x + player.w / 2, player.y + player.h + 5, 78, 110);
-      g!.restore();
-    }
-
-    // Khẩu súng trong tay: chỉ vẽ khi còn đạn, và giấu đi lúc đang chém hoặc
-    // đang đỡ — hai tay đang bận việc khác thì cầm súng nhìn rất sai. Khi bộ
-    // khung bắn đã có ảnh, khẩu súng nằm trong ảnh rồi nên bỏ luôn lớp đè này.
-    const gunInFrame = P_SHOOT.length > 0 && player.shootT > 0;
-    if (
-      player.ammo > 0 && player.atk <= 0 && !player.guarding &&
-      player.breakT <= 0 && !gunInFrame
-    ) {
-      const gx = cx + player.face * (player.shootT > 0 ? 16 : 11);
-      const gy = player.y + (player.shootT > 0 ? 17 : 21);
-      g!.save();
-      g!.translate(gx, gy);
-      g!.scale(player.face, 1);
-      const held = ASSETS.gunHeldArt ? img(GEAR_SPRITES.gunHeld) : null;
-      if (held) {
-        drawFit(g!, held, 3, 6, 26, 20);
-      } else {
-        g!.fillStyle = "#3f4a55";
-        g!.beginPath();
-        g!.roundRect(-6, -3, 17, 6, 2);
-        g!.fill();
-        g!.fillStyle = "#9fd8ff";
-        g!.fillRect(-2, -2, 8, 2);
-        g!.fillStyle = "#2b333c";
-        g!.beginPath();
-        g!.roundRect(-5, 2, 5, 7, 2);
-        g!.fill();
-      }
-      if (player.shootT > 0) {
-        // Chớp đầu nòng, to nhất ở khung đầu rồi tắt nhanh
-        const k = player.shootT / 0.2;
-        g!.globalAlpha = k;
-        const muzzle = ASSETS.muzzleArt ? img(GEAR_SPRITES.muzzle) : null;
-        if (muzzle) {
-          drawFit(g!, muzzle, 16, 12 + k * 6, 16 + k * 18, 12 + k * 14);
-        } else {
-          g!.fillStyle = "#f2ffc4";
-          g!.beginPath();
-          g!.ellipse(13 + k * 3, 0, 5 + k * 7, 3 + k * 4, 0, 0, Math.PI * 2);
-          g!.fill();
-        }
-      }
       g!.restore();
     }
 
@@ -2716,11 +2834,21 @@ export function createGame(
 
     // Đạn: nhân lõi sáng, đuôi mờ kéo lại phía sau
     for (const s of shots) {
+      if (s.reflected) {
+        g!.save();
+        g!.strokeStyle = LIME;
+        g!.lineWidth = 3;
+        g!.beginPath();
+        g!.arc(s.x, s.y, s.r + 4, 0, Math.PI * 2);
+        g!.stroke();
+        g!.restore();
+      }
       const shot = img(SCENE_SPRITES.shot);
       if (shot) {
         g!.save();
         g!.translate(s.x, s.y);
         g!.rotate(Math.atan2(s.vy, s.vx));
+        if (s.reflected) g!.filter = "hue-rotate(80deg)";
         drawFit(g!, shot, 0, 10, 34, 20);
         g!.restore();
         continue;
@@ -2943,6 +3071,11 @@ export function createGame(
       g!.textAlign = "center";
       g!.fillStyle = "#f2f1ec";
       g!.fillText(m.boss, W / 2, 45);
+      if (m.bossKind === "volley") {
+        g!.font = `800 12px ${FONT_SANS}`;
+        g!.fillStyle = LIME;
+        g!.fillText(labels.volleyHint, W / 2, 63);
+      }
     }
 
     // Combo: chỉ hiện khi đang có chuỗi, nằm ngay cạnh nhân vật
@@ -2978,6 +3111,7 @@ export function createGame(
   /* ── vòng lặp và input ───────────────────────────────── */
 
   function frame(t: number) {
+    if (destroyed) return;
     const dt = Math.min(0.05, (t - last) / 1000 || 0.016);
     last = t;
     if (freeze > 0) {
@@ -3003,13 +3137,16 @@ export function createGame(
     ArrowLeft: "left", KeyA: "left",
     ArrowRight: "right", KeyD: "right",
     ArrowUp: "jump", KeyW: "jump", Space: "jump",
+    ArrowDown: "down", KeyS: "down",
     KeyJ: "atk", KeyZ: "atk",
     KeyK: "shoot", KeyX: "shoot",
     KeyL: "guard", ShiftLeft: "guard", ShiftRight: "guard",
   };
 
   function press(k: GameKey) {
+    const wasPressed = keys[k];
     keys[k] = true;
+    if (k === "down" && !wasPressed) dropDown();
     if (k === "jump") {
       // Ghi nhận cú bấm sớm: chạm đất là nhảy luôn, không bị "ăn" mất phím
       player.jumpBuf = 0.12;
@@ -3031,7 +3168,8 @@ export function createGame(
       phase = "paused";
       pauseWhy = reason;
       // Nhả hết phím, không thì lúc quay lại nhân vật tự chạy
-      keys.left = keys.right = keys.jump = keys.atk = keys.shoot = keys.guard = false;
+      keys.left = keys.right = keys.jump = keys.down = keys.atk = keys.shoot = keys.guard = false;
+      player.raiseT = player.aimT = player.shootT = 0;
       player.guarding = false;
       player.guardT = 0;
       handlers.onPause?.(true, reason);
@@ -3056,6 +3194,7 @@ export function createGame(
    */
   const KEY_ALIAS: Record<string, string> = {
     ArrowLeft: "ArrowLeft", ArrowRight: "ArrowRight", ArrowUp: "ArrowUp",
+    ArrowDown: "ArrowDown", s: "KeyS",
     a: "KeyA", d: "KeyD", w: "KeyW", j: "KeyJ", z: "KeyZ", x: "KeyX", p: "KeyP",
     k: "KeyK", l: "KeyL", b: "KeyB", Shift: "ShiftLeft",
     " ": "Space", Escape: "Escape",
@@ -3065,7 +3204,12 @@ export function createGame(
 
   function onKeyDown(e: KeyboardEvent) {
     const code = codeOf(e);
+    const target = typeof HTMLElement !== "undefined" && e.target instanceof HTMLElement ? e.target : null;
+    // Let native buttons/checkboxes consume Space/Enter/arrows inside the boards.
+    if (target?.closest('button, a, input, select, textarea, [contenteditable="true"]') &&
+      (code === "Space" || code === "Enter" || (phase !== "play" && code.startsWith("Arrow")))) return;
     if (code === "KeyP" || code === "Escape") {
+      if (e.repeat) return;
       if (phase === "play" || phase === "paused") {
         e.preventDefault();
         setPaused(phase === "play");
@@ -3073,6 +3217,7 @@ export function createGame(
       return;
     }
     if (code === "KeyB") {
+      if (e.repeat) return;
       if (phase === "play" || phase === "paused") {
         e.preventDefault();
         // Đang dừng vì lý do khác thì B đóng bảng đó luôn, không chồng bảng
@@ -3083,6 +3228,7 @@ export function createGame(
     }
     const k = KEYMAP[code];
     if (!k) return;
+    if (e.repeat && (k === "jump" || k === "down")) return;
     e.preventDefault();
     if (phase === "paused") return;
     press(k);
@@ -3108,16 +3254,21 @@ export function createGame(
   // dùng — img() chỉ tạo phần tử <img> khi được gọi lần đầu, nên nếu để tới
   // lúc nhảy/chạy mới gọi thì khung hình đầu tiên sẽ không có gì để vẽ.
   // Chỉ tải những file ASSETS khai báo là có thật, tránh 404 rác.
-  [...P_IDLE, ...P_RUN, ...P_ATK, ...P_SHOOT, P_RISE, P_FALL, P_LAND, P_HURT].forEach(img);
+  [...P_IDLE, ...P_RUN, ...P_ATK, ...P_SHOOT, P_ARMED_IDLE, P_RISE, P_FALL, P_LAND, P_HURT].forEach(img);
   if (ASSETS.playerGuard) img(P_GUARD);
+  if (ASSETS.playerRaiseGun) img(P_RAISE_GUN);
+  P_ARMED_RUN.forEach(img);
+  if (ASSETS.playerArmedJump) [P_ARMED_RISE, P_ARMED_FALL].forEach(img);
   Object.values(TRAP_SPRITES).forEach(img);
   Object.values(SCENE_SPRITES).forEach(img);
-  if (ASSETS.gunHeldArt) img(GEAR_SPRITES.gunHeld);
   if (ASSETS.bulletArt) img(GEAR_SPRITES.bullet);
   if (ASSETS.muzzleArt) img(GEAR_SPRITES.muzzle);
   if (ASSETS.shieldArt) img(GEAR_SPRITES.shield);
   for (let i = 1; i <= ASSETS.slashFx; i++) img(`fx/slash-${i}.png`);
-  maps.forEach((m, i) => {
+  // Load only the active map; the next map warms during the clear screen.
+  // Previously all five maps decoded hundreds of textures at initial mount.
+  function preloadMapAssets(i: number) {
+    const m = maps[i];
     img(`boss/b${i + 1}.png`);
     img(`boss/b${i + 1}-tel.png`);
     img(`bg/m${i + 1}-mid.png`);
@@ -3135,7 +3286,7 @@ export function createGame(
       if (k === "rider" && !ASSETS.riderArt) return;
       for (let f = 1; f <= mobFrameCount(k); f++) img(`mob/m${i + 1}-${k}-${f}.png`);
     });
-  });
+  }
 
   loadMap(0);
   raf = requestAnimationFrame(frame);
@@ -3171,6 +3322,8 @@ export function createGame(
     press,
     release,
     destroy() {
+      destroyed = true;
+      if (deathTimer !== null) window.clearTimeout(deathTimer);
       cancelAnimationFrame(raf);
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);

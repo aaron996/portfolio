@@ -1182,13 +1182,16 @@ export const content: SiteContent = {
     note:
       "Game này mình dựng bằng AI-assisted coding. Phần khó không nằm ở code — nó nằm ở chỗ quyết định cái gì đáng đưa vào và cái gì nên bỏ.",
     controlsHint:
-      "← → di chuyển · ↑ hoặc Space nhảy · J chém · K bắn · L đỡ · B túi đồ · P tạm dừng · trên điện thoại dùng nút bên dưới",
+      "← → di chuyển · ↑/Space nhảy · ↓/S xuống bệ · J chém · K bắn · L đỡ · B túi đồ · P tạm dừng",
+    dropLabel: "Nhảy xuống bệ thấp",
+    rushHint: "Quái báo đỏ: nhảy qua hoặc đỡ phía trước. Vòng xanh: quái đang nghỉ, áp sát chém!",
     startLabel: "Bắt đầu",
     nextLabel: "Vào ải {n} →",
     clearHeading: "Hạ trùm ải {n}",
     bossAppear: "{boss} xuất hiện!",
     deathLine: "Ngã rồi. Đứng dậy đi.",
     skillsLabel: "Túi kỹ năng",
+    skillProgress: "Kỹ năng {n}/{total}",
     pickupTool: "Nhặt được {name}",
     pickupHeal: "Hồi một máu",
     pickupGun: "Nạp đạn: {name}",
@@ -1199,6 +1202,8 @@ export const content: SiteContent = {
     },
     noAmmo: "Hết đạn — J để chém",
     parryLine: "Đỡ chuẩn!",
+    reflectLine: "Phản đạn! Trúng trùm sẽ trừ máu",
+    volleyHint: "L đúng lúc đạn chạm → phản đạn gây sát thương",
     guardBreakLine: "Vỡ đỡ!",
     pickupPanel: {
       heading: "Vừa nhặt được",
@@ -1226,6 +1231,7 @@ export const content: SiteContent = {
       controls: [
         { keys: "← →  ·  A D", label: "Di chuyển" },
         { keys: "↑  ·  W  ·  Space", label: "Nhảy — bấm sớm lúc đang rơi vẫn được ghi nhận" },
+        { keys: "↓  ·  S", label: "Thả xuống bệ thấp — nhả rồi bấm lại để xuống tiếp; không xuyên mặt đất" },
         { keys: "J  ·  Z", label: "Chém — ba nhát liền nhau thành combo, nhát thứ ba mạnh nhất" },
         { keys: "K  ·  X", label: "Bắn — cần súng quét nhặt dọc đường, giữ nút thì bắn liên tục" },
         { keys: "L  ·  Shift", label: "Giữ để đỡ — chặn đòn từ phía trước, tốn thể lực. Đỡ ngay lúc đòn tới thì không tốn gì và bật ngược đạn về" },
@@ -1234,7 +1240,7 @@ export const content: SiteContent = {
         { keys: "P  ·  Esc", label: "Tạm dừng và mở lại bảng này" },
       ],
       /** Thay cho bảng phím trên màn hình hẹp — ở đó chơi bằng nút ảo */
-      mobileControls: "Chơi bằng nút ◀ ▶ ▲, CHÉM, BẮN và ĐỠ ở dưới màn chơi. Nút 🎒 mở túi đồ.",
+      mobileControls: "◀ ▶ di chuyển · ▲ nhảy · ▼ xuống bệ thấp. CHÉM, BẮN và ĐỠ ở bên phải; 🎒 mở túi đồ. ĐỠ ngay khi đạn chạm phía trước để phản đạn.",
       objectiveHeading: "Mục tiêu ải này",
       tipHeading: "Mẹo",
       progressMobs: "Còn {left}/{total} quái thường phải dọn",
@@ -1354,7 +1360,7 @@ export const content: SiteContent = {
         line: "Con trùm này có thật. Hạ được nó mất hơn một năm, không phải một phút.",
         objective:
           "Dọn hết đơn trễ, hub báo đỏ và hai rider giao gấp, rồi hạ Trùm 90,1% ở cuối sàn.",
-        tip: "Rider rú ga nửa giây trước khi lao. Nghe tiếng là nhảy, hoặc quay mặt về phía nó và giữ L để đỡ cú tông.",
+        tip: "Rider báo hướng bằng mũi tên đỏ trước khi lao. Nhảy qua hoặc quay mặt đỡ cú tông; vòng xanh dưới chân là lúc nó đang nghỉ, áp sát chém được.",
         skills: ["Quản trị đối tác", "KPI on-time"],
         palette: {
           sky: "#FFCDB4", far: "#FBA981", mid: "#EE7A4D",

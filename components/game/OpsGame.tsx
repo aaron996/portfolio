@@ -1,6 +1,8 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { GameBoard } from "./GameBoard";
+import styles from "./OpsGame.module.css";
 import { content } from "@/content/content.vi";
 import {
   createGame,
@@ -39,6 +41,7 @@ export function OpsGame() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameRef = useRef<GameInstance | null>(null);
   const pickupTimer = useRef<number | null>(null);
+  const clearTimer = useRef<number | null>(null);
   /** Engine đọc cờ này qua setPauseOnPickup; ref để handler không bị đóng băng giá trị cũ */
   const pauseOnPickupRef = useRef(true);
 
@@ -68,6 +71,8 @@ export function OpsGame() {
         pickupGun: game.pickupGun,
         noAmmo: game.noAmmo,
         parryLine: game.parryLine,
+        reflectLine: game.reflectLine,
+        volleyHint: game.volleyHint,
         guardBreakLine: game.guardBreakLine,
         pauseHint: game.pauseHint,
       },
@@ -77,7 +82,7 @@ export function OpsGame() {
           setGot((prev) => [...prev, ...skills.filter((s) => !prev.includes(s))]);
           setLastClear({ index: i, skills });
           // Đợi hiệu ứng nổ và màn tối chạy xong rồi mới đưa bảng tổng kết lên
-          window.setTimeout(() => {
+          clearTimer.current = window.setTimeout(() => {
             setPhase(i + 1 >= game.maps.length ? "end" : "clear");
           }, 900);
         },
@@ -106,6 +111,7 @@ export function OpsGame() {
     instance.setPauseOnPickup(saved);
     return () => {
       if (pickupTimer.current) window.clearTimeout(pickupTimer.current);
+      if (clearTimer.current) window.clearTimeout(clearTimer.current);
       instance.destroy();
       gameRef.current = null;
     };
@@ -113,6 +119,8 @@ export function OpsGame() {
 
   /** Vào màn chơi: dùng chung cho bắt đầu, qua ải, chơi lại */
   const enterPlay = useCallback((index?: number) => {
+    if (clearTimer.current) window.clearTimeout(clearTimer.current);
+    if (pickupTimer.current) window.clearTimeout(pickupTimer.current);
     setPickup(null);
     setPaused(false);
     if (index != null) gameRef.current?.loadMap(index);
@@ -150,13 +158,14 @@ export function OpsGame() {
   const padProps = (key: GameKey) => ({
     onPointerDown: (e: React.PointerEvent) => {
       e.preventDefault();
+      e.currentTarget.setPointerCapture(e.pointerId);
       gameRef.current?.press(key);
     },
     onPointerUp: (e: React.PointerEvent) => {
       e.preventDefault();
       gameRef.current?.release(key);
     },
-    onPointerLeave: () => gameRef.current?.release(key),
+    onLostPointerCapture: () => gameRef.current?.release(key),
     onPointerCancel: () => gameRef.current?.release(key),
   });
 
@@ -167,9 +176,9 @@ export function OpsGame() {
 
   return (
     <div className="mx-auto w-full max-w-4xl">
-      <div className="relative overflow-hidden rounded-2xl border border-ink-700 bg-ink-900">
+      <div className={`${styles.frame} ${paused ? styles.reading : ""} relative overflow-hidden rounded-2xl border border-ink-700 bg-ink-900`}>
         {/* Thanh trạng thái: đang ở ải nào, đã nhặt được kỹ năng gì */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-800 px-4 py-3">
+        <div inert={paused || phase !== "play"} className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-800 px-4 py-3">
           <div>
             <p className="font-display text-lg font-bold uppercase tracking-tight text-paper">
               {map.name}
@@ -179,7 +188,7 @@ export function OpsGame() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <ul className="flex flex-wrap justify-end gap-1.5" aria-label={game.skillsLabel}>
+            <ul className="hidden max-w-md flex-wrap justify-end gap-1.5 lg:flex" aria-label={game.skillsLabel}>
               {ALL_SKILLS.map((s) => {
                 const owned = got.includes(s);
                 return (
@@ -196,6 +205,7 @@ export function OpsGame() {
                 );
               })}
             </ul>
+            <span className="text-xs text-mute lg:hidden">{game.skillProgress.replace("{n}", String(got.length)).replace("{total}", String(ALL_SKILLS.length))}</span>
             {phase === "play" ? (
               <div className="flex shrink-0 gap-2">
                 <button
@@ -219,7 +229,7 @@ export function OpsGame() {
           </div>
         </div>
 
-        <div className="relative">
+        <div className={`${styles.stage} ${phase !== "play" ? styles.instructions : ""} relative`}>
           <canvas
             ref={canvasRef}
             width={800}
@@ -247,7 +257,7 @@ export function OpsGame() {
           ) : null}
 
           {phase !== "play" ? (
-            <div className="absolute inset-0 grid place-items-center bg-ink-950/85 px-5 text-center">
+            <GameBoard label={phase === "title" ? game.heading : phase === "end" ? game.finish.heading : game.clearHeading.replace("{n}", String((lastClear?.index ?? 0) + 1))} centered>
               <div className="max-w-sm">
                 {phase === "title" ? (
                   <>
@@ -314,17 +324,15 @@ export function OpsGame() {
                   </>
                 ) : null}
               </div>
-            </div>
+            </GameBoard>
           ) : null}
         </div>
 
         {/* Bảng vật phẩm vừa nhặt — game dừng hẳn cho tới khi đọc xong */}
         {phase === "play" && paused && pauseWhy === "pickup" && pickup ? (
-          <div className="absolute inset-0 grid place-items-center bg-ink-950/88 p-4">
+          <GameBoard label={panel.heading} supply centered>
             <div
-              className="w-full max-w-md rounded-2xl border border-ink-700 bg-ink-900 p-4 sm:p-5"
-              role="dialog"
-              aria-label={panel.heading}
+              className="w-full max-w-md py-4"
             >
               <p className="font-display text-[10px] font-bold uppercase tracking-widest text-mute-3">
                 {panel.heading}
@@ -353,18 +361,22 @@ export function OpsGame() {
               <button
                 type="button"
                 onClick={togglePause}
-                autoFocus
                 className="mt-4 w-full rounded-lg bg-lime px-5 py-2.5 font-display text-xs font-bold uppercase tracking-wide text-ink-950 transition-transform hover:scale-[1.02]"
               >
                 {panel.resumeLabel}
               </button>
             </div>
-          </div>
+          </GameBoard>
         ) : null}
 
         {/* Túi đồ — mở bằng B hoặc nút 🎒, đọc từ ảnh chụp lúc dừng */}
         {phase === "play" && paused && pauseWhy === "inventory" ? (
-          <div className="absolute inset-0 overflow-y-auto bg-ink-950/88 p-3 sm:p-5">
+          <GameBoard label={bag.heading} supply actions={
+            <button type="button" onClick={toggleBag}
+              className="rounded-lg bg-lime px-5 py-2 font-display text-xs font-bold uppercase tracking-wide text-ink-950">
+              {bag.closeLabel}
+            </button>
+          }>
             <div className="flex items-baseline justify-between gap-3">
               <h2 className="display text-xl text-paper sm:text-2xl">{bag.heading}</h2>
               <p className="text-[11px] tracking-wide text-mute-3">
@@ -427,19 +439,23 @@ export function OpsGame() {
               <p className="mt-1.5 text-[12px] text-mute">{bag.emptyLabel}</p>
             )}
 
-            <button
-              type="button"
-              onClick={toggleBag}
-              className="mt-4 rounded-lg bg-lime px-5 py-2 font-display text-xs font-bold uppercase tracking-wide text-ink-950 transition-transform hover:scale-[1.04]"
-            >
-              {bag.closeLabel}
-            </button>
-          </div>
+          </GameBoard>
         ) : null}
 
         {/* Bảng tạm dừng: hướng dẫn điều khiển + mục tiêu ải hiện tại */}
         {phase === "play" && paused && pauseWhy === "manual" ? (
-          <div className="absolute inset-0 overflow-y-auto bg-ink-950/85 p-3 sm:p-5">
+          <GameBoard label={pause.heading} actions={
+            <div className="flex flex-wrap gap-2.5">
+              <button type="button" onClick={togglePause}
+                className="rounded-lg bg-lime px-5 py-2 font-display text-xs font-bold uppercase tracking-wide text-ink-950">
+                {pause.resumeLabel}
+              </button>
+              <button type="button" onClick={restartMap}
+                className="rounded-lg border border-ink-700 px-4 py-2 text-xs text-mute">
+                {pause.restartLabel}
+              </button>
+            </div>
+          }>
             <div className="flex items-baseline justify-between gap-3">
               <h2 className="display text-xl text-paper sm:text-2xl">{pause.heading}</h2>
               <p className="text-[11px] tracking-wide text-mute-3">
@@ -449,8 +465,8 @@ export function OpsGame() {
 
             {/* Hai cột để cả bảng vừa trong khung game, không phải cuộn mới thấy nút */}
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-xl border border-ink-700 bg-ink-900/70 p-3">
-                <p className="font-display text-[10px] font-bold uppercase tracking-widest text-lime">
+              <div className="py-2 pr-2">
+                <p className="font-display text-sm font-bold text-lime">
                   {pause.objectiveHeading}
                 </p>
                 <p className="mt-1.5 text-[13px] leading-snug text-paper">{map.objective}</p>
@@ -467,6 +483,9 @@ export function OpsGame() {
                   <span className="font-semibold text-mute-2">{pause.tipHeading}: </span>
                   {map.tip}
                 </p>
+                {map.mobs.some((mob) => mob.kind === "rider" || mob.kind === "charger") && (
+                  <p className="mt-2 text-[11px] leading-snug text-mute">{game.rushHint}</p>
+                )}
               </div>
 
               {/* Màn hình hẹp: cả thẻ game chỉ cao khoảng 290px, nhồi thêm bảng
@@ -480,7 +499,7 @@ export function OpsGame() {
                 <p className="font-display text-[10px] font-bold uppercase tracking-widest text-mute-3">
                   {pause.controlsHeading}
                 </p>
-                <ul className="mt-1.5 divide-y divide-ink-800 rounded-xl border border-ink-800">
+                <ul className="mt-1.5 divide-y divide-ink-800">
                   {pause.controls.map((c) => (
                     <li key={c.keys} className="px-2.5 py-1.5">
                       <span className="font-display text-[11px] font-bold tracking-wide text-lime">
@@ -493,36 +512,23 @@ export function OpsGame() {
               </div>
             </div>
 
-            <div className="mt-3 flex flex-wrap gap-2.5">
-              <button
-                type="button"
-                onClick={togglePause}
-                className="rounded-lg bg-lime px-5 py-2 font-display text-xs font-bold uppercase tracking-wide text-ink-950 transition-transform hover:scale-[1.04]"
-              >
-                {pause.resumeLabel}
-              </button>
-              <button
-                type="button"
-                onClick={restartMap}
-                className="rounded-lg border border-ink-700 px-4 py-2 text-xs text-mute transition-colors hover:border-mute-3 hover:text-paper"
-              >
-                {pause.restartLabel}
-              </button>
-            </div>
-          </div>
+          </GameBoard>
         ) : null}
       </div>
 
       {/* Nút ảo — chỉ hiện trên màn hình cảm ứng hoặc màn hình hẹp.
           Sáu hành động không nhét vừa một hàng, nên cụm phải xếp hai tầng:
           tầng trên là né (nhảy, đỡ), tầng dưới là đánh (chém, bắn). */}
-      <div className="mt-3 flex items-end justify-between gap-2 md:hidden">
-        <div className="flex gap-2">
+      <div inert={paused || phase !== "play"} className={`mt-3 flex items-end justify-between gap-2 md:hidden ${paused || phase !== "play" ? "opacity-40" : ""}`}>
+        <div className="grid grid-cols-2 gap-2">
           <button type="button" aria-label="Sang trái" {...padProps("left")} className={PAD}>
             ◀
           </button>
           <button type="button" aria-label="Sang phải" {...padProps("right")} className={PAD}>
             ▶
+          </button>
+          <button type="button" aria-label={game.dropLabel} {...padProps("down")} className={`${PAD} col-span-2 justify-self-center`}>
+            ▼
           </button>
         </div>
 

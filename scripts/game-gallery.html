@@ -1,0 +1,29 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Runtime sprite audit</title>
+<style>body{background:#33414b;color:#fff;font:14px system-ui;margin:20px}button{padding:12px;margin-right:8px}section{display:flex;flex-wrap:wrap;gap:4px}figure{margin:0;width:164px}canvas{width:164px;height:150px;background:#577080}figcaption{font-size:11px;padding:5px}h2{margin:20px 0 8px}</style>
+<h1>Runtime sprite audit — actual drawRig / anchors</h1>
+<nav><button data-group="player">Player</button><button data-group="1">Map 1</button><button data-group="2">Map 2</button><button data-group="3">Map 3</button><button data-group="4">Map 4</button><button data-group="5">Map 5</button><button id="flip">Flip</button><button id="animate">Animate</button></nav>
+<p id="status"></p><main></main>
+<script type="module">
+import {drawRig,playerRig,mobRig,mobRef,bossRig,HEAD_PX,BOSS_PX} from '/engine.js';
+const manifest=await fetch('/manifest.json').then(r=>r.json());
+let selection='player',flipped=false,animated=false,frame=0,groups=[];
+async function show(){
+ document.querySelector('#status').textContent='Loading frames…';
+ document.querySelectorAll('nav button').forEach(button=>button.disabled=true);
+ document.querySelector('main').replaceChildren();groups=[];
+ const files=selection==='player'?manifest.player.filter(p=>!p.endsWith('gun-held.png')):[...manifest.mob.filter(p=>p.includes(`/m${selection}-`)),...manifest.boss.filter(p=>p.includes(`/b${selection}.`)||p.includes(`/b${selection}-`))];
+ const sets=Object.groupBy(files,p=>selection==='player'?(p.includes('armed-')?'armed':p.includes('/run-')?'run':p.includes('/idle-')?'idle':p.includes('/attack-')?'attack':'other'):p.split('/').at(-1).split('-')[0]+'-'+(p.includes('/boss/')?'boss':p.split('-')[1]));
+ for(const [name,paths] of Object.entries(sets)){
+  const heading=document.createElement('h2');heading.textContent=name;document.querySelector('main').append(heading);
+  const section=document.createElement('section');document.querySelector('main').append(section);
+  const imgs=await Promise.all(paths.map(async src=>{const im=new Image();im.src=src;await im.decode();return im;}));
+  const cells=paths.map((src,i)=>{const figure=document.createElement('figure'),canvas=document.createElement('canvas'),caption=document.createElement('figcaption');canvas.width=328;canvas.height=300;caption.textContent=src.split('/').at(-1);figure.append(canvas,caption);section.append(figure);return {canvas,i};});
+  groups.push({paths,imgs,cells});
+ }
+ document.querySelector('#status').textContent=`${selection}: ${files.length} frames decoded; baseline is the white line. No fit-box resizing.`;render();
+ document.querySelectorAll('nav button').forEach(button=>button.disabled=false);
+}
+function render(){for(const group of groups)for(const {canvas,i}of group.cells){const g=canvas.getContext('2d');g.setTransform(2,0,0,2,0,0);g.clearRect(0,0,164,150);g.fillStyle='#d9e5e9';g.fillRect(0,136,164,1);const index=animated?(frame%group.imgs.length):i;const src=group.paths[index],image=group.imgs[index];const kind=src.includes('/mob/')?src.split('-')[1]:null;const rig=kind?mobRig(kind):src.includes('/boss/')?bossRig():playerRig(src.replace('/game/',''));const ref=kind?mobRef(kind)*1.5:src.includes('/boss/')?BOSS_PX:HEAD_PX*1.5;drawRig(g,image,rig,ref,82,136,{flip:flipped});}}
+document.querySelector('nav').onclick=e=>{if(e.target.dataset.group){selection=e.target.dataset.group;show()}else if(e.target.id==='flip'){flipped=!flipped;render()}else if(e.target.id==='animate'){animated=!animated;render()}};
+setInterval(()=>{if(animated){frame++;render()}},160);show();
+</script></html>

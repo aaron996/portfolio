@@ -1,0 +1,72 @@
+.board {
+  --board-ink: #28333c;
+  --board-muted: #554d3f;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  inset: 0;
+  z-index: 4;
+  color: var(--board-ink);
+  background: #f4e6ca;
+  border: 54px solid transparent;
+  border-inline-width: 72px;
+  border-image-slice: 140 210 fill;
+  border-image-width: 54px 72px;
+  border-image-repeat: stretch;
+  outline: none;
+}
+.briefing { border-image-source: url('/game/ui/briefing-board.png'); }
+.supply {
+  border-image-source: url('/game/ui/supply-board.png');
+  border-image-slice: 140 300 fill;
+  border-inline-width: 104px;
+  border-image-width: 54px 104px;
+}
+.content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 10px 12px 16px;
+  scrollbar-width: thin;
+  scrollbar-color: #857052 #f4e6ca;
+}
+.actions { flex: none; overflow: visible; padding-top: 12px; padding-bottom: 0; }
+.centered .content { display: grid; place-items: center; text-align: center; }
+.content h2 { color: var(--board-ink); line-height: 1.12; text-wrap: balance; }
+.content p, .content label, .content li { color: var(--board-muted); }
+.content p { font-size: 13px; line-height: 1.55; }
+.content :global(.text-paper) { color: var(--board-ink); }
+.content :global(.text-mute), .content :global(.text-mute-2), .content :global(.text-mute-3) { color: var(--board-muted); }
+.content :global(.text-lime), .content :global(.text-\[\#9fd8ff\]) { color: #245b66; }
+.content :global(.text-\[\#ff8f85\]) { color: #9f382b; }
+.content :global(.border-ink-800), .content :global(.border-ink-700) { border-color: #bcaa8a; }
+.content :global(.bg-ink-900\/70), .content :global(.bg-ink-900) { background: transparent; }
+.content :global(.bg-lime\/10) { background: #e4e9bd; }
+.content :global(.border-lime) { border-color: #789045; }
+.content button, .content a {
+  min-height: 44px;
+  color: #28333c;
+  border-radius: 7px;
+  transition: background-color 160ms, transform 160ms;
+}
+.content button:global(.bg-lime), .content a:global(.bg-lime) {
+  background: #d4f236;
+  border: 1px solid #65792b;
+}
+.content button:hover, .content a:hover { background: #dfcaa2; transform: none; }
+.content button:focus-visible, .content a:focus-visible, .content input:focus-visible {
+  outline: 3px solid #245b66;
+  outline-offset: 3px;
+}
+.content ::selection { color: #fff; background: #245b66; }
+@media (max-width: 639px) {
+  .board { border-width: 42px 25px; border-image-width: 42px 25px; }
+  .supply { border-inline-width: 38px; border-image-width: 42px 38px; }
+  .content { padding: 8px 7px 16px; }
+  .content p { font-size: 13px; }
+  .content h2 { font-size: 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .content button, .content a { transition: none; }
+}

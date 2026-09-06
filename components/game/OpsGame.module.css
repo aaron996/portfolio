@@ -1,0 +1,7 @@
+.frame { isolation: isolate; }
+.reading { min-height: 610px; }
+.instructions { min-height: 420px; }
+@media (max-width: 639px) {
+  .reading { min-height: 580px; }
+  .instructions { min-height: 440px; }
+}
