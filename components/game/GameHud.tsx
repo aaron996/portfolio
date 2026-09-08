@@ -31,7 +31,9 @@ export function GameHud({ instanceRef, touch }: {
   if (!status) return null;
   const map = game.maps[status.mapIndex];
   const labels = game.display;
-  const hint = status.bossAlive && map.bossKind === "volley"
+  const hint = status.bossAlive && map.mission && status.mission?.exposure === 0
+    ? map.mission.locked
+    : status.bossAlive && map.bossKind === "volley"
     ? (touch ? labels.volleyTouch : game.volleyHint)
     : labels.remaining.replace("{n}", String(status.mobsLeft)).replace("{total}", String(status.mobsTotal));
   const message = touch ? status.message.replace("J", labels.attack) : status.message;
@@ -49,9 +51,24 @@ export function GameHud({ instanceRef, touch }: {
         <span>{map.boss}</span><meter min={0} max={1} value={status.bossHpPct} />
       </label> : null}
       <div className={styles.hudHint}>
-        <span>{status.bossAlive && map.bossKind !== "volley" ? map.boss : hint}</span>
+        <span>{status.bossAlive && !map.mission && map.bossKind !== "volley" ? map.boss : hint}</span>
+        {status.remainingTarget ? <span className={styles.targetHint}>
+          {labels.remainingTarget
+            .replace("{name}", status.remainingTarget.name)
+            .replace("{direction}", `${status.remainingTarget.direction === "left" ? "←" : "→"}${status.remainingTarget.vertical === "up" ? " ↑" : status.remainingTarget.vertical === "down" ? " ↓" : ""}`)}
+        </span> : null}
+        {status.bossAlive && status.checkpoint ? <span className={styles.checkpoint}>{game.checkpointLabel}</span> : null}
         <span role="status" className={styles.feedback}>{message}</span>
       </div>
+      {map.mission && status.mission ? <div className={styles.missionHud}>
+        <p>{!status.bossAlive ? map.mission.brief : status.mission.exposure > 0
+          ? `${map.mission.exposed}${map.mission.mode === "rules" ? "" : ` (${status.mission.exposure}s)`}`
+          : `${map.mission.action}: ${status.mission.completed}/${status.mission.total} · ${status.mission.next} ${status.mission.direction} ${status.mission.timing}`}</p>
+        {status.bossAlive && status.mission.nearby && status.mission.exposure === 0 ?
+          <button type="button" onClick={() => { instanceRef.current?.press("interact"); instanceRef.current?.release("interact"); }}>
+            {map.mission.action} · {status.mission.nearby}{touch ? "" : " (E)"}
+          </button> : null}
+      </div> : null}
     </div>
   );
 }

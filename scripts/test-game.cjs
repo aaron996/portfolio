@@ -1,6 +1,80 @@
 const assert = require('node:assert/strict');
 const { test } = require('node:test');
-const { fixture, advance, content } = require('./game-test-runtime.cjs');
+const { fixture, advance, content, evaluate } = require('./game-test-runtime.cjs');
+
+test('chapter rules differ: matching, toggle routing, timing, ordered tracing, persistent prevention', () => {
+  const { MissionRun } = evaluate('components/game/chapterMission.ts');
+  const runs = content.game.maps.map((map) => new MissionRun(map.mission));
+  const use = (run, id) => {
+    const node = run.definition.nodes.find((entry) => entry.id === id);
+    return run.interact(node.x, node.y);
+  };
+  const [match, route, timing, trace, rules] = runs;
+  assert.equal(use(match, 'wrong-one'), 'wrong');
+  assert.equal(use(match, 'correct'), 'exposed');
+  assert.equal(use(route, 'dispatch'), 'wrong');
+  use(route, 'b'); use(route, 'a'); use(route, 'a');
+  assert.equal(use(route, 'dispatch'), 'wrong');
+  use(route, 'a'); assert.equal(use(route, 'dispatch'), 'exposed');
+  assert.equal(use(timing, 'balance'), 'wrong');
+  timing.tick(4); assert.equal(use(timing, 'balance'), 'exposed');
+  timing.tick(10); assert.equal(timing.exposure, 0);
+  assert.equal(use(trace, 'warehouse'), 'wrong');
+  use(trace, 'order'); use(trace, 'handoff'); assert.equal(use(trace, 'warehouse'), 'exposed');
+  use(rules, 'unique'); assert.equal(use(rules, 'bypass'), 'wrong');
+  assert.equal(rules.completed.length, 0);
+  use(rules, 'unique'); assert.equal(use(rules, 'required'), 'exposed');
+  rules.tick(120); assert.ok(rules.exposure > 0);
+  assert.equal(match.interact(0, 344), 'absent');
+});
+
+test('tutorial events require real movement, grounded jump, hit and held guard', () => {
+  const actions = [];
+  const g = fixture({}, { handlers: { onTutorialAction: (action) => actions.push(action) } });
+  g.press('atk'); g.release('atk'); advance(g, .4);
+  assert.ok(!actions.includes('atk'));
+  g.press('right'); advance(g, .5); g.release('right');
+  assert.ok(actions.includes('right'));
+  g.press('jump'); g.release('jump');
+  assert.equal(actions.filter((a) => a === 'jump').length, 1);
+  g.press('jump'); g.release('jump');
+  assert.equal(actions.filter((a) => a === 'jump').length, 1);
+  advance(g, 1); g.press('guard'); advance(g, .4); g.release('guard');
+  assert.ok(actions.includes('guard'));
+});
+
+test('death callback selects boss checkpoint only after the encounter has begun', () => {
+  for (const checkpoint of [false, true]) {
+    let death;
+    const g = fixture({}, { globals: { window: {
+      addEventListener() {}, removeEventListener() {}, clearTimeout() {},
+      setTimeout(fn) { death = fn; return 1; },
+    } } });
+    if (checkpoint) g.lab.spawnBoss();
+    g.lab.player.hp = 1; g.lab.hurtPlayer(-1); death();
+    assert.equal(g.status().hp, 5);
+    assert.equal(g.status().bossAlive, checkpoint);
+    assert.equal(g.status().mobsLeft, checkpoint ? 0 : 1);
+  }
+});
+
+test('audio stays silent before activation, when muted and paused, and closes on teardown', () => {
+  let created = 0, starts = 0, closed = 0;
+  const param = { value: 0, setTargetAtTime() {}, setValueAtTime() {}, linearRampToValueAtTime() {}, exponentialRampToValueAtTime() {} };
+  class AudioContext {
+    state = 'running'; currentTime = 1;
+    constructor() { created++; }
+    createGain() { return { gain: { ...param }, connect() {}, disconnect() {} }; }
+    createOscillator() { return { frequency: { value: 0 }, connect() {}, disconnect() {}, start() { starts++; }, stop() {} }; }
+    close() { closed++; return Promise.resolve(); }
+  }
+  const { GameAudio } = evaluate('components/game/gameAudio.ts', { AudioContext });
+  const sound = new GameAudio(); sound.play('jump'); assert.equal(created, 0);
+  sound.activate(); sound.setMuted(true); sound.play('jump'); assert.equal(starts, 0);
+  sound.setMuted(false); sound.setPaused(true); sound.play('jump'); assert.equal(starts, 0);
+  sound.setPaused(false); sound.play('jump'); assert.equal(starts, 2);
+  sound.destroy(); assert.equal(closed, 1);
+});
 
 test('death timeout is canceled by restart and destroy, with no ghost map reload', () => {
   for (const action of ['restart', 'destroy']) {
@@ -25,6 +99,88 @@ test('map loads reset held keys, ammo and timed combat state', () => {
   g.loadMap(0); advance(g, .25);
   assert.equal(g.lab.player.x, 60); assert.equal(g.status().ammo, 0);
   assert.equal(g.lab.player.raiseT, 0); assert.equal(g.lab.player.dropY, null);
+});
+
+test('boss checkpoint restarts the boss encounter without restoring cleared mobs', () => {
+  const g = fixture({ mobs: [], traps: [], pickups: [] });
+  g.lab.spawnBoss();
+  assert.equal(g.status().checkpoint, true);
+  g.restartFromCheckpoint();
+  const state = g.status();
+  assert.equal(state.mobsLeft, 0);
+  assert.equal(state.bossAlive, true);
+  assert.equal(state.checkpoint, true);
+  assert.ok(g.lab.player.x > 1500);
+});
+
+test('remaining target gives a direction only when at most two mobs remain', () => {
+  const g = fixture();
+  assert.equal(g.status().remainingTarget?.name, 'sentinel');
+  assert.equal(g.status().remainingTarget?.direction, 'right');
+  g.lab.player.x = 2150;
+  assert.equal(g.status().remainingTarget?.direction, 'left');
+});
+
+test('checkpoint preserves entry equipment across repeated deaths and avoids moving traps', () => {
+  for (const map of content.game.maps) {
+    const g = fixture(map);
+    Object.assign(g.lab.player, { ammo: 6, gunName: 'checkpoint gun', tool: 8, toolName: 'checkpoint tool' });
+    g.lab.spawnBoss();
+    for (let attempt = 0; attempt < 2; attempt++) {
+      Object.assign(g.lab.player, { ammo: 0, tool: 0, hp: 0 });
+      g.restartFromCheckpoint();
+      const state = g.status();
+      assert.equal(state.ammo, 6); assert.equal(state.toolLeft, 8);
+      assert.equal(state.hp, 5); assert.equal(state.mobsLeft, 0);
+      assert.equal(state.bossHpPct, 1);
+      const x = g.lab.player.x;
+      for (const trap of map.traps) {
+        if ((trap.y ?? 344) < 304) continue;
+        assert.ok(x + 26 <= trap.x - 36 || x >= trap.x + (trap.w ?? 26) + 36, map.name);
+      }
+    }
+  }
+});
+
+test('source tracing rejects wrong order, respects pause and resets its window at checkpoint', () => {
+  const map = content.game.maps[3];
+  const g = fixture({ ...map, mobs: [], traps: [], pickups: [] });
+  g.lab.spawnBoss();
+  g.lab.player.inv = 100;
+  const interact = (id) => {
+    const node = map.mission.nodes.find((entry) => entry.id === id);
+    Object.assign(g.lab.player, { x: node.x - 13, y: node.y - 40 });
+    g.press('interact'); g.release('interact');
+  };
+  interact('warehouse'); assert.equal(g.status().mission.completed, 0);
+  g.pause(); interact('order'); assert.equal(g.status().mission.completed, 0);
+  g.resume();
+  for (const id of map.mission.sequence) interact(id);
+  assert.equal(g.status().mission.exposure, 10);
+  g.pause(); advance(g, 12); assert.equal(g.status().mission.exposure, 10);
+  g.resume(); advance(g, 10.1);
+  assert.equal(g.status().mission.completed, 0); assert.equal(g.status().mission.exposure, 0);
+  for (const id of map.mission.sequence) interact(id);
+  g.restartFromCheckpoint(); assert.equal(g.status().mission.exposure, 0);
+  assert.equal(g.status().mission.completed, 0);
+});
+
+test('locked source boss blocks melee and bullets, then takes damage when traced', () => {
+  const map = content.game.maps[3];
+  const g = fixture({ ...map, mobs: [], traps: [], pickups: [], plats: [] });
+  g.lab.spawnBoss(); g.lab.player.inv = 100;
+  Object.assign(g.lab.boss, { x: 800, cd: 100 });
+  Object.assign(g.lab.player, { x: 766, face: 1, ammo: 10 });
+  g.press('atk'); g.release('atk'); advance(g, .4);
+  g.press('shoot'); g.release('shoot'); advance(g, .4);
+  assert.equal(g.lab.boss.hp, 16);
+  for (const node of map.mission.nodes) {
+    Object.assign(g.lab.player, { x: node.x - 13, y: node.y - 40 });
+    g.press('interact'); g.release('interact');
+  }
+  Object.assign(g.lab.player, { x: g.lab.boss.x - 34, y: 304, ground: true, face: 1 });
+  g.press('atk'); g.release('atk'); advance(g, .4);
+  assert.ok(g.lab.boss.hp < 16);
 });
 
 test('pause hotkeys ignore auto-repeat; paused simulation consumes no movement or ammo', () => {
@@ -53,6 +209,14 @@ for (const map of content.game.maps) test(`${map.boss}: melee can defeat the bos
     handlers: { onCleared: () => cleared++, onFinished: () => finished++ },
   });
   g.lab.spawnBoss(); g.lab.player.inv = 100;
+  if (map.mission) {
+    if (map.mission.mode === 'timing') advance(g, 4.1);
+    for (const id of map.mission.sequence) {
+      const node = map.mission.nodes.find((entry) => entry.id === id);
+      Object.assign(g.lab.player, { x: node.x - 13, y: node.y - 40 });
+      g.press('interact'); g.release('interact');
+    }
+  }
   for (let i = 0; i < 40 && !cleared; i++) {
     Object.assign(g.lab.boss, { x: 800, y: 262, cd: 100, dash: 0, tel: 0 });
     Object.assign(g.lab.player, { x: 766, y: 304, vx: 0, vy: 0, face: 1, ground: true });

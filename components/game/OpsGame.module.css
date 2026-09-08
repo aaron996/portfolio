@@ -9,6 +9,11 @@
 .actions button:disabled { opacity: .45; }
 .surface button:focus-visible, .surface select:focus-visible { outline: 3px solid #d4f236; outline-offset: 2px; }
 .canvas { display: block; width: 100%; height: auto; touch-action: none; }
+.tutorial { position: absolute; z-index: 2; left: 12px; top: 12px; display: flex; align-items: center; gap: 12px; max-width: min(360px, calc(100% - 24px)); padding: 9px 12px; border: 1px solid #d4f236; border-radius: 8px; background: rgba(16, 23, 25, .92); color: #f2f1ec; font-size: 13px; font-weight: 700; box-shadow: 0 8px 24px rgba(0, 0, 0, .25); }
+.tutorial small { color: #d4f236; font-variant-numeric: tabular-nums; }
+.tutorial { flex-wrap: wrap; }
+.tutorial span { flex: 1; min-width: 180px; }
+.tutorial button { min-height: 44px; padding: 4px 8px; font-size: 12px; text-decoration: underline; text-underline-offset: 3px; }
 .hud { flex: none; padding: 9px 12px; background: #182126; color: #f2f1ec; font-size: 13px; line-height: 1.4; font-variant-numeric: tabular-nums; }
 .hudStats { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 18px; }
 .hudStats label { display: flex; align-items: center; gap: 6px; }
@@ -18,6 +23,11 @@
 .hud meter::-moz-meter-bar { background: #9fd8ff; }
 .hudHint { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 4px; min-height: 19px; }
 .feedback { color: #d4f236; }
+.targetHint { color: #d4f236; font-weight: 700; }
+.checkpoint { color: #9fd8ff; }
+.missionHud { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px; }
+.missionHud p { flex: 1; }
+.missionHud button { min-height: 44px; padding: 6px 12px; color: #101719; background: #d4f236; border-radius: 6px; font-weight: 700; }
 .warning { color: #ffb2a9; }
 .bossHealth { display: flex; align-items: center; gap: 12px; margin-top: 5px; }
 .bossHealth meter { flex: 1; min-width: 40px; }
@@ -47,6 +57,7 @@
   .mapTitle span { font-size: 11px; }
   .hudStats { gap: 5px 12px; }
   .hudStats label meter { width: 35px; }
+  .tutorial { left: 8px; top: 8px; max-width: calc(100% - 16px); font-size: 12px; }
   .expanded .mapTitle { width: 100%; }
   .expanded .toolbar { gap: 4px; }
   .expanded .mapTitle { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }

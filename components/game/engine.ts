@@ -12,8 +12,10 @@
  * không phình to nhỏ giữa các khung hình — lỗi nặng nhất của bản trước.
  */
 import type { GameMap, GameMobSpawn, MobKind } from "@/content/types";
+import { MissionRun } from "./chapterMission";
+import type { GameSound } from "./gameAudio";
 
-export type GameKey = "left" | "right" | "jump" | "down" | "atk" | "shoot" | "guard";
+export type GameKey = "left" | "right" | "jump" | "down" | "atk" | "shoot" | "guard" | "interact";
 export type GamePhase = "title" | "play" | "paused" | "clear" | "end";
 
 /**
@@ -35,6 +37,7 @@ export interface PickupInfo {
 
 /** Ảnh chụp trạng thái ải, để bảng tạm dừng nói đúng việc còn phải làm */
 export interface GameStatus {
+  mission: { completed: number; total: number; exposure: number; nearby: string | null; next: string | null; direction: string; timing: string } | null;
   message: string;
   mapIndex: number;
   mobsLeft: number;
@@ -53,9 +56,14 @@ export interface GameStatus {
   guard: number;
   /** Mọi vật phẩm đã nhặt trong ải này, theo thứ tự nhặt */
   items: PickupInfo[];
+  /** Quái gần nhất khi chỉ còn tối đa hai con, để không phải đi lùng cả bản đồ. */
+  remainingTarget: { name: string; direction: "left" | "right"; vertical: "up" | "down" | null } | null;
+  /** Sau khi trùm xuất hiện, chết sẽ quay lại ngay trước trận trùm trong phiên chơi này. */
+  checkpoint: boolean;
 }
 
 export interface GameHandlers {
+  onSound?: (sound: GameSound) => void;
   /** Đổi bản đồ — giao diện cập nhật tên ải trên HUD */
   onMap?: (index: number) => void;
   /** Hạ trùm ải thứ index, rơi ra `skills` */
@@ -66,6 +74,10 @@ export interface GameHandlers {
   onPause?: (paused: boolean, reason: PauseReason) => void;
   /** Nhặt được vật phẩm, kèm câu giải nghĩa để dựng thẻ */
   onPickup?: (info: PickupInfo) => void;
+  /** Một thao tác thật của người chơi, dùng cho tutorial đầu game. */
+  onTutorialAction?: (key: GameKey) => void;
+  /** Trùm vừa xuất hiện; game có thể báo rõ checkpoint đã đặt. */
+  onCheckpoint?: (index: number) => void;
 }
 
 export interface GameLabels {
@@ -595,6 +607,7 @@ interface Slash {
 
 export interface GameInstance {
   loadMap(index: number): void;
+  restartFromCheckpoint(): void;
   resume(): void;
   pause(): void;
   togglePause(): void;
@@ -656,10 +669,14 @@ export function createGame(
   let freeze = 0;
 
   const keys: Record<GameKey, boolean> = {
-    left: false, right: false, jump: false, down: false, atk: false, shoot: false, guard: false,
+    left: false, right: false, jump: false, down: false, atk: false, shoot: false, guard: false, interact: false,
   };
   let pauseWhy: PauseReason = "manual";
   let pauseOnPickup = true;
+  /** Checkpoint trong màn hiện tại chỉ có hiệu lực từ lúc trùm xuất hiện. */
+  let bossCheckpoint = false;
+  let checkpointEquipment: { ammo: number; gunName: string | null; tool: number; toolName: string | null; items: PickupInfo[] } | null = null;
+  let mission: MissionRun | null = null;
   /** Vật phẩm đã nhặt trong ải đang chơi — nguồn của bảng túi đồ */
   let bag: PickupInfo[] = [];
 
@@ -797,8 +814,11 @@ export function createGame(
     deathTimer = null;
     for (const key of Object.keys(keys) as GameKey[]) keys[key] = false;
     lv = index;
+    bossCheckpoint = false;
+    checkpointEquipment = null;
     const m = maps[lv];
     preloadMapAssets(index);
+    mission = m.mission ? new MissionRun(m.mission) : null;
     if (process.env.NODE_ENV !== "production") warnFlyerReach(m, index);
     Object.assign(player, {
       x: 60, y: GY - PLAYER_H, vx: 0, vy: 0, face: 1,
@@ -865,6 +885,8 @@ export function createGame(
   }
 
   function spawnBoss() {
+    bossCheckpoint = true;
+    checkpointEquipment = { ammo: player.ammo, gunName: player.gunName, tool: player.tool, toolName: player.toolName, items: bag.slice() };
     boss = {
       x: WORLD - 190, y: GY - 82, w: 72, h: 82,
       hp: 16, mhp: 16, dir: -1,
@@ -874,6 +896,32 @@ export function createGame(
     say(labels.bossAppear.replace("{boss}", maps[lv].boss), 1.6);
     flash = 0.5;
     shake = 7;
+    handlers.onCheckpoint?.(lv);
+    handlers.onSound?.("checkpoint");
+  }
+
+  /**
+   * Checkpoint bắt đầu trận trùm: không bắt người chơi dọn lại quái thường,
+   * nhưng trùm và nhân vật đều trở về trạng thái đầy đủ để trận vẫn công bằng.
+   */
+  function restartFromCheckpoint() {
+    if (!bossCheckpoint) { loadMap(lv); return; }
+    const equipment = checkpointEquipment;
+    loadMap(lv);
+    mobs.forEach((o) => { o.dead = true; o.deadT = 1; });
+    pickups.forEach((p) => { p.taken = true; });
+    // Find a floor position outside every trap's full movement range.
+    let spawnX = WORLD - 430;
+    while (spawnX > W && traps.some((t) =>
+      t.y >= GY - PLAYER_H && spawnX + PLAYER_W > t.x - 36 && spawnX < t.x + t.w + 36)) spawnX -= 40;
+    Object.assign(player, { x: spawnX, y: GY - PLAYER_H, ground: true, face: 1, inv: 1.5 });
+    if (equipment) {
+      const { items, ...gear } = equipment;
+      Object.assign(player, gear);
+      bag = items.slice();
+    }
+    cam = WORLD - W;
+    spawnBoss();
   }
 
   function clearMap() {
@@ -887,6 +935,7 @@ export function createGame(
     boss = null;
     flash = 0.6;
     handlers.onCleared?.(lv, m.skills);
+    handlers.onSound?.("clear");
     if (lv + 1 < maps.length) preloadMapAssets(lv + 1);
     if (lv + 1 >= maps.length) handlers.onFinished?.();
   }
@@ -900,6 +949,8 @@ export function createGame(
     if (phase !== "play" || player.hp <= 0 || busy()) return;
     if (!player.ground && player.coyote <= 0) return;
     player.vy = -JUMP_V;
+    handlers.onTutorialAction?.("jump");
+    handlers.onSound?.("jump");
     player.ground = false;
     player.coyote = 0;
     player.jumpBuf = 0;
@@ -975,6 +1026,8 @@ export function createGame(
       if (o.dead || !overlap(hb, o)) continue;
       hitAny = true;
       o.hp -= dmg;
+      handlers.onTutorialAction?.("atk");
+      handlers.onSound?.("hit");
       o.hurt = 0.18;
       o.x = Math.max(o.a, Math.min(o.b, o.x + player.face * (heavy ? 22 : 14)));
       o.tel = 0;
@@ -991,8 +1044,10 @@ export function createGame(
     }
 
     if (boss && overlap(hb, boss)) {
+      if (mission && mission.exposure <= 0) { say(mission.definition.locked, 1.5); return; }
       hitAny = true;
       boss.hp -= dmg;
+      handlers.onSound?.("hit");
       boss.hurt = 0.16;
       spark(boss.x + boss.w / 2, boss.y + boss.h / 2, player.face);
       puff(boss.x + boss.w / 2, boss.y + boss.h / 2, m.palette.boss, 8);
@@ -1024,6 +1079,7 @@ export function createGame(
 
   function fireGun() {
     if (phase !== "play" || busy() || player.hurtT > 0 || player.atk > 0 || player.ammo <= 0) return;
+    handlers.onSound?.("shoot");
     player.ammo -= 1;
     player.aimT = 0.48;
     player.gunCd = GUN_COOLDOWN;
@@ -1060,6 +1116,7 @@ export function createGame(
       return true;
     }
     if (boss && overlap(box, boss)) {
+      if (mission && mission.exposure <= 0) { say(mission.definition.locked, 1.5); return true; }
       boss.hp -= GUN_DMG;
       boss.hurt = 0.14;
       spark(b.x, b.y, Math.sign(b.vx) || 1);
@@ -1101,6 +1158,7 @@ export function createGame(
         ring(player.x + player.w / 2 + player.face * 14, player.y + 18, "#9fd8ff");
       }
       player.guardT += dt;
+      if (player.guardT >= 0.3) handlers.onTutorialAction?.("guard");
       player.stam = Math.max(0, player.stam - GUARD_DRAIN * dt);
       player.stamDelay = GUARD_REGEN_DELAY;
       // Đứng tấn: hãm người lại chứ không cấm hẳn, để không bị kẹt trong bẫy
@@ -1175,6 +1233,7 @@ export function createGame(
     if (player.inv > 0) return "ignored";
     player.raiseT = player.aimT = player.shootT = 0;
     player.hp -= 1;
+    handlers.onSound?.("hurt");
     player.inv = 1.35;
     player.hurtT = 0.35;
     player.vy = -360;
@@ -1192,7 +1251,7 @@ export function createGame(
       say(labels.deathLine, 1.4);
       deathTimer = window.setTimeout(() => {
         deathTimer = null;
-        if (!destroyed && (phase === "play" || phase === "paused")) loadMap(lv);
+        if (!destroyed && (phase === "play" || phase === "paused")) restartFromCheckpoint();
       }, 700);
     }
   }
@@ -1371,10 +1430,15 @@ export function createGame(
   }
 
   function stepBoss(b: Boss, dt: number) {
+    mission?.tick(dt);
     const kind = maps[lv].bossKind;
     b.hurt = Math.max(0, b.hurt - dt);
     b.act = Math.max(0, b.act - dt);
     b.bob += dt * 3;
+    if (mission?.definition.mode === "timing" && mission.exposure > 0) {
+      b.dash = 0; b.tel = 0; b.cd = 1.2;
+      return;
+    }
 
     if (b.dash > 0) {
       b.dash -= dt;
@@ -1392,7 +1456,20 @@ export function createGame(
       if (b.tel <= 0) {
         shake = 8;
         b.act = 0.3;
-        if (kind === "slam") {
+        if (mission?.definition.mode === "trace" && mission.exposure <= 0) {
+          // Unresolved evidence emits one aimed packet; resolving it silences that source.
+          const source = mission.next;
+          if (source) {
+            const dx = player.x + player.w / 2 - source.x;
+            const dy = player.y + player.h / 2 - (source.y - 48);
+            const distance = Math.max(1, Math.hypot(dx, dy));
+            fire(source.x, source.y - 48, dx / distance * 3.4, dy / distance * 3.4);
+          }
+        } else if (mission?.definition.mode === "route" && mission.exposure <= 0) {
+          for (const node of mission.definition.nodes.slice(0, 2)) {
+            if (!mission.completed.includes(node.id)) fire(node.x, node.y - 22, player.x < node.x ? -3.8 : 3.8, 0);
+          }
+        } else if (kind === "slam") {
           fire(b.x + 8, GY - 16, -4.2, 0);
           fire(b.x + b.w - 8, GY - 16, 4.2, 0);
           dust(b.x + b.w / 2, b.y + b.h, 10, 2.2);
@@ -1473,6 +1550,7 @@ export function createGame(
     player.vx = Math.max(-360, Math.min(360, player.vx));
     const moveX = player.vx * dt;
     player.x = Math.max(0, Math.min(WORLD - player.w, player.x + moveX));
+    if (keys.right && player.x >= 160) handlers.onTutorialAction?.("right");
     if (player.ground && Math.abs(moveX) > 0.01) {
       // Chu kỳ chạy tính theo quãng đường, không theo thời gian: chạy chậm thì
       // chân bước chậm, không bị hiện tượng trượt chân. 150px một chu kỳ hai
@@ -1576,6 +1654,7 @@ export function createGame(
       };
       bag.push(info);
       handlers.onPickup?.(info);
+      handlers.onSound?.("pickup");
       // Dừng hẳn để người chơi đọc xong câu giải nghĩa. Thẻ tự tắt sau vài
       // giây thì vật phẩm nào cũng trôi qua mà không ai kịp đọc.
       if (pauseOnPickup) setPaused(true, "pickup");
@@ -1606,6 +1685,7 @@ export function createGame(
           s.reflected = true;
           s.t = 0;
           say(labels.reflectLine, 0.9);
+          handlers.onSound?.("reflect");
           return true;
         }
         return false;
@@ -2682,7 +2762,7 @@ export function createGame(
     if (rect.width > 0) {
       const dpr = Math.min(2, window.devicePixelRatio || 1);
       const targetW = Math.round(rect.width * dpr);
-      const targetH = Math.round(rect.height * dpr);
+      const targetH = Math.round(targetW * H / W);
       if (canvas.width !== targetW || canvas.height !== targetH) {
         canvas.width = targetW;
         canvas.height = targetH;
@@ -2726,7 +2806,22 @@ export function createGame(
       g!.fillRect(px + 3, py + 13, pw - 6, 4);
     }
 
-    for (const t of traps) drawTrap(t);
+    if (phase !== "clear" || !mission) for (const t of traps) drawTrap(t);
+    if (mission && (boss || phase === "clear")) {
+      // Tactical markers are UI, like the existing dash/guard rings; no new scene artwork.
+      for (const node of mission.definition.nodes) {
+        const done = phase === "clear" || mission.completed.includes(node.id);
+        const next = mission.next?.id === node.id;
+        g!.save();
+        const threatening = boss && boss.tel > 0 && !done &&
+          (mission.definition.mode === "trace" && next || mission.definition.mode === "route" && node.id !== "dispatch");
+        g!.strokeStyle = threatening ? HAZARD : done ? LIME : next ? "#9FD8FF" : "#f2f1ec";
+        g!.lineWidth = next ? 3 : 1.5;
+        g!.beginPath(); g!.ellipse(node.x, node.y - 2, 25, 7, 0, 0, Math.PI * 2); g!.stroke();
+        g!.restore();
+        drawLabel(`${done ? "✓ " : next ? "↓ " : ""}${node.name}`, node.x, node.y - 60);
+      }
+    }
     for (const p of pickups) if (!p.taken) drawPickup(p);
 
     // Cửa ải ở cuối bản đồ, sáng lên khi đã hạ hết quái thường
@@ -3088,10 +3183,10 @@ export function createGame(
       g!.textAlign = "center";
       g!.fillStyle = "#f2f1ec";
       g!.fillText(m.boss, W / 2, 45);
-      if (m.bossKind === "volley") {
+      if (mission || m.bossKind === "volley") {
         g!.font = `800 12px ${FONT_SANS}`;
         g!.fillStyle = LIME;
-        g!.fillText(labels.volleyHint, W / 2, 63);
+        g!.fillText(mission && mission.exposure <= 0 ? mission.definition.locked : labels.volleyHint, W / 2, 63, W - 160);
       }
     }
 
@@ -3148,11 +3243,18 @@ export function createGame(
     KeyJ: "atk", KeyZ: "atk",
     KeyK: "shoot", KeyX: "shoot",
     KeyL: "guard", ShiftLeft: "guard", ShiftRight: "guard",
+    KeyE: "interact",
   };
 
   function press(k: GameKey) {
     const wasPressed = keys[k];
     keys[k] = true;
+    if (k === "interact" && !wasPressed && phase === "play" && player.hp > 0 && mission && boss) {
+      const result = mission.interact(player.x + player.w / 2, player.y + player.h);
+      if (result === "recorded" || result === "exposed") handlers.onSound?.("interact");
+      if (result === "exposed") say(mission.definition.exposed, 2.5);
+      else if (result === "wrong") say(mission.definition.locked, 1.5);
+    }
     if (k === "down" && !wasPressed) dropDown();
     if (k === "jump") {
       // Ghi nhận cú bấm sớm: chạm đất là nhảy luôn, không bị "ăn" mất phím
@@ -3175,7 +3277,7 @@ export function createGame(
       phase = "paused";
       pauseWhy = reason;
       // Nhả hết phím, không thì lúc quay lại nhân vật tự chạy
-      keys.left = keys.right = keys.jump = keys.down = keys.atk = keys.shoot = keys.guard = false;
+      keys.left = keys.right = keys.jump = keys.down = keys.atk = keys.shoot = keys.guard = keys.interact = false;
       player.raiseT = player.aimT = player.shootT = 0;
       player.guarding = false;
       player.guardT = 0;
@@ -3203,7 +3305,7 @@ export function createGame(
     ArrowLeft: "ArrowLeft", ArrowRight: "ArrowRight", ArrowUp: "ArrowUp",
     ArrowDown: "ArrowDown", s: "KeyS",
     a: "KeyA", d: "KeyD", w: "KeyW", j: "KeyJ", z: "KeyZ", x: "KeyX", p: "KeyP",
-    k: "KeyK", l: "KeyL", b: "KeyB", Shift: "ShiftLeft",
+    k: "KeyK", l: "KeyL", b: "KeyB", e: "KeyE", Shift: "ShiftLeft",
     " ": "Space", Escape: "Escape",
   };
   const codeOf = (e: KeyboardEvent) =>
@@ -3300,6 +3402,7 @@ export function createGame(
 
   return {
     loadMap,
+    restartFromCheckpoint,
     resume() {
       phase = "play";
       last = performance.now();
@@ -3312,10 +3415,22 @@ export function createGame(
     pauseReason: () => pauseWhy,
     setPauseOnPickup(on: boolean) { pauseOnPickup = on; },
     setExternalHud(on: boolean) { externalHud = on; },
-    status: (): GameStatus => ({
+    status: (): GameStatus => {
+      const alive = mobs.filter((o) => !o.dead);
+      const nearest = alive.length <= 2
+        ? alive.reduce<Mob | null>((best, current) =>
+          !best || Math.abs(current.x - player.x) < Math.abs(best.x - player.x) ? current : best, null)
+        : null;
+      return ({
+      mission: mission ? { completed: mission.completed.length, total: mission.definition.sequence.length,
+        exposure: Math.ceil(mission.exposure), nearby: mission.nearest(player.x + player.w / 2, player.y + player.h)?.name ?? null,
+        next: mission.next?.name ?? null,
+        direction: mission.next ? (mission.next.x < player.x ? "←" : "→") : "",
+        timing: mission.definition.mode === "timing" ? (mission.cycle >= 4 ? mission.definition.ready ?? "" :
+          (mission.definition.waiting ?? "").replace("{n}", String(Math.ceil(4 - mission.cycle)))) : "" } : null,
       message: msgT > 0 ? msg : "",
       mapIndex: lv,
-      mobsLeft: mobs.filter((o) => !o.dead).length,
+      mobsLeft: alive.length,
       mobsTotal: mobs.length,
       bossAlive: !!boss,
       bossHpPct: boss ? Math.max(0, boss.hp / boss.mhp) : 0,
@@ -3327,7 +3442,11 @@ export function createGame(
       gunName: player.gunName,
       guard: player.stam,
       items: bag.slice(),
-    }),
+      remainingTarget: nearest ? { name: nearest.name, direction: nearest.x < player.x ? "left" : "right",
+        vertical: nearest.y + nearest.h < player.y - 20 ? "up" : nearest.y > player.y + player.h + 20 ? "down" : null } : null,
+      checkpoint: bossCheckpoint,
+    });
+    },
     press,
     release,
     destroy() {

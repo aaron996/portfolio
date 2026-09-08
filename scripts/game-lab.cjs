@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { root, compile } = require('./game-test-runtime.cjs');
 const modules = {
+  '/chapterMission': compile('components/game/chapterMission.ts', true),
   '/engine.js': 'const process = {env:{NODE_ENV:"production"}};\n' + compile('components/game/engine.ts', true),
   '/content.js': compile('content/content.vi.ts', true),
 };
