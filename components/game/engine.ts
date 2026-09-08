@@ -18,6 +18,11 @@ import type { GameSound } from "./gameAudio";
 export type GameKey = "left" | "right" | "jump" | "down" | "atk" | "shoot" | "guard" | "interact";
 export type GamePhase = "title" | "play" | "paused" | "clear" | "end";
 
+export interface TraversalStatus {
+  completed: number; total: number; next: string; hint: string; direction: string;
+  nearby: string | null; floor: string; checkpoint: string | null;
+}
+
 /**
  * Vì sao game đang dừng. Ba lý do dùng chung một `phase`, khác nhau ở bảng
  * mà giao diện dựng lên: tự bấm dừng, vừa nhặt vật phẩm, hay đang mở túi đồ.
@@ -38,6 +43,7 @@ export interface PickupInfo {
 /** Ảnh chụp trạng thái ải, để bảng tạm dừng nói đúng việc còn phải làm */
 export interface GameStatus {
   mission: { completed: number; total: number; exposure: number; nearby: string | null; next: string | null; direction: string; timing: string } | null;
+  traversal: TraversalStatus | null;
   message: string;
   mapIndex: number;
   mobsLeft: number;
@@ -413,8 +419,14 @@ const TRAP_SPRITES = {
   pulseVent: "trap/pulse-vent.png",
 };
 
+function mobAsset(mapIndex: number, kind: MobKind, frame: number) {
+  // Warehouse branch emitters reuse the existing hub shooter art and rig.
+  const artMap = mapIndex === 1 && kind === "shooter" ? 3 : mapIndex + 1;
+  return `mob/m${artMap}-${kind}-${frame}.png`;
+}
+
 function mobSprite(mapIndex: number, kind: MobKind, frame: number) {
-  return img(`mob/m${mapIndex + 1}-${kind}-${frame}.png`);
+  return img(mobAsset(mapIndex, kind, frame));
 }
 /**
  * Khung trùm: "-tel" cho lúc báo đòn, "-hit" cho lúc vừa trúng đòn (chỉ khi
@@ -673,10 +685,22 @@ export function createGame(
   };
   let pauseWhy: PauseReason = "manual";
   let pauseOnPickup = true;
-  /** Checkpoint trong màn hiện tại chỉ có hiệu lực từ lúc trùm xuất hiện. */
+  /** Checkpoint trận trùm; checkpoint tuyến đi được lưu riêng bên dưới. */
   let bossCheckpoint = false;
-  let checkpointEquipment: { ammo: number; gunName: string | null; tool: number; toolName: string | null; items: PickupInfo[] } | null = null;
+  type CheckpointEquipment = { ammo: number; gunName: string | null; tool: number; toolName: string | null; items: PickupInfo[] };
+  let checkpointEquipment: CheckpointEquipment | null = null;
   let mission: MissionRun | null = null;
+  let worldWidth = WORLD;
+  let routeProgress = 0;
+  let liftY = GY;
+  let liftDirection = -1;
+  let liftWait = 1.5;
+  let onLift = false;
+  let routeCheckpoint: {
+    progress: number; x: number; y: number;
+    mobs: Mob[]; pickups: Pickup[]; traps: Trap[];
+    equipment: CheckpointEquipment;
+  } | null = null;
   /** Vật phẩm đã nhặt trong ải đang chơi — nguồn của bảng túi đồ */
   let bag: PickupInfo[] = [];
 
@@ -721,6 +745,72 @@ export function createGame(
   let slashes: Slash[] = [];
   let boss: Boss | null = null;
   let cam = 0;
+  let camY = 0;
+
+  function surfaces(): [number, number, number][] {
+    const map = maps[lv];
+    return map.traversal && routeProgress >= 3 ? [...map.plats, ...map.traversal.shortcut] : map.plats;
+  }
+
+  function routeStatus(): TraversalStatus | null {
+    const route = maps[lv].traversal;
+    if (!route) return null;
+    const next = route.nodes[routeProgress];
+    const feet = player.y + player.h;
+    const nearby = next && Math.abs(next.x - player.x - player.w / 2) <= 48 && Math.abs(next.y - feet) <= 32;
+    return {
+      completed: routeProgress, total: route.nodes.length,
+      next: next?.name ?? "Lõi máy đã mở", hint: next?.hint ?? "Phản đạn hoặc áp sát chém lõi máy.",
+      direction: next ? `${next.x < player.x ? "←" : "→"}${next.y < feet - 40 ? " ↑" : next.y > feet + 40 ? " ↓" : ""}` : "",
+      nearby: nearby ? next.name : null,
+      floor: (route.tiers.find((tier) => feet >= tier.y - 60) ?? route.tiers[route.tiers.length - 1]).name,
+      checkpoint: routeCheckpoint ? route.nodes[routeCheckpoint.progress - 1].name : null,
+    };
+  }
+
+  function interactRoute() {
+    const route = maps[lv].traversal;
+    if (!route || boss || !player.ground || !routeStatus()?.nearby) return;
+    const node = route.nodes[routeProgress++];
+    // Connecting a branch permanently stops its shooter and floor hazard.
+    if (node.id === "a" || node.id === "b") {
+      mobs.filter((mob) => mob.kind === "shooter" && mob.floor === node.y)
+        .forEach((mob) => { mob.dead = true; mob.deadT = 1; });
+      traps = traps.filter((trap) => trap.y !== node.y);
+      shots = [];
+    }
+    if (routeProgress === route.nodes.length) {
+      mobs.forEach((mob) => { mob.dead = true; mob.deadT = 1; });
+      shots = []; bullets = []; traps = [];
+      // Make room between the gate interaction and the boss's first volley.
+      Object.assign(player, { x: worldWidth - 400, y: GY - PLAYER_H, vx: 0, vy: 0, face: 1, inv: 1.5 });
+      spawnBoss();
+    } else {
+      routeCheckpoint = {
+        progress: routeProgress, x: node.x - PLAYER_W / 2, y: node.y - PLAYER_H,
+        mobs: mobs.map((mob) => ({ ...mob })), pickups: pickups.map((pickup) => ({ ...pickup })),
+        traps: traps.map((trap) => ({ ...trap })),
+        equipment: { ammo: player.ammo, gunName: player.gunName, tool: player.tool, toolName: player.toolName, items: bag.slice() },
+      };
+      handlers.onSound?.("checkpoint");
+    }
+    say(node.result, 4);
+    handlers.onSound?.("interact");
+  }
+
+  function stepLift(dt: number) {
+    const lift = maps[lv].traversal?.lift;
+    if (!lift || routeProgress === 0 || boss || phase === "clear") return;
+    const previousY = liftY;
+    if (liftWait > 0) liftWait = Math.max(0, liftWait - dt);
+    else {
+      liftY = Math.max(lift.top, Math.min(lift.bottom, liftY + liftDirection * lift.speed * dt));
+      if (liftY === lift.top || liftY === lift.bottom) { liftDirection *= -1; liftWait = 1.5; }
+    }
+    const riding = player.ground && player.vy === 0 && Math.abs(player.y + player.h - previousY) < 1
+      && player.x + player.w > lift.x && player.x < lift.x + lift.width;
+    if (riding) { player.y += liftY - previousY; onLift = true; }
+  }
 
   /* ── vòng đời ải ─────────────────────────────────────── */
 
@@ -816,7 +906,10 @@ export function createGame(
     lv = index;
     bossCheckpoint = false;
     checkpointEquipment = null;
+    routeCheckpoint = null; routeProgress = 0; onLift = false;
     const m = maps[lv];
+    worldWidth = m.traversal?.width ?? WORLD;
+    liftY = m.traversal?.lift.bottom ?? GY; liftDirection = -1; liftWait = 1.5;
     preloadMapAssets(index);
     mission = m.mission ? new MissionRun(m.mission) : null;
     if (process.env.NODE_ENV !== "production") warnFlyerReach(m, index);
@@ -835,7 +928,7 @@ export function createGame(
     bullets = [];
     slashes = [];
     boss = null;
-    cam = 0;
+    cam = 0; camY = 0;
     shake = 0;
     fade = 0;
     flash = 0;
@@ -857,7 +950,7 @@ export function createGame(
         hp: MOB_HP[sp.kind],
         dir: Math.random() < 0.5 ? -1 : 1,
         a: platform ? platform[0] : Math.max(0, sp.x - range),
-        b: platform ? platform[0] + platform[2] - w : Math.min(WORLD - w, sp.x + range),
+        b: platform ? platform[0] + platform[2] - w : Math.min(worldWidth - w, sp.x + range),
         floor,
         hurt: 0, bob: Math.random() * 6, anim: Math.random(),
         dead: false, deadT: 0,
@@ -886,9 +979,10 @@ export function createGame(
 
   function spawnBoss() {
     bossCheckpoint = true;
+    if (maps[lv].traversal) { routeProgress = maps[lv].traversal!.nodes.length; traps = []; }
     checkpointEquipment = { ammo: player.ammo, gunName: player.gunName, tool: player.tool, toolName: player.toolName, items: bag.slice() };
     boss = {
-      x: WORLD - 190, y: GY - 82, w: 72, h: 82,
+      x: worldWidth - 190, y: GY - 82, w: 72, h: 82,
       hp: 16, mhp: 16, dir: -1,
       hurt: 0, tel: 0, cd: 2.2, bob: 0, dash: 0,
       walkPhase: 0, stepPhase: 0, act: 0,
@@ -905,13 +999,29 @@ export function createGame(
    * nhưng trùm và nhân vật đều trở về trạng thái đầy đủ để trận vẫn công bằng.
    */
   function restartFromCheckpoint() {
-    if (!bossCheckpoint) { loadMap(lv); return; }
+    if (!bossCheckpoint) {
+      const saved = routeCheckpoint;
+      loadMap(lv);
+      if (saved) {
+        routeCheckpoint = saved; routeProgress = saved.progress;
+        mobs = saved.mobs.map((mob) => ({ ...mob }));
+        pickups = saved.pickups.map((pickup) => ({ ...pickup }));
+        traps = saved.traps.map((trap) => ({ ...trap }));
+        const { items, ...gear } = saved.equipment;
+        bag = items.slice();
+        Object.assign(player, gear, { x: saved.x, y: saved.y, ground: true, inv: 2 });
+        cam = Math.max(0, Math.min(worldWidth - W, player.x - W / 2));
+        camY = Math.max(maps[lv].traversal!.top, Math.min(0, player.y - 220));
+        say("Đã về chặng đã lưu · " + routeStatus()!.next, 3);
+      }
+      return;
+    }
     const equipment = checkpointEquipment;
     loadMap(lv);
     mobs.forEach((o) => { o.dead = true; o.deadT = 1; });
     pickups.forEach((p) => { p.taken = true; });
     // Find a floor position outside every trap's full movement range.
-    let spawnX = WORLD - 430;
+    let spawnX = worldWidth - 430;
     while (spawnX > W && traps.some((t) =>
       t.y >= GY - PLAYER_H && spawnX + PLAYER_W > t.x - 36 && spawnX < t.x + t.w + 36)) spawnX -= 40;
     Object.assign(player, { x: spawnX, y: GY - PLAYER_H, ground: true, face: 1, inv: 1.5 });
@@ -920,7 +1030,7 @@ export function createGame(
       Object.assign(player, gear);
       bag = items.slice();
     }
-    cam = WORLD - W;
+    cam = worldWidth - W; camY = 0;
     spawnBoss();
   }
 
@@ -948,6 +1058,7 @@ export function createGame(
   function tryJump() {
     if (phase !== "play" || player.hp <= 0 || busy()) return;
     if (!player.ground && player.coyote <= 0) return;
+    onLift = false;
     player.vy = -JUMP_V;
     handlers.onTutorialAction?.("jump");
     handlers.onSound?.("jump");
@@ -960,7 +1071,7 @@ export function createGame(
   function dropDown() {
     if (phase !== "play" || !player.ground || player.breakT > 0) return;
     const bottom = player.y + player.h;
-    if (!maps[lv].plats.some(([x, y, w]) => Math.abs(y - bottom) < 1 && player.x + player.w > x && player.x < x + w)) return;
+    if (onLift || !surfaces().some(([x, y, w]) => Math.abs(y - bottom) < 1 && player.x + player.w > x && player.x < x + w)) return;
     player.dropY = bottom;
     player.ground = false;
     player.guarding = false;
@@ -1444,7 +1555,7 @@ export function createGame(
       b.dash -= dt;
       const from = b.x;
       b.x += b.dir * 9 * dt * 60;
-      b.x = Math.max(60, Math.min(WORLD - b.w - 20, b.x));
+      b.x = Math.max(60, Math.min(worldWidth - b.w - 20, b.x));
       bossStride(b, b.x - from);
       if (Math.random() < 0.5) dust(b.x + b.w / 2, b.y + b.h, 2, 1.4);
       if (b.dash <= 0) b.cd = 1.8;
@@ -1494,7 +1605,7 @@ export function createGame(
     }
     b.dir = player.x < b.x ? -1 : 1;
     const from = b.x;
-    b.x = Math.max(60, Math.min(WORLD - b.w - 20, b.x + b.dir * 0.85 * dt * 60));
+    b.x = Math.max(60, Math.min(worldWidth - b.w - 20, b.x + b.dir * 0.85 * dt * 60));
     bossStride(b, b.x - from);
   }
 
@@ -1549,7 +1660,7 @@ export function createGame(
     }
     player.vx = Math.max(-360, Math.min(360, player.vx));
     const moveX = player.vx * dt;
-    player.x = Math.max(0, Math.min(WORLD - player.w, player.x + moveX));
+    player.x = Math.max(0, Math.min(worldWidth - player.w, player.x + moveX));
     if (keys.right && player.x >= 160) handlers.onTutorialAction?.("right");
     if (player.ground && Math.abs(moveX) > 0.01) {
       // Chu kỳ chạy tính theo quãng đường, không theo thời gian: chạy chậm thì
@@ -1559,6 +1670,7 @@ export function createGame(
       player.runPhase = wrap(player.runPhase + Math.abs(moveX) / 150, 1);
     }
 
+    stepLift(dt);
     const wasGround = player.ground;
     const prevBottom = player.y + player.h;
     player.fallSpeed = player.vy;
@@ -1571,7 +1683,7 @@ export function createGame(
       player.ground = true;
     }
     // Bệ nhảy chỉ đỡ khi rơi từ trên xuống, để nhảy xuyên từ dưới lên được
-    for (const [px, py, pw] of m.plats) {
+    for (const [px, py, pw] of surfaces()) {
       if (
         py !== player.dropY && player.vy > 0 && prevBottom <= py + 4 &&
         player.y + player.h >= py &&
@@ -1581,6 +1693,12 @@ export function createGame(
         player.vy = 0;
         player.ground = true;
       }
+    }
+    const lift = m.traversal?.lift;
+    onLift = false;
+    if (lift && player.vy >= 0 && prevBottom <= liftY + 4 && player.y + player.h >= liftY
+      && player.x + player.w > lift.x && player.x < lift.x + lift.width) {
+      player.y = liftY - player.h; player.vy = 0; player.ground = true; onLift = true;
     }
     if (player.dropY !== null && player.y > player.dropY + 4) player.dropY = null;
     if (player.ground && !wasGround) {
@@ -1607,7 +1725,7 @@ export function createGame(
         }
       }
     }
-    if (!alive && !boss && phase === "play") spawnBoss();
+    if (!m.traversal && !alive && !boss && phase === "play") spawnBoss();
 
     for (const t of traps) {
       t.t += dt;
@@ -1671,7 +1789,7 @@ export function createGame(
       s.y += s.vy * dt * 60;
       if (s.reflected) {
         if (bulletHits(s, m)) return false;
-        return s.t < 8 && s.x > -30 && s.x < WORLD + 30 && s.y > -30 && s.y < H + 60;
+        return s.t < 8 && s.x > -30 && s.x < worldWidth + 30 && s.y > (m.traversal?.top ?? 0) - 60 && s.y < H + 60;
       }
       if (overlap(player, { x: s.x - s.r, y: s.y - s.r, w: s.r * 2, h: s.r * 2 })) {
         const dir = s.vx > 0 ? 1 : -1;
@@ -1690,7 +1808,7 @@ export function createGame(
         }
         return false;
       }
-      return s.x > -30 && s.x < WORLD + 30 && s.y > -30 && s.y < H + 60;
+      return s.x > -30 && s.x < worldWidth + 30 && s.y > (m.traversal?.top ?? 0) - 60 && s.y < H + 60;
     });
 
     bullets = bullets.filter((b) => {
@@ -1720,8 +1838,10 @@ export function createGame(
 
     // Camera nhìn trước một đoạn theo hướng chạy — thấy quái sớm hơn nửa nhịp
     const lead = player.face * 54 * Math.min(1, Math.abs(player.vx) / 300);
-    const want = Math.max(0, Math.min(WORLD - W, player.x + player.w / 2 + lead - W / 2));
+    const want = Math.max(0, Math.min(worldWidth - W, player.x + player.w / 2 + lead - W / 2));
     cam += (want - cam) * Math.min(1, dt * 6);
+    const wantY = m.traversal ? Math.max(m.traversal.top, Math.min(0, player.y + player.h - 260)) : 0;
+    camY += (wantY - camY) * Math.min(1, dt * 8);
     if (phase === "clear") fade += dt;
   }
 
@@ -1922,8 +2042,112 @@ export function createGame(
     g!.restore();
   }
 
+  function drawWarehouseBackground(m: GameMap) {
+    const route = m.traversal!;
+    const wash = g!.createLinearGradient(0, 0, 0, H);
+    wash.addColorStop(0, "#28333c"); wash.addColorStop(1, "#55616a");
+    g!.fillStyle = wash; g!.fillRect(0, 0, W, H);
+    // Reuse the warehouse illustration behind the structural floor grid.
+    const backdrop = img(`bg/m${lv + 1}-mid.png`);
+    if (backdrop) {
+      g!.globalAlpha = 0.32;
+      for (const tier of route.tiers) {
+        const y = tier.y - camY * 0.8 - 260;
+        drawTiled(g!, backdrop, -cam * 0.3, y, W + 400, 280);
+      }
+      g!.globalAlpha = 1;
+    }
+    g!.save(); g!.translate(-cam * 0.65, -camY);
+    for (let x = 30; x < route.width + 300; x += 180) {
+      g!.fillStyle = "#25343bb0"; g!.fillRect(x, route.top, 14, GY - route.top);
+      g!.fillStyle = "#a3b5b522"; g!.fillRect(x + 2, route.top, 2, GY - route.top);
+    }
+    for (const tier of route.tiers) {
+      g!.fillStyle = "#172b363d"; g!.fillRect(0, tier.y - 210, route.width + 300, 7);
+      for (let x = 70; x < route.width + 200; x += 180) {
+        g!.fillStyle = "#e8cda522"; g!.fillRect(x, tier.y - 188, 90, 66);
+        g!.fillStyle = "#ffe5aa55"; g!.fillRect(x, tier.y - 188, 90, 3);
+      }
+    }
+    g!.restore();
+    const floorY = GY - camY;
+    g!.fillStyle = m.palette.ground; g!.fillRect(0, floorY, W, H);
+    const ground = img(SCENE_SPRITES.ground);
+    if (ground) drawTiled(g!, ground, -cam, floorY, W + worldWidth, 76);
+    g!.fillStyle = "#eab86b"; g!.fillRect(0, floorY, W, 5);
+  }
+
+  function drawTraversal(m: GameMap) {
+    const route = m.traversal!;
+    for (const tier of route.tiers) {
+      g!.fillStyle = "#15222eee"; g!.fillRect(26, tier.y - 98, 190, 29);
+      g!.fillStyle = "#ffdda0"; g!.font = `700 13px ${FONT_SANS}`;
+      g!.textAlign = "left"; g!.fillText(tier.name, 38, tier.y - 78);
+    }
+    const lift = route.lift;
+    for (const x of [lift.x + 6, lift.x + lift.width - 10]) {
+      g!.fillStyle = "#111e2a"; g!.fillRect(x, lift.top - 50, 5, lift.bottom - lift.top + 50);
+      g!.fillStyle = "#d8c498"; g!.fillRect(x + 2, lift.top - 50, 1, lift.bottom - lift.top + 50);
+    }
+    g!.fillStyle = routeProgress > 0 ? "#edbd68" : "#687783";
+    g!.fillRect(lift.x, liftY, lift.width, 15);
+    for (let x = lift.x + 8; x < lift.x + lift.width; x += 20) {
+      g!.fillStyle = "#172b36"; g!.fillRect(x, liftY + 5, 10, 5);
+    }
+    drawLabel(routeProgress === 0 ? "CẦU NÂNG · CHƯA CÓ ĐIỆN" : "CẦU NÂNG · 1 ↔ 2", lift.x + lift.width / 2, liftY + 34, "#ffdda0");
+    if (routeProgress < 3) {
+      g!.strokeStyle = "#e9bc7355"; g!.lineWidth = 2;
+      g!.setLineDash([6, 6]);
+      for (const [x, y, w] of route.shortcut) { g!.beginPath(); g!.moveTo(x, y); g!.lineTo(x + w, y); g!.stroke(); }
+      g!.setLineDash([]);
+      drawLabel("LỐI VỀ · MỞ SAU NHÁNH B", 210, -135, "#ffdda0");
+    }
+    for (const [i, node] of route.nodes.entries()) {
+      const done = i < routeProgress;
+      const active = i === routeProgress;
+      const color = done ? LIME : active ? "#ffda8b" : "#82929e";
+      g!.fillStyle = "#15222e"; g!.fillRect(node.x - 15, node.y - 39, 30, 36);
+      g!.strokeStyle = color; g!.lineWidth = active ? 3 : 1;
+      g!.strokeRect(node.x - 15, node.y - 39, 30, 36);
+      g!.fillStyle = color; g!.fillRect(node.x - 8, node.y - 32, 16, 10);
+      g!.font = `700 12px ${FONT_SANS}`; g!.textAlign = "center";
+      g!.fillText(done ? "✓" : String(i + 1), node.x, node.y - 7);
+      drawLabel(node.name, node.x, node.y - 51, color);
+      if (active) {
+        g!.beginPath(); g!.moveTo(node.x - 6, node.y - 70); g!.lineTo(node.x + 6, node.y - 70);
+        g!.lineTo(node.x, node.y - 61); g!.fill();
+      }
+    }
+  }
+
+  function drawRouteMap() {
+    const route = maps[lv].traversal;
+    if (!route) return;
+    const sx = 0.11, sy = 0.11, x = W - 140, y = 14;
+    g!.save(); g!.translate(x, y);
+    g!.fillStyle = "#10212be8"; g!.fillRect(-8, -8, 138, 106);
+    g!.strokeStyle = "#aebac1"; g!.lineWidth = 2;
+    for (const [px, py, pw] of [[0, GY, worldWidth], ...surfaces()]) {
+      g!.beginPath(); g!.moveTo(px * sx, (py - route.top) * sy);
+      g!.lineTo((px + pw) * sx, (py - route.top) * sy); g!.stroke();
+    }
+    for (const [i, node] of route.nodes.entries()) {
+      g!.fillStyle = i < routeProgress ? LIME : i === routeProgress ? "#ffd07c" : "#687783";
+      g!.fillRect(node.x * sx - 2, (node.y - route.top) * sy - 5, 5, 5);
+    }
+    g!.strokeStyle = "#ffffff33"; g!.lineWidth = 1;
+    g!.strokeRect(cam * sx, (camY - route.top) * sy, W * sx, H * sy);
+    g!.fillStyle = "#ffffff"; g!.beginPath();
+    g!.arc((player.x + player.w / 2) * sx, (player.y + player.h - route.top) * sy - 2, 3, 0, Math.PI * 2); g!.fill();
+    g!.restore();
+  }
+
   function drawBackground(m: GameMap) {
     const p = m.palette;
+    if (m.traversal) {
+      drawWarehouseBackground(m);
+      return;
+    }
 
     // Lớp trời: có ảnh vẽ tay thì kéo phủ khung (nó đứng yên theo camera),
     // chưa có thì dốc màu nhạt dần về chân trời cộng mấy mảng mây trôi chậm.
@@ -2776,13 +3000,14 @@ export function createGame(
       g!.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
     }
     drawBackground(m);
-    g!.translate(-cam, 0);
+    g!.translate(-cam, -camY);
+    if (m.traversal) drawTraversal(m);
 
     // Bệ nhảy: thân tối, mép trên sáng — cố ý KHÔNG lấy màu theo bảng màu ải.
     // Nền vẽ tay chi tiết và nhiều màu, bệ tô theo palette là chìm nghỉm vào
     // tranh; mà đây là thứ người chơi phải nhìn ra trong một phần giây để
     // quyết định có nhảy hay không.
-    for (const [px, py, pw] of m.plats) {
+    for (const [px, py, pw] of surfaces()) {
       const platform = img(SCENE_SPRITES.platform);
       if (platform) {
         const cap = 12, srcCap = platform.naturalHeight * 0.65;
@@ -2830,17 +3055,17 @@ export function createGame(
     if (gate) {
       g!.save();
       g!.filter = opened ? "brightness(1.2)" : "saturate(.55)";
-      drawFit(g!, gate, WORLD - 47, GY + 3, 66, 108);
+      drawFit(g!, gate, worldWidth - 47, GY + 3, 66, 108);
       g!.restore();
     } else {
     g!.fillStyle = opened ? "rgba(212,242,54,.5)" : "rgba(255,255,255,.5)";
-    g!.fillRect(WORLD - 70, GY - 96, 46, 96);
+    g!.fillRect(worldWidth - 70, GY - 96, 46, 96);
     g!.fillStyle = m.palette.groundEdge;
-    g!.fillRect(WORLD - 64, GY - 88, 34, 88);
+    g!.fillRect(worldWidth - 64, GY - 88, 34, 88);
     if (opened) {
       g!.globalAlpha = 0.35 + Math.sin(worldTime * 4) * 0.2;
       g!.fillStyle = LIME;
-      g!.fillRect(WORLD - 64, GY - 88, 34, 88);
+      g!.fillRect(worldWidth - 64, GY - 88, 34, 88);
       g!.globalAlpha = 1;
     }
     }
@@ -3031,7 +3256,7 @@ export function createGame(
     g!.globalAlpha = 1;
 
     const nearImg = ASSETS.bgNear ? img(`bg/m${lv + 1}-near.png`) : null;
-    if (nearImg) {
+    if (nearImg && !m.traversal) {
       // Tiền cảnh phủ trước nhân vật, chạy nhanh hơn camera cho có chiều sâu
       g!.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
       const nh = 120;
@@ -3064,6 +3289,7 @@ export function createGame(
 
   function drawHud(m: GameMap) {
     if (!externalHud) drawCanvasStatus(m);
+    drawRouteMap();
 
     // Combo stays anchored to the character, independently of the status HUD.
     if (player.comboT > 0 && player.combo > 0) {
@@ -3071,7 +3297,7 @@ export function createGame(
       g!.textAlign = "center";
       g!.globalAlpha = Math.min(1, player.comboT * 3);
       g!.fillStyle = LIME;
-      g!.fillText(`x${player.combo + 1}`, player.x + player.w / 2 - cam, player.y - 22);
+      g!.fillText(`x${player.combo + 1}`, player.x + player.w / 2 - cam, player.y - camY - 22);
       g!.globalAlpha = 1;
     }
   }
@@ -3149,7 +3375,7 @@ export function createGame(
     }
 
     // Đếm quái còn lại — không có nó thì không biết còn phải dọn bao nhiêu
-    if (!boss) {
+    if (!boss && !m.traversal) {
       const total = mobs.length;
       const left = mobs.filter((o) => !o.dead).length;
       g!.font = `700 13px ${FONT_DISPLAY}`;
@@ -3196,9 +3422,9 @@ export function createGame(
       g!.textAlign = "center";
       g!.lineWidth = 6;
       g!.strokeStyle = "rgba(10,10,10,.8)";
-      g!.strokeText(msg, W / 2, 140);
+      g!.strokeText(msg, W / 2, 140, W - 40);
       g!.fillStyle = LIME;
-      g!.fillText(msg, W / 2, 140);
+      g!.fillText(msg, W / 2, 140, W - 40);
       g!.globalAlpha = 1;
     }
 
@@ -3249,6 +3475,7 @@ export function createGame(
   function press(k: GameKey) {
     const wasPressed = keys[k];
     keys[k] = true;
+    if (k === "interact" && !wasPressed && phase === "play" && player.hp > 0) interactRoute();
     if (k === "interact" && !wasPressed && phase === "play" && player.hp > 0 && mission && boss) {
       const result = mission.interact(player.x + player.w / 2, player.y + player.h);
       if (result === "recorded" || result === "exposed") handlers.onSound?.("interact");
@@ -3393,7 +3620,7 @@ export function createGame(
     const kinds = new Set(m.mobs.map((sp) => sp.kind));
     kinds.forEach((k) => {
       if (k === "rider" && !ASSETS.riderArt) return;
-      for (let f = 1; f <= mobFrameCount(k); f++) img(`mob/m${i + 1}-${k}-${f}.png`);
+      for (let f = 1; f <= mobFrameCount(k); f++) img(mobAsset(i, k, f));
     });
   }
 
@@ -3422,6 +3649,7 @@ export function createGame(
           !best || Math.abs(current.x - player.x) < Math.abs(best.x - player.x) ? current : best, null)
         : null;
       return ({
+      traversal: routeStatus(),
       mission: mission ? { completed: mission.completed.length, total: mission.definition.sequence.length,
         exposure: Math.ceil(mission.exposure), nearby: mission.nearest(player.x + player.w / 2, player.y + player.h)?.name ?? null,
         next: mission.next?.name ?? null,
@@ -3442,9 +3670,9 @@ export function createGame(
       gunName: player.gunName,
       guard: player.stam,
       items: bag.slice(),
-      remainingTarget: nearest ? { name: nearest.name, direction: nearest.x < player.x ? "left" : "right",
+      remainingTarget: nearest && !maps[lv].traversal ? { name: nearest.name, direction: nearest.x < player.x ? "left" : "right",
         vertical: nearest.y + nearest.h < player.y - 20 ? "up" : nearest.y > player.y + player.h + 20 ? "down" : null } : null,
-      checkpoint: bossCheckpoint,
+      checkpoint: bossCheckpoint || !!routeCheckpoint,
     });
     },
     press,

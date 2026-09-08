@@ -1178,7 +1178,7 @@ export const content: SiteContent = {
     eyebrow: "MINIGAME · DỰNG BẰNG AI-ASSISTED CODING",
     heading: "Ải Vận Hành",
     intro:
-      "Năm bản đồ là năm nơi mình từng làm việc. Chạy sang phải, dọn sạch quái, hạ trùm cuối bản đồ để nhận hai kỹ năng. Hết năm ải là xong sáu năm.",
+      "Năm bản đồ là năm nơi mình từng làm việc. Khám phá đường đi, xử lý nhiệm vụ và hạ trùm mỗi bản đồ để nhận hai kỹ năng. Hết năm ải là xong sáu năm.",
     note:
       "Game này mình dựng bằng AI-assisted coding. Phần khó không nằm ở code — nó nằm ở chỗ quyết định cái gì đáng đưa vào và cái gì nên bỏ.",
     controlsHint:
@@ -1331,26 +1331,33 @@ export const content: SiteContent = {
         ],
       },
 
-      /* Ải 2 — leo thùng. Bệ so le cao thấp, hai lưỡi cưa chạy dưới đất. */
+      /* Ải 2 — kho ba tầng, cầu nâng và đường vòng; tiến triển theo tuyến. */
       {
         year: "2020",
         place: "J&T Express",
         name: "Kho Phân Loại",
-        mission: {
-          mode: "route",
-          brief: "Bật hai nhánh A và B, rồi thử chạy tại Cổng ra. Bấm lại một nhánh sẽ tắt nó; có thể chỉnh theo bất kỳ thứ tự nào.",
-          action: "Chuyển tuyến", locked: "Còn nhánh chưa nối. Bật A và B trước khi thử chạy.",
-          exposed: "Luồng hàng đã thông — băng chuyền lộ lõi!",
-          result: "Hai nhánh đã thông về cổng ra, băng chuyền thôi dồn kiện. Luồng đi đúng rồi; ca cao điểm tiếp theo cần xử lý trước khi hàng lại chất đống.",
-          nodes: [{ id: "a", name: "Nhánh A", x: 1760, y: 344 }, { id: "b", name: "Nhánh B", x: 1910, y: 344 }, { id: "dispatch", name: "Cổng ra", x: 2100, y: 344 }],
-          sequence: ["a", "b", "dispatch"], exposureSeconds: 12,
+        traversal: {
+          width: 1100, top: -440,
+          nodes: [
+            { id: "power", name: "Bật điện", x: 350, y: 184,
+              hint: "Leo hai bậc bên trái tới bảng điện.", result: "Có điện — cầu nâng chạy giữa tầng 1 và 2. Đã lưu chặng." },
+            { id: "a", name: "Nối nhánh A", x: 850, y: 44,
+              hint: "Đón cầu nâng ở giữa kho, lên tầng 2 rồi đi sang phải.", result: "Nhánh A đã thông — nguồn bắn tầng 2 dừng. Leo các bậc bên phải lên tầng 3." },
+            { id: "b", name: "Nối nhánh B", x: 220, y: -256,
+              hint: "Leo các bậc bên phải rồi đi sang trái trên tầng 3.", result: "Nhánh B đã thông — mở lối xuống bên trái. Bấm xuống để xuống từng bậc." },
+            { id: "dispatch", name: "Chạy cổng ra", x: 950, y: 344,
+              hint: "Xuống các chiếu nghỉ bên trái, trở về cổng ở tầng 1.", result: "Hai tuyến đã thông — lõi máy lộ ra. Đỡ đúng nhịp để phản đạn hoặc áp sát chém!" },
+          ],
+          lift: { x: 470, width: 120, bottom: 344, top: 44, speed: 90 },
+          shortcut: [[140,-176,140],[140,-96,140],[140,-16,140],[140,64,140],[140,144,140],[140,224,140]],
+          tiers: [{ y: 344, name: "01 · NHẬP HÀNG" }, { y: 44, name: "02 · PHÂN TUYẾN" }, { y: -256, name: "03 · ĐẦU RA" }],
         },
         boss: "Băng Chuyền Kẹt",
         bossKind: "volley",
         line: "Ba trăm nghìn đơn một ngày. Băng chuyền không chờ ai.",
         objective:
-          "Leo hết ba tầng thùng, dọn sạch kiện lạc tuyến, rồi hạ Băng Chuyền Kẹt.",
-        tip: "Lưỡi cưa chỉ chạy dưới đất, phải né bằng chân — đỡ không chặn được bẫy. Trùm ải này bắn loạt ba quả: giữ L để đỡ, bấm L đúng lúc quả đầu tới thì không tốn thể lực và đạn bật ngược vào chính nó.",
+          "Bật điện, đi cầu nâng nối nhánh A và B trên hai tầng, rồi quay về cổng ra để xử lý lõi máy. Không cần dọn hết quái.",
+        tip: "Cầu nâng dừng ở mỗi đầu để bạn bước lên. Nhảy để rời cầu; bấm xuống để xuyên bệ. Mỗi công tắc lưu chặng. Quay mặt về đạn và đỡ đúng lúc để phản đạn vào lõi máy.",
         skills: ["Vận hành quy mô lớn", "Chuẩn hoá chỉ số"],
         palette: {
           sky: "#FFDFAF", far: "#F0BE7E", mid: "#CF8B45",
@@ -1358,33 +1365,27 @@ export const content: SiteContent = {
           mob: "#FFF3DC", boss: "#C0392B",
         },
         deco: "crate",
-        plats: [[280,266,110],[470,214,110],[660,166,110],[900,214,120],[1120,266,120],[1340,206,110],[1560,158,120],[1800,220,130],[2000,270,120]],
+        plats: [[140,264,140],[280,184,140],[360,44,110],[590,44,310],[900,-36,140],[760,-116,140],[900,-196,140],[140,-256,800]],
         mobs: [
-          { kind: "walker", name: "Kiện lạc tuyến", x: 330, y: 266, range: 40 },
-          { kind: "charger", name: "Kiện văng ra", x: 620 },
-          { kind: "walker", name: "Kiện lạc tuyến", x: 710, y: 166, range: 40 },
-          { kind: "charger", name: "Kiện văng ra", x: 1090 },
-          { kind: "walker", name: "Kiện lạc tuyến", x: 1390, y: 206, range: 40 },
-          { kind: "charger", name: "Kiện văng ra", x: 1720 },
-          { kind: "walker", name: "Kiện lạc tuyến", x: 1860, y: 220, range: 50 },
-          { kind: "flyer", name: "Kiện rơi tầng trên", x: 2040, y: 190 },
+          { kind: "walker", name: "Kiện lạc tuyến", x: 680, range: 70 },
+          { kind: "walker", name: "Kiện chắn tầng", x: 650, y: 44, range: 55 },
+          { kind: "shooter", name: "Nguồn kẹt nhánh A", x: 780, y: 44, range: 25 },
+          { kind: "flyer", name: "Kiện rơi tầng trên", x: 960, y: -100, range: 45 },
+          { kind: "walker", name: "Kiện lạc đầu ra", x: 540, y: -256, range: 65 },
+          { kind: "shooter", name: "Nguồn kẹt nhánh B", x: 330, y: -256, range: 20 },
         ],
-        traps: [
-          { kind: "saw", x: 760, w: 260 },
-          { kind: "saw", x: 1420, w: 220 },
-          { kind: "spike", x: 1240, w: 60 },
-        ],
+        traps: [{ kind: "pulse", x: 710, y: 44 }],
         pickups: [
           {
-            kind: "heal", x: 700, y: 166, name: "Bữa trưa ca đêm",
+            kind: "heal", x: 620, y: 44, name: "Bữa trưa ca đêm",
             desc: "Hồi một máu. Ca đêm ở kho ăn lúc hai giờ sáng, ăn xong chạy tiếp tới sáng.",
           },
           {
-            kind: "tool", x: 1610, y: 158, name: "Súng bắn mã",
+            kind: "tool", x: 650, y: -256, name: "Súng bắn mã",
             desc: "12 giây chém nhanh hơn, xa hơn, sát thương gấp đôi. Ba trăm nghìn đơn một ngày thì tốc độ quét là tốc độ cả kho.",
           },
           {
-            kind: "gun", x: 940, y: 214, name: "Súng bắn mã vạch",
+            kind: "gun", x: 200, y: 264, name: "Súng bắn mã vạch",
             desc: "Vũ khí tầm xa, bấm K để bắn, 14 viên. Bắn kiện văng ra từ đầu bên kia lối đi, không phải chờ nó lao tới mới chém được.",
           },
         ],
