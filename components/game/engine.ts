@@ -3,8 +3,8 @@
  *
  * Không phụ thuộc React. Chỉ nhận một <canvas> cùng dữ liệu bản đồ, rồi
  * bắn ra event khi có chuyện đáng để giao diện biết (qua ải, nhặt vật phẩm,
- * tạm dừng, hết game). HUD máu và thanh máu trùm vẽ thẳng trong canvas — nếu
- * đẩy chúng lên React thì mỗi khung hình phải re-render một lần, không đáng.
+ * tạm dừng, hết game). Giao diện có thể dùng HUD HTML với ảnh chụp trạng thái
+ * 10 lần/giây; canvas giữ HUD dự phòng cho runtime độc lập.
  *
  * Toàn bộ bố cục, tên quái, bẫy và vật phẩm đến từ content/content.vi.ts.
  *
@@ -35,6 +35,7 @@ export interface PickupInfo {
 
 /** Ảnh chụp trạng thái ải, để bảng tạm dừng nói đúng việc còn phải làm */
 export interface GameStatus {
+  message: string;
   mapIndex: number;
   mobsLeft: number;
   mobsTotal: number;
@@ -607,6 +608,7 @@ export interface GameInstance {
    * lưu của người chơi rồi báo xuống — engine không đụng vào localStorage.
    */
   setPauseOnPickup(on: boolean): void;
+  setExternalHud(on: boolean): void;
   status(): GameStatus;
   press(key: GameKey): void;
   release(key: GameKey): void;
@@ -637,6 +639,7 @@ export function createGame(
   let phase: GamePhase = "title";
   let raf = 0;
   let destroyed = false;
+  let externalHud = false;
   let deathTimer: number | null = null;
   let last = 0;
   let shake = 0;
@@ -2965,6 +2968,20 @@ export function createGame(
   }
 
   function drawHud(m: GameMap) {
+    if (!externalHud) drawCanvasStatus(m);
+
+    // Combo stays anchored to the character, independently of the status HUD.
+    if (player.comboT > 0 && player.combo > 0) {
+      g!.font = `800 14px ${FONT_DISPLAY}`;
+      g!.textAlign = "center";
+      g!.globalAlpha = Math.min(1, player.comboT * 3);
+      g!.fillStyle = LIME;
+      g!.fillText(`x${player.combo + 1}`, player.x + player.w / 2 - cam, player.y - 22);
+      g!.globalAlpha = 1;
+    }
+  }
+
+  function drawCanvasStatus(m: GameMap) {
     for (let i = 0; i < player.mhp; i++) {
       const heart = img(SCENE_SPRITES.heart);
       if (heart) {
@@ -3076,16 +3093,6 @@ export function createGame(
         g!.fillStyle = LIME;
         g!.fillText(labels.volleyHint, W / 2, 63);
       }
-    }
-
-    // Combo: chỉ hiện khi đang có chuỗi, nằm ngay cạnh nhân vật
-    if (player.comboT > 0 && player.combo > 0) {
-      g!.font = `800 14px ${FONT_DISPLAY}`;
-      g!.textAlign = "center";
-      g!.globalAlpha = Math.min(1, player.comboT * 3);
-      g!.fillStyle = LIME;
-      g!.fillText(`x${player.combo + 1}`, player.x + player.w / 2 - cam, player.y - 22);
-      g!.globalAlpha = 1;
     }
 
     if (msgT > 0) {
@@ -3304,7 +3311,9 @@ export function createGame(
     toggleInventory,
     pauseReason: () => pauseWhy,
     setPauseOnPickup(on: boolean) { pauseOnPickup = on; },
+    setExternalHud(on: boolean) { externalHud = on; },
     status: (): GameStatus => ({
+      message: msgT > 0 ? msg : "",
       mapIndex: lv,
       mobsLeft: mobs.filter((o) => !o.dead).length,
       mobsTotal: mobs.length,
@@ -3315,7 +3324,7 @@ export function createGame(
       toolLeft: player.tool,
       toolName: player.tool > 0 ? player.toolName : null,
       ammo: player.ammo,
-      gunName: player.ammo > 0 ? player.gunName : null,
+      gunName: player.gunName,
       guard: player.stam,
       items: bag.slice(),
     }),

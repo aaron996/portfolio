@@ -1,7 +1,69 @@
 .frame { isolation: isolate; }
+.surface { outline: none; color: #f2f1ec; }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 0; }
+.mapTitle { min-width: 0; }
+.mapTitle p { font-size: 16px; font-weight: 750; }
+.mapTitle span { display: block; font-size: 12px; color: #bebcb5; }
+.actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.actions button { min-height: 44px; padding: 8px 12px; border: 1px solid #67665f; border-radius: 7px; background: #252623; font-size: 13px; }
+.actions button:disabled { opacity: .45; }
+.surface button:focus-visible, .surface select:focus-visible { outline: 3px solid #d4f236; outline-offset: 2px; }
+.canvas { display: block; width: 100%; height: auto; touch-action: none; }
+.hud { flex: none; padding: 9px 12px; background: #182126; color: #f2f1ec; font-size: 13px; line-height: 1.4; font-variant-numeric: tabular-nums; }
+.hudStats { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 18px; }
+.hudStats label { display: flex; align-items: center; gap: 6px; }
+.hud meter { width: 56px; height: 10px; accent-color: #9fd8ff; }
+.hud meter::-webkit-meter-bar { background: #455259; border: 0; }
+.hud meter::-webkit-meter-optimum-value { background: #9fd8ff; }
+.hud meter::-moz-meter-bar { background: #9fd8ff; }
+.hudHint { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 4px; min-height: 19px; }
+.feedback { color: #d4f236; }
+.warning { color: #ffb2a9; }
+.bossHealth { display: flex; align-items: center; gap: 12px; margin-top: 5px; }
+.bossHealth meter { flex: 1; min-width: 40px; }
+.bossHealth meter::-webkit-meter-optimum-value { background: #e0563f; }
+.bossHealth meter::-moz-meter-bar { background: #e0563f; }
+.touchSettings { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: #c7c7bf; }
+.touchSettings label { display: flex; align-items: center; gap: 8px; }
+.touchSettings select { min-height: 44px; background: #252623; color: #f2f1ec; padding: 4px 8px; border: 1px solid #67665f; border-radius: 5px; }
+.touchControls { display: flex; align-items: end; justify-content: space-between; gap: 12px; padding: 8px 0; touch-action: none; }
+.directions, .combat { display: grid; grid-template-columns: repeat(2, auto); gap: 8px; }
+.down { grid-column: span 2; justify-self: center; }
+.expanded { position: fixed; inset: 0; z-index: 100; max-width: none; width: 100%; height: 100dvh; display: flex; flex-direction: column; padding: max(8px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)); background: #101719; overflow: auto; }
+.expanded .toolbar { flex: none; padding: 0 0 8px; }
+.expanded .frame { flex: 1; display: flex; flex-direction: column; min-height: 160px; border-radius: 8px; }
+.expanded .stage { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; overflow: hidden; }
+.expanded .canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.expanded .touchSettings, .expanded .touchControls { flex: none; }
+.expanded .touchSettings { margin-top: 6px; }
+.expanded .instructions { min-height: 0; }
+.expanded .reading { min-height: 160px; }
 .reading { min-height: 610px; }
 .instructions { min-height: 420px; }
 @media (max-width: 639px) {
   .reading { min-height: 580px; }
   .instructions { min-height: 440px; }
+  .toolbar { gap: 6px; }
+  .mapTitle span { font-size: 11px; }
+  .hudStats { gap: 5px 12px; }
+  .hudStats label meter { width: 35px; }
+  .expanded .mapTitle { width: 100%; }
+  .expanded .toolbar { gap: 4px; }
+  .expanded .mapTitle { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .expanded .mapTitle span { max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+@media (min-width: 640px) and (max-height: 540px) {
+  .expanded .toolbar { gap: 6px; padding-bottom: 4px; }
+  .expanded .mapTitle span { display: none; }
+  .expanded .touchControls { padding: 4px 0 0; }
+  .expanded .directions { grid-template-columns: repeat(3, auto); }
+  .expanded .combat { grid-template-columns: repeat(4, auto); }
+  .expanded .down { grid-column: auto; }
+  .expanded .touchControls button { height: 44px; width: 54px; border-radius: 9px; }
+  .expanded .hud { padding: 4px 10px; }
+  .expanded .touchSettings { position: absolute; bottom: max(8px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); margin: 0; }
+  .expanded .touchSettings > span { display: none; }
+  .expanded .touchSettings label { gap: 4px; font-size: 11px; }
+  .expanded .touchSettings select { max-width: 90px; }
+  .expanded:not(.withTouch) .touchSettings { position: static; transform: none; justify-content: flex-end; }
 }
