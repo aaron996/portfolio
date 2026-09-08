@@ -318,6 +318,13 @@ export interface GameContent {
   /** Ghi chú thành thật về việc đây là bản nháp */
   note: string;
   controlsHint: string;
+  display: {
+    expand: string; collapse: string; touchLabel: string;
+    touchAuto: string; touchOn: string; touchOff: string;
+    hp: string; guard: string; ammo: string; noGun: string;
+    remaining: string; toolTime: string; volleyTouch: string;
+    left: string; right: string; jump: string; block: string; shoot: string; attack: string;
+  };
   dropLabel: string;
   rushHint: string;
   startLabel: string;

@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { GameBoard } from "./GameBoard";
+import { GameHud } from "./GameHud";
 import styles from "./OpsGame.module.css";
 import { content } from "@/content/content.vi";
 import {
@@ -38,6 +39,11 @@ function readPauseOnPickup() {
 }
 
 export function OpsGame() {
+  const surfaceRef = useRef<HTMLDivElement>(null);
+  const [expanded, setExpanded] = useState(false);
+  const [touchMode, setTouchMode] = useState<"auto" | "on" | "off">("auto");
+  const [autoTouch, setAutoTouch] = useState(false);
+  const showTouch = touchMode === "on" || (touchMode === "auto" && autoTouch);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameRef = useRef<GameInstance | null>(null);
   const pickupTimer = useRef<number | null>(null);
@@ -105,6 +111,7 @@ export function OpsGame() {
       }
     );
     gameRef.current = instance;
+    instance.setExternalHud(true);
     const saved = readPauseOnPickup();
     pauseOnPickupRef.current = saved;
     setPauseOnPickupState(saved);
@@ -117,6 +124,48 @@ export function OpsGame() {
     };
   }, []);
 
+  useEffect(() => {
+    const media = window.matchMedia("(any-pointer: coarse), (max-width: 767px)");
+    const update = () => setAutoTouch(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    if (!expanded) return;
+    const previousOverflow = document.body.style.overflow;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    document.body.style.overflow = "hidden";
+    surfaceRef.current?.focus({ preventScroll: true });
+    const trapTab = (event: KeyboardEvent) => {
+      if (event.key !== "Tab") return;
+      const root = surfaceRef.current;
+      if (!root || root.querySelector('[role="dialog"]')) return;
+      const controls = Array.from(root.querySelectorAll<HTMLElement>("button, select, a[href]"))
+        .filter((item) => !item.closest("[inert]") && !item.hasAttribute("disabled") && item.getClientRects().length > 0);
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (!first) return;
+      if (event.shiftKey && (document.activeElement === first || document.activeElement === root)) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || document.activeElement === root)) {
+        event.preventDefault(); first.focus();
+      }
+    };
+    document.addEventListener("keydown", trapTab);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", trapTab);
+      if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
+    };
+  }, [expanded]);
+
+  const toggleExpanded = () => {
+    if (expanded) gameRef.current?.pause();
+    setExpanded((value) => !value);
+  };
+
   /** Vào màn chơi: dùng chung cho bắt đầu, qua ải, chơi lại */
   const enterPlay = useCallback((index?: number) => {
     if (clearTimer.current) window.clearTimeout(clearTimer.current);
@@ -128,7 +177,10 @@ export function OpsGame() {
     gameRef.current?.resume();
   }, []);
 
-  const start = useCallback(() => enterPlay(), [enterPlay]);
+  const start = useCallback(() => {
+    if (window.matchMedia("(any-pointer: coarse), (max-width: 767px)").matches) setExpanded(true);
+    enterPlay();
+  }, [enterPlay]);
   const next = useCallback(
     () => enterPlay((lastClear?.index ?? mapIndex) + 1),
     [enterPlay, lastClear, mapIndex]
@@ -175,66 +227,33 @@ export function OpsGame() {
   const panel = game.pickupPanel;
 
   return (
-    <div className="mx-auto w-full max-w-4xl">
-      <div className={`${styles.frame} ${paused ? styles.reading : ""} relative overflow-hidden rounded-2xl border border-ink-700 bg-ink-900`}>
-        {/* Thanh trạng thái: đang ở ải nào, đã nhặt được kỹ năng gì */}
-        <div inert={paused || phase !== "play"} className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-800 px-4 py-3">
-          <div>
-            <p className="font-display text-lg font-bold uppercase tracking-tight text-paper">
-              {map.name}
-            </p>
-            <p className="text-[11px] tracking-wide text-mute-3">
-              Ải {mapIndex + 1}/{game.maps.length} · {map.year} · {map.place}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <ul className="hidden max-w-md flex-wrap justify-end gap-1.5 lg:flex" aria-label={game.skillsLabel}>
-              {ALL_SKILLS.map((s) => {
-                const owned = got.includes(s);
-                return (
-                  <li
-                    key={s}
-                    className={`rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
-                      owned
-                        ? "border-lime bg-lime/10 text-lime"
-                        : "border-ink-700 text-mute-3"
-                    }`}
-                  >
-                    {s}
-                  </li>
-                );
-              })}
-            </ul>
-            <span className="text-xs text-mute lg:hidden">{game.skillProgress.replace("{n}", String(got.length)).replace("{total}", String(ALL_SKILLS.length))}</span>
-            {phase === "play" ? (
-              <div className="flex shrink-0 gap-2">
-                <button
-                  type="button"
-                  onClick={toggleBag}
-                  aria-label={bag.heading}
-                  className="rounded-lg border border-ink-700 px-3 py-1.5 font-display text-xs font-bold uppercase tracking-wide text-mute transition-colors hover:border-lime hover:text-lime"
-                >
-                  🎒
-                </button>
-                <button
-                  type="button"
-                  onClick={togglePause}
-                  aria-label={paused ? pause.resumeLabel : pause.heading}
-                  className="rounded-lg border border-ink-700 px-3 py-1.5 font-display text-xs font-bold uppercase tracking-wide text-mute transition-colors hover:border-lime hover:text-lime"
-                >
-                  {paused ? "▶" : "❚❚"}
-                </button>
-              </div>
-            ) : null}
-          </div>
+    <div ref={surfaceRef} tabIndex={-1} aria-label={game.heading}
+      className={`${styles.surface} ${expanded ? styles.expanded : ""} ${showTouch ? styles.withTouch : ""} mx-auto w-full max-w-4xl`}>
+      <div className={styles.toolbar}>
+        <div className={styles.mapTitle}>
+          <p>{map.name}</p>
+          <span>{mapIndex + 1}/{game.maps.length} · {map.year} · {map.place}</span>
         </div>
-
+        <div className={styles.actions}>
+          {phase === "play" ? <>
+            <button type="button" onClick={toggleBag} disabled={paused} aria-label={bag.heading}>{bag.heading}</button>
+            <button type="button" onClick={togglePause} aria-label={paused ? pause.resumeLabel : pause.heading}>
+              {paused ? pause.resumeLabel : pause.heading}
+            </button>
+          </> : null}
+          <button type="button" onClick={toggleExpanded} aria-pressed={expanded}>
+            {expanded ? game.display.collapse : game.display.expand}
+          </button>
+        </div>
+      </div>
+      <div className={`${styles.frame} ${paused ? styles.reading : ""} relative overflow-hidden rounded-2xl border border-ink-700 bg-ink-900`}>
+        {phase === "play" ? <GameHud instanceRef={gameRef} touch={showTouch} /> : null}
         <div className={`${styles.stage} ${phase !== "play" ? styles.instructions : ""} relative`}>
           <canvas
             ref={canvasRef}
             width={800}
             height={420}
-            className="block h-auto w-full touch-none"
+            className={styles.canvas}
             aria-label={`Màn chơi ${map.name}`}
           />
 
@@ -270,7 +289,7 @@ export function OpsGame() {
                     >
                       {game.startLabel}
                     </button>
-                    <p className="mt-4 text-xs text-mute-3">{game.controlsHint}</p>
+                    <p className="mt-4 text-xs text-mute-3">{showTouch ? pause.mobileControls : game.controlsHint}</p>
                   </>
                 ) : null}
 
@@ -308,7 +327,7 @@ export function OpsGame() {
                     <p className="mt-3 text-sm leading-relaxed text-mute">{game.finish.body}</p>
                     <div className="mt-6 flex flex-wrap justify-center gap-3">
                       <Link
-                        href="/#featured"
+                        href="/#cases"
                         className="rounded-lg bg-lime px-6 py-3 font-display text-sm font-bold uppercase tracking-wide text-ink-950 transition-transform hover:scale-[1.04]"
                       >
                         {game.finish.cta}
@@ -481,7 +500,7 @@ export function OpsGame() {
                 ) : null}
                 <p className="mt-2 border-t border-ink-800 pt-2 text-[11px] leading-snug text-mute">
                   <span className="font-semibold text-mute-2">{pause.tipHeading}: </span>
-                  {map.tip}
+                  {showTouch ? map.tip.replaceAll("bấm L", "bấm ĐỠ").replaceAll("giữ L", "giữ ĐỠ").replaceAll("bấm K", "bấm BẮN") : map.tip}
                 </p>
                 {map.mobs.some((mob) => mob.kind === "rider" || mob.kind === "charger") && (
                   <p className="mt-2 text-[11px] leading-snug text-mute">{game.rushHint}</p>
@@ -491,11 +510,11 @@ export function OpsGame() {
               {/* Màn hình hẹp: cả thẻ game chỉ cao khoảng 290px, nhồi thêm bảng
                   phím vào là phải cuộn mới thấy nút. Ở đó chơi bằng nút ảo nên
                   bảng phím không cần thiết — thay bằng một dòng. */}
-              <p className="text-[11px] leading-snug text-mute sm:hidden">
+              <p className="text-[11px] leading-snug text-mute" hidden={!showTouch}>
                 {pause.mobileControls}
               </p>
 
-              <div className="hidden sm:block">
+              <div hidden={showTouch}>
                 <p className="font-display text-[10px] font-bold uppercase tracking-widest text-mute-3">
                   {pause.controlsHeading}
                 </p>
@@ -516,71 +535,36 @@ export function OpsGame() {
         ) : null}
       </div>
 
-      {/* Nút ảo — chỉ hiện trên màn hình cảm ứng hoặc màn hình hẹp.
-          Sáu hành động không nhét vừa một hàng, nên cụm phải xếp hai tầng:
-          tầng trên là né (nhảy, đỡ), tầng dưới là đánh (chém, bắn). */}
-      <div inert={paused || phase !== "play"} className={`mt-3 flex items-end justify-between gap-2 md:hidden ${paused || phase !== "play" ? "opacity-40" : ""}`}>
-        <div className="grid grid-cols-2 gap-2">
-          <button type="button" aria-label="Sang trái" {...padProps("left")} className={PAD}>
-            ◀
-          </button>
-          <button type="button" aria-label="Sang phải" {...padProps("right")} className={PAD}>
-            ▶
-          </button>
-          <button type="button" aria-label={game.dropLabel} {...padProps("down")} className={`${PAD} col-span-2 justify-self-center`}>
-            ▼
-          </button>
-        </div>
-
-        <div className="flex shrink-0 flex-col gap-2">
-          <button
-            type="button"
-            aria-label={bag.heading}
-            onClick={toggleBag}
-            className="grid h-10 w-10 touch-none select-none place-items-center rounded-xl border border-ink-700 bg-ink-850 text-sm text-mute active:border-lime active:text-lime"
-          >
-            🎒
-          </button>
-          <button
-            type="button"
-            aria-label={pause.heading}
-            onClick={togglePause}
-            className="grid h-10 w-10 touch-none select-none place-items-center rounded-xl border border-ink-700 bg-ink-850 text-xs text-mute active:border-lime active:text-lime"
-          >
-            {paused ? "▶" : "❚❚"}
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            aria-label="Đỡ đòn"
-            {...padProps("guard")}
-            className={`${ACT} border-[#9fd8ff] text-[#9fd8ff]`}
-          >
-            Đỡ
-          </button>
-          <button type="button" aria-label="Nhảy" {...padProps("jump")} className={PAD}>
-            ▲
-          </button>
-          <button
-            type="button"
-            aria-label="Bắn"
-            {...padProps("shoot")}
-            className={`${ACT} border-[#9fd8ff] bg-[#9fd8ff] text-ink-950`}
-          >
-            Bắn
-          </button>
-          <button
-            type="button"
-            aria-label="Chém"
-            {...padProps("atk")}
-            className={`${ACT} border-lime bg-lime text-ink-950`}
-          >
-            Chém
-          </button>
-        </div>
+      <div className={styles.touchSettings}>
+        <label>
+          {game.display.touchLabel}
+          <select value={touchMode} onChange={(event) => {
+            (["left", "right", "jump", "down", "guard", "atk", "shoot"] as GameKey[])
+              .forEach((key) => gameRef.current?.release(key));
+            setTouchMode(event.target.value as "auto" | "on" | "off");
+          }}>
+            <option value="auto">{game.display.touchAuto}</option>
+            <option value="on">{game.display.touchOn}</option>
+            <option value="off">{game.display.touchOff}</option>
+          </select>
+        </label>
+        <span>{game.skillProgress.replace("{n}", String(got.length)).replace("{total}", String(ALL_SKILLS.length))}</span>
       </div>
+      {showTouch && phase === "play" && !paused ? (
+        <div className={styles.touchControls}>
+          <div className={styles.directions}>
+            <button type="button" aria-label={game.display.left} {...padProps("left")} className={PAD}>◀</button>
+            <button type="button" aria-label={game.display.right} {...padProps("right")} className={PAD}>▶</button>
+            <button type="button" aria-label={game.dropLabel} {...padProps("down")} className={`${PAD} ${styles.down}`}>▼</button>
+          </div>
+          <div className={styles.combat}>
+            <button type="button" {...padProps("guard")} className={`${ACT} border-[#9fd8ff] text-[#9fd8ff]`}>{game.display.block}</button>
+            <button type="button" {...padProps("jump")} className={PAD}>{game.display.jump}</button>
+            <button type="button" {...padProps("shoot")} className={`${ACT} border-[#9fd8ff] bg-[#9fd8ff] text-ink-950`}>{game.display.shoot}</button>
+            <button type="button" {...padProps("atk")} className={`${ACT} border-lime bg-lime text-ink-950`}>{game.display.attack}</button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

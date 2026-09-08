@@ -1183,6 +1183,14 @@ export const content: SiteContent = {
       "Game này mình dựng bằng AI-assisted coding. Phần khó không nằm ở code — nó nằm ở chỗ quyết định cái gì đáng đưa vào và cái gì nên bỏ.",
     controlsHint:
       "← → di chuyển · ↑/Space nhảy · ↓/S xuống bệ · J chém · K bắn · L đỡ · B túi đồ · P tạm dừng",
+    display: {
+      expand: "Mở rộng", collapse: "Thu nhỏ", touchLabel: "Nút cảm ứng",
+      touchAuto: "Tự động", touchOn: "Luôn hiện", touchOff: "Ẩn",
+      hp: "Máu", guard: "Đỡ", ammo: "Đạn", noGun: "Chưa có súng",
+      remaining: "Còn {n}/{total} quái", toolTime: "Đồ nghề: {n}s",
+      volleyTouch: "ĐỠ đúng lúc đạn chạm để phản đạn",
+      left: "Sang trái", right: "Sang phải", jump: "Nhảy", block: "Đỡ", shoot: "Bắn", attack: "Chém",
+    },
     dropLabel: "Nhảy xuống bệ thấp",
     rushHint: "Quái báo đỏ: nhảy qua hoặc đỡ phía trước. Vòng xanh: quái đang nghỉ, áp sát chém!",
     startLabel: "Bắt đầu",
