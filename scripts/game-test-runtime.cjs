@@ -31,6 +31,10 @@ function evaluate(file, globals = {}) {
   const exports = {};
   vm.runInNewContext(compile(file), {
     exports, process: { env: { NODE_ENV: 'production' } }, console,
+    require: (name) => {
+      if (name === './chapterMission') return evaluate('components/game/chapterMission.ts');
+      throw new Error(`Unexpected engine dependency: ${name}`);
+    },
     Image: class { complete = false; naturalWidth = 0; },
     getComputedStyle: () => ({ getPropertyValue: () => '' }),
     matchMedia: () => ({ matches: true }), performance: { now: () => 0 },
@@ -42,7 +46,7 @@ function evaluate(file, globals = {}) {
 }
 const content = evaluate('content/content.vi.ts').content;
 function fixture(overrides = {}, options = {}) {
-  const map = { ...content.game.maps[0], traps: [], pickups: [],
+  const map = { ...content.game.maps[0], mission: undefined, traps: [], pickups: [],
     mobs: [{ kind: 'walker', name: 'sentinel', x: 2100, range: 10 }],
     plats: [], ...overrides };
   const canvas = { getContext: () => ({}), addEventListener() {}, removeEventListener() {} };

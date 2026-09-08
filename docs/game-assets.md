@@ -25,6 +25,9 @@ một thứ mới nhìn thấy được thì cập nhật bảng này ngay trong
 
 Bổ sung combat: `armed-idle.png` + `raise-gun.png` ngoài bộ gốc. Vòng báo hướng
 lao, vòng hồi sức xanh và viền đạn phản dùng canvas, không cần sinh thêm ảnh.
+Các điểm tương tác nhiệm vụ cũng dùng ký hiệu chiến thuật bằng canvas (vòng sàn,
+tên điểm, mũi tên và dấu hoàn tất), cùng quy ước với vòng đỡ. Đây là lớp chỉ dẫn,
+không phải vật thể cảnh đang chờ thay bằng sprite.
 
 **Đã xong (176 tấm):** 22 khung nhân vật · 64 khung quái (16 loại × 4) · 40 khung trùm
 (đứng, báo đòn, trúng đòn, đi, ra đòn) · 20 lớp nền · 4 bẫy · 15 vật phẩm

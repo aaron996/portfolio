@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { GameBoard } from "./GameBoard";
 import { GameHud } from "./GameHud";
+import { GameAudio } from "./gameAudio";
 import styles from "./OpsGame.module.css";
 import { content } from "@/content/content.vi";
 import {
@@ -28,6 +29,10 @@ const PICKUP_CARD_MS = 5200;
  * localStorage thì lần sau mở lại trang vẫn còn.
  */
 const PAUSE_ON_PICKUP_KEY = "opsgame:pause-on-pickup";
+const PROGRESS_KEY = "opsgame:progress-v1";
+const TUTORIAL_KEY = "opsgame:tutorial-v1";
+const SOUND_KEY = "opsgame:muted";
+type SavedProgress = { nextMap: number; skills: string[] };
 
 function readPauseOnPickup() {
   try {
@@ -36,6 +41,21 @@ function readPauseOnPickup() {
     // Trình duyệt chặn lưu trữ (chế độ riêng tư, cookie bị khoá) — cứ dừng
     return true;
   }
+}
+
+function readProgress(): SavedProgress | null {
+  try {
+    const value: unknown = JSON.parse(localStorage.getItem(PROGRESS_KEY) ?? "null");
+    if (!value || typeof value !== "object") return null;
+    const saved = value as Partial<SavedProgress>;
+    if (!Number.isInteger(saved.nextMap) || saved.nextMap! < 1 || saved.nextMap! >= game.maps.length ||
+      !Array.isArray(saved.skills) || !saved.skills.every((skill) => typeof skill === "string")) return null;
+    return { nextMap: saved.nextMap!, skills: game.maps.slice(0, saved.nextMap!).flatMap((map) => map.skills) };
+  } catch { return null; }
+}
+
+function hasFinishedTutorial() {
+  try { return localStorage.getItem(TUTORIAL_KEY) === "1"; } catch { return false; }
 }
 
 export function OpsGame() {
@@ -48,8 +68,12 @@ export function OpsGame() {
   const gameRef = useRef<GameInstance | null>(null);
   const pickupTimer = useRef<number | null>(null);
   const clearTimer = useRef<number | null>(null);
+  const tutorialTimer = useRef<number | null>(null);
+  const audioRef = useRef<GameAudio | null>(null);
+  const [muted, setMuted] = useState(false);
   /** Engine đọc cờ này qua setPauseOnPickup; ref để handler không bị đóng băng giá trị cũ */
   const pauseOnPickupRef = useRef(true);
+  const tutorialStepRef = useRef<number | null>(null);
 
   const [phase, setPhase] = useState<Phase>("title");
   const [mapIndex, setMapIndex] = useState(0);
@@ -61,10 +85,20 @@ export function OpsGame() {
   /** Ảnh chụp lúc bấm tạm dừng — bảng hướng dẫn đọc từ đây, không đọc mỗi khung hình */
   const [status, setStatus] = useState<GameStatus | null>(null);
   const [pickup, setPickup] = useState<PickupInfo | null>(null);
+  const [savedProgress, setSavedProgress] = useState<SavedProgress | null>(null);
+  const [tutorialStep, setTutorialStep] = useState<number | null>(null);
+
+  const setTutorial = useCallback((next: number | null) => {
+    tutorialStepRef.current = next;
+    setTutorialStep(next);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const audio = new GameAudio();
+    audioRef.current = audio;
+    try { const off = localStorage.getItem(SOUND_KEY) === "1"; setMuted(off); audio.setMuted(off); } catch { /* session default */ }
 
     const instance = createGame(
       canvas,
@@ -83,16 +117,29 @@ export function OpsGame() {
         pauseHint: game.pauseHint,
       },
       {
-        onMap: (i) => setMapIndex(i),
+        onSound: (sound) => audio.play(sound),
+        onMap: (i) => {
+          setMapIndex(i);
+          if (i !== 0) setTutorial(null);
+        },
         onCleared: (i, skills) => {
           setGot((prev) => [...prev, ...skills.filter((s) => !prev.includes(s))]);
           setLastClear({ index: i, skills });
+          if (i + 1 < game.maps.length) {
+            const progress = { nextMap: i + 1, skills: game.maps.slice(0, i + 1).flatMap((map) => map.skills) };
+            setSavedProgress(progress);
+            try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); } catch { /* session still continues */ }
+          } else {
+            setSavedProgress(null);
+            try { localStorage.removeItem(PROGRESS_KEY); } catch { /* completed in this session */ }
+          }
           // Đợi hiệu ứng nổ và màn tối chạy xong rồi mới đưa bảng tổng kết lên
           clearTimer.current = window.setTimeout(() => {
             setPhase(i + 1 >= game.maps.length ? "end" : "clear");
-          }, 900);
+          }, game.maps[i].mission ? 1800 : 900);
         },
         onPause: (next, reason) => {
+          audio.setPaused(next);
           setPaused(next);
           setPauseWhy(reason);
           if (next) setStatus(gameRef.current?.status() ?? null);
@@ -108,6 +155,18 @@ export function OpsGame() {
             pickupTimer.current = window.setTimeout(() => setPickup(null), PICKUP_CARD_MS);
           }
         },
+        onTutorialAction: (key) => {
+          const current = tutorialStepRef.current;
+          const needed: GameKey[] = ["right", "jump", "atk", "guard"];
+          if (current === null || key !== needed[current]) return;
+          if (current + 1 < needed.length) setTutorial(current + 1);
+          else {
+            setTutorial(4);
+            try { localStorage.setItem(TUTORIAL_KEY, "1"); } catch { /* only this session needs it */ }
+            if (tutorialTimer.current) window.clearTimeout(tutorialTimer.current);
+            tutorialTimer.current = window.setTimeout(() => setTutorial(null), 2600);
+          }
+        },
       }
     );
     gameRef.current = instance;
@@ -116,13 +175,17 @@ export function OpsGame() {
     pauseOnPickupRef.current = saved;
     setPauseOnPickupState(saved);
     instance.setPauseOnPickup(saved);
+    setSavedProgress(readProgress());
     return () => {
       if (pickupTimer.current) window.clearTimeout(pickupTimer.current);
       if (clearTimer.current) window.clearTimeout(clearTimer.current);
+      if (tutorialTimer.current) window.clearTimeout(tutorialTimer.current);
       instance.destroy();
+      audio.destroy();
+      audioRef.current = null;
       gameRef.current = null;
     };
-  }, []);
+  }, [setTutorial]);
 
   useEffect(() => {
     const media = window.matchMedia("(any-pointer: coarse), (max-width: 767px)");
@@ -168,6 +231,8 @@ export function OpsGame() {
 
   /** Vào màn chơi: dùng chung cho bắt đầu, qua ải, chơi lại */
   const enterPlay = useCallback((index?: number) => {
+    audioRef.current?.activate();
+    audioRef.current?.setPaused(false);
     if (clearTimer.current) window.clearTimeout(clearTimer.current);
     if (pickupTimer.current) window.clearTimeout(pickupTimer.current);
     setPickup(null);
@@ -179,8 +244,19 @@ export function OpsGame() {
 
   const start = useCallback(() => {
     if (window.matchMedia("(any-pointer: coarse), (max-width: 767px)").matches) setExpanded(true);
-    enterPlay();
-  }, [enterPlay]);
+    setGot([]);
+    setSavedProgress(null);
+    try { localStorage.removeItem(PROGRESS_KEY); } catch { /* current run remains playable */ }
+    setTutorial(hasFinishedTutorial() ? null : 0);
+    enterPlay(0);
+  }, [enterPlay, setTutorial]);
+  const continueSaved = useCallback(() => {
+    if (!savedProgress) return;
+    if (window.matchMedia("(any-pointer: coarse), (max-width: 767px)").matches) setExpanded(true);
+    setGot(savedProgress.skills);
+    setTutorial(null);
+    enterPlay(savedProgress.nextMap);
+  }, [enterPlay, savedProgress, setTutorial]);
   const next = useCallback(
     () => enterPlay((lastClear?.index ?? mapIndex) + 1),
     [enterPlay, lastClear, mapIndex]
@@ -188,8 +264,11 @@ export function OpsGame() {
   const restartAll = useCallback(() => {
     setGot([]);
     setLastClear(null);
+    setSavedProgress(null);
+    setTutorial(hasFinishedTutorial() ? null : 0);
+    try { localStorage.removeItem(PROGRESS_KEY); } catch { /* current run remains new */ }
     enterPlay(0);
-  }, [enterPlay]);
+  }, [enterPlay, setTutorial]);
   const restartMap = useCallback(() => enterPlay(mapIndex), [enterPlay, mapIndex]);
   const togglePause = useCallback(() => gameRef.current?.togglePause(), []);
   const toggleBag = useCallback(() => gameRef.current?.toggleInventory(), []);
@@ -235,6 +314,11 @@ export function OpsGame() {
           <span>{mapIndex + 1}/{game.maps.length} · {map.year} · {map.place}</span>
         </div>
         <div className={styles.actions}>
+          <button type="button" aria-pressed={!muted} onClick={() => {
+            const off = !muted;
+            setMuted(off); audioRef.current?.setMuted(off); audioRef.current?.activate();
+            try { localStorage.setItem(SOUND_KEY, off ? "1" : "0"); } catch { /* session preference */ }
+          }}>{muted ? game.soundOnLabel : game.soundOffLabel}</button>
           {phase === "play" ? <>
             <button type="button" onClick={toggleBag} disabled={paused} aria-label={bag.heading}>{bag.heading}</button>
             <button type="button" onClick={togglePause} aria-label={paused ? pause.resumeLabel : pause.heading}>
@@ -275,6 +359,17 @@ export function OpsGame() {
             </div>
           ) : null}
 
+          {phase === "play" && tutorialStep !== null && !paused ? (
+            <div className={styles.tutorial} role="status">
+              <span>{game.tutorial[tutorialStep === 4 ? "done" : (["move", "jump", "attack", "guard"] as const)[tutorialStep]]}</span>
+              {tutorialStep < 4 ? <small>{tutorialStep + 1}/4</small> : null}
+              {tutorialStep < 4 ? <button type="button" onClick={() => {
+                setTutorial(null);
+                try { localStorage.setItem(TUTORIAL_KEY, "1"); } catch { /* skip for this session */ }
+              }}>{game.tutorial.skip}</button> : null}
+            </div>
+          ) : null}
+
           {phase !== "play" ? (
             <GameBoard label={phase === "title" ? game.heading : phase === "end" ? game.finish.heading : game.clearHeading.replace("{n}", String((lastClear?.index ?? 0) + 1))} centered>
               <div className="max-w-sm">
@@ -282,13 +377,17 @@ export function OpsGame() {
                   <>
                     <h2 className="display text-3xl text-paper">{game.heading}</h2>
                     <p className="mt-3 text-sm leading-relaxed text-mute">{game.intro}</p>
-                    <button
-                      type="button"
-                      onClick={start}
-                      className="mt-6 rounded-lg bg-lime px-7 py-3 font-display text-sm font-bold uppercase tracking-wide text-ink-950 transition-transform hover:scale-[1.04]"
-                    >
-                      {game.startLabel}
-                    </button>
+                    <div className="mt-6 flex flex-wrap justify-center gap-3">
+                      {savedProgress ? <button type="button" onClick={continueSaved}
+                        className="rounded-lg bg-lime px-7 py-3 font-display text-sm font-bold uppercase tracking-wide text-ink-950 transition-transform hover:scale-[1.04]">
+                        {game.continueLabel.replace("{n}", String(savedProgress.nextMap + 1))}
+                      </button> : null}
+                      <button type="button" onClick={start}
+                        className={`${savedProgress ? "border border-ink-700 text-mute" : "bg-lime text-ink-950"} rounded-lg px-7 py-3 font-display text-sm font-bold uppercase tracking-wide transition-transform hover:scale-[1.04]`}>
+                        {savedProgress ? game.newRunLabel : game.startLabel}
+                      </button>
+                    </div>
+                    {savedProgress ? <p className="mt-3 text-xs text-mute-3">{game.savedRunLabel.replace("{n}", String(savedProgress.nextMap + 1))}</p> : null}
                     <p className="mt-4 text-xs text-mute-3">{showTouch ? pause.mobileControls : game.controlsHint}</p>
                   </>
                 ) : null}
@@ -299,7 +398,7 @@ export function OpsGame() {
                       {game.clearHeading.replace("{n}", String(lastClear.index + 1))}
                     </h2>
                     <p className="mt-3 text-sm leading-relaxed text-mute">
-                      {game.maps[lastClear.index].line}
+                      {game.maps[lastClear.index].mission?.result ?? game.maps[lastClear.index].line}
                     </p>
                     <ul className="mt-4 flex flex-wrap justify-center gap-2">
                       {lastClear.skills.map((s) => (
@@ -325,6 +424,7 @@ export function OpsGame() {
                   <>
                     <h2 className="display text-3xl text-paper">{game.finish.heading}</h2>
                     <p className="mt-3 text-sm leading-relaxed text-mute">{game.finish.body}</p>
+                    <p className="mt-3 text-sm leading-relaxed text-mute">{game.maps[game.maps.length - 1].mission?.result}</p>
                     <div className="mt-6 flex flex-wrap justify-center gap-3">
                       <Link
                         href="/#cases"
@@ -337,7 +437,7 @@ export function OpsGame() {
                         onClick={restartAll}
                         className="rounded-lg border border-ink-700 px-6 py-3 text-sm text-mute transition-colors hover:border-mute-3 hover:text-paper"
                       >
-                        Chơi lại từ ải 1
+                        {game.newRunLabel}
                       </button>
                     </div>
                   </>
@@ -489,6 +589,7 @@ export function OpsGame() {
                   {pause.objectiveHeading}
                 </p>
                 <p className="mt-1.5 text-[13px] leading-snug text-paper">{map.objective}</p>
+                {map.mission ? <p className="mt-2 text-[13px] leading-snug text-paper">{map.mission.brief}</p> : null}
                 {status ? (
                   <p className="mt-2 text-[11px] leading-snug text-mute-2">
                     {status.bossAlive || status.mobsLeft === 0

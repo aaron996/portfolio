@@ -278,6 +278,7 @@ export interface GamePickup {
 }
 
 export interface GameMap {
+  mission?: import("@/components/game/chapterMission").ChapterMission;
   year: string;
   place: string;
   /** Tên bản đồ hiện trên HUD */
@@ -322,12 +323,26 @@ export interface GameContent {
     expand: string; collapse: string; touchLabel: string;
     touchAuto: string; touchOn: string; touchOff: string;
     hp: string; guard: string; ammo: string; noGun: string;
-    remaining: string; toolTime: string; volleyTouch: string;
+    remaining: string; remainingTarget: string; toolTime: string; volleyTouch: string;
     left: string; right: string; jump: string; block: string; shoot: string; attack: string;
   };
   dropLabel: string;
   rushHint: string;
   startLabel: string;
+  soundOnLabel: string;
+  soundOffLabel: string;
+  continueLabel: string;
+  newRunLabel: string;
+  savedRunLabel: string;
+  checkpointLabel: string;
+  tutorial: {
+    skip: string;
+    move: string;
+    jump: string;
+    attack: string;
+    guard: string;
+    done: string;
+  };
   /** Có {n} — số thứ tự ải kế tiếp */
   nextLabel: string;
   /** Có {n} — số thứ tự ải vừa qua */
