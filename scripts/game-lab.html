@@ -2,13 +2,14 @@
 <html lang="vi"><meta charset="utf-8"><title>Game combat diagnostic</title>
 <style>body{background:#17191b;color:#f6f6f4;font:15px system-ui;max-width:1000px;margin:24px auto}button{padding:12px;margin:4px;background:#30353b;color:white;border:1px solid #63717f;border-radius:8px;cursor:pointer}canvas{width:100%;image-rendering:auto}pre{white-space:pre-wrap}</style>
 <h1>Game combat diagnostic — actual engine</h1>
-<div id="scenarios"><button data-scene="gun">Gun</button><button data-scene="drop">Drop</button><button data-scene="reflect">Reflect</button><button data-scene="rider">Rider</button><button data-scene="mission0">Port mission</button><button data-scene="mission1">Route mission</button><button data-scene="mission2">Timing mission</button><button data-scene="mission3">Trace mission</button><button data-scene="mission4">Rules mission</button></div>
+<div id="scenarios"><button data-scene="warehouse">Warehouse route</button><button data-scene="gun">Gun</button><button data-scene="drop">Drop</button><button data-scene="reflect">Reflect</button><button data-scene="rider">Rider</button><button data-scene="mission0">Port mission</button><button data-scene="mission1">Route mission</button><button data-scene="mission2">Timing mission</button><button data-scene="mission3">Trace mission</button><button data-scene="mission4">Rules mission</button></div>
 <div><button id="next-node">Move to next node</button><button id="interact">Interact (E)</button><button id="checkpoint">Restart checkpoint</button></div>
 <div><button id="shoot">Shoot</button><button id="down">Down</button><button id="guard">Guard</button><button id="step">Step 0.1s</button><button id="half">Step 0.5s</button><button id="face">Turn</button></div>
-<canvas width="800" height="420"></canvas><pre id="state"></pre>
+<button id="walk-route">Walk complete warehouse route</button><div id="route-frames"></div><canvas width="800" height="420"></canvas><pre id="state"></pre>
 <script type="module">
 import { createGame } from './engine.js';
 import { content } from './content.js';
+import { warehouseRoute } from './warehouse-route.js';
 window.requestAnimationFrame = () => 0;
 let game;
 let activeMap;
@@ -21,6 +22,10 @@ function render(){
 function advance(seconds){for(let i=0;i<Math.round(seconds*120);i++) game.lab.step(1/120);render();}
 function scene(which){
   game?.destroy();
+  if(which==='warehouse') {
+    activeMap=content.game.maps[1];game=createGame(canvas,content.game.maps,content.game);
+    game.loadMap(1);game.resume();game.setPauseOnPickup(false);game.lab.player.ground=true;game.lab.player.inv=1000;render();return;
+  }
   if(which.startsWith('mission')) {
     const index=Number(which.slice(7)); activeMap=content.game.maps[index];
     game=createGame(canvas,content.game.maps,content.game);
@@ -29,7 +34,7 @@ function scene(which){
     advance(.1);return;
   }
   const base = content.game.maps[which==='rider'?2:1];
-  const map = {...base, mission:undefined,traps:[],pickups:[],plats:which==='drop'?[[160,240,160],[140,160,180]]:[],mobs:[{kind:'walker',name:'sentinel',x:2100,range:10}]};
+  const map = {...base, mission:undefined,traversal:undefined,traps:[],pickups:[],plats:which==='drop'?[[160,240,160],[140,160,180]]:[],mobs:[{kind:'walker',name:'sentinel',x:2100,range:10}]};
   if(which==='rider') map.mobs=[{kind:'rider',name:'Shipper',x:350,range:70}];
   const index=which==='rider'?2:1;
   const maps=content.game.maps.map((m,i)=>i===index?map:m);
@@ -43,6 +48,10 @@ function scene(which){
   if(which==='rider')game.lab.mobs[0].cd=0;
   render();
 }
+document.querySelector('#walk-route').onclick=()=>{
+  scene('warehouse');const frames=document.querySelector('#route-frames');frames.replaceChildren();
+  warehouseRoute(game,(stage)=>{render();const img=document.createElement('img');img.alt='Warehouse stage '+stage;img.src=canvas.toDataURL();img.style.width='100%';frames.append(img);});render();
+};
 document.querySelector('#scenarios').onclick=e=>{if(e.target.dataset.scene)scene(e.target.dataset.scene)};
 document.querySelector('#next-node').onclick=()=>{
   const node=activeMap?.mission?.nodes.find(node=>node.name===game.status().mission?.next);

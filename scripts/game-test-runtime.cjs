@@ -16,7 +16,9 @@ function compile(file, browser = false) {
     source = source.replace(anchor, `  return {
     lab: { player, step, stepMob, playerFrame, draw, fire, spawnBoss, hurtPlayer, onKeyDown,
       get mobs() { return mobs; }, get shots() { return shots; },
-      get bullets() { return bullets; }, get boss() { return boss; } },
+      get bullets() { return bullets; }, get boss() { return boss; },
+      get liftY() { return liftY; }, get camera() { return {x:cam,y:camY}; },
+      get platforms() { return surfaces(); }, get pickups() { return pickups; } },
     loadMap,`);
     if (browser) source += '\nexport { drawRig, playerRig, mobRig, mobRef, bossRig, HEAD_PX, BOSS_PX };';
   }

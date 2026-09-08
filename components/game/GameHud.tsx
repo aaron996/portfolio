@@ -35,6 +35,7 @@ export function GameHud({ instanceRef, touch }: {
     ? map.mission.locked
     : status.bossAlive && map.bossKind === "volley"
     ? (touch ? labels.volleyTouch : game.volleyHint)
+    : status.traversal ? `${status.traversal.floor} · ${status.traversal.completed}/${status.traversal.total} chặng`
     : labels.remaining.replace("{n}", String(status.mobsLeft)).replace("{total}", String(status.mobsTotal));
   const message = touch ? status.message.replace("J", labels.attack) : status.message;
   return (
@@ -60,6 +61,13 @@ export function GameHud({ instanceRef, touch }: {
         {status.bossAlive && status.checkpoint ? <span className={styles.checkpoint}>{game.checkpointLabel}</span> : null}
         <span role="status" className={styles.feedback}>{message}</span>
       </div>
+      {status.traversal && !status.bossAlive ? <div className={styles.missionHud}>
+        <p><strong>{status.traversal.next} {status.traversal.direction}</strong> · {status.traversal.hint}</p>
+        {status.traversal.checkpoint ? <span className={styles.checkpoint}>Chặng đã lưu: {status.traversal.checkpoint}</span> : null}
+        {status.traversal.nearby ? <button type="button" onClick={() => {
+          instanceRef.current?.press("interact"); instanceRef.current?.release("interact");
+        }}>{status.traversal.nearby}{touch ? "" : " (E)"}</button> : null}
+      </div> : null}
       {map.mission && status.mission ? <div className={styles.missionHud}>
         <p>{!status.bossAlive ? map.mission.brief : status.mission.exposure > 0
           ? `${map.mission.exposed}${map.mission.mode === "rules" ? "" : ` (${status.mission.exposure}s)`}`

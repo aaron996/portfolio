@@ -278,6 +278,15 @@ export interface GamePickup {
 }
 
 export interface GameMap {
+  /** Optional vertical route. Coordinates share the existing ground line y=344. */
+  traversal?: {
+    width: number;
+    top: number;
+    nodes: { id: string; name: string; x: number; y: number; hint: string; result: string }[];
+    lift: { x: number; width: number; bottom: number; top: number; speed: number };
+    shortcut: [number, number, number][];
+    tiers: { y: number; name: string }[];
+  };
   mission?: import("@/components/game/chapterMission").ChapterMission;
   year: string;
   place: string;
@@ -305,7 +314,7 @@ export interface GameMap {
   };
   /** Hình khối trang trí ở lớp giữa */
   deco: "container" | "crate" | "tower" | "server" | "gear";
-  /** Bệ nhảy: [x, y, rộng] trong toạ độ thế giới rộng 2200px */
+  /** Bệ nhảy: [x, y, rộng]; mặc định rộng 2200px, traversal có giới hạn riêng */
   plats: [number, number, number][];
   mobs: GameMobSpawn[];
   traps: GameTrap[];

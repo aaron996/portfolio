@@ -4,6 +4,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { root, compile } = require('./game-test-runtime.cjs');
 const modules = {
+  '/warehouse-route.js': fs.readFileSync(path.join(__dirname, 'warehouse-route.cjs'),'utf8')
+    .replace("const assert = require('node:assert/strict');", "const assert = {ok(v,m){if(!v)throw Error(m)},equal(a,b,m){if(a!==b)throw Error(m || (a+' != '+b))}};")
+    .replace("const { advance } = require('./game-test-runtime.cjs');", "function advance(g,s){for(let i=0;i<Math.round(s*120);i++)g.lab.step(1/120)}")
+    .replace('module.exports={warehouseRoute};', 'export { warehouseRoute };'),
   '/chapterMission': compile('components/game/chapterMission.ts', true),
   '/engine.js': 'const process = {env:{NODE_ENV:"production"}};\n' + compile('components/game/engine.ts', true),
   '/content.js': compile('content/content.vi.ts', true),

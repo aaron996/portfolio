@@ -4,12 +4,13 @@ const { fixture, advance, content, evaluate } = require('./game-test-runtime.cjs
 
 test('chapter rules differ: matching, toggle routing, timing, ordered tracing, persistent prevention', () => {
   const { MissionRun } = evaluate('components/game/chapterMission.ts');
-  const runs = content.game.maps.map((map) => new MissionRun(map.mission));
+  const runs = content.game.maps.filter((map) => map.mission).map((map) => new MissionRun(map.mission));
   const use = (run, id) => {
     const node = run.definition.nodes.find((entry) => entry.id === id);
     return run.interact(node.x, node.y);
   };
-  const [match, route, timing, trace, rules] = runs;
+  const [match, timing, trace, rules] = runs;
+  const route = new MissionRun({ mode: 'route', nodes: [{id:'a',x:0,y:0},{id:'b',x:100,y:0},{id:'dispatch',x:200,y:0}], sequence: ['a','b','dispatch'], exposureSeconds: 12 });
   assert.equal(use(match, 'wrong-one'), 'wrong');
   assert.equal(use(match, 'correct'), 'exposed');
   assert.equal(use(route, 'dispatch'), 'wrong');

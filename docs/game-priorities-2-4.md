@@ -18,6 +18,8 @@
 
 ## Năm nhiệm vụ
 
+Cập nhật ải 2: xem [kho ba tầng](warehouse-vertical-plan.md). Kho Phân Loại mở nhiệm vụ ngay từ đầu, có checkpoint tại công tắc và không yêu cầu dọn sạch quái. Mô tả mở khóa boss theo thời gian dưới đây chỉ áp dụng các ải còn lại.
+
 Tương tác khi đứng gần vòng đánh dấu: E hoặc nút hành động trên HUD. Nhiệm vụ mở
 khi đã dọn hết quái thường. Vòng xanh nhạt/mũi tên là điểm kế tiếp; dấu tích biểu
 thị điểm đã xử lý. Các ký hiệu là lớp chỉ dẫn canvas, không có sprite thiếu.
@@ -25,7 +27,7 @@ thị điểm đã xử lý. Các ký hiệu là lớp chỉ dẫn canvas, khôn
 | Ải | Quyết định của người chơi | Tác động lên trận trùm |
 | --- | --- | --- |
 | Cảng Cát Lái | Đối chiếu CT-018 giữa ba mã gần giống | Mở sát thương 12 giây |
-| Kho Phân Loại | Bật/tắt hai nhánh theo thứ tự tùy ý, rồi thử cổng ra | Nhánh đã nối ngừng phát đạn; đủ nhánh mở sát thương 12 giây |
+| Kho Phân Loại | Bật điện, cầu nâng lên tầng 2, nối A/B rồi xuống cổng ra | Công tắc tắt nguồn bắn, mở đường về; cổng ra gọi boss với sát thương mở sẵn |
 | Sàn Điều Phối | Canh cửa sổ mở tuyến 2 giây trong chu kỳ 6 giây | San tải mở sát thương 10 giây và dừng cú lao |
 | Phòng Dữ Liệu | Đơn hàng → bàn giao → kho nhận theo đúng thứ tự | Điểm chưa xử lý phát đạn nhắm người chơi; đủ chuỗi mở sát thương 10 giây |
 | Xưởng Sản Phẩm | Bật chặn thiếu mã và trùng mã; bỏ kiểm tra xóa lựa chọn | Đủ hai quy tắc gỡ khóa sát thương đến hết trận |
