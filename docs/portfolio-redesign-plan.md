@@ -104,7 +104,6 @@ Sơ đồ luồng phải phản ánh quan hệ thật. `FlowDiagram` hiện ch�
 Đầu ra: homepage + case P&G có thể xem được, kèm bản so sánh với baseline. Đây là mốc xem lại visual trước khi nhân rộng; có thể chỉnh khi người dùng phản hồi, không tiếp tục xin lại các quyết định đã chốt.
 
 Bàn giao: [so sánh, ảnh và checks](portfolio-phase2-review.md), [hướng bản mẫu](portfolio-phase2-direction.md), [DESIGN.md bản mẫu](../DESIGN.md). Case không ảnh được kiểm ở cấu trúc hàng KA/SLA trên homepage; bốn trang case cũ vẫn truy cập được. Flow và toàn bộ feature inventory P&G sẽ chuyển sang template mới ở Phase 4. Chưa đánh dấu hoàn thành Phase 3–6 từ các primitive đã dùng cho bản mẫu.
-
 ### Phase 3 — Hệ thống giao diện và trang chủ
 
 - [ ] Tạo token semantic cho nền, chữ, viền, link, accent và focus của portfolio; kiểm tương phản trên cả vùng sáng/tối.
@@ -193,4 +192,3 @@ Không xóa file/component chỉ vì không render nữa trước khi kiểm imp
 ## 11. Ngoài phạm vi
 
 Thay đổi CV PDF, job search, viết lại dữ kiện nghề nghiệp, xác thực hệ thống production khách hàng, tạo quote/portrait/số liệu giả, thêm CMS/auth/analytics/form backend, đổi domain/slug, thay engine hoặc art game, deploy lên production.
-
