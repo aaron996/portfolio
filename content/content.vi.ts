@@ -1326,6 +1326,7 @@ export const content: SiteContent = {
     parryLine: "Đỡ chuẩn!",
     reflectLine: "Phản đạn! Trúng trùm sẽ trừ máu",
     volleyHint: "L đúng lúc đạn chạm → phản đạn gây sát thương",
+    slamHint: "NHẢY KHI DẬM",
     guardBreakLine: "Vỡ đỡ!",
     pickupPanel: {
       heading: "Vừa nhặt được",
@@ -1388,7 +1389,7 @@ export const content: SiteContent = {
           action: "Đối chiếu", locked: "Mã chưa khớp chứng từ CT-018.",
           exposed: "Mã đã khớp — đánh trùm trước khi lô tiếp theo tới!",
           result: "Mã vỏ đã khớp chứng từ. Bãi hết cảnh báo, lô hàng ra đúng cổng. Nhưng ở kho kế tiếp, đúng mã vẫn chưa đủ nếu kiện vào sai tuyến.",
-          nodes: [{ id: "wrong-one", name: "CT-081", x: 1800, y: 344 }, { id: "correct", name: "CT-018", x: 1950, y: 344 }, { id: "wrong-two", name: "CT-019", x: 2110, y: 344 }],
+          nodes: [{ id: "wrong-one", name: "CT-081", x: 1600, y: 344 }, { id: "correct", name: "CT-018", x: 1760, y: 344 }, { id: "wrong-two", name: "CT-019", x: 1920, y: 344 }],
           sequence: ["correct"], exposureSeconds: 12,
         },
         boss: "Trùm Sai Mã Container",
@@ -1396,7 +1397,7 @@ export const content: SiteContent = {
         line: "Hai lô lệch một ký tự. Không ai chết, nhưng hàng đi nhầm nước.",
         objective:
           "Dọn hết chứng từ lệch dọc cầu cảng, rồi hạ Trùm Sai Mã Container ở cuối bãi.",
-        tip: "Đứng dưới đất thì quái bay cao hơn tầm chém. Nhảy lên rồi bấm chém — đòn trên không quét cả khoảng trên đầu. Bấm sớm một nhịp, vì lưỡi chỉ tới đích một lúc sau tiếng bấm.",
+        tip: "Container nén thân trước khi dậm: nhảy khi chân chạm sàn để vượt sóng. Trong vòng xanh hồi sức, áp sát đối chiếu mã hoặc chém. Quái bay cần nhảy chém mới tới.",
         skills: ["Master data", "Đối chiếu chứng từ"],
         palette: {
           sky: "#A9DCF0", far: "#7BB9D4", mid: "#4E8FAE",
@@ -1453,7 +1454,7 @@ export const content: SiteContent = {
           tiers: [{ y: 344, name: "01 · NHẬP HÀNG" }, { y: 44, name: "02 · PHÂN TUYẾN" }, { y: -256, name: "03 · ĐẦU RA" }],
         },
         boss: "Băng Chuyền Kẹt",
-        bossKind: "volley",
+        bossKind: "parcel",
         line: "Ba trăm nghìn đơn một ngày. Băng chuyền không chờ ai.",
         objective:
           "Bật điện, đi cầu nâng nối nhánh A và B trên hai tầng, rồi quay về cổng ra để xử lý lõi máy. Không cần dọn hết quái.",
@@ -1568,15 +1569,15 @@ export const content: SiteContent = {
           exposed: "Đã xác định kho nhận — áp sát chém hoặc phản đạn!",
           result: "Chuỗi bàn giao đã nối đủ. Đơn trễ có nơi chịu trách nhiệm; cảnh báo trong phòng dữ liệu tắt. Bước tiếp theo: đưa cách kiểm tra này vào sản phẩm, để lỗi bị chặn từ đầu.",
           nodes: [
-            { id: "order", name: "Đơn hàng", x: 1840, y: 344 },
-            { id: "handoff", name: "Bàn giao", x: 1950, y: 344 },
-            { id: "warehouse", name: "Kho nhận", x: 2110, y: 344 },
+            { id: "order", name: "Đơn hàng", x: 1600, y: 344 },
+            { id: "handoff", name: "Bàn giao", x: 1760, y: 344 },
+            { id: "warehouse", name: "Kho nhận", x: 1920, y: 344 },
           ],
           sequence: ["order", "handoff", "warehouse"],
           exposureSeconds: 10,
         },
         boss: "Đơn Vô Chủ",
-        bossKind: "volley",
+        bossKind: "cast",
         line: "Đơn trễ mà không kho nào nhận. Phải chỉ đúng tên nó mới chịu ngã.",
         objective:
           "Dọn hết query lỗi và join nhân dòng giữa rừng gai, rồi hạ Đơn Vô Chủ.",
@@ -1633,11 +1634,11 @@ export const content: SiteContent = {
           action: "Đặt quy tắc", locked: "Bỏ kiểm tra làm lỗi quay lại. Cần cả hai quy tắc bảo vệ.",
           exposed: "Hai quy tắc đã chặn lỗi — lớp bảo vệ trùm bị gỡ hẳn!",
           result: "Lỗi thiếu mã và trùng mã bị chặn trước cửa xưởng. Từ sửa một chứng từ đến dựng quy tắc cho cả luồng: ca này đã có cách tự bảo vệ.",
-          nodes: [{ id: "required", name: "Chặn thiếu mã", x: 1720, y: 344 }, { id: "unique", name: "Chặn trùng mã", x: 2030, y: 344 }, { id: "bypass", name: "Bỏ kiểm tra", x: 2150, y: 344 }],
+          nodes: [{ id: "required", name: "Chặn thiếu mã", x: 1600, y: 344 }, { id: "unique", name: "Chặn trùng mã", x: 1780, y: 344 }, { id: "bypass", name: "Bỏ kiểm tra", x: 1940, y: 344 }],
           sequence: ["required", "unique"], exposureSeconds: 60,
         },
         boss: "CATEGORY.SKU",
-        bossKind: "dash",
+        bossKind: "hybrid",
         line: "Con trùm cuối là một cái tên cột. Tách sai một dấu chấm là vỡ cả bảng.",
         objective:
           "Đủ bốn loại quái, đủ ba loại bẫy. Dọn sạch xưởng rồi hạ CATEGORY.SKU.",

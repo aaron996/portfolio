@@ -22,12 +22,18 @@ một thứ mới nhìn thấy được thì cập nhật bảng này ngay trong
 | `player/raise-gun.png` — đã tích hợp | 0 còn thiếu (1 tấm đã gen) | Khung nâng súng trước khi bắn, alpha thật, rig 1024² | 8 |
 | `player/armed-run-1..4.png`, `armed-jump-rise/fall.png` — đã tích hợp | 0 còn thiếu (6 tấm đã gen) | Chạy/nhảy vẫn nắm súng, alpha thật, rig 512² | 13 |
 | `ui/briefing-board.png`, `ui/supply-board.png` — đã tích hợp | 0 còn thiếu (2 tấm đã gen) | Nền bảng hướng dẫn và túi đồ, chữ vẫn là HTML | 13 |
+| `combat-v3/{boss,player,mob,fx,projectile,prop}` | 138 tấm do agent ảnh riêng bàn giao | Runtime hiện dùng asset cũ + fallback canvas; task combat này không generate/ghi đè PNG | Combat V3 handoff |
 
 Bổ sung combat: `armed-idle.png` + `raise-gun.png` ngoài bộ gốc. Vòng báo hướng
 lao, vòng hồi sức xanh và viền đạn phản dùng canvas, không cần sinh thêm ảnh.
-Các điểm tương tác nhiệm vụ cũng dùng ký hiệu chiến thuật bằng canvas (vòng sàn,
-tên điểm, mũi tên và dấu hoàn tất), cùng quy ước với vòng đỡ. Đây là lớp chỉ dẫn,
-không phải vật thể cảnh đang chờ thay bằng sprite.
+Các điểm tương tác nhiệm vụ hiện có vật thể thiết bị procedural bằng canvas (khung,
+màn hình, đèn trạng thái, nhãn và dấu hoàn tất). Đây là fallback đủ đọc được trong
+khi chờ agent ảnh bàn giao 22 prop off/on; match/rules không tô sáng đáp án kế tiếp.
+
+Namespace `combat-v3` là gói bổ sung riêng, không thay đổi tuyên bố “asset v2 đã
+hoàn tất” ở trên. Khi nhập gói mới phải bật từng clip sau QA, giữ rig boss v1 cho
+walk/idle cũ và dùng rig v2 chỉ cho clip mới; tuyệt đối không đổi global boss rig
+khi hai đời asset còn chạy song song.
 
 **Đã xong (176 tấm):** 22 khung nhân vật · 64 khung quái (16 loại × 4) · 40 khung trùm
 (đứng, báo đòn, trúng đòn, đi, ra đòn) · 20 lớp nền · 4 bẫy · 15 vật phẩm

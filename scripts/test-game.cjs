@@ -219,7 +219,7 @@ for (const map of content.game.maps) test(`${map.boss}: melee can defeat the bos
     }
   }
   for (let i = 0; i < 40 && !cleared; i++) {
-    Object.assign(g.lab.boss, { x: 800, y: 262, cd: 100, dash: 0, tel: 0 });
+    Object.assign(g.lab.boss, { x: 800, y: 262, cd: 100, dash: 0, tel: 0, recover: 100, impulseT: 0 });
     Object.assign(g.lab.player, { x: 766, y: 304, vx: 0, vy: 0, face: 1, ground: true });
     g.press('atk'); g.release('atk'); advance(g, .5);
   }
@@ -227,21 +227,123 @@ for (const map of content.game.maps) test(`${map.boss}: melee can defeat the bos
   assert.equal(g.lab.boss, null); advance(g, .5); assert.equal(cleared, 1);
 });
 
-test('boss projectile patterns emit their expected volley and can be reflected back from the real firing position', () => {
-  for (const kind of ['slam', 'volley']) {
-    const g = fixture({ bossKind: kind }); const p = g.lab.player;
-    Object.assign(p, { x: 400, face: 1 }); g.lab.spawnBoss();
-    Object.assign(g.lab.boss, { x: 520, tel: .001, cd: 100 });
-    g.lab.step(1/120); assert.equal(g.lab.shots.length, kind === 'slam' ? 2 : 3);
-    let reflected = false; const hp = g.lab.boss.hp;
-    for (let i=0;i<180;i++) {
-      const approaching = g.lab.shots.some(s=>!s.reflected && s.vx < 0 && s.x < p.x+55 && s.x > p.x);
-      if (approaching && !p.guarding) g.press('guard');
-      g.lab.step(1/120);
-      if (g.lab.shots.some(s=>s.reflected)) reflected = true;
-    }
-    assert.ok(reflected, kind); assert.ok(g.lab.boss.hp < hp, kind);
+test('boss volley emits three typed projectiles and can be reflected from the real firing position', () => {
+  const g = fixture({ bossKind: 'volley' }); const p = g.lab.player;
+  Object.assign(p, { x: 400, face: 1 }); g.lab.spawnBoss();
+  Object.assign(g.lab.boss, { x: 520, dir: -1, tel: .001, cd: 100, attackId: 41 });
+  g.lab.step(1/120); assert.equal(g.lab.shots.length, 3);
+  assert.ok(g.lab.shots.every((shot) => shot.attackId === 41));
+  let reflected = false; const hp = g.lab.boss.hp;
+  for (let i=0;i<180;i++) {
+    const approaching = g.lab.shots.some(s=>!s.reflected && s.vx < 0 && s.x < p.x+55 && s.x > p.x);
+    if (approaching && !p.guarding) g.press('guard');
+    g.lab.step(1/120);
+    if (g.lab.shots.some(s=>s.reflected)) reflected = true;
   }
+  assert.ok(reflected); assert.ok(g.lab.boss.hp < hp);
+});
+
+test('slam emits floor shockwaves, cannot be guarded, and is avoided above the floor', () => {
+  for (const airborne of [false, true]) {
+    const g = fixture({ bossKind: 'slam' }); const p = g.lab.player;
+    Object.assign(p, { x: 480, y: airborne ? 250 : 304, vy: airborne ? -100 : 0, ground: !airborne, face: 1 });
+    g.lab.spawnBoss();
+    Object.assign(g.lab.boss, { x: 520, dir: -1, tel: .001, cd: 100, attackId: 51 });
+    if (!airborne) g.press('guard');
+    g.lab.step(1/120);
+    assert.equal(g.lab.shots.length, 0);
+    assert.equal(g.lab.shockwaves.length, 2);
+    advance(g, .1);
+    assert.equal(p.hp, airborne ? 5 : 4);
+    if (!airborne) assert.equal(p.vy, 0, 'ground wave must not reuse the large upward hurt launch');
+  }
+});
+
+test('attack ids resolve exactly once while different attacks remain independent', () => {
+  const g = fixture(); const p = g.lab.player;
+  assert.equal(g.lab.hurtPlayer(1, false, { attackId: 71 }), 'damaged');
+  p.inv = 0;
+  assert.equal(g.lab.hurtPlayer(1, false, { attackId: 71 }), 'ignored');
+  assert.equal(p.hp, 4);
+  assert.equal(g.lab.hurtPlayer(1, false, { attackId: 72 }), 'damaged');
+  assert.equal(p.hp, 3);
+});
+
+test('boss dash locks direction at tell, resolves once, repels on parry and stays harmless in recovery', () => {
+  const direction = fixture({ bossKind: 'dash' });
+  direction.lab.spawnBoss();
+  Object.assign(direction.lab.player, { x: 400, y: 304, ground: true });
+  Object.assign(direction.lab.boss, { x: 520, cd: 0 });
+  direction.lab.step(1/120);
+  assert.equal(direction.lab.boss.dir, -1);
+  direction.lab.player.x = 700;
+  advance(direction, .66);
+  assert.equal(direction.lab.boss.dir, -1, 'direction must stay snapshotted through tell');
+
+  const parry = fixture({ bossKind: 'dash' }); const p = parry.lab.player;
+  parry.lab.spawnBoss();
+  Object.assign(p, { x: 400, y: 304, ground: true, face: 1 });
+  Object.assign(parry.lab.boss, { x: 424, dir: -1, dash: .5, attackId: 81, cd: 100 });
+  parry.press('guard'); advance(parry, .03);
+  assert.equal(p.hp, 5); assert.equal(parry.lab.boss.dash, 0);
+  assert.ok(parry.lab.boss.recover > 1); assert.ok(parry.lab.boss.impulseX > 0);
+  const hp = p.hp;
+  Object.assign(parry.lab.boss, { x: p.x + 4 });
+  advance(parry, .2);
+  assert.equal(p.hp, hp, 'recovery body overlap must be harmless');
+});
+
+test('boss-specific patterns use parcel, trace packet and hybrid slam contracts', () => {
+  const game = fixture({}, { maps: content.game.maps });
+
+  game.loadMap(1); game.resume(); game.lab.spawnBoss();
+  Object.assign(game.lab.boss, { x: 520, dir: -1, tel: .001, cd: 100, attackId: 91 });
+  game.lab.step(1/120);
+  assert.equal(game.lab.shots.length, 2);
+  assert.ok(game.lab.shots.every((shot) => shot.kind === 'parcel' && shot.attackId === 91));
+
+  game.loadMap(3); game.resume(); game.lab.spawnBoss();
+  Object.assign(game.lab.player, { x: 400, y: 304, ground: true });
+  Object.assign(game.lab.boss, { x: 520, dir: -1, tel: .001, cd: 100, attackId: 92, targetX: 413, targetY: 324 });
+  game.lab.step(1/120);
+  assert.equal(game.lab.shots.length, 1);
+  assert.equal(game.lab.shots[0].kind, 'packet');
+  assert.ok(Math.abs(game.lab.shots[0].x - (game.lab.boss.x + game.lab.boss.w / 2 - 24)) < 10,
+    'trace packet must originate at the boss emitter, not the interaction node');
+
+  game.loadMap(4); game.resume(); game.lab.spawnBoss();
+  Object.assign(game.lab.boss, { cd: 0, pattern: 1 });
+  game.lab.step(1/120);
+  assert.equal(game.lab.boss.attackKind, 'slam');
+  assert.ok(game.lab.boss.tel > .79);
+});
+
+test('walker, flyer and shooter each have a harmless tell and a separate recovery', () => {
+  const walkerGame = fixture({ mobs: [{ kind: 'walker', name: 'walker', x: 105, range: 70 }] });
+  const walker = walkerGame.lab.mobs[0]; const p = walkerGame.lab.player;
+  Object.assign(p, { x: 100, y: 304, ground: true }); walker.cd = 0;
+  walkerGame.lab.step(1/120);
+  assert.ok(walker.tel > 0); assert.equal(p.hp, 5);
+  advance(walkerGame, .3);
+  assert.equal(p.hp, 4); assert.ok(walker.recover > 0);
+  const hp = p.hp; Object.assign(walker, { x: p.x + 4 }); advance(walkerGame, .2);
+  assert.equal(p.hp, hp);
+
+  const flyerGame = fixture({ mobs: [{ kind: 'flyer', name: 'flyer', x: 220, y: 300, range: 220 }] });
+  const flyer = flyerGame.lab.mobs[0]; Object.assign(flyerGame.lab.player, { x: 120, y: 260 }); flyer.cd = 0;
+  const targetY = flyerGame.lab.player.y;
+  flyerGame.lab.step(1/120);
+  assert.ok(flyer.tel > .4); const attackVy = flyer.attackVy;
+  flyerGame.lab.player.y = targetY - 100;
+  advance(flyerGame, .45);
+  assert.equal(flyer.attackVy, attackVy, 'dive vertical course must stay snapshotted');
+
+  const shooterGame = fixture({ mobs: [{ kind: 'shooter', name: 'shooter', x: 220 }] });
+  const shooter = shooterGame.lab.mobs[0]; shooter.cd = 0;
+  shooterGame.lab.step(1/120);
+  assert.ok(shooter.tel > .4); assert.equal(shooterGame.lab.shots.length, 0);
+  advance(shooterGame, .43);
+  assert.equal(shooterGame.lab.shots.length, 1); assert.ok(shooter.recover > 0);
 });
 
 test('gun raises before spending ammo, fires on pose, keeps aim for repeat shots', () => {
@@ -300,7 +402,7 @@ test('holding guard late blocks but does not reflect; wrong facing takes damage'
 test('reflected diagonal projectile travels back and damages a boss', () => {
   const g = fixture({ bossKind: 'volley' }); const p = g.lab.player;
   Object.assign(p, { x: 400, face: 1 }); g.lab.spawnBoss();
-  Object.assign(g.lab.boss, { x: 520, y: 262, cd: 100 });
+  Object.assign(g.lab.boss, { x: 520, y: 262, cd: 100, recover: 100 });
   const hp = g.lab.boss.hp;
   g.press('guard'); advance(g, .03);
   g.lab.fire(p.x + 27, p.y + 20, -4.4, 1.1); advance(g, .02);
@@ -332,7 +434,8 @@ for (const kind of ['charger', 'rider']) {
     Object.assign(o, { x: 124, dir: -1, dash: .5 });
     g.press('guard'); advance(g, .025);
     assert.equal(o.dash, 0); assert.ok(o.recover > 1); assert.equal(p.hp, 5);
-    g.release('guard'); g.press('atk'); advance(g, .2);
+    g.release('guard'); advance(g, .3);
+    Object.assign(p, { x: o.x - 32, face: 1 }); g.press('atk'); advance(g, .2);
     assert.ok(o.hp < 3); assert.equal(p.hp, 5);
   });
 }
