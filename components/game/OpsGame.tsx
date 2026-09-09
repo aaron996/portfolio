@@ -113,6 +113,7 @@ export function OpsGame() {
         parryLine: game.parryLine,
         reflectLine: game.reflectLine,
         volleyHint: game.volleyHint,
+        slamHint: game.slamHint,
         guardBreakLine: game.guardBreakLine,
         pauseHint: game.pauseHint,
       },

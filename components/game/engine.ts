@@ -103,6 +103,8 @@ export interface GameLabels {
   reflectLine: string;
   /** Gợi ý luôn hiện dưới thanh máu trùm bắn loạt */
   volleyHint: string;
+  /** Báo ngắn khi container chuẩn bị dậm đất */
+  slamHint: string;
   /** Giữ đỡ tới cạn thể lực */
   guardBreakLine: string;
   /** Gợi ý phím tạm dừng, vẽ ở góc dưới canvas */
@@ -571,6 +573,12 @@ interface Mob {
   recoil: number;
   /** Bước chân gần nhất, để chỉ nhả bụi một lần mỗi bước */
   stepPhase: number;
+  /** Mỗi cú lao là một nguồn sát thương độc lập, chỉ resolve một lần. */
+  attackId: number;
+  /** Xung lực ngoài tách khỏi vận tốc tuần tra để block/parry thật sự bật quái ra. */
+  impulseX: number; impulseT: number;
+  /** Vận tốc dọc snapshot cho cú bổ nhào, không homing theo player. */
+  attackVy: number;
 }
 interface Boss {
   x: number; y: number; w: number; h: number;
@@ -585,6 +593,17 @@ interface Boss {
   stepPhase: number;
   /** Đếm ngược khung "đòn đã bung ra", đặt đúng lúc đòn nổ */
   act: number;
+  /** Trạng thái nghỉ vô hại sau đòn; body không gây sát thương trong pha này. */
+  recover: number;
+  /** Hướng/mục tiêu được snapshot ở đầu tell, không homing sát giờ active. */
+  targetX: number; targetY: number;
+  /** Một ID cho mỗi đòn để overlap nhiều tick vẫn chỉ có một kết quả. */
+  attackId: number;
+  /** Pattern đã chốt cho lượt hiện tại; boss hybrid luân phiên húc/dậm. */
+  attackKind: "slam" | "volley" | "dash" | "parcel" | "cast";
+  pattern: number;
+  /** Xung lực bật lùi do block/parry, tách khỏi logic bám người chơi. */
+  impulseX: number; impulseT: number;
 }
 interface Trap {
   kind: "spike" | "saw" | "pulse";
@@ -605,9 +624,18 @@ interface Particle {
   kind: "spark" | "dust" | "ring";
   size: number;
 }
-interface Shot { x: number; y: number; vx: number; vy: number; r: number; t: number; reflected?: boolean }
+type ShotKind = "energy" | "parcel" | "packet";
+interface Shot {
+  x: number; y: number; vx: number; vy: number; r: number; t: number;
+  attackId: number; kind: ShotKind; reflected?: boolean;
+}
 /** Tia súng quét của người chơi — bay thẳng, xuyên qua bẫy, tan khi trúng */
 interface Bullet { x: number; y: number; vx: number; t: number }
+/** Mặt sóng sát sàn của cú dậm; không phải projectile và không thể phản bằng guard. */
+interface Shockwave {
+  x: number; y: number; dir: number; speed: number; t: number;
+  attackId: number;
+}
 /** Một nhát chém đã bay ra khỏi tay — vẽ vệt lưỡi liềm rồi tự tan */
 interface Slash {
   x: number; y: number; face: number;
@@ -679,6 +707,10 @@ export function createGame(
    * này: cùng một sát thương, có hit-stop thì đòn "nặng" hẳn lên.
    */
   let freeze = 0;
+  let attackSerial = 0;
+  /** Kết quả của một đòn với player được ghi ở đây, không dựa vào invulnerability. */
+  const resolvedPlayerAttacks = new Set<number>();
+  const nextAttackId = () => ++attackSerial;
 
   const keys: Record<GameKey, boolean> = {
     left: false, right: false, jump: false, down: false, atk: false, shoot: false, guard: false, interact: false,
@@ -735,12 +767,17 @@ export function createGame(
     jumpBuf: 0,
     /** Tốc độ rơi khung trước, để biết đáp đất mạnh hay nhẹ */
     fallSpeed: 0,
+    /** Xung lực va chạm tách khỏi vx để phím/friction không xóa knockback ngay. */
+    impulseX: 0, impulseT: 0,
+    /** Pose/VFX phản lực ngắn, vẫn có fallback code khi chưa có ảnh. */
+    braceT: 0, parryT: 0,
   };
   let mobs: Mob[] = [];
   let traps: Trap[] = [];
   let pickups: Pickup[] = [];
   let parts: Particle[] = [];
   let shots: Shot[] = [];
+  let shockwaves: Shockwave[] = [];
   let bullets: Bullet[] = [];
   let slashes: Slash[] = [];
   let boss: Boss | null = null;
@@ -912,6 +949,7 @@ export function createGame(
     liftY = m.traversal?.lift.bottom ?? GY; liftDirection = -1; liftWait = 1.5;
     preloadMapAssets(index);
     mission = m.mission ? new MissionRun(m.mission) : null;
+    resolvedPlayerAttacks.clear();
     if (process.env.NODE_ENV !== "production") warnFlyerReach(m, index);
     Object.assign(player, {
       x: 60, y: GY - PLAYER_H, vx: 0, vy: 0, face: 1,
@@ -921,10 +959,12 @@ export function createGame(
       guarding: false, guardT: 0, stam: 1, stamDelay: 0, breakT: 0,
       runPhase: 0, attackActive: 0, attackHit: false, attackBuffed: false,
       combo: 0, comboT: 0, landT: 0, coyote: 0, jumpBuf: 0, fallSpeed: 0,
+      impulseX: 0, impulseT: 0, braceT: 0, parryT: 0,
     });
     bag = [];
     parts = [];
     shots = [];
+    shockwaves = [];
     bullets = [];
     slashes = [];
     boss = null;
@@ -956,6 +996,7 @@ export function createGame(
         dead: false, deadT: 0,
         cd: 1 + Math.random(), dash: 0, tel: 0, recover: 0, recoil: 0,
         stepPhase: 0,
+        attackId: 0, impulseX: 0, impulseT: 0, attackVy: 0,
       };
     });
 
@@ -981,11 +1022,17 @@ export function createGame(
     bossCheckpoint = true;
     if (maps[lv].traversal) { routeProgress = maps[lv].traversal!.nodes.length; traps = []; }
     checkpointEquipment = { ammo: player.ammo, gunName: player.gunName, tool: player.tool, toolName: player.toolName, items: bag.slice() };
+    const configuredKind = maps[lv].bossKind;
     boss = {
       x: worldWidth - 190, y: GY - 82, w: 72, h: 82,
       hp: 16, mhp: 16, dir: -1,
       hurt: 0, tel: 0, cd: 2.2, bob: 0, dash: 0,
       walkPhase: 0, stepPhase: 0, act: 0,
+      recover: 0,
+      targetX: player.x + player.w / 2, targetY: player.y + player.h / 2,
+      attackId: 0, impulseX: 0, impulseT: 0,
+      attackKind: configuredKind === "hybrid" ? "dash" : configuredKind,
+      pattern: 0,
     };
     say(labels.bossAppear.replace("{boss}", maps[lv].boss), 1.6);
     flash = 0.5;
@@ -1043,6 +1090,7 @@ export function createGame(
       ring(boss.x + boss.w / 2, boss.y + boss.h / 2, LIME);
     }
     boss = null;
+    shockwaves = [];
     flash = 0.6;
     handlers.onCleared?.(lv, m.skills);
     handlers.onSound?.("clear");
@@ -1308,7 +1356,7 @@ export function createGame(
   }
 
   /** Đỡ trúng nhịp: không tốn thể lực, đẩy lùi kẻ tấn công, đứng hình một chớp */
-  function onBlocked(parry: boolean, atX: number) {
+  function onBlocked(parry: boolean, atX: number, dir: number) {
     const y = player.y + 18;
     if (parry) {
       say(labels.parryLine, 0.8);
@@ -1323,7 +1371,10 @@ export function createGame(
       if (player.stam <= 0) breakGuard();
     }
     player.stamDelay = GUARD_REGEN_DELAY;
-    player.vx += -player.face * (parry ? 40 : 120);
+    player.impulseX = dir * (parry ? 48 : 72);
+    player.impulseT = 0.2;
+    player.parryT = parry ? 0.28 : 0;
+    player.braceT = parry ? 0 : 0.24;
     shake = Math.max(shake, parry ? 5 : 3);
   }
 
@@ -1331,24 +1382,40 @@ export function createGame(
    * `unblockable` dành cho bẫy: gai và lưỡi cưa vẫn phải né bằng chân, không
    * thì cả ải rút về việc giữ nút đỡ mà đi xuyên qua mọi thứ.
    */
-  function hurtPlayer(dir: number, unblockable = false) {
+  type ContactResult = "damaged" | "blocked" | "parried" | "ignored";
+  interface HurtOptions {
+    attackId?: number;
+    damage?: number;
+    knockbackX?: number;
+    knockbackY?: number;
+    invulnerability?: number;
+  }
+
+  function hurtPlayer(dir: number, unblockable = false, options: HurtOptions = {}): ContactResult {
     if (phase !== "play") return "ignored";
+    if (options.attackId != null) {
+      if (resolvedPlayerAttacks.has(options.attackId)) return "ignored";
+      // Ghi nhận cả khi đang inv: cùng cú lao không được gây damage muộn khi hết inv.
+      resolvedPlayerAttacks.add(options.attackId);
+    }
     // Normal held blocks retain their cooldown; a fresh timed guard can reflect a volley.
     if (player.inv > 0 && (unblockable || !blocks(dir) || player.guardT > PARRY_WINDOW)) return "ignored";
     if (!unblockable && blocks(dir)) {
       const parry = player.guardT <= PARRY_WINDOW;
-      onBlocked(parry, player.x + player.w / 2 + player.face * 18);
+      onBlocked(parry, player.x + player.w / 2 + player.face * 18, dir);
       player.inv = 0.25;
       return parry ? "parried" : "blocked";
     }
     if (player.inv > 0) return "ignored";
     player.raiseT = player.aimT = player.shootT = 0;
-    player.hp -= 1;
+    player.hp -= options.damage ?? 1;
     handlers.onSound?.("hurt");
-    player.inv = 1.35;
+    player.inv = options.invulnerability ?? 1.35;
     player.hurtT = 0.35;
-    player.vy = -360;
-    player.vx = dir * 450;
+    player.vy = options.knockbackY ?? -360;
+    player.vx = 0;
+    player.impulseX = dir * (options.knockbackX ?? 240);
+    player.impulseT = options.knockbackX != null ? 0.24 : 0.22;
     player.combo = 0;
     player.comboT = 0;
     player.guarding = false;
@@ -1365,6 +1432,7 @@ export function createGame(
         if (!destroyed && (phase === "play" || phase === "paused")) restartFromCheckpoint();
       }, 700);
     }
+    return "damaged";
   }
 
   /* ── tiện ích ────────────────────────────────────────── */
@@ -1372,6 +1440,23 @@ export function createGame(
   type Box = { x: number; y: number; w: number; h: number };
   const overlap = (a: Box, b: Box) =>
     a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+
+  function sweptBody(fromX: number, body: Box): Box {
+    const x = Math.min(fromX, body.x);
+    return { x, y: body.y, w: Math.abs(body.x - fromX) + body.w, h: body.h };
+  }
+
+  /** Tách hai body ngay khi cú tông resolve để recovery không giữ player trong góc. */
+  function separateAttacker(body: { x: number; w: number }, dir: number, minX: number, maxX: number) {
+    const gap = 16;
+    const target = dir > 0 ? player.x - body.w - gap : player.x + player.w + gap;
+    if (target >= minX && target <= maxX) {
+      body.x = target;
+      return;
+    }
+    player.x = Math.max(0, Math.min(worldWidth - player.w,
+      dir > 0 ? body.x + body.w + gap : body.x - player.w - gap));
+  }
 
   function puff(x: number, y: number, color: string, n: number) {
     for (let i = 0; i < n; i++) {
@@ -1417,8 +1502,16 @@ export function createGame(
     msg = text;
     msgT = seconds;
   }
-  function fire(x: number, y: number, vx: number, vy: number) {
-    shots.push({ x, y, vx, vy, r: 9, t: 0 });
+  function fire(x: number, y: number, vx: number, vy: number, kind: ShotKind = "energy", attackId = nextAttackId()) {
+    shots.push({ x, y, vx, vy, r: kind === "parcel" ? 11 : 9, t: 0, kind, attackId });
+  }
+
+  function emitShockwaves(b: Boss) {
+    const y = GY - 9;
+    shockwaves.push(
+      { x: b.x + 8, y, dir: -1, speed: 300, t: 0, attackId: b.attackId },
+      { x: b.x + b.w - 8, y, dir: 1, speed: 300, t: 0, attackId: b.attackId },
+    );
   }
 
   /** Hộp gây sát thương của một cái bẫy tại thời điểm hiện tại, null nếu đang tắt */
@@ -1434,14 +1527,33 @@ export function createGame(
 
   function interruptRush(o: Mob, seconds: number) {
     if (o.kind !== "charger" && o.kind !== "rider") return;
+    endMobAttack(o, seconds);
+  }
+
+  function endMobAttack(o: Mob, seconds: number) {
     o.tel = o.dash = 0;
     o.recover = Math.max(o.recover, seconds);
     o.cd = Math.max(o.cd, 0.65);
   }
 
+  function repelMobAttack(o: Mob, result: ContactResult) {
+    const parried = result === "parried";
+    const duration = parried ? 0.24 : 0.2;
+    const distance = parried ? 86 : 50;
+    endMobAttack(o, parried ? 1.2 : 0.72);
+    o.impulseX = -o.dir * distance / duration;
+    o.impulseT = duration;
+  }
+
   function stepRush(o: Mob, dx: number, dy: number, dt: number) {
     const rider = o.kind === "rider";
     o.y = o.floor - o.h;
+    if (o.impulseT > 0) {
+      const travel = Math.min(dt, o.impulseT);
+      o.x = Math.max(o.a, Math.min(o.b, o.x + o.impulseX * travel));
+      o.impulseT = Math.max(0, o.impulseT - dt);
+      if (o.impulseT <= 0) o.impulseX = 0;
+    }
     if (o.recover > 0) {
       o.recover = Math.max(0, o.recover - dt);
       return;
@@ -1468,6 +1580,7 @@ export function createGame(
     o.cd = Math.max(0, o.cd - dt);
     if (Math.abs(dx) < (rider ? 560 : 360) && Math.abs(dy) < 75 && o.cd <= 0) {
       o.dir = dx < 0 ? -1 : 1;
+      o.attackId = nextAttackId();
       o.tel = rider ? 0.75 : 0.6;
       return;
     }
@@ -1488,10 +1601,28 @@ export function createGame(
     const dy = player.y - o.y;
 
     if (o.kind === "walker") {
+      o.y = o.floor - o.h;
+      if (o.recover > 0) { o.recover = Math.max(0, o.recover - dt); return; }
+      if (o.dash > 0) {
+        o.dash = Math.max(0, o.dash - dt);
+        if (o.dash <= 0) endMobAttack(o, 0.52);
+        return;
+      }
+      if (o.tel > 0) {
+        o.tel = Math.max(0, o.tel - dt);
+        if (o.tel <= 0) o.dash = 0.16;
+        return;
+      }
+      o.cd = Math.max(0, o.cd - dt);
+      if (Math.abs(dx) < 54 && Math.abs(dy) < 52 && o.cd <= 0) {
+        o.dir = dx < 0 ? -1 : 1;
+        o.attackId = nextAttackId();
+        o.tel = 0.28;
+        return;
+      }
       o.x += o.dir * 0.92 * dt * 60;
       if (o.x < o.a) { o.x = o.a; o.dir = 1; }
       if (o.x > o.b) { o.x = o.b; o.dir = -1; }
-      o.y = o.floor - o.h;
       // Nhả bụi mỗi lần chân chạm đất, lấy nhịp từ chính chu kỳ khung hình
       const ph = Math.floor(o.anim * 6);
       if (ph !== o.stepPhase) {
@@ -1499,22 +1630,59 @@ export function createGame(
         if (Math.random() < 0.5) dust(o.x + o.w / 2, o.y + o.h, 1, 0.5);
       }
     } else if (o.kind === "flyer") {
+      const hoverY = o.floor - o.h + Math.sin(o.bob * 0.5) * FLYER_BOB;
+      if (o.recover > 0) {
+        o.recover = Math.max(0, o.recover - dt);
+        o.y += (hoverY - o.y) * Math.min(1, dt * 7);
+        return;
+      }
+      if (o.dash > 0) {
+        o.dash = Math.max(0, o.dash - dt);
+        o.x = Math.max(o.a, Math.min(o.b, o.x + o.dir * 240 * dt));
+        o.y += o.attackVy * dt;
+        if (o.dash <= 0 || o.x <= o.a || o.x >= o.b) endMobAttack(o, 0.68);
+        return;
+      }
+      if (o.tel > 0) {
+        o.tel = Math.max(0, o.tel - dt);
+        if (o.tel <= 0) o.dash = 0.44;
+        return;
+      }
+      o.cd = Math.max(0, o.cd - dt);
+      if (Math.abs(dx) < 280 && Math.abs(dy) < 150 && o.cd <= 0) {
+        o.dir = dx < 0 ? -1 : 1;
+        o.attackVy = (player.y + player.h / 2 - (o.y + o.h / 2)) / 0.44;
+        o.attackId = nextAttackId();
+        o.tel = 0.44;
+        return;
+      }
       o.x += o.dir * 0.75 * dt * 60;
       if (o.x < o.a) { o.x = o.a; o.dir = 1; }
       if (o.x > o.b) { o.x = o.b; o.dir = -1; }
-      o.y = o.floor - o.h + Math.sin(o.bob * 0.5) * FLYER_BOB;
+      o.y = hoverY;
     } else if (o.kind === "charger" || o.kind === "rider") {
       stepRush(o, dx, dy, dt);
     } else {
-      // shooter: đứng im, nhả đạn về phía người chơi
+      // Shooter: tell khóa hướng → phát → recoil/recovery. Không bắn ngay khi cooldown về 0.
       o.y = o.floor - o.h;
-      o.cd -= dt;
+      if (o.recover > 0) { o.recover = Math.max(0, o.recover - dt); return; }
+      if (o.tel > 0) {
+        o.tel = Math.max(0, o.tel - dt);
+        if (o.tel <= 0) {
+          o.recoil = 1;
+          const kind: ShotKind = lv === 1 ? "parcel" : lv === 3 ? "packet" : "energy";
+          fire(o.x + o.w / 2 + o.dir * 14, o.y + o.h / 2, o.dir * 3.4, 0, kind, o.attackId);
+          puff(o.x + o.w / 2 + o.dir * 14, o.y + o.h * 0.5, HAZARD, 3);
+          o.recover = 0.46;
+        }
+        return;
+      }
+      o.cd = Math.max(0, o.cd - dt);
       if (o.cd <= 0) {
         o.cd = 2.2;
         o.dir = dx < 0 ? -1 : 1;
-        o.recoil = 1;
-        fire(o.x + o.w / 2, o.y + o.h / 2, o.dir * 3.4, 0);
-        puff(o.x + o.w / 2 + o.dir * 14, o.y + o.h * 0.5, HAZARD, 3);
+        o.attackId = nextAttackId();
+        o.tel = 0.42;
       }
     }
   }
@@ -1546,19 +1714,35 @@ export function createGame(
     b.hurt = Math.max(0, b.hurt - dt);
     b.act = Math.max(0, b.act - dt);
     b.bob += dt * 3;
-    if (mission?.definition.mode === "timing" && mission.exposure > 0) {
-      b.dash = 0; b.tel = 0; b.cd = 1.2;
+    if (mission?.definition.mode === "timing" && (mission.exposure > 0 || mission.cycle >= 4)) {
+      b.dash = 0; b.tel = 0; b.recover = Math.max(b.recover, 1.2); b.cd = 1.2;
+      return;
+    }
+
+    if (b.impulseT > 0) {
+      const travel = Math.min(dt, b.impulseT);
+      b.x = Math.max(60, Math.min(worldWidth - b.w - 20, b.x + b.impulseX * travel));
+      b.impulseT = Math.max(0, b.impulseT - dt);
+      if (b.impulseT <= 0) b.impulseX = 0;
+    }
+    if (b.recover > 0) {
+      b.recover = Math.max(0, b.recover - dt);
       return;
     }
 
     if (b.dash > 0) {
-      b.dash -= dt;
+      const travel = Math.min(dt, b.dash);
+      b.dash = Math.max(0, b.dash - dt);
       const from = b.x;
-      b.x += b.dir * 9 * dt * 60;
+      b.x += b.dir * 540 * travel;
       b.x = Math.max(60, Math.min(worldWidth - b.w - 20, b.x));
       bossStride(b, b.x - from);
       if (Math.random() < 0.5) dust(b.x + b.w / 2, b.y + b.h, 2, 1.4);
-      if (b.dash <= 0) b.cd = 1.8;
+      if (b.dash <= 0 || b.x <= 60 || b.x >= worldWidth - b.w - 20) {
+        b.dash = 0;
+        b.recover = Math.max(b.recover, 0.78);
+        b.cd = 1.8;
+      }
       return;
     }
 
@@ -1568,29 +1752,44 @@ export function createGame(
         shake = 8;
         b.act = 0.3;
         if (mission?.definition.mode === "trace" && mission.exposure <= 0) {
-          // Unresolved evidence emits one aimed packet; resolving it silences that source.
-          const source = mission.next;
-          if (source) {
-            const dx = player.x + player.w / 2 - source.x;
-            const dy = player.y + player.h / 2 - (source.y - 48);
-            const distance = Math.max(1, Math.hypot(dx, dy));
-            fire(source.x, source.y - 48, dx / distance * 3.4, dy / distance * 3.4);
-          }
+          // Gói dữ liệu phát từ trùm, không phát ngay trên bảng người chơi cần bấm.
+          const sx = b.x + b.w / 2 + b.dir * 24;
+          const sy = b.y + 30;
+          const dx = b.targetX - sx;
+          const dy = b.targetY - sy;
+          const distance = Math.max(1, Math.hypot(dx, dy));
+          fire(sx, sy, dx / distance * 3.4, dy / distance * 3.4, "packet", b.attackId);
+          b.recover = 0.82;
         } else if (mission?.definition.mode === "route" && mission.exposure <= 0) {
           for (const node of mission.definition.nodes.slice(0, 2)) {
-            if (!mission.completed.includes(node.id)) fire(node.x, node.y - 22, player.x < node.x ? -3.8 : 3.8, 0);
+            if (!mission.completed.includes(node.id)) fire(b.x + b.w / 2, b.y + 34, player.x < b.x ? -3.8 : 3.8, 0, "parcel", b.attackId);
           }
-        } else if (kind === "slam") {
-          fire(b.x + 8, GY - 16, -4.2, 0);
-          fire(b.x + b.w - 8, GY - 16, 4.2, 0);
+          b.recover = 0.82;
+        } else if (b.attackKind === "slam") {
+          emitShockwaves(b);
           dust(b.x + b.w / 2, b.y + b.h, 10, 2.2);
-        } else if (kind === "volley") {
-          const dir = player.x < b.x ? -1 : 1;
-          fire(b.x + b.w / 2, b.y + 20, dir * 4.4, -1.1);
-          fire(b.x + b.w / 2, b.y + 34, dir * 4.6, 0);
-          fire(b.x + b.w / 2, b.y + 48, dir * 4.4, 1.1);
+          b.recover = 1.1;
+        } else if (b.attackKind === "parcel") {
+          const dir = b.dir;
+          fire(b.x + b.w / 2, GY - 22, dir * 4.1, 0, "parcel", b.attackId);
+          fire(b.x + b.w / 2 - dir * 18, GY - 22, dir * 3.55, 0, "parcel", b.attackId);
+          b.recover = 0.95;
+        } else if (b.attackKind === "cast") {
+          const sx = b.x + b.w / 2 + b.dir * 24;
+          const sy = b.y + 28;
+          const dx = b.targetX - sx;
+          const dy = b.targetY - sy;
+          const distance = Math.max(1, Math.hypot(dx, dy));
+          fire(sx, sy, dx / distance * 3.6, dy / distance * 3.6, "packet", b.attackId);
+          b.recover = 0.92;
+        } else if (b.attackKind === "volley") {
+          const dir = b.dir;
+          const shotKind: ShotKind = lv === 1 ? "parcel" : lv === 3 ? "packet" : "energy";
+          fire(b.x + b.w / 2, b.y + 20, dir * 4.4, -1.1, shotKind, b.attackId);
+          fire(b.x + b.w / 2, b.y + 34, dir * 4.6, 0, shotKind, b.attackId);
+          fire(b.x + b.w / 2, b.y + 48, dir * 4.4, 1.1, shotKind, b.attackId);
+          b.recover = 0.82;
         } else {
-          b.dir = player.x < b.x ? -1 : 1;
           b.dash = 0.55;
         }
       }
@@ -1599,13 +1798,28 @@ export function createGame(
 
     b.cd -= dt;
     if (b.cd <= 0) {
-      b.tel = kind === "dash" ? 0.6 : 0.55;
-      b.cd = kind === "dash" ? 2.4 : 2.6;
+      b.dir = player.x < b.x ? -1 : 1;
+      b.targetX = player.x + player.w / 2;
+      b.targetY = player.y + player.h / 2;
+      b.attackId = nextAttackId();
+      if (kind === "hybrid") {
+        b.attackKind = b.pattern++ % 2 === 0 ? "dash" : "slam";
+      } else {
+        b.attackKind = kind;
+      }
+      b.tel = b.attackKind === "slam" ? 0.8 : b.attackKind === "dash" ? 0.65 : 0.62;
+      b.cd = b.attackKind === "dash" ? 2.4 : 2.6;
+      if (mission?.definition.mode === "trace" && mission.exposure <= 0) {
+        b.cd += mission.completed.length * 0.55;
+      }
+      if (b.attackKind === "slam") say(labels.slamHint, 0.9);
       return;
     }
     b.dir = player.x < b.x ? -1 : 1;
+    const lastNode = mission?.definition.nodes.reduce((x, node) => Math.max(x, node.x), 0) ?? 0;
+    const arenaLeft = Math.min(worldWidth - b.w - 20, Math.max(worldWidth - 320, lastNode + 80));
     const from = b.x;
-    b.x = Math.max(60, Math.min(worldWidth - b.w - 20, b.x + b.dir * 0.85 * dt * 60));
+    b.x = Math.max(arenaLeft, Math.min(worldWidth - b.w - 20, b.x + b.dir * 51 * dt));
     bossStride(b, b.x - from);
   }
 
@@ -1630,6 +1844,8 @@ export function createGame(
     player.tool = Math.max(0, player.tool - dt);
     player.hurtT = Math.max(0, player.hurtT - dt);
     player.landT = Math.max(0, player.landT - dt);
+    player.braceT = Math.max(0, player.braceT - dt);
+    player.parryT = Math.max(0, player.parryT - dt);
     player.coyote = Math.max(0, player.coyote - dt);
     player.jumpBuf = Math.max(0, player.jumpBuf - dt);
     msgT = Math.max(0, msgT - dt);
@@ -1659,7 +1875,10 @@ export function createGame(
       player.vx -= Math.sign(player.vx) * Math.min(Math.abs(player.vx), brake);
     }
     player.vx = Math.max(-360, Math.min(360, player.vx));
-    const moveX = player.vx * dt;
+    const impulseTravel = Math.min(dt, player.impulseT);
+    const moveX = player.vx * dt + player.impulseX * impulseTravel;
+    player.impulseT = Math.max(0, player.impulseT - dt);
+    if (player.impulseT <= 0) player.impulseX = 0;
     player.x = Math.max(0, Math.min(worldWidth - player.w, player.x + moveX));
     if (keys.right && player.x >= 160) handlers.onTutorialAction?.("right");
     if (player.ground && Math.abs(moveX) > 0.01) {
@@ -1717,12 +1936,16 @@ export function createGame(
         continue;
       }
       alive++;
+      const fromX = o.x;
+      const wasRush = o.dash > 0;
       stepMob(o, dt);
-      if (o.recover <= 0 && o.hurt <= 0 && overlap(player, o)) {
-        const result = hurtPlayer(player.x + player.w / 2 < o.x + o.w / 2 ? -1 : 1);
-        if (result === "parried" || result === "blocked") {
-          interruptRush(o, result === "parried" ? 1.3 : 0.65);
-        }
+      const contactAttack = o.kind !== "shooter" && (wasRush || o.dash > 0);
+      if (contactAttack && overlap(player, sweptBody(fromX, o))) {
+        if (!o.attackId) o.attackId = nextAttackId();
+        const result = hurtPlayer(o.dir, false, { attackId: o.attackId });
+        separateAttacker(o, o.dir, o.a, o.b);
+        if (result === "parried" || result === "blocked") repelMobAttack(o, result);
+        else endMobAttack(o, 0.68);
       }
     }
     if (!m.traversal && !alive && !boss && phase === "play") spawnBoss();
@@ -1779,9 +2002,40 @@ export function createGame(
     }
 
     if (boss) {
+      const activeBoss = boss;
+      const fromX = activeBoss.x;
+      const wasDash = activeBoss.dash > 0;
       stepBoss(boss, dt);
-      if (overlap(player, boss)) hurtPlayer(player.x < boss.x ? -1 : 1);
+      if (boss && (wasDash || activeBoss.dash > 0) && overlap(player, sweptBody(fromX, activeBoss))) {
+        if (!activeBoss.attackId) activeBoss.attackId = nextAttackId();
+        const result = hurtPlayer(activeBoss.dir, false, { attackId: activeBoss.attackId });
+        activeBoss.dash = activeBoss.tel = 0;
+        activeBoss.recover = Math.max(activeBoss.recover, result === "parried" ? 1.2 : 0.74);
+        const duration = result === "parried" ? 0.24 : 0.2;
+        const distance = result === "parried" ? 88 : result === "blocked" ? 52 : 28;
+        activeBoss.impulseX = -activeBoss.dir * distance / duration;
+        activeBoss.impulseT = duration;
+        separateAttacker(activeBoss, activeBoss.dir, 60, worldWidth - activeBoss.w - 20);
+      }
     }
+
+    shockwaves = shockwaves.filter((wave) => {
+      const fromX = wave.x;
+      wave.t += dt;
+      wave.x += wave.dir * wave.speed * dt;
+      const front = { x: Math.min(fromX, wave.x) - 8, y: wave.y - 5, w: Math.abs(wave.x - fromX) + 16, h: 12 };
+      const feetAboveGround = GY - (player.y + player.h);
+      if (feetAboveGround < 18 && overlap(player, front)) {
+        hurtPlayer(wave.dir, true, {
+          attackId: wave.attackId,
+          knockbackX: 110,
+          knockbackY: 0,
+          invulnerability: 0.7,
+        });
+        return false;
+      }
+      return wave.t < 3 && wave.x > -40 && wave.x < worldWidth + 40;
+    });
 
     shots = shots.filter((s) => {
       s.t += dt;
@@ -1795,7 +2049,7 @@ export function createGame(
         const dir = s.vx > 0 ? 1 : -1;
         // Đỡ trúng nhịp thì đạn bật ngược lại thành đạn của mình. Đây là
         // phần thưởng cho việc bấm đỡ đúng lúc thay vì giữ đỡ suốt trận.
-        const result = hurtPlayer(dir);
+        const result = hurtPlayer(dir, false, { attackId: s.attackId });
         if (result === "parried") {
           // Keep this projectile and its vertical trajectory, reversing ownership and velocity.
           s.vx *= -1.4;
@@ -2779,6 +3033,13 @@ export function createGame(
       src = P_HURT;
       rot = -player.face * 0.22;
       dy = 1;
+    } else if (player.parryT > 0 || player.braceT > 0) {
+      src = ASSETS.playerGuard ? P_GUARD : P_IDLE[0];
+      const parry = player.parryT > 0;
+      rot = -player.face * (parry ? 0.13 : 0.08);
+      sx = parry ? 0.96 : 1.04;
+      sy = parry ? 1.04 : 0.96;
+      dy = 1;
     } else if (player.guarding) {
       // Có player/guard.png thì dùng; chưa có thì lấy khung đứng, hạ thấp và
       // nghiêng người vào đòn — cái khiên vẽ bằng code mới là thứ đọc ra "đỡ".
@@ -2921,7 +3182,7 @@ export function createGame(
       g!.fillRect(player.x + (player.face > 0 ? 15 : 6), player.y - 4, 4, 4);
     }
 
-    if (player.shootT > 0.14) {
+    if (player.shootT > 0.09) {
       const muzzle = ASSETS.muzzleArt ? img(GEAR_SPRITES.muzzle) : null;
       const mx = cx + player.face * 26;
       const my = player.y - 3;
@@ -2932,6 +3193,22 @@ export function createGame(
         drawFit(g!, muzzle, 0, 10, 22, 20);
         g!.restore();
       }
+    }
+
+    if (player.parryT > 0 || player.braceT > 0) {
+      const parry = player.parryT > 0;
+      g!.save();
+      g!.strokeStyle = parry ? LIME : "#9FD8FF";
+      g!.lineWidth = parry ? 3 : 2;
+      g!.globalAlpha = Math.min(1, (parry ? player.parryT / 0.28 : player.braceT / 0.24) * 1.4);
+      for (let i = 0; i < (parry ? 3 : 2); i++) {
+        const x = cx + player.face * (22 + i * 7);
+        g!.beginPath();
+        g!.moveTo(x - player.face * 4, player.y + 8 + i * 7);
+        g!.lineTo(x + player.face * 7, player.y + 4 + i * 7);
+        g!.stroke();
+      }
+      g!.restore();
     }
 
     if (player.tool > 0) {
@@ -3033,20 +3310,34 @@ export function createGame(
 
     if (phase !== "clear" || !mission) for (const t of traps) drawTrap(t);
     if (mission && (boss || phase === "clear")) {
-      // Tactical markers are UI, like the existing dash/guard rings; no new scene artwork.
       for (const node of mission.definition.nodes) {
         const done = phase === "clear" || mission.completed.includes(node.id);
-        const next = mission.next?.id === node.id;
+        const mode = mission.definition.mode;
+        // Match/rules không được dùng mission.next để vô tình chỉ sẵn đáp án.
+        const next = mode === "match" || mode === "rules" ? false : mission.next?.id === node.id;
+        const available = mode === "rules" ? mission.definition.sequence.includes(node.id) : mode === "match" || next;
+        const nearby = mission.nearest(player.x + player.w / 2, player.y + player.h)?.id === node.id;
         g!.save();
         const threatening = boss && boss.tel > 0 && !done &&
           (mission.definition.mode === "trace" && next || mission.definition.mode === "route" && node.id !== "dispatch");
-        g!.strokeStyle = threatening ? HAZARD : done ? LIME : next ? "#9FD8FF" : "#f2f1ec";
-        g!.lineWidth = next ? 3 : 1.5;
-        g!.beginPath(); g!.ellipse(node.x, node.y - 2, 25, 7, 0, 0, Math.PI * 2); g!.stroke();
+        const color = threatening ? HAZARD : done ? LIME : nearby ? "#9FD8FF" : available ? "#f2f1ec" : "#8b969e";
+        // Vật thể thiết bị procedural: khung/tủ, màn hình và đèn trạng thái tách bạch.
+        g!.fillStyle = "#172631";
+        g!.beginPath(); g!.roundRect(node.x - 20, node.y - 48, 40, 46, 5); g!.fill();
+        g!.strokeStyle = color; g!.lineWidth = nearby ? 3 : 1.5;
+        g!.strokeRect(node.x - 20, node.y - 48, 40, 46);
+        g!.fillStyle = done ? "#2f5b45" : "#253946";
+        g!.fillRect(node.x - 13, node.y - 40, 26, 16);
+        g!.fillStyle = done ? LIME : available ? "#f2f1ec" : "#75828a";
+        g!.beginPath(); g!.arc(node.x + 12, node.y - 10, 3, 0, Math.PI * 2); g!.fill();
+        g!.fillStyle = color;
+        g!.font = `800 12px ${FONT_SANS}`; g!.textAlign = "center";
+        g!.fillText(done ? "✓" : nearby ? "E" : "•", node.x, node.y - 28);
         g!.restore();
-        drawLabel(`${done ? "✓ " : next ? "↓ " : ""}${node.name}`, node.x, node.y - 60);
+        drawLabel(`${done ? "✓ " : nearby ? "E · " : ""}${node.name}`, node.x, node.y - 58, color);
       }
     }
+
     for (const p of pickups) if (!p.taken) drawPickup(p);
 
     // Cửa ải ở cuối bản đồ, sáng lên khi đã hạ hết quái thường
@@ -3090,7 +3381,7 @@ export function createGame(
        * và lắc thân quanh trục đứng để không phải là một khối trượt ngang.
        * Khi đã có bX-walk-1..N thì ảnh lo phần dáng, code chỉ còn giữ nhịp.
        */
-      const walking = boss.dash <= 0 && boss.tel <= 0 && boss.act <= 0;
+      const walking = boss.dash <= 0 && boss.tel <= 0 && boss.act <= 0 && boss.recover <= 0;
       const cyc = boss.walkPhase * Math.PI * 4;
       const lift = walking ? Math.abs(Math.sin(cyc / 2)) : 0;
       const stepHit = walking ? Math.max(0, -Math.cos(cyc)) : 0;
@@ -3116,7 +3407,8 @@ export function createGame(
 
       // Vòng báo đòn dưới chân trùm — đọc được kể cả khi mắt đang dán vào nhân vật
       if (boss.tel > 0) {
-        const t = 1 - boss.tel / 0.6;
+        const tellTotal = boss.attackKind === "slam" ? 0.8 : boss.attackKind === "dash" ? 0.65 : 0.62;
+        const t = 1 - boss.tel / tellTotal;
         g!.strokeStyle = HAZARD;
         g!.lineWidth = 3;
         g!.globalAlpha = 0.8 * (1 - t * 0.4);
@@ -3125,8 +3417,13 @@ export function createGame(
         g!.stroke();
         g!.globalAlpha = 1;
       }
+      if (boss.recover > 0) {
+        g!.strokeStyle = LIME; g!.lineWidth = 3;
+        g!.beginPath(); g!.ellipse(boss.x + boss.w / 2, GY - 3, 48, 12, 0, 0, Math.PI * 2); g!.stroke();
+      }
 
-      const telScale = boss.tel > 0 ? 1 + (1 - boss.tel / 0.6) * 0.06 : 1;
+      const tellTotal = boss.attackKind === "slam" ? 0.8 : boss.attackKind === "dash" ? 0.65 : 0.62;
+      const telScale = boss.tel > 0 ? 1 + (1 - boss.tel / tellTotal) * 0.06 : 1;
       if (sprite) {
         // Bóp dọc lúc chân chạm đất; ảnh đi (nếu có) đã tự có nhịp nên nhẹ hơn
         const squash = stepHit * (ASSETS.bossWalk ? 0.02 : 0.05);
@@ -3155,7 +3452,23 @@ export function createGame(
       }
     }
 
-    // Đạn: nhân lõi sáng, đuôi mờ kéo lại phía sau
+    // Sóng dậm là hazard sát sàn riêng: front hẹp, đọc được hướng và không phản bằng guard.
+    for (const wave of shockwaves) {
+      const tail = wave.dir * -28;
+      const grad = g!.createLinearGradient(wave.x + tail, wave.y, wave.x, wave.y);
+      grad.addColorStop(0, "rgba(224,86,63,0)");
+      grad.addColorStop(1, "rgba(224,86,63,.9)");
+      g!.fillStyle = grad;
+      g!.beginPath();
+      g!.moveTo(wave.x + tail, wave.y + 5);
+      g!.lineTo(wave.x, wave.y - 9);
+      g!.lineTo(wave.x + wave.dir * 8, wave.y + 5);
+      g!.closePath(); g!.fill();
+      g!.strokeStyle = "rgba(255,241,210,.9)"; g!.lineWidth = 2;
+      g!.beginPath(); g!.moveTo(wave.x - wave.dir * 3, wave.y - 6); g!.lineTo(wave.x + wave.dir * 7, wave.y - 1); g!.stroke();
+    }
+
+    // Đạn: kiện, gói dữ liệu và năng lượng có silhouette riêng.
     for (const s of shots) {
       if (s.reflected) {
         g!.save();
@@ -3166,13 +3479,27 @@ export function createGame(
         g!.stroke();
         g!.restore();
       }
-      const shot = img(SCENE_SPRITES.shot);
+      const shot = s.kind === "energy" ? img(SCENE_SPRITES.shot) : null;
       if (shot) {
         g!.save();
         g!.translate(s.x, s.y);
         g!.rotate(Math.atan2(s.vy, s.vx));
-        if (s.reflected) g!.filter = "hue-rotate(80deg)";
         drawFit(g!, shot, 0, 10, 34, 20);
+        g!.restore();
+        continue;
+      }
+      if (s.kind === "parcel") {
+        g!.save(); g!.translate(s.x, s.y); g!.rotate(Math.atan2(s.vy, s.vx));
+        g!.fillStyle = "#c98d4e"; g!.strokeStyle = "#422b22"; g!.lineWidth = 2;
+        g!.fillRect(-11, -8, 22, 16); g!.strokeRect(-11, -8, 22, 16);
+        g!.strokeStyle = "#f0c77c"; g!.beginPath(); g!.moveTo(0, -8); g!.lineTo(0, 8); g!.stroke();
+        g!.restore();
+        continue;
+      }
+      if (s.kind === "packet") {
+        g!.save(); g!.translate(s.x, s.y); g!.rotate(Math.atan2(s.vy, s.vx) + Math.PI / 4);
+        g!.fillStyle = HAZARD; g!.strokeStyle = "#fff2c7"; g!.lineWidth = 2;
+        g!.fillRect(-8, -8, 16, 16); g!.strokeRect(-8, -8, 16, 16);
         g!.restore();
         continue;
       }
@@ -3409,7 +3736,7 @@ export function createGame(
       g!.textAlign = "center";
       g!.fillStyle = "#f2f1ec";
       g!.fillText(m.boss, W / 2, 45);
-      if (mission || m.bossKind === "volley") {
+      if (mission || m.bossKind === "volley" || m.bossKind === "parcel" || m.bossKind === "cast") {
         g!.font = `800 12px ${FONT_SANS}`;
         g!.fillStyle = LIME;
         g!.fillText(mission && mission.exposure <= 0 ? mission.definition.locked : labels.volleyHint, W / 2, 63, W - 160);

@@ -227,7 +227,13 @@ export type BossKind =
   /** Bắn một loạt ba quả về phía người chơi */
   | "volley"
   /** Nhắm rồi lao ngang thật nhanh */
-  | "dash";
+  | "dash"
+  /** Máy băng chuyền đẩy kiện thấp theo hướng đã khóa */
+  | "parcel"
+  /** Kiện dữ liệu tụ dấu vết rồi phóng một gói có hướng */
+  | "cast"
+  /** Luân phiên húc và dậm, không nối đòn trong recovery */
+  | "hybrid";
 
 export interface GameMobSpawn {
   kind: MobKind;
@@ -362,6 +368,8 @@ export interface GameContent {
   reflectLine: string;
   /** Gợi ý ngắn luôn hiện khi đánh trùm bắn loạt */
   volleyHint: string;
+  /** Báo ngắn khi container chuẩn bị dậm đất */
+  slamHint: string;
   /** Giữ đỡ tới cạn thể lực thì vỡ đỡ, đứng chịu trận một nhịp */
   guardBreakLine: string;
   /**

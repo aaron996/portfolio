@@ -33,7 +33,7 @@ export function GameHud({ instanceRef, touch }: {
   const labels = game.display;
   const hint = status.bossAlive && map.mission && status.mission?.exposure === 0
     ? map.mission.locked
-    : status.bossAlive && map.bossKind === "volley"
+    : status.bossAlive && (map.bossKind === "volley" || map.bossKind === "parcel" || map.bossKind === "cast")
     ? (touch ? labels.volleyTouch : game.volleyHint)
     : status.traversal ? `${status.traversal.floor} · ${status.traversal.completed}/${status.traversal.total} chặng`
     : labels.remaining.replace("{n}", String(status.mobsLeft)).replace("{total}", String(status.mobsTotal));
@@ -52,7 +52,7 @@ export function GameHud({ instanceRef, touch }: {
         <span>{map.boss}</span><meter min={0} max={1} value={status.bossHpPct} />
       </label> : null}
       <div className={styles.hudHint}>
-        <span>{status.bossAlive && !map.mission && map.bossKind !== "volley" ? map.boss : hint}</span>
+        <span>{status.bossAlive && !map.mission && map.bossKind !== "volley" && map.bossKind !== "parcel" && map.bossKind !== "cast" ? map.boss : hint}</span>
         {status.remainingTarget ? <span className={styles.targetHint}>
           {labels.remainingTarget
             .replace("{name}", status.remainingTarget.name)
