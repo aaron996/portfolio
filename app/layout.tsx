@@ -49,7 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-lime focus:px-4 focus:py-2 focus:text-ink-950"
         >
-          Bỏ qua tới nội dung chính
+          {content.prototype.labels.skip}
         </a>
         <CursorLight />
         {children}

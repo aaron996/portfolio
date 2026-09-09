@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useState, type ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
 
 export function Reveal({
@@ -6,23 +7,30 @@ export function Reveal({
   delay = 0,
   className = "",
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   delay?: number;
   className?: string;
 }) {
+  const [mounted, setMounted] = useState(false);
   const reducedMotion = useReducedMotion();
 
-  /* `initial` phải giống nhau ở server và client. Trước đây nó phụ thuộc
-     useReducedMotion() — hàm này luôn trả false khi render trên server, nên
-     người bật "giảm chuyển động" gặp hydration mismatch trên toàn bộ trang.
-     Giữ initial cố định, chỉ rút thời lượng transition về 0. */
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  /* Progressive enhancement: khi render SSR hoặc khi JS tắt,
+     trả về thẻ div bình thường để không bao giờ để lại inline opacity: 0. */
+  if (!mounted || reducedMotion) {
+    return <div className={className}>{children}</div>;
+  }
+
   return (
     <motion.div
       className={className}
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={reducedMotion ? { duration: 0 } : { duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.45, delay, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
     </motion.div>

@@ -12,6 +12,101 @@ import type { SiteContent } from "./types";
 const NEEDS_INPUT = (hint: string) => `⚠️ NEEDS_INPUT: ${hint}`;
 
 export const content: SiteContent = {
+  prototype: {
+    nav: [{ label: "Công việc", href: "/#cases" }, { label: "Về tôi", href: "/#about" }, { label: "Liên hệ", href: "/#contact" }],
+    hero: {
+      domain: "Logistics · Thương mại điện tử",
+      heading: "MAKE SENSE OF DATA. MAKE THINGS WORK.",
+      headlineLines: ["MAKE SENSE", "OF DATA.", "MAKE THINGS", "WORK."],
+      objects: {
+        container: { label: "Từ logistics", href: "#experience" },
+        keyboard: { label: "Đến chơi & làm game", href: "/game" },
+        description: "Container xanh Maersk và bàn phím cơ thu gọn — công việc và sở thích của tôi.",
+      },
+      body: "Tôi xây dashboard và quy trình báo cáo cho đội ngũ vận hành: làm rõ cách tính chỉ tiêu, tổ chức dữ liệu và đối chiếu đầu ra trước khi đưa vào sử dụng.",
+      primary: { label: "Xem công việc tiêu biểu", href: "#cases" },
+      secondary: { label: "Trao đổi cùng tôi", href: "#contact" },
+    },
+    labels: {
+      cv: "Xem CV (PDF)", skip: "Đến nội dung chính", navigation: "Điều hướng chính",
+      works: "Công việc tiêu biểu", otherWorks: "Kết quả và công việc khác",
+      process: "Cách làm việc", about: "Tôi đến với dữ liệu từ phía vận hành",
+      experience: "Kinh nghiệm", skills: "Năng lực qua công việc",
+      demo: "Giao diện thật · dữ liệu minh hoạ", enlarge: "Xem ảnh lớn",
+      closeImage: "Đóng ảnh", imageViewer: "Ảnh sản phẩm", back: "Về danh sách công việc",
+      decisions: "Hai quyết định đứng sau báo cáo", details: "Đọc sâu", results: "Kết quả và giới hạn",
+      ownership: "Phần tôi phụ trách", sharedScope: "Phần phối hợp và giới hạn",
+      related: "Công việc liên quan", lesson: "Nhìn lại", stack: "Công nghệ",
+      source: "Nguồn và phương pháp", email: "Gửi email", linkedin: "LinkedIn",
+      top: "Lên đầu trang", location: "TP.HCM",
+    },
+    worksIntro: "Những sản phẩm và phân tích tôi đã thực hiện, từ tổng hợp doanh số đến theo dõi hiệu suất giao nhận.",
+    media: {
+      "pg-sales-operations": {
+        src: "/case-pg-dashboard.png", width: 1838, height: 907,
+        crop: { left: 200, top: 0, width: 1610, height: 850 },
+        alt: "Dashboard doanh số: bộ lọc, tiến độ target, xu hướng lũy kế và bảng kết quả theo vùng",
+        caption: "Theo dõi doanh số so với target và tìm vùng cần xem lại.",
+      },
+      "kas-shopee-performance": {
+        src: "/case-kas-shopee-matrix.png", width: 1800, height: 1000,
+        alt: "App GHN hiển thị chỉ số đúng giờ, cảnh báo và ma trận hiệu suất theo vùng",
+        caption: "Xem chỉ số đúng giờ và các hub cần can thiệp trên cùng một màn hình.",
+      },
+      target: { src: "/case-pg-target-preview.png", width: 1086, height: 611,
+        alt: "Lịch target theo ngày cùng bảng xem trước thay đổi", caption: "Điều chỉnh target ngày và xem tác động trước khi áp dụng." },
+      import: { src: "/case-pg-import-preview.png", width: 780, height: 595,
+        alt: "Hộp xem trước phạm vi ngày, cách xử lý trùng và chênh lệch trước khi thay dữ liệu", caption: "Xem phạm vi và chênh lệch dữ liệu trước khi xác nhận thay thế." },
+    },
+    resultNote: "Pickup on-time của Viettel Post. Theo hồ sơ công việc tại Shopee, 2021–2025; kết quả phối hợp với đối tác. Hai mốc không đại diện cho toàn bộ diễn biến trong kỳ.",
+    process: [
+      { title: "Hiểu bài toán", body: "Trao đổi với người dùng để biết họ cần quyết định gì từ báo cáo." },
+      { title: "Chốt định nghĩa", body: "Làm rõ đơn vị tính, phạm vi dữ liệu và cách xử lý ngoại lệ." },
+      { title: "Xây và đối chiếu", body: "Dựng mô hình, báo cáo và kiểm những chỗ lệch với nguồn đang dùng." },
+      { title: "Đưa vào sử dụng", body: "Bàn giao đầu ra theo cách đội ngũ làm việc và sửa theo phản hồi." },
+    ],
+    about: [
+      "Tôi bắt đầu từ chăm sóc khách hàng xuất khẩu và vận hành giao nhận, rồi chuyển sang phân tích dữ liệu. Những công việc đó giúp tôi đặt câu hỏi về một con số trong bối cảnh thực tế: đơn đi qua đâu, ai dùng báo cáo và họ cần xử lý việc gì tiếp theo.",
+      "Tôi làm việc cùng người dùng nghiệp vụ và các đội phụ trách hạ tầng để đưa giải pháp vào sử dụng. AI hỗ trợ tôi viết code; phần chốt logic và kiểm chứng đầu ra vẫn do tôi chịu trách nhiệm.",
+    ],
+    experience: [
+      { company: "Giao Hàng Nhanh", period: "Từ 2025", role: "Key Account Solution / Data Analyst", body: "Chuẩn hoá báo cáo và xây công cụ phân tích cho các tài khoản chiến lược." },
+      { company: "Interdist", period: "Từ T5/2026", role: "Dữ liệu & sản phẩm · Bán thời gian, từ xa", body: "Xây hệ thống vận hành doanh số P&G song song với công việc tại GHN." },
+      { company: "Shopee", period: "2021–2025", role: "Logistics Management Specialist", body: "Phân tích hiệu suất và phối hợp cải tiến với các đối tác vận chuyển." },
+      { company: "J&T Express", period: "2020–2021", role: "Key Account Specialist", body: "Theo dõi vận hành luồng đơn Shopee và chuẩn hoá báo cáo nội bộ." },
+      { company: "A.P. Moller Maersk", period: "2019–2020", role: "Export Care Business Partner", body: "Phối hợp xử lý hàng xuất khẩu và duy trì master data khách hàng." },
+    ],
+    skills: [
+      { title: "Định nghĩa và kiểm tra dữ liệu", body: "SQL, mô hình dữ liệu, đối chiếu KPI và xử lý ngoại lệ.", links: [{ label: "Reporting KA", href: "/case/kas-reporting-automation" }, { label: "SLA", href: "/case/sla-attribution" }] },
+      { title: "Xây sản phẩm báo cáo", body: "Dashboard, business rule, phân quyền và luồng nhập dữ liệu.", links: [{ label: "P&G", href: "/case/pg-sales-operations" }, { label: "App điều hành GHN", href: "/case/kas-shopee-performance" }] },
+      { title: "Phân tích để phối hợp vận hành", body: "Theo dõi hiệu suất, xác định khâu cần xem lại và làm việc với đối tác.", links: [{ label: "Hiệu suất 3PL", href: "/case/shopee-3pl-performance" }] },
+    ],
+    contact: {
+      heading: "Trao đổi về công việc hoặc dự án",
+      body: "Bạn đang tuyển BI/Data Analyst hoặc cần xây dashboard, chuẩn hoá báo cáo cho đội ngũ? Hãy gửi tôi bối cảnh công việc và điều bạn muốn giải quyết.",
+      game: "Ải Vận Hành — một minigame lấy cảm hứng từ những nơi tôi từng làm việc.",
+      gameCta: { label: "Khám phá minigame", href: "/game" },
+    },
+    pg: {
+      period: "Interdist · Từ T5/2026 · Bán thời gian, từ xa",
+      context: "Doanh số về từ nhiều file Excel, khiến việc tổng hợp và theo dõi target phải lặp lại qua từng kỳ. Tôi xây ứng dụng nội bộ để đưa dữ liệu, quy tắc tính và báo cáo vào cùng một quy trình.",
+      role: "Phụ trách nghiệp vụ, mô hình dữ liệu, ứng dụng và vận hành sản phẩm; sử dụng AI hỗ trợ lập trình.",
+      output: "Dashboard doanh số, quy trình nhập có kiểm tra, giá theo thời gian hiệu lực và target theo lịch cửa hàng.",
+      decisions: [
+        { id: "effective-price", title: "Giá của giao dịch, theo đúng thời kỳ", body: "Giá thay đổi theo kênh, cửa hàng và thời kỳ. Tôi lưu khoảng hiệu lực và thứ tự ưu tiên giá riêng của cửa hàng so với giá mặc định để áp dụng quy tắc khi tính doanh thu." },
+        { id: "daily-target", title: "Target đi theo lịch cửa hàng", body: "Tôi dùng trọng số theo thứ và ngoại lệ theo ngày, kèm preview trước khi áp dụng một lô điều chỉnh. Người dùng thấy tác động lên chỉ tiêu thay vì chia đều tháng theo một số ngày cố định." },
+      ],
+      details: [
+        { title: "Tách SKU và kiểm tra file", body: "Tiêu đề cột có dạng CATEGORY.SKU, nhưng SKU cũng có thể chứa dấu chấm. Chỉ tách ở dấu chấm đầu tiên và giữ phần còn lại. File vào staging để chuẩn hoá theo quy tắc, kiểm từng dòng và báo lỗi trước khi chuyển vào bảng giao dịch." },
+        { title: "Actual và target có nguồn riêng", body: "Bảng target chỉ lưu chỉ tiêu. Actual được tính từ bảng giao dịch khi đọc, giúp tránh duy trì thêm một bản sao số dẫn xuất phải đồng bộ sau mỗi lần import hoặc sửa lịch sử." },
+        { title: "Phân quyền và lịch sử thay đổi", body: "Đăng nhập Google và phân quyền admin / user / pending. Phân quyền được thực thi ở tầng dữ liệu; các thao tác thay đổi có nhật ký người thực hiện và thời điểm. Đây là mô tả cơ chế, không phải kết quả kiểm toán bảo mật." },
+      ],
+      result: { value: "40–60 giờ/tháng", label: "Thời gian tổng hợp được giải phóng · Ước tính",
+        method: "Ước tính từ thao tác tổng hợp Excel của 3–4 PIC, công thức lặp và việc tập trung dữ liệu giá, target, mapping cửa hàng. Chưa đo bằng time-tracking thực tế." },
+      snapshot: "Hồ sơ portfolio ghi nhận 85.563 giao dịch, 12.476 bản tổng hợp ngày, 569 dòng chỉ tiêu tháng, 41 cửa hàng, 176 SKU, 6 vùng, 2 kênh và 8 tài khoản từ Postgres/master data của Interdist. Chưa có ngày snapshot; đây là số quy mô đã ghi nhận, không phải số hiện tại hoặc tác động kinh doanh đã xác thực lại.",
+      lesson: "Ở giai đoạn đầu, tôi dựng dashboard trước khi chốt xong định nghĩa chỉ tiêu và phải làm lại phần tính toán khi nghiệp vụ được làm rõ. Từ đó tôi viết định nghĩa ra và cho người dùng xác nhận trước khi bắt đầu code. Tôi cũng cần đo thời gian quy trình cũ ngay từ đầu để có mốc đánh giá tác động.",
+    },
+  },
   meta: {
     name: "Lương Thế Vinh",
     roleLabel: "BI & Data Analyst",
@@ -136,6 +231,7 @@ export const content: SiteContent = {
        ═══════════════════════════════════════════════════════════════════════ */
     {
       slug: "pg-sales-operations",
+      homepage: { title: "P&G Sales Operations Dashboard", summary: "Gom file doanh số rời vào một hệ thống để quản lý theo dõi kết quả theo vùng, kênh và sản phẩm.", role: "Interdist · Dữ liệu & ứng dụng · Bán thời gian", evidence: "Giá theo hiệu lực. Target theo lịch cửa hàng.", cta: "Xem case P&G" },
       tier: "flagship",
       scopeLabel: "Sản phẩm end-to-end · 1 người",
       proves: "Tôi ship được một sản phẩm dữ liệu chạy thật — từ phỏng vấn nghiệp vụ tới production — một mình.",
@@ -389,7 +485,8 @@ export const content: SiteContent = {
        ═══════════════════════════════════════════════════════════════════════ */
     {
       slug: "kas-shopee-performance",
-      tier: "deep",
+      homepage: { title: "App điều hành hiệu suất Shopee tại GHN", summary: "Đưa các bảng theo dõi đúng giờ, leadtime và hiệu suất hub vào một app phục vụ điều hành.", role: "Giao Hàng Nhanh · Dữ liệu & ứng dụng", evidence: "Đã được team Control Tower SPE nhúng lại.", cta: "Xem case app điều hành" },
+      tier: "flagship",
       scopeLabel: "Sản phẩm nội bộ · từ báo cáo rời tới một app điều hành",
       proves:
         "Sản phẩm tôi làm không dừng ở chỗ chạy được — nó được một team khác chọn nhúng vào hệ thống của họ.",
@@ -583,6 +680,7 @@ export const content: SiteContent = {
        ═══════════════════════════════════════════════════════════════════════ */
     {
       slug: "kas-reporting-automation",
+      homepage: { title: "Chuẩn hoá báo cáo Key Account", summary: "Một nguồn định nghĩa KPI và quy trình sinh báo cáo cho điều hành vùng, team KA khách hàng và vận hành hub.", role: "Giao Hàng Nhanh", evidence: "Định nghĩa KPI dùng chung", cta: "Xem case Reporting KA" },
       tier: "deep",
       scopeLabel: "Hệ thống dùng chung · toàn team Key Account",
       proves: "Tôi chuẩn hoá được định nghĩa KPI cho cả một team — không chỉ cho báo cáo của riêng mình.",
@@ -758,6 +856,7 @@ export const content: SiteContent = {
        ═══════════════════════════════════════════════════════════════════════ */
     {
       slug: "sla-attribution",
+      homepage: { title: "Quy trách nhiệm đơn trễ", summary: "Chuyển log ra/vào kho thành dữ liệu để vận hành kiểm lại kho được chọn theo thứ tự ưu tiên của quy tắc.", role: "Giao Hàng Nhanh", evidence: "Từ log đến cơ sở chọn kho", cta: "Xem case SLA" },
       tier: "deep",
       scopeLabel: "Business logic · từ log thô tới một kho chịu trách nhiệm",
       proves:
@@ -905,6 +1004,7 @@ export const content: SiteContent = {
        ═══════════════════════════════════════════════════════════════════════ */
     {
       slug: "shopee-3pl-performance",
+      homepage: { title: "Hiệu suất đối tác vận chuyển 3PL", summary: "Phân tích hiệu suất và phối hợp cải tiến cùng đối tác trong công việc tại Shopee.", role: "Shopee · 2021–2025", evidence: "90,1% → 97,5%", cta: "Xem case 3PL" },
       tier: "brief",
       scopeLabel: "Kết quả đã kiểm chứng · 4 năm",
       proves: "Con số cứng nhất trong portfolio này — đã được cả Shopee và đối tác vận chuyển xác nhận.",
