@@ -56,6 +56,7 @@ export function CursorLight() {
   return (
     <div
       ref={ref}
+      data-cursor-light
       aria-hidden="true"
       className="pointer-events-none fixed left-0 top-0 z-[44] -ml-[210px] -mt-[210px] h-[420px] w-[420px] rounded-full opacity-0 mix-blend-screen transition-opacity duration-500 [background:radial-gradient(circle,rgba(212,242,54,.16),rgba(212,242,54,.05)_42%,transparent_68%)]"
     />

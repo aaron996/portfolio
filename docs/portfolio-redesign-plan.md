@@ -2,7 +2,7 @@
 
 Ngày: 09/09/2026
 
-Trạng thái: Kế hoạch để triển khai; chưa thay đổi UI hoặc nội dung đang hiển thị.
+Trạng thái: Phase 1–2 hoàn thành local ngày 09/09/2026. Đã dựng homepage và case P&G, so sánh baseline, kiểm desktop/mobile và sửa một batch review. Đang ở mốc xem lại visual trước Phase 3; chưa commit, push hoặc deploy.
 Phạm vi: Trang chủ, cả 5 case study, navigation/contact và phần giới thiệu dẫn vào minigame.
 
 ## 1. Mục tiêu và quyết định đã chốt
@@ -85,24 +85,25 @@ Sơ đồ luồng phải phản ánh quan hệ thật. `FlowDiagram` hiện ch�
 
 ### Phase 1 — Biên tập và kiểm kê bằng chứng
 
-- [ ] Lập bảng keep/rewrite/move/hide cho từng section và từng nhóm trường trong content.
-- [ ] Viết nội dung homepage ngắn và bản tóm tắt cho cả 5 case; chọn decision tiêu biểu theo ý nghĩa, không cắt tự động theo index.
-- [ ] Kiểm tra ảnh hiện có trong `public/case-*.png`, crop/khung hiển thị và caption phù hợp.
-- [ ] Kiểm tra claim, ước tính, vai trò và nhãn công ty; đánh dấu dữ kiện cần nguồn bổ sung.
-- [ ] Viết ngắn product context từ các quyết định đã chốt; khi bước vào triển khai lưu PRODUCT.md. Không hỏi lại tỷ lệ 50/50.
+- [x] Lập bảng keep/rewrite/move/hide cho từng section và từng nhóm trường trong content.
+- [x] Viết nội dung homepage ngắn và bản tóm tắt cho cả 5 case; chọn decision tiêu biểu theo ý nghĩa, không cắt tự động theo index.
+- [x] Kiểm tra ảnh hiện có trong `public/case-*.png`, crop/khung hiển thị và caption phù hợp.
+- [x] Kiểm tra claim, ước tính, vai trò và nhãn công ty; đánh dấu dữ kiện cần nguồn bổ sung.
+- [x] Viết ngắn product context từ các quyết định đã chốt; khi bước vào triển khai lưu PRODUCT.md. Không hỏi lại tỷ lệ 50/50.
 
-Đầu ra: content map và copy draft để gắn trực tiếp vào bản mẫu. Không cần thêm ảnh hoặc xác nhận số mới để xử lý phần đã có đủ bằng chứng.
+Đầu ra: [content map và kiểm kê bằng chứng](portfolio-content-map.md), [copy draft](portfolio-copy-draft.md), [PRODUCT.md](../PRODUCT.md) để gắn trực tiếp vào bản mẫu. Không cần thêm ảnh hoặc xác nhận số mới để xử lý phần đã có đủ bằng chứng.
 
 ### Phase 2 — Bản mẫu trang chủ và một case
 
-- [ ] Dựng một hướng hoàn chỉnh: hero tối gọn, nền sáng cho dự án/nội dung, lime có vai trò rõ.
-- [ ] Dùng P&G làm case mẫu vì có ảnh, decisions, features, flow và kết quả; kiểm tra thêm tình huống case không có ảnh ở mức cấu trúc.
-- [ ] Thể hiện ảnh luôn nhìn thấy, thứ bậc 2 case nổi bật + 3 case bổ sung, contact 50/50 và link CV phụ.
-- [ ] Dùng tiếng Việt và nội dung thật để kiểm line-wrap, không dùng lorem ipsum.
-- [ ] Xem desktop và mobile trong một lượt có giới hạn, gom sửa phát hiện vào một batch.
+- [x] Dựng một hướng hoàn chỉnh: hero tối gọn, nền sáng cho dự án/nội dung, lime có vai trò rõ.
+- [x] Dùng P&G làm case mẫu vì có ảnh, decisions, features, flow và kết quả; kiểm tra thêm tình huống case không có ảnh ở mức cấu trúc.
+- [x] Thể hiện ảnh luôn nhìn thấy, thứ bậc 2 case nổi bật + 3 case bổ sung, contact 50/50 và link CV phụ.
+- [x] Dùng tiếng Việt và nội dung thật để kiểm line-wrap, không dùng lorem ipsum.
+- [x] Xem desktop và mobile trong một lượt có giới hạn, gom sửa phát hiện vào một batch.
 
 Đầu ra: homepage + case P&G có thể xem được, kèm bản so sánh với baseline. Đây là mốc xem lại visual trước khi nhân rộng; có thể chỉnh khi người dùng phản hồi, không tiếp tục xin lại các quyết định đã chốt.
 
+Bàn giao: [so sánh, ảnh và checks](portfolio-phase2-review.md), [hướng bản mẫu](portfolio-phase2-direction.md), [DESIGN.md bản mẫu](../DESIGN.md). Case không ảnh được kiểm ở cấu trúc hàng KA/SLA trên homepage; bốn trang case cũ vẫn truy cập được. Flow và toàn bộ feature inventory P&G sẽ chuyển sang template mới ở Phase 4. Chưa đánh dấu hoàn thành Phase 3–6 từ các primitive đã dùng cho bản mẫu.
 ### Phase 3 — Hệ thống giao diện và trang chủ
 
 - [ ] Tạo token semantic cho nền, chữ, viền, link, accent và focus của portfolio; kiểm tương phản trên cả vùng sáng/tối.

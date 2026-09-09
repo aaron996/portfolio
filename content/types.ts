@@ -46,30 +46,14 @@
    - `sectionLabels.featuredEyebrow` / `otherCasesEyebrow` / `otherCasesHeading`
                            → chỉ FeaturedCase (thiết kế cũ) đọc. Component đã xoá.
 
-   CHƯA ĐƯỢC ĐỌC BỞI COMPONENT NÀO (giữ lại có ý thức, không phải bỏ sót)
-   - `featuredSlug`        → CaseGrid render cả 5 case cùng một kích cỡ nên chưa cần
-                             biết case nào là flagship.
-   - `CaseStudy.tier`      → cùng lý do: hierarchy 3 kích cỡ chưa được cài lại sau
-                             đợt rebuild theo template. Dữ liệu giữ nguyên cho lần sau.
-   Nếu sửa hai field này mà không thấy gì đổi trên trang thì đó là đúng như mô tả,
-   không phải lỗi build.
+   Phase 2: PortfolioHome reads CaseStudy.tier for hierarchy. featuredSlug remains
+   legacy data for compatibility and does not control the prototype.
    ========================================================================== */
 
 export type Accent = "navy" | "blue" | "amber" | "lime";
 
-/**
- * Điều khiển layout của case. Component render theo tier:
- *
- *  flagship → trang đầy đủ: keyResult → context → decisions → features →
- *             flow → media → ownership → results → reflection → stack
- *  deep     → trang đầy đủ NHƯNG không features grid, không media bắt buộc.
- *             Sức nặng dồn vào `decisions`.
- *  brief    → trang ngắn: keyResult → context → decisions → results.
- *             Không flow, không features, không media.
- *
- * Trên trang chủ: flagship chiếm 1 block lớn, deep là 2 card ngang,
- * brief là 1 dải kết quả (result strip) — 3 kích cỡ khác nhau = hierarchy nhìn thấy được.
- */
+/** Homepage hierarchy: flagship = visible product spread, deep = text row,
+ * brief = result strip. Case detail templates are migrated separately. */
 export type CaseTier = "flagship" | "deep" | "brief";
 
 export interface Cta {
@@ -146,6 +130,8 @@ export interface Media {
 }
 
 export interface CaseStudy {
+  /** Short editorial projection for the Phase 2 homepage. */
+  homepage?: { title: string; summary: string; role: string; evidence: string; cta: string };
   slug: string;
   tier: CaseTier;
 
@@ -431,6 +417,7 @@ export interface GameContent {
 }
 
 export interface SiteContent {
+  prototype: PortfolioPrototype;
   meta: {
     name: string;
     roleLabel: string;
@@ -553,4 +540,46 @@ export interface SiteContent {
   };
 
   game: GameContent;
+}
+
+export interface PrototypeMedia {
+  src: string;
+  alt: string;
+  caption: string;
+  width: number;
+  height: number;
+  /** Layout crop keeps the existing screenshot intact, including in the viewer. */
+  crop?: { left: number; top: number; width: number; height: number };
+}
+
+export interface PortfolioPrototype {
+  nav: Cta[];
+  hero: {
+    domain: string; heading: string; body: string; primary: Cta; secondary: Cta;
+    headlineLines: [string, string, string, string];
+    objects: { container: Cta; keyboard: Cta; description: string };
+  };
+  labels: {
+    cv: string; skip: string; navigation: string; works: string; otherWorks: string;
+    process: string; about: string; experience: string; skills: string;
+    demo: string; enlarge: string; closeImage: string; imageViewer: string;
+    back: string; decisions: string; details: string; results: string; ownership: string;
+    sharedScope: string; related: string; lesson: string; stack: string; source: string;
+    email: string; linkedin: string; top: string; location: string;
+  };
+  worksIntro: string;
+  media: Record<string, PrototypeMedia>;
+  resultNote: string;
+  process: { title: string; body: string }[];
+  about: string[];
+  experience: { company: string; period: string; role: string; body: string }[];
+  skills: { title: string; body: string; links: Cta[] }[];
+  contact: { heading: string; body: string; game: string; gameCta: Cta };
+  pg: {
+    period: string; context: string; role: string; output: string;
+    decisions: { id: string; title: string; body: string }[];
+    details: { title: string; body: string }[];
+    result: { value: string; label: string; method: string };
+    snapshot: string; lesson: string;
+  };
 }

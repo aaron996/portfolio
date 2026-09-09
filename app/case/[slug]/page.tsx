@@ -2,10 +2,10 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { content } from "@/content/content.vi";
-import { Nav } from "@/components/Nav";
-import { ScrollProgress } from "@/components/ui/ScrollProgress";
-import { Footer } from "@/components/Footer";
-import { Contact } from "@/components/Contact";
+import { PgCase } from "@/components/portfolio/PgCase";
+import { PortfolioNav, PortfolioContact } from "@/components/portfolio/PortfolioShell";
+import { PortfolioIcon } from "@/components/portfolio/PortfolioIcon";
+import { portfolioFontVariables } from "@/components/portfolio/PortfolioFonts";
 import { Section, SectionHeading } from "@/components/ui/Section";
 import { Reveal } from "@/components/ui/Reveal";
 import { DraftBadge } from "@/components/ui/DraftBadge";
@@ -34,48 +34,49 @@ export default async function CasePage({ params }: Params) {
   const { slug } = await params;
   const c = content.cases.find((x) => x.slug === slug);
   if (!c) notFound();
+  if (c.slug === "pg-sales-operations") return <PgCase caseStudy={c} />;
 
   const others = content.cases.filter((x) => x.slug !== c.slug);
 
   return (
-    <>
-      <ScrollProgress />
-      <Nav />
-      <main id="main">
-        <header className="border-b border-ink-800 bg-ink-950">
-          <div className="mx-auto w-full max-w-6xl px-5 pb-16 pt-28 sm:px-8 md:pb-20 md:pt-32">
-            <Link href="/#cases" className="text-sm text-mute-2 transition-colors hover:text-lime">
-              ← Tất cả case
-            </Link>
-            <p className="eyebrow mt-8 text-lime">{c.scopeLabel}</p>
-            <h1 className="display mt-4 text-[clamp(2.1rem,6vw,4.2rem)]">{c.title}</h1>
-            <p className="mt-4 max-w-2xl text-base font-semibold text-paper md:text-lg">{c.proves}</p>
-            <p className="prose-lede mt-4 text-mute md:text-lg">{c.oneLiner}</p>
+    <div className={`portfolio-v2 ${portfolioFontVariables}`}>
+      <div className="pf-dark">
+        <PortfolioNav />
+      </div>
+      <main id="main" tabIndex={-1}>
+        <header className="pf-shell pf-case-header">
+          <Link href="/#cases" className="pf-text-link">
+            <PortfolioIcon name="back" />
+            Tất cả case
+          </Link>
+          <p className="pf-eyebrow mt-6">{c.scopeLabel}</p>
+          <h1 className="display mt-2 text-[clamp(2.1rem,6vw,4.2rem)]">{c.title}</h1>
+          <p className="mt-4 max-w-2xl text-base font-semibold text-[var(--pf-text)] md:text-lg">{c.proves}</p>
+          <p className="prose-lede mt-3 text-[var(--pf-secondary)] md:text-lg">{c.oneLiner}</p>
 
-            <div className="mt-10 inline-flex flex-col rounded-2xl border border-lime/40 bg-lime/5 px-6 py-5">
-              <span className="font-display text-2xl font-extrabold text-paper md:text-3xl">
-                {c.keyResult.value}
-                <DraftBadge verified={c.keyResult.verified} />
-              </span>
-              <span className="mt-2 text-sm text-mute-2">{c.keyResult.label}</span>
-            </div>
-
-            <dl className="mt-12 grid gap-6 border-t border-ink-800 pt-8 sm:grid-cols-3">
-              <div>
-                <dt className="eyebrow text-mute-3">Khách hàng</dt>
-                <dd className="mt-2 text-sm text-paper">{c.client}</dd>
-                {c.clientNote ? <dd className="mt-1 text-xs text-mute-3">{c.clientNote}</dd> : null}
-              </div>
-              <div>
-                <dt className="eyebrow text-mute-3">Vai trò</dt>
-                <dd className="mt-2 text-sm text-paper">{c.role}</dd>
-              </div>
-              <div>
-                <dt className="eyebrow text-mute-3">Thời gian</dt>
-                <dd className="mt-2 text-sm text-paper">{c.period}</dd>
-              </div>
-            </dl>
+          <div className="mt-8 inline-flex flex-col rounded-xl border border-[var(--pf-line)] bg-[var(--pf-elevated)] px-6 py-5">
+            <span className="font-display text-2xl font-extrabold text-[var(--pf-text)] md:text-3xl">
+              {c.keyResult.value}
+              <DraftBadge verified={c.keyResult.verified} />
+            </span>
+            <span className="mt-2 text-sm text-[var(--pf-secondary)]">{c.keyResult.label}</span>
           </div>
+
+          <dl className="mt-10 grid gap-6 border-t border-[var(--pf-line)] pt-8 sm:grid-cols-3">
+            <div>
+              <dt className="pf-eyebrow text-[var(--pf-secondary)]">Khách hàng</dt>
+              <dd className="mt-2 text-sm text-[var(--pf-text)]">{c.client}</dd>
+              {c.clientNote ? <dd className="mt-1 text-xs text-[var(--pf-secondary)]">{c.clientNote}</dd> : null}
+            </div>
+            <div>
+              <dt className="pf-eyebrow text-[var(--pf-secondary)]">Vai trò</dt>
+              <dd className="mt-2 text-sm text-[var(--pf-text)]">{c.role}</dd>
+            </div>
+            <div>
+              <dt className="pf-eyebrow text-[var(--pf-secondary)]">Thời gian</dt>
+              <dd className="mt-2 text-sm text-[var(--pf-text)]">{c.period}</dd>
+            </div>
+          </dl>
         </header>
 
         {c.context.length > 0 && (
@@ -246,22 +247,20 @@ export default async function CasePage({ params }: Params) {
         )}
 
         {others.length > 0 && (
-          <Section tone="darker" className="border-b border-ink-800">
+          <Section tone="darker" className="border-b border-[var(--pf-line)]">
             <SectionHeading eyebrow="Case khác">Xem tiếp</SectionHeading>
-            {/* 4 case còn lại: 2 cột trên tablet, 4 cột trên desktop — tránh để
-                lẻ một card mồ côi như lưới 3 cột. */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {others.map((o) => (
                 <Link
                   key={o.slug}
                   href={`/case/${o.slug}`}
-                  className="group flex h-full flex-col rounded-xl border border-ink-700 bg-ink-900 p-5 transition-colors hover:border-lime/50"
+                  className="group flex h-full flex-col rounded-xl border border-[var(--pf-line)] bg-[var(--pf-elevated)] p-5 transition-colors hover:border-[var(--pf-accent)]"
                 >
-                  <p className="eyebrow text-lime">{o.scopeLabel}</p>
-                  <h3 className="mt-2 font-display text-sm font-bold uppercase leading-tight text-paper">
+                  <p className="pf-eyebrow">{o.scopeLabel}</p>
+                  <h3 className="mt-2 font-display text-sm font-bold uppercase leading-tight text-[var(--pf-text)]">
                     {o.title}
                   </h3>
-                  <span className="mt-3 text-xs font-semibold text-lime group-hover:underline">
+                  <span className="mt-3 text-xs font-semibold text-[var(--pf-accent)] group-hover:underline">
                     Xem chi tiết →
                   </span>
                 </Link>
@@ -270,10 +269,9 @@ export default async function CasePage({ params }: Params) {
           </Section>
         )}
 
-        <Contact />
+        <PortfolioContact />
       </main>
       <SensorBotCanvas />
-      <Footer />
-    </>
+    </div>
   );
 }
