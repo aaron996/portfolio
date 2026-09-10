@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const { test } = require('node:test');
-const { fixture, advance, content, evaluate } = require('./game-test-runtime.cjs');
+const { fixture, advance, content, evaluate, canvasRecorder } = require('./game-test-runtime.cjs');
 
 test('chapter rules differ: matching, toggle routing, timing, ordered tracing, persistent prevention', () => {
   const { MissionRun } = evaluate('components/game/chapterMission.ts');
@@ -232,7 +232,8 @@ test('boss volley emits three typed projectiles and can be reflected from the re
   Object.assign(p, { x: 400, face: 1 }); g.lab.spawnBoss();
   Object.assign(g.lab.boss, { x: 520, dir: -1, tel: .001, cd: 100, attackId: 41 });
   g.lab.step(1/120); assert.equal(g.lab.shots.length, 3);
-  assert.ok(g.lab.shots.every((shot) => shot.attackId === 41));
+  assert.equal(new Set(g.lab.shots.map((shot) => shot.attackId)).size, 3,
+    'each projectile must own collision resolution independently');
   let reflected = false; const hp = g.lab.boss.hp;
   for (let i=0;i<180;i++) {
     const approaching = g.lab.shots.some(s=>!s.reflected && s.vx < 0 && s.x < p.x+55 && s.x > p.x);
@@ -253,10 +254,24 @@ test('slam emits floor shockwaves, cannot be guarded, and is avoided above the f
     g.lab.step(1/120);
     assert.equal(g.lab.shots.length, 0);
     assert.equal(g.lab.shockwaves.length, 2);
+    assert.equal(new Set(g.lab.shockwaves.map((wave) => wave.attackId)).size, 1,
+      'the two fronts of one slam must share one collision result');
     advance(g, .1);
     assert.equal(p.hp, airborne ? 5 : 4);
     if (!airborne) assert.equal(p.vy, 0, 'ground wave must not reuse the large upward hurt launch');
   }
+});
+
+test('the two fronts of one slam cannot deal damage twice after immunity ends', () => {
+  const g = fixture({ bossKind: 'slam' }); const p = g.lab.player;
+  Object.assign(p, { x: 480, y: 304, ground: true }); g.lab.spawnBoss();
+  Object.assign(g.lab.boss, { x: 520, dir: -1, tel: .001, cd: 100, attackId: 61 });
+  g.lab.step(1/120); advance(g, .1);
+  assert.equal(p.hp, 4, 'the first wave front lands');
+  p.inv = 0; p.x = 630;
+  advance(g, .05);
+  assert.equal(p.hp, 4, 'the second front shares the slam collision result');
+  assert.equal(g.lab.shockwaves.length, 0, 'both fronts reached their terminal collision');
 });
 
 test('attack ids resolve exactly once while different attacks remain independent', () => {
@@ -267,6 +282,76 @@ test('attack ids resolve exactly once while different attacks remain independent
   assert.equal(p.hp, 4);
   assert.equal(g.lab.hurtPlayer(1, false, { attackId: 72 }), 'damaged');
   assert.equal(p.hp, 3);
+});
+
+test('separate projectiles preserve their own id through parry and resolve after immunity ends', () => {
+  const parry = fixture(); const p = parry.lab.player;
+  Object.assign(p, { x: 400, face: 1 });
+  parry.lab.fire(p.x + 27, p.y + 20, -4.4, 0);
+  parry.lab.fire(p.x + 120, p.y + 20, -4.4, 0);
+  const [first, second] = parry.lab.shots;
+  const firstId = first.attackId; const secondId = second.attackId;
+  assert.notEqual(first.attackId, second.attackId);
+  parry.press('guard'); advance(parry, .02);
+  assert.equal(first.reflected, true); assert.equal(first.attackId, firstId);
+  parry.release('guard');
+  second.x = p.x + 27;
+  parry.press('guard'); advance(parry, .02);
+  assert.equal(second.reflected, true, 'a later projectile must not inherit the first parry result');
+  assert.equal(second.attackId, secondId, 'parry must retain projectile ownership id');
+
+  const damage = fixture(); const target = damage.lab.player;
+  Object.assign(target, { x: 400, face: -1 });
+  damage.lab.fire(target.x + 27, target.y + 20, -4, 0);
+  damage.lab.fire(target.x + 120, target.y + 20, -4, 0);
+  const [, later] = damage.lab.shots;
+  advance(damage, .02); assert.equal(target.hp, 4);
+  target.inv = 0;
+  later.x = target.x + 27;
+  advance(damage, .02);
+  assert.equal(target.hp, 3, 'a different projectile resolves normally once existing immunity expires');
+});
+
+test('rules devices render neutral before interaction and only show completion after success', () => {
+  const recording = canvasRecorder();
+  const g = fixture({}, { maps: content.game.maps, canvas: recording.canvas });
+  g.loadMap(4); g.resume(); g.lab.spawnBoss();
+  const nodes = content.game.maps[4].mission.nodes;
+  const p = g.lab.player;
+  const paint = () => {
+    recording.commands.length = 0; g.lab.draw();
+    return (node) => {
+      const reverse = [...recording.commands].reverse();
+      return {
+        border: reverse.find((command) => command.op === 'strokeRect' && command.args[0] === node.x - 20 && command.args[1] === node.y - 48),
+        light: reverse.find((command) => command.op === 'arc' && command.args[0] === node.x + 12 && command.args[1] === node.y - 10 && command.args[2] === 3),
+        symbol: reverse.find((command) => command.op === 'fillText' && command.args[1] === node.x && command.args[2] === node.y - 28),
+        label: reverse.find((command) => command.op === 'fillText' && typeof command.args[0] === 'string' && command.args[0].endsWith(node.name)),
+      };
+    };
+  };
+  const assertPaint = (node, color, symbol) => {
+    const commands = paint()(node);
+    assert.equal(commands.border?.strokeStyle, color, `${node.id} border`);
+    assert.equal(commands.light?.fillStyle, color, `${node.id} light`);
+    assert.equal(commands.symbol?.fillStyle, color, `${node.id} symbol`);
+    assert.equal(commands.symbol?.args[0], symbol, `${node.id} symbol text`);
+    assert.equal(commands.label?.fillStyle, color, `${node.id} label`);
+  };
+  const at = (node) => Object.assign(p, { x: node.x - p.w / 2, y: node.y - p.h, ground: true });
+  const interact = (node) => { at(node); g.press('interact'); g.release('interact'); };
+
+  at({ x: 1200, y: 344 });
+  for (const node of nodes) assertPaint(node, '#f2f1ec', '•');
+  for (const node of nodes) { at(node); assertPaint(node, '#9FD8FF', 'E'); }
+
+  interact(nodes[0]); assertPaint(nodes[0], '#d4f236', '✓');
+  interact(nodes[2]);
+  at({ x: 1200, y: 344 });
+  for (const node of nodes) assertPaint(node, '#f2f1ec', '•');
+
+  interact(nodes[0]); interact(nodes[1]);
+  assert.ok(g.status().mission.exposure > 0, 'both valid rules keep the boss unlocked');
 });
 
 test('boss dash locks direction at tell, resolves once, repels on parry and stays harmless in recovery', () => {
@@ -300,7 +385,8 @@ test('boss-specific patterns use parcel, trace packet and hybrid slam contracts'
   Object.assign(game.lab.boss, { x: 520, dir: -1, tel: .001, cd: 100, attackId: 91 });
   game.lab.step(1/120);
   assert.equal(game.lab.shots.length, 2);
-  assert.ok(game.lab.shots.every((shot) => shot.kind === 'parcel' && shot.attackId === 91));
+  assert.ok(game.lab.shots.every((shot) => shot.kind === 'parcel'));
+  assert.equal(new Set(game.lab.shots.map((shot) => shot.attackId)).size, 2);
 
   game.loadMap(3); game.resume(); game.lab.spawnBoss();
   Object.assign(game.lab.player, { x: 400, y: 304, ground: true });

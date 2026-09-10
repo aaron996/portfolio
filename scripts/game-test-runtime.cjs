@@ -48,11 +48,29 @@ function evaluate(file, globals = {}) {
   return exports;
 }
 const content = evaluate('content/content.vi.ts').content;
+function canvasRecorder() {
+  const commands = [];
+  const state = {};
+  const snapshot = () => ({ fillStyle: state.fillStyle, strokeStyle: state.strokeStyle,
+    lineWidth: state.lineWidth, font: state.font, textAlign: state.textAlign });
+  const gradient = () => ({ addColorStop(...args) { commands.push({ op: 'addColorStop', args, ...snapshot() }); } });
+  const context = new Proxy({}, {
+    get(_, key) {
+      if (key in state) return state[key];
+      if (key === 'createLinearGradient') return (...args) => { commands.push({ op: key, args, ...snapshot() }); return gradient(); };
+      if (key === 'measureText') return (text) => ({ width: String(text).length * 6 });
+      return (...args) => commands.push({ op: key, args, ...snapshot() });
+    },
+    set(_, key, value) { state[key] = value; commands.push({ op: 'set', key, value, ...snapshot() }); return true; },
+  });
+  return { canvas: { width: 0, height: 0, getContext: () => context, getBoundingClientRect: () => ({ width: 0 }),
+    addEventListener() {}, removeEventListener() {} }, commands };
+}
 function fixture(overrides = {}, options = {}) {
   const map = { ...content.game.maps[0], mission: undefined, traps: [], pickups: [],
     mobs: [{ kind: 'walker', name: 'sentinel', x: 2100, range: 10 }],
     plats: [], ...overrides };
-  const canvas = { getContext: () => ({}), addEventListener() {}, removeEventListener() {} };
+  const canvas = options.canvas || { getContext: () => ({}), addEventListener() {}, removeEventListener() {} };
   const game = evaluate('components/game/engine.ts', options.globals).createGame(canvas, options.maps || [map], content.game, options.handlers);
   game.resume();
   game.setPauseOnPickup(false);
@@ -62,4 +80,4 @@ function fixture(overrides = {}, options = {}) {
 function advance(game, seconds) {
   for (let i = 0; i < Math.round(seconds * 120); i++) game.lab.step(1 / 120);
 }
-module.exports = { root, compile, fixture, advance, content, evaluate };
+module.exports = { root, compile, fixture, advance, content, evaluate, canvasRecorder };
