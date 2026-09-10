@@ -357,9 +357,12 @@ const BOSS_RIG_V1: Rig = { unit: 416 / 446, ax: 0.5, ay: 431 / 446 };
 const MOB_RIG_V2: Rig = { unit: 440 / 512, ax: 0.5, ay: 476 / 512 };
 /** Trùm đúng spec: khung 768×768, thân cao 660px, chân ở y = 714 */
 const BOSS_RIG_V2: Rig = { unit: 660 / 768, ax: 0.5, ay: 714 / 768 };
+/** Combat v3 player poses use their own fixed 512² canvas and foot pivot. */
+const PLAYER_COMBAT_V3_RIG: Rig = { unit: 353 / 1024, ax: 0.5, ay: 480 / 512 };
 
 const ARMED_PASSING_RIG: Rig = { ...PLAYER_RIG, unit: PLAYER_RIG.unit / 1.1 };
 function playerRig(src?: string): Rig {
+  if (src?.startsWith("combat-v3/player/")) return PLAYER_COMBAT_V3_RIG;
   // Optical correction: the head detector included the shoulder on these two
   // new poses. Keep the authored foot anchor; match head size, not body height.
   if (src === "player/armed-run-2.png" || src === "player/armed-run-3.png") return ARMED_PASSING_RIG;
@@ -379,7 +382,8 @@ function mobRef(kind: MobKind): number {
   if (kind === "rider") return RIDER_PX;
   return MOB_PX;
 }
-const bossRig = () => (RIG_SET.boss === "v2" ? BOSS_RIG_V2 : BOSS_RIG_V1);
+const bossRig = (src?: string) =>
+  src?.startsWith("combat-v3/boss/") || RIG_SET.boss === "v2" ? BOSS_RIG_V2 : BOSS_RIG_V1;
 
 /* ── tên file ─────────────────────────────────────────── */
 
@@ -401,6 +405,34 @@ const P_RISE = ASSETS.playerJump === "split" ? "player/jump-rise.png" : "player/
 const P_FALL = ASSETS.playerJump === "split" ? "player/jump-fall.png" : "player/jump.png";
 const P_LAND = ASSETS.playerJump === "split" ? "player/land.png" : "player/jump.png";
 const P_HURT = "player/hurt.png";
+const COMBAT_V3 = {
+  boss: {
+    stomp: Array.from({ length: 6 }, (_, i) => `combat-v3/boss/b1-stomp-${i + 1}.png`),
+    rush: Array.from({ length: 4 }, (_, i) => `combat-v3/boss/b3-rush-${i + 1}.png`),
+    repel: Array.from({ length: 3 }, (_, i) => `combat-v3/boss/b3-repel-${i + 1}.png`),
+    recover: "combat-v3/boss/b3-recover-1.png",
+  },
+  player: {
+    knockback: Array.from({ length: 3 }, (_, i) => `combat-v3/player/knockback-${i + 1}.png`),
+    armedKnockback: Array.from({ length: 3 }, (_, i) => `combat-v3/player/armed-knockback-${i + 1}.png`),
+    armedBrace: Array.from({ length: 2 }, (_, i) => `combat-v3/player/armed-brace-${i + 1}.png`),
+    armedParry: Array.from({ length: 3 }, (_, i) => `combat-v3/player/armed-parry-${i + 1}.png`),
+  },
+  fx: {
+    ground: Array.from({ length: 3 }, (_, i) => `combat-v3/fx/ground-impact-${i + 1}.png`),
+    shockwave: Array.from({ length: 3 }, (_, i) => `combat-v3/fx/shockwave-${i + 1}.png`),
+    skid: Array.from({ length: 2 }, (_, i) => `combat-v3/fx/skid-${i + 1}.png`),
+    block: Array.from({ length: 3 }, (_, i) => `combat-v3/fx/block-impact-${i + 1}.png`),
+    parry: Array.from({ length: 3 }, (_, i) => `combat-v3/fx/parry-impact-${i + 1}.png`),
+    muzzle: Array.from({ length: 3 }, (_, i) => `combat-v3/fx/player-muzzle-${i + 1}.png`),
+    bolt: Array.from({ length: 2 }, (_, i) => `combat-v3/fx/player-bolt-${i + 1}.png`),
+    bullet: Array.from({ length: 3 }, (_, i) => `combat-v3/fx/bullet-impact-${i + 1}.png`),
+  },
+} as const;
+
+function clipFrame<T>(frames: readonly T[], progress: number): T {
+  return frames[Math.min(frames.length - 1, Math.max(0, Math.floor(progress * frames.length)))];
+}
 const SCENE_SPRITES = {
   platform: "bg/platform.png", ground: "bg/ground.png", gate: "ui/gate.png",
   heart: "ui/heart-full.png", bossbar: "ui/bossbar.png", aura: "fx/aura.png",
@@ -512,6 +544,23 @@ function drawFit(
   g.drawImage(im, centerX - w / 2, bottomY - h, w, h);
 }
 
+/** Vẽ FX theo pivot đã QA, không ép tâm ảnh vào điểm va chạm. */
+function drawPivotFit(
+  g: CanvasRenderingContext2D,
+  im: HTMLImageElement,
+  x: number,
+  y: number,
+  maxW: number,
+  maxH: number,
+  pivotX: number,
+  pivotY: number,
+) {
+  const scale = Math.min(maxW / im.naturalWidth, maxH / im.naturalHeight);
+  const w = im.naturalWidth * scale;
+  const h = im.naturalHeight * scale;
+  g.drawImage(im, x - pivotX * scale, y - pivotY * scale, w, h);
+}
+
 /** Vẽ một ảnh lặp ngang để lấp đầy bề rộng `w`, cắt tấm cuối nếu dư */
 function drawTiled(
   g: CanvasRenderingContext2D,
@@ -604,6 +653,8 @@ interface Boss {
   pattern: number;
   /** Xung lực bật lùi do block/parry, tách khỏi logic bám người chơi. */
   impulseX: number; impulseT: number;
+  /** Pose repel chỉ mở khi dash thực sự bị block/parry, không dùng hurt chung. */
+  repelT: number;
 }
 interface Trap {
   kind: "spike" | "saw" | "pulse";
@@ -636,6 +687,9 @@ interface Shockwave {
   x: number; y: number; dir: number; speed: number; t: number;
   attackId: number;
 }
+/** FX tĩnh chỉ dành cho các nhóm asset đã QA pass; sóng dậm có state Shockwave riêng. */
+type CombatFxKind = "ground" | "skid" | "block" | "parry" | "bullet";
+interface CombatFx { kind: CombatFxKind; x: number; y: number; t: number; dur: number }
 /** Một nhát chém đã bay ra khỏi tay — vẽ vệt lưỡi liềm rồi tự tan */
 interface Slash {
   x: number; y: number; face: number;
@@ -780,6 +834,7 @@ export function createGame(
   let shockwaves: Shockwave[] = [];
   let bullets: Bullet[] = [];
   let slashes: Slash[] = [];
+  let combatFx: CombatFx[] = [];
   let boss: Boss | null = null;
   let cam = 0;
   let camY = 0;
@@ -967,6 +1022,7 @@ export function createGame(
     shockwaves = [];
     bullets = [];
     slashes = [];
+    combatFx = [];
     boss = null;
     cam = 0; camY = 0;
     shake = 0;
@@ -1030,7 +1086,7 @@ export function createGame(
       walkPhase: 0, stepPhase: 0, act: 0,
       recover: 0,
       targetX: player.x + player.w / 2, targetY: player.y + player.h / 2,
-      attackId: 0, impulseX: 0, impulseT: 0,
+      attackId: 0, impulseX: 0, impulseT: 0, repelT: 0,
       attackKind: configuredKind === "hybrid" ? "dash" : configuredKind,
       pattern: 0,
     };
@@ -1264,6 +1320,7 @@ export function createGame(
       o.tel = 0;
       o.dash = 0;
       interruptRush(o, 0.65);
+      combatEffect("bullet", b.x, b.y);
       spark(b.x, b.y, Math.sign(b.vx) || 1);
       puff(o.x + o.w / 2, o.y + o.h / 2, m.palette.mob, 5);
       if (o.hp <= 0) {
@@ -1278,6 +1335,7 @@ export function createGame(
       if (mission && mission.exposure <= 0) { say(mission.definition.locked, 1.5); return true; }
       boss.hp -= GUN_DMG;
       boss.hurt = 0.14;
+      combatEffect("bullet", b.x, b.y);
       spark(b.x, b.y, Math.sign(b.vx) || 1);
       puff(boss.x + boss.w / 2, boss.y + boss.h / 2, m.palette.boss, 6);
       if (boss.hp <= 0) clearMap();
@@ -1364,10 +1422,12 @@ export function createGame(
       freeze = reduced ? 0 : 0.08;
       ring(atX, y, LIME);
       puff(atX, y, LIME, 10);
+      combatEffect("parry", atX, y);
     } else {
       player.stam = Math.max(0, player.stam - GUARD_BLOCK_COST);
       freeze = reduced ? 0 : 0.03;
       puff(atX, y, "#9fd8ff", 6);
+      combatEffect("block", atX, y);
       if (player.stam <= 0) breakGuard();
     }
     player.stamDelay = GUARD_REGEN_DELAY;
@@ -1497,6 +1557,10 @@ export function createGame(
   /** Vòng sáng loang ra — đánh dấu chỗ vừa có gì đó nổ */
   function ring(x: number, y: number, color: string) {
     parts.push({ x, y, vx: 0, vy: 0, life: 0.4, max: 0.4, color, kind: "ring", size: 10 });
+  }
+  /** Effects are opt-in only for the QA-passed combat-v3 groups. */
+  function combatEffect(kind: CombatFxKind, x: number, y: number, dur = 0.24, delay = 0) {
+    combatFx.push({ kind, x, y, t: -delay, dur });
   }
   function say(text: string, seconds: number) {
     msg = text;
@@ -1713,6 +1777,7 @@ export function createGame(
     const kind = maps[lv].bossKind;
     b.hurt = Math.max(0, b.hurt - dt);
     b.act = Math.max(0, b.act - dt);
+    b.repelT = Math.max(0, b.repelT - dt);
     b.bob += dt * 3;
     if (mission?.definition.mode === "timing" && (mission.exposure > 0 || mission.cycle >= 4)) {
       b.dash = 0; b.tel = 0; b.recover = Math.max(b.recover, 1.2); b.cd = 1.2;
@@ -1742,6 +1807,7 @@ export function createGame(
         b.dash = 0;
         b.recover = Math.max(b.recover, 0.78);
         b.cd = 1.8;
+        if (lv === 2) combatEffect("skid", b.x + b.w / 2 - b.dir * 18, b.y + b.h);
       }
       return;
     }
@@ -1768,6 +1834,7 @@ export function createGame(
         } else if (b.attackKind === "slam") {
           emitShockwaves(b);
           dust(b.x + b.w / 2, b.y + b.h, 10, 2.2);
+          combatEffect("ground", b.x + b.w / 2, b.y + b.h, 0.22);
           b.recover = 1.1;
         } else if (b.attackKind === "parcel") {
           const dir = b.dir;
@@ -2013,6 +2080,7 @@ export function createGame(
         activeBoss.recover = Math.max(activeBoss.recover, result === "parried" ? 1.2 : 0.74);
         const duration = result === "parried" ? 0.24 : 0.2;
         const distance = result === "parried" ? 88 : result === "blocked" ? 52 : 28;
+        activeBoss.repelT = result === "parried" || result === "blocked" ? duration : 0;
         activeBoss.impulseX = -activeBoss.dir * distance / duration;
         activeBoss.impulseT = duration;
         separateAttacker(activeBoss, activeBoss.dir, 60, worldWidth - activeBoss.w - 20);
@@ -2075,6 +2143,11 @@ export function createGame(
     slashes = slashes.filter((s) => {
       s.t += dt;
       return s.t < s.dur;
+    });
+
+    combatFx = combatFx.filter((fx) => {
+      fx.t += dt;
+      return fx.t < fx.dur;
     });
 
     parts = parts.filter((p) => {
@@ -3026,7 +3099,8 @@ export function createGame(
     let dy = 0;
 
     if (player.hurtT > 0) {
-      src = P_HURT;
+      const frames = player.ammo > 0 ? COMBAT_V3.player.armedKnockback : COMBAT_V3.player.knockback;
+      src = clipFrame(frames, 1 - player.hurtT / 0.35);
       rot = -player.face * 0.12;
     } else if (player.breakT > 0) {
       // Vỡ đỡ: dùng lại khung trúng đòn, người ngả ra sau và run nhẹ
@@ -3034,15 +3108,21 @@ export function createGame(
       rot = -player.face * 0.22;
       dy = 1;
     } else if (player.parryT > 0 || player.braceT > 0) {
-      src = ASSETS.playerGuard ? P_GUARD : P_IDLE[0];
       const parry = player.parryT > 0;
-      rot = -player.face * (parry ? 0.13 : 0.08);
-      sx = parry ? 0.96 : 1.04;
-      sy = parry ? 1.04 : 0.96;
-      dy = 1;
+      if (player.ammo > 0) {
+        src = parry
+          ? clipFrame(COMBAT_V3.player.armedParry, 1 - player.parryT / 0.28)
+          : clipFrame(COMBAT_V3.player.armedBrace, 1 - player.braceT / 0.24);
+      } else {
+        src = ASSETS.playerGuard ? P_GUARD : P_IDLE[0];
+        rot = -player.face * (parry ? 0.13 : 0.08);
+        sx = parry ? 0.96 : 1.04;
+        sy = parry ? 1.04 : 0.96;
+        dy = 1;
+      }
     } else if (player.guarding) {
-      // Có player/guard.png thì dùng; chưa có thì lấy khung đứng, hạ thấp và
-      // nghiêng người vào đòn — cái khiên vẽ bằng code mới là thứ đọc ra "đỡ".
+      // A held guard is not a successful collision response. The unauthorised
+      // brace/parry candidates remain out of runtime until their QA hold clears.
       if (ASSETS.playerGuard) {
         src = P_GUARD;
       } else {
@@ -3152,6 +3232,40 @@ export function createGame(
     return { src, rot, sx, sy, dy };
   }
 
+  function drawCombatEffects(behindActors: boolean) {
+    for (const fx of combatFx) {
+      if (fx.t < 0) continue;
+      const groundFx = fx.kind === "ground" || fx.kind === "skid";
+      if (groundFx !== behindActors) continue;
+      const frames = COMBAT_V3.fx[fx.kind];
+      const sprite = img(clipFrame(frames, fx.t / fx.dur));
+      if (!sprite) continue;
+      if (fx.kind === "ground") {
+        drawPivotFit(g!, sprite, fx.x, fx.y, 152, 76, 256, 224);
+      } else if (fx.kind === "skid") {
+        drawPivotFit(g!, sprite, fx.x, fx.y, 64, 32, 128, 112);
+      } else {
+        drawPivotFit(g!, sprite, fx.x, fx.y, 46, 46, 128, 128);
+      }
+    }
+  }
+
+  function combatBossFrame(b: Boss): string | null {
+    if (lv === 0 && b.attackKind === "slam" && b.tel > 0) {
+      return clipFrame(COMBAT_V3.boss.stomp.slice(0, 3), 1 - b.tel / 0.8);
+    }
+    if (lv === 0 && b.attackKind === "slam" && b.act > 0) return COMBAT_V3.boss.stomp[3];
+    if (lv === 0 && b.attackKind === "slam" && b.recover > 0) {
+      return clipFrame(COMBAT_V3.boss.stomp.slice(4), 1 - b.recover / 1.1);
+    }
+    if (lv === 2 && b.repelT > 0 && b.impulseT > 0) {
+      return clipFrame(COMBAT_V3.boss.repel, 1 - b.repelT / 0.24);
+    }
+    if (lv === 2 && b.dash > 0) return clipFrame(COMBAT_V3.boss.rush, 1 - b.dash / 0.55);
+    if (lv === 2 && b.recover > 0) return COMBAT_V3.boss.recover;
+    return null;
+  }
+
   function drawPlayer() {
     const frame = playerFrame();
     const sprite = img(frame.src) ?? img(P_IDLE[0]);
@@ -3183,14 +3297,17 @@ export function createGame(
     }
 
     if (player.shootT > 0.09) {
-      const muzzle = ASSETS.muzzleArt ? img(GEAR_SPRITES.muzzle) : null;
+      const progress = 1 - player.shootT / 0.2;
+      const combatMuzzle = img(clipFrame(COMBAT_V3.fx.muzzle, progress));
+      const muzzle = combatMuzzle ?? (ASSETS.muzzleArt ? img(GEAR_SPRITES.muzzle) : null);
       const mx = cx + player.face * 26;
       const my = player.y - 3;
       if (muzzle) {
         g!.save();
         g!.translate(mx, my);
         g!.scale(player.face, 1);
-        drawFit(g!, muzzle, 0, 10, 22, 20);
+        if (combatMuzzle) drawPivotFit(g!, muzzle, 0, 0, 22, 20, 64, 128);
+        else drawFit(g!, muzzle, 0, 10, 22, 20);
         g!.restore();
       }
     }
@@ -3372,6 +3489,8 @@ export function createGame(
       if (!o.dead) drawLabel(o.name, o.x + o.w / 2, o.y - (o.kind === "rider" ? 22 : 7));
     }
 
+    drawCombatEffects(true);
+
     if (boss) {
       /**
        * Hoạt ảnh đi của trùm.
@@ -3389,7 +3508,7 @@ export function createGame(
       const cyc = boss.walkPhase * Math.PI * 4;
       const lift = walking ? Math.abs(Math.sin(cyc / 2)) : 0;
       const stepHit = walking ? Math.max(0, -Math.cos(cyc)) : 0;
-      const by =
+      const legacyBy =
         boss.y +
         Math.sin(boss.bob) * 2 -
         (ASSETS.bossWalk ? 0 : lift * 3);
@@ -3401,12 +3520,16 @@ export function createGame(
           ? bossWalkSprite(lv, 1 + (Math.floor(boss.walkPhase * ASSETS.bossWalk) % ASSETS.bossWalk))
           : null;
       const actFrame = boss.act > 0 || boss.dash > 0 ? bossAtkSprite(lv) : null;
+      // B1 artwork follows the actual combat state: 1–3 tell, 4 active
+      // (the exact event that emits shockwave fronts), then 5–6 recovery.
+      const combatBossAsset = combatBossFrame(boss);
+      const combatBossSprite = combatBossAsset ? img(combatBossAsset) : null;
+      const useCombatBoss = !!combatBossSprite;
       const sprite =
+        combatBossSprite ??
         (hitFrame ? bossSprite(lv, "hit") : null) ??
-        (telegraphing ? bossSprite(lv, "tel") : null) ??
-        actFrame ??
-        walkFrame ??
-        bossSprite(lv, "idle");
+        (telegraphing ? bossSprite(lv, "tel") : null) ?? actFrame ?? walkFrame ?? bossSprite(lv, "idle");
+      const by = useCombatBoss ? boss.y : legacyBy;
       drawShadow(boss.x + boss.w / 2, GY, boss.w * 1.5, 0.3);
 
       // Vòng báo đòn dưới chân trùm — đọc được kể cả khi mắt đang dán vào nhân vật
@@ -3431,12 +3554,12 @@ export function createGame(
       if (sprite) {
         // Bóp dọc lúc chân chạm đất; ảnh đi (nếu có) đã tự có nhịp nên nhẹ hơn
         const squash = stepHit * (ASSETS.bossWalk ? 0.02 : 0.05);
-        drawRig(g!, sprite, bossRig(), BOSS_PX, boss.x + boss.w / 2, by + boss.h + 2, {
+        drawRig(g!, sprite, bossRig(useCombatBoss ? combatBossAsset ?? undefined : undefined), BOSS_PX, boss.x + boss.w / 2, by + boss.h + 2, {
           flip: boss.dir < 0,
-          sx: boss.dash > 0 ? 1.1 : telScale * (1 + squash),
-          sy: boss.dash > 0 ? 0.93 : telScale * (1 - squash),
+          sx: useCombatBoss ? 1 : boss.dash > 0 ? 1.1 : telScale * (1 + squash),
+          sy: useCombatBoss ? 1 : boss.dash > 0 ? 0.93 : telScale * (1 - squash),
           // Lắc thân theo bước — nhỏ thôi, 2,5 độ là đủ để hết cảm giác trượt
-          rot: walking && !ASSETS.bossWalk ? Math.sin(cyc / 2) * 0.044 * boss.dir : 0,
+          rot: useCombatBoss ? 0 : walking && !ASSETS.bossWalk ? Math.sin(cyc / 2) * 0.044 * boss.dir : 0,
           filter: boss.hurt > 0 && !hitFrame ? "brightness(2) saturate(0.3)" : undefined,
         });
       } else {
@@ -3458,6 +3581,15 @@ export function createGame(
 
     // Sóng dậm là hazard sát sàn riêng: front hẹp, đọc được hướng và không phản bằng guard.
     for (const wave of shockwaves) {
+      const shockwave = img(clipFrame(COMBAT_V3.fx.shockwave, Math.min(0.999, wave.t / 0.36)));
+      if (shockwave) {
+        g!.save();
+        g!.translate(wave.x, wave.y);
+        g!.scale(wave.dir, 1);
+        drawPivotFit(g!, shockwave, 0, 0, 128, 64, 256, 224);
+        g!.restore();
+        continue;
+      }
       const tail = wave.dir * -28;
       const grad = g!.createLinearGradient(wave.x + tail, wave.y, wave.x, wave.y);
       grad.addColorStop(0, "rgba(224,86,63,0)");
@@ -3533,12 +3665,14 @@ export function createGame(
     // hẳn màu đạn của quái (đỏ) — nhìn một phần giây phải biết đạn của ai.
     for (const b of bullets) {
       const s = Math.sign(b.vx) || 1;
-      const art = ASSETS.bulletArt ? img(GEAR_SPRITES.bullet) : null;
+      const combatBolt = img(clipFrame(COMBAT_V3.fx.bolt, b.t / 0.12));
+      const art = combatBolt ?? (ASSETS.bulletArt ? img(GEAR_SPRITES.bullet) : null);
       if (art) {
         g!.save();
         g!.translate(b.x, b.y);
         g!.scale(s, 1);
-        drawFit(g!, art, 0, 7, 38, 14);
+        if (combatBolt) drawPivotFit(g!, art, 0, 0, 38, 14, 192, 64);
+        else drawFit(g!, art, 0, 7, 38, 14);
         g!.restore();
         continue;
       }
@@ -3555,6 +3689,7 @@ export function createGame(
 
     // Nhấp nháy khi đang bất tử sau lúc trúng đòn
     if (player.inv <= 0 || Math.floor(player.inv * 16) % 2 === 0) drawPlayer();
+    drawCombatEffects(false);
     for (const s of slashes) drawSlash(s);
 
     for (const p of parts) {
