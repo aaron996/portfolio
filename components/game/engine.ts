@@ -152,6 +152,8 @@ const FLYER_BOB = 16;
 /** Màu chung cho mọi thứ gây sát thương, để người chơi học một lần là nhớ */
 const HAZARD = "#E0563F";
 const LIME = "#d4f236";
+/** Màu năng lượng của súng: đồng bộ chớp đầu nòng và tia đạn xanh lam/trắng. */
+const GUN_ENERGY = "#9FD8FF";
 
 /** Đồ nghề: 12 giây đánh nhanh hơn, xa hơn, mạnh gấp đôi */
 const TOOL_SECONDS = 12;
@@ -1249,7 +1251,9 @@ export function createGame(
     const muzzleX = player.x + player.w / 2 + player.face * 26;
     const muzzleY = player.y - 3;
     bullets.push({ x: muzzleX, y: muzzleY, vx: player.face * GUN_SPEED, t: 0 });
-    puff(muzzleX, muzzleY, LIME, 3);
+    // Hạt khai hỏa phải cùng ngôn ngữ cyan–blue–white với muzzle và viên đạn;
+    // lime dành cho tool/parry nên không dùng lẫn vào súng cơ bản.
+    puff(muzzleX, muzzleY, GUN_ENERGY, 3);
     shake = Math.max(shake, 1.6);
   }
 
