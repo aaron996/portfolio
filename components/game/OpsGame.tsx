@@ -120,10 +120,13 @@ export function OpsGame() {
       {
         onSound: (sound) => audio.play(sound),
         onMap: (i) => {
+          audio.setMusicMap(i);
           setMapIndex(i);
           if (i !== 0) setTutorial(null);
         },
         onCleared: (i, skills) => {
+          // Let the short clear cue land while the ambient bed recedes.
+          audio.setMusicActive(false);
           setGot((prev) => [...prev, ...skills.filter((s) => !prev.includes(s))]);
           setLastClear({ index: i, skills });
           if (i + 1 < game.maps.length) {
@@ -234,6 +237,8 @@ export function OpsGame() {
   const enterPlay = useCallback((index?: number) => {
     audioRef.current?.activate();
     audioRef.current?.setPaused(false);
+    audioRef.current?.setMusicMap(index ?? mapIndex);
+    audioRef.current?.setMusicActive(true);
     if (clearTimer.current) window.clearTimeout(clearTimer.current);
     if (pickupTimer.current) window.clearTimeout(pickupTimer.current);
     setPickup(null);
