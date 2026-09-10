@@ -9,24 +9,21 @@
       768
     ],
     "uniform_scale": 0.6124401913875598,
-    "source_origin": [
-      0,
-      0
-    ],
-    "destination_origin": [
-      0,
-      0
-    ],
+    "crop": false,
+    "alpha_cleanup": "alpha <= 8 set to 0; alpha >= 9 retained",
+    "ground_anchor_rule": "contact row is lowest y with >=5 pixels alpha >32; entire frame translated so support contact y=714",
     "target_pivot": [
       384,
       714
     ],
-    "source_pivot": [
-      627,
-      1165.828125
-    ],
-    "crop": false,
-    "per_frame_translation": false
+    "per_frame_root_translations_are_anchor_corrections": [
+      4,
+      9,
+      8,
+      7,
+      -20,
+      2
+    ]
   },
   "frames": [
     {
@@ -34,16 +31,20 @@
       "raw": "raw/combat-v3/boss/b1-stomp-1-alpha-edit-revision-2-raw.png",
       "raw_sha256": "d3a86c6a3beab7466756a5004829387a383f5e6308fdc5f48526ada3b95adeaa",
       "output": "public/game/combat-v3/boss/b1-stomp-1.png",
-      "output_sha256": "ef7f192706ecb12e432b0e3183843250e463480ace78076159c5cac7a5fb265b",
+      "output_sha256": "3b50f2e82d1cdd696ff13a0f470dfe887015827a6fd4f3e7c2cb0aaecec702f8",
       "alpha_min": 0,
       "alpha_max": 255,
-      "transparent_percent": 49.4917,
-      "partial_alpha_pixels": 295981,
+      "transparent_percent": 50.1524,
+      "partial_alpha_pixels": 292084,
+      "alpha_noise_zeroed_at_or_below": 8,
+      "contact_y_before_translation": 710,
+      "root_translation_y": 4,
+      "contact_y_after_translation": 714,
       "alpha_bbox": [
-        27,
-        13,
-        750,
-        752
+        29,
+        75,
+        734,
+        715
       ]
     },
     {
@@ -51,16 +52,20 @@
       "raw": "raw/combat-v3/boss/b1-stomp-2-alpha-edit-revision-2-raw.png",
       "raw_sha256": "dfd005656468852cc8899aea5885039d22bafd41b28d4456e9651671d6b04073",
       "output": "public/game/combat-v3/boss/b1-stomp-2.png",
-      "output_sha256": "4674826fee4f005a19af2addb9ba8d33b7825ae467acbb100e9e4ed3024a1715",
+      "output_sha256": "2c15539b6a7635bdc5e07ce09f3bea1dccfa1831fde18624adef5d8fe6f83ce6",
       "alpha_min": 0,
       "alpha_max": 255,
-      "transparent_percent": 50.1534,
-      "partial_alpha_pixels": 292305,
+      "transparent_percent": 50.7589,
+      "partial_alpha_pixels": 288734,
+      "alpha_noise_zeroed_at_or_below": 8,
+      "contact_y_before_translation": 705,
+      "root_translation_y": 9,
+      "contact_y_after_translation": 714,
       "alpha_bbox": [
-        27,
-        31,
-        737,
-        745
+        29,
+        78,
+        734,
+        715
       ]
     },
     {
@@ -68,33 +73,41 @@
       "raw": "raw/combat-v3/boss/b1-stomp-3-alpha-edit-revision-2-raw.png",
       "raw_sha256": "582c19e77bf399de0823648c0cfba1ea28dfece50c89adb6e31e0cb85575b7e9",
       "output": "public/game/combat-v3/boss/b1-stomp-3.png",
-      "output_sha256": "edeb8825e2bdcdce2943d4b37fcaedb847162dc1d03e958c0005fbcf33e50813",
+      "output_sha256": "2383efdabf262f79c91557bd696430ceb1d21663c905a8fed14fcf2c9a9a1c3f",
       "alpha_min": 0,
       "alpha_max": 255,
-      "transparent_percent": 51.1166,
-      "partial_alpha_pixels": 286580,
+      "transparent_percent": 51.6868,
+      "partial_alpha_pixels": 283217,
+      "alpha_noise_zeroed_at_or_below": 8,
+      "contact_y_before_translation": 706,
+      "root_translation_y": 8,
+      "contact_y_after_translation": 714,
       "alpha_bbox": [
-        27,
-        3,
-        752,
-        748
+        29,
+        77,
+        735,
+        715
       ]
     },
     {
       "frame": 4,
-      "raw": "raw/combat-v3/boss/b1-stomp-4-alpha-edit-raw.png",
-      "raw_sha256": "783891a54dd6e86bc36c53c2b2b805ba0855a035cadf22967d42ae12d81c22c4",
+      "raw": "raw/combat-v3/boss/b1-stomp-4-impact-revision-3-raw.png",
+      "raw_sha256": "558101b53414fe42e0e922f5910fb34f7e26614c88e8ed6ce36d038f136319fc",
       "output": "public/game/combat-v3/boss/b1-stomp-4.png",
-      "output_sha256": "290e7d08c70e233688da5320cdd902c7b6a6abd0bb134aa41733c4acb7169352",
+      "output_sha256": "9425e380504a1a1a3a28022b580cca17ee238db3fd9e4b00fb9d253f52168517",
       "alpha_min": 0,
       "alpha_max": 255,
-      "transparent_percent": 53.0084,
-      "partial_alpha_pixels": 275201,
+      "transparent_percent": 55.6949,
+      "partial_alpha_pixels": 259564,
+      "alpha_noise_zeroed_at_or_below": 8,
+      "contact_y_before_translation": 707,
+      "root_translation_y": 7,
+      "contact_y_after_translation": 714,
       "alpha_bbox": [
-        0,
-        0,
-        737,
-        768
+        42,
+        129,
+        722,
+        715
       ]
     },
     {
@@ -102,33 +115,41 @@
       "raw": "raw/combat-v3/boss/b1-stomp-5-alpha-edit-revision-2-raw.png",
       "raw_sha256": "254af4e2efac169e343cef0f3b8a31709577c3a4079a0286252cb27844349811",
       "output": "public/game/combat-v3/boss/b1-stomp-5.png",
-      "output_sha256": "c44cfd53ec5ab34eb544b0dac25d4c82152c750beb1bdb6639eb0f6e1dd5547d",
+      "output_sha256": "b7314dd79cbd01303e90ebf052e29b49b033a2d1b871a21a8c455fba57b8abdc",
       "alpha_min": 0,
       "alpha_max": 255,
-      "transparent_percent": 47.7336,
-      "partial_alpha_pixels": 306140,
+      "transparent_percent": 48.4738,
+      "partial_alpha_pixels": 301774,
+      "alpha_noise_zeroed_at_or_below": 8,
+      "contact_y_before_translation": 734,
+      "root_translation_y": -20,
+      "contact_y_after_translation": 714,
       "alpha_bbox": [
-        0,
-        20,
-        748,
-        745
+        25,
+        41,
+        738,
+        715
       ]
     },
     {
       "frame": 6,
-      "raw": "raw/combat-v3/boss/b1-stomp-6-alpha-edit-raw.png",
-      "raw_sha256": "b2067f6e50e9ea224e177b4934c99063ef565c2b1e746784cb135bc698aef6ab",
+      "raw": "raw/combat-v3/boss/b1-stomp-6-idle-revision-3-raw.png",
+      "raw_sha256": "24cfe91e4b52754a22cf79036c703439695cc1da225e395c5b37af9236eb7870",
       "output": "public/game/combat-v3/boss/b1-stomp-6.png",
-      "output_sha256": "0511b1f1779a24c4abd8c24223a7916abd5c02888e71d4c076b4a065692655bf",
+      "output_sha256": "de65c5e4f4f2cff47430e7fd1b3fa74011d03f7f983fb066b95c76a9d90da131",
       "alpha_min": 0,
       "alpha_max": 255,
-      "transparent_percent": 42.2672,
-      "partial_alpha_pixels": 338326,
+      "transparent_percent": 47.0871,
+      "partial_alpha_pixels": 310146,
+      "alpha_noise_zeroed_at_or_below": 8,
+      "contact_y_before_translation": 712,
+      "root_translation_y": 2,
+      "contact_y_after_translation": 714,
       "alpha_bbox": [
-        0,
-        25,
-        758,
-        768
+        12,
+        76,
+        756,
+        716
       ]
     }
   ]
