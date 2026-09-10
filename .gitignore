@@ -15,4 +15,5 @@ __pycache__/
 *.pyc
 output/playwright/
 output/imagegen/
+output/audio-audition/
 .playwright-cli/

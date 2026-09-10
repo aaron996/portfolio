@@ -1,0 +1,142 @@
+{
+  "status": "audition-only; no asset approved for production",
+  "verifiedOn": "2026-09-10",
+  "license": "CC0-1.0",
+  "sources": [
+    {
+      "id": "loop-town",
+      "round": 2,
+      "kind": "music",
+      "author": "Fupi",
+      "title": "Loop Town",
+      "page": "https://opengameart.org/content/loop-town",
+      "url": "https://opengameart.org/sites/default/files/loopcity_0.ogg",
+      "file": "loopcity_0.ogg",
+      "originalFormat": "OGG Vorbis; WAV also offered on source page",
+      "durationSeconds": 118.47,
+      "license": "CC0-1.0",
+      "previewMode": "whole-track",
+      "purpose": "Round 2: cheerful piano, harp, bass and drums; source describes a fast-moving small town. User requests a happier MapleStory-like feel. Await listening."
+    },
+    {
+      "id": "town-theme",
+      "round": 2,
+      "kind": "music",
+      "author": "cynicmusic",
+      "title": "Town Theme RPG",
+      "page": "https://opengameart.org/content/town-theme-rpg",
+      "url": "https://opengameart.org/sites/default/files/TownTheme.mp3",
+      "file": "TownTheme.mp3",
+      "originalFormat": "MP3",
+      "durationSeconds": 97.49000000000001,
+      "license": "CC0-1.0",
+      "previewMode": "whole-track",
+      "purpose": "Round 2: calm fantasy town, harp and recorders, warm exploration alternative. Page explicitly states this track is now CC0; broader site music has separate conditions. Await listening."
+    },
+    {
+      "id": "magic-town",
+      "round": 2,
+      "kind": "music",
+      "author": "controllerhead",
+      "title": "Magic Town",
+      "page": "https://opengameart.org/content/magic-town",
+      "url": "https://opengameart.org/sites/default/files/Magic%20Town_0.mp3?download=1",
+      "file": "Magic Town_0.mp3",
+      "originalFormat": "MP3",
+      "durationSeconds": 55.7,
+      "license": "CC0-1.0",
+      "previewMode": "whole-track",
+      "purpose": "Round 2: whimsical fantasy town inspired by SNES RPGs; playful retro alternative. Await listening."
+    },
+    {
+      "id": "searching",
+      "kind": "music",
+      "author": "yd",
+      "page": "https://opengameart.org/content/searching",
+      "url": "https://opengameart.org/sites/default/files/Searching.ogg",
+      "file": "Searching.ogg",
+      "originalFormat": "OGG Vorbis",
+      "durationSeconds": 104.58,
+      "purpose": "Music candidate A; industrial electronic loop; measure duration during preview preparation"
+    },
+    {
+      "id": "bleak",
+      "kind": "music",
+      "author": "Ruskerdax",
+      "page": "https://opengameart.org/content/bleak-terminal",
+      "url": "https://opengameart.org/sites/default/files/ruskerdax_-_bleak_terminal_theme.mp3",
+      "file": "ruskerdax_-_bleak_terminal_theme.mp3",
+      "originalFormat": "MP3",
+      "durationSeconds": 112.18,
+      "purpose": "Music candidate B; industrial horror alternative; measure duration during preview preparation"
+    },
+    {
+      "id": "harbour",
+      "kind": "ambience",
+      "author": "Carlvus",
+      "page": "https://freesound.org/people/Carlvus/sounds/182616/",
+      "url": "https://cdn.freesound.org/previews/182/182616_3244946-hq.mp3",
+      "file": "182616_3244946-hq.mp3",
+      "originalFile": "CFX-20130331-UK-DorsetHarbour08.wav",
+      "originalFormat": "WAV 96 kHz 24-bit stereo",
+      "durationSeconds": 153.743,
+      "purpose": "Ambience candidate A; small harbour; public MP3 preview only, original requires login"
+    },
+    {
+      "id": "diesel",
+      "kind": "ambience",
+      "author": "DBlover",
+      "page": "https://freesound.org/people/DBlover/sounds/659922/",
+      "url": "https://cdn.freesound.org/previews/659/659922_7846219-hq.mp3",
+      "file": "659922_7846219-hq.mp3",
+      "originalFile": "Boat Engine",
+      "originalFormat": "WAV 48 kHz 16-bit stereo",
+      "durationSeconds": 176.508,
+      "purpose": "Ambience candidate B; cargo ship engine in port; public MP3 preview only, original requires login"
+    },
+    {
+      "id": "impact",
+      "kind": "sfx-pack",
+      "author": "Kenney",
+      "page": "https://kenney.nl/assets/impact-sounds",
+      "url": "https://kenney.nl/media/pages/assets/impact-sounds/87b4ddecda-1677589768/kenney_impact-sounds.zip",
+      "file": "kenney_impact-sounds.zip",
+      "originalFormat": "ZIP containing OGG Vorbis samples and License.txt",
+      "durationSeconds": "Per-file values in docs/game-audio-audition-manifest.json",
+      "purpose": "Hit variations, hurt, defeat, metal slam; individual file durations recorded after unpacking"
+    },
+    {
+      "id": "interface",
+      "kind": "sfx-pack",
+      "author": "Kenney",
+      "page": "https://kenney.nl/assets/interface-sounds",
+      "url": "https://kenney.nl/media/pages/assets/interface-sounds/fa43c1dd4d-1677589452/kenney_interface-sounds.zip",
+      "file": "kenney_interface-sounds.zip",
+      "originalFormat": "ZIP containing OGG Vorbis samples and License.txt",
+      "durationSeconds": "Per-file values in docs/game-audio-audition-manifest.json",
+      "purpose": "Pickup, checkpoint, interaction and clear candidates"
+    },
+    {
+      "id": "scifi",
+      "kind": "sfx-pack",
+      "author": "Kenney",
+      "page": "https://kenney.nl/assets/sci-fi-sounds",
+      "url": "https://kenney.nl/media/pages/assets/sci-fi-sounds/6b296f9ecf-1677589334/kenney_sci-fi-sounds.zip",
+      "file": "kenney_sci-fi-sounds.zip",
+      "originalFormat": "ZIP containing OGG Vorbis samples and License.txt",
+      "durationSeconds": "Per-file values in docs/game-audio-audition-manifest.json",
+      "purpose": "Shot, parry, boss warning candidates"
+    },
+    {
+      "id": "rpg",
+      "kind": "sfx-pack",
+      "author": "Kenney",
+      "page": "https://kenney.nl/assets/rpg-audio",
+      "url": "https://kenney.nl/media/pages/assets/rpg-audio/8e99002d76-1677590336/kenney_rpg-audio.zip",
+      "file": "kenney_rpg-audio.zip",
+      "originalFormat": "ZIP containing OGG Vorbis samples and License.txt",
+      "durationSeconds": "Per-file values in docs/game-audio-audition-manifest.json",
+      "purpose": "Swing variations and movement foley candidates"
+    }
+  ]
+}

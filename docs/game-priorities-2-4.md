@@ -42,10 +42,16 @@ quy trình nghiệp vụ đầy đủ hoặc kết quả công việc mới.
 
 ## Âm thanh và giao diện
 
-Âm hiệu tổng hợp ngắn cho nhảy, trúng đòn, bắn, nhận sát thương, phản đạn, nhặt đồ,
-checkpoint, tương tác và chiến thắng. AudioContext chỉ mở sau thao tác người dùng;
-tắt âm được nhớ qua lần tải lại, tạm dừng làm im tiếng, unmount đóng context.
-Chưa có nhạc nền hoặc thu âm diễn viên.
+Audio V1 đã tích hợp cục bộ ngày 10/09/2026: nhạc Loop Town và ambience cảng cho
+Ải 1, giữ nguyên dữ liệu ambience kho của Ải 2. Bộ 15 sample CC0 phục vụ 13 cue
+dùng chung, gồm vung vũ khí, hạ quái, cảnh báo và dậm đất của boss. AudioContext
+chỉ mở sau thao tác người dùng; mute được nhớ qua reload, pause làm im tiếng,
+unmount dừng nguồn và đóng context. Chưa có thu âm diễn viên.
+
+Kiểm tra Audio V1: 73/73 test, TypeScript, build và browser Start/pause/mute/restart/
+Continue đã đạt. Người dùng giao quyền chọn asset; nghe chủ quan và loa điện thoại
+thật chưa kiểm chứng. Chi tiết nguồn âm và giới hạn xác minh nằm trong
+`game-audio-credits.md` và `game-audio-audition.md`; phần này chưa được commit/deploy.
 
 Canvas giữ tỷ lệ 800:420 trong chế độ mở rộng. Màn dọc sẽ có khoảng trống để giữ
 toàn bộ khung chơi; màn ngang có nút cảm ứng thành một hàng.

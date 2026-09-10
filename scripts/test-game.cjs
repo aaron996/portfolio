@@ -59,60 +59,7 @@ test('death callback selects boss checkpoint only after the encounter has begun'
   }
 });
 
-test('audio stays silent before activation, when muted and paused, and closes on teardown', () => {
-  let created = 0, starts = 0, closed = 0;
-  const param = { value: 0, setTargetAtTime() {}, setValueAtTime() {}, linearRampToValueAtTime() {}, exponentialRampToValueAtTime() {} };
-  class AudioContext {
-    state = 'running'; currentTime = 1;
-    constructor() { created++; }
-    createGain() { return { gain: { ...param }, connect() {}, disconnect() {} }; }
-    createOscillator() { return { frequency: { value: 0 }, connect() {}, disconnect() {}, start() { starts++; }, stop() {} }; }
-    close() { closed++; return Promise.resolve(); }
-  }
-  const { GameAudio } = evaluate('components/game/gameAudio.ts', { AudioContext });
-  const sound = new GameAudio(); sound.play('jump'); assert.equal(created, 0);
-  sound.activate(); sound.setMuted(true); sound.play('jump'); assert.equal(starts, 0);
-  sound.setMuted(false); sound.setPaused(true); sound.play('jump'); assert.equal(starts, 0);
-  sound.setPaused(false); sound.play('jump'); assert.equal(starts, 2);
-  sound.destroy(); assert.equal(closed, 1);
-});
-
-test('ambient music starts only after an active player session and reuses its voices between maps', () => {
-  let starts = 0;
-  const param = { value: 0, setTargetAtTime() {}, setValueAtTime() {}, linearRampToValueAtTime() {}, exponentialRampToValueAtTime() {} };
-  class AudioContext {
-    state = 'running'; currentTime = 1;
-    createGain() { return { gain: { ...param }, connect() {}, disconnect() {} }; }
-    createOscillator() { return { frequency: { ...param }, connect() {}, disconnect() {}, start() { starts++; }, stop() {} }; }
-    close() { return Promise.resolve(); }
-  }
-  const { GameAudio } = evaluate('components/game/gameAudio.ts', { AudioContext });
-  const sound = new GameAudio(); sound.setMusicMap(2); assert.equal(starts, 0);
-  sound.activate(); sound.setMusicActive(true); assert.equal(starts, 4);
-  sound.setMusicMap(3); assert.equal(starts, 4);
-  sound.destroy();
-});
-
-test('the CC0 warehouse loop plays only in the warehouse chapter and respects pause', () => {
-  let plays = 0; let pauses = 0; let source = '';
-  const param = { value: 0, setTargetAtTime() {}, setValueAtTime() {}, linearRampToValueAtTime() {}, exponentialRampToValueAtTime() {} };
-  class AudioContext {
-    state = 'running'; currentTime = 1;
-    createGain() { return { gain: { ...param }, connect() {}, disconnect() {} }; }
-    createOscillator() { return { frequency: { ...param }, connect() {}, disconnect() {}, start() {}, stop() {} }; }
-    close() { return Promise.resolve(); }
-  }
-  class Audio {
-    constructor(value) { source = value; this.loop = false; this.preload = ''; this.volume = 0; }
-    play() { plays++; return Promise.resolve(); }
-    pause() { pauses++; }
-    removeAttribute() {} load() {}
-  }
-  const { GameAudio } = evaluate('components/game/gameAudio.ts', { AudioContext, Audio });
-  const sound = new GameAudio(); sound.activate(); sound.setMusicActive(true);
-  assert.equal(plays, 0); sound.setMusicMap(1); assert.equal(source, '/game/audio/factory-ambiance.ogg'); assert.equal(plays, 1);
-  sound.setPaused(true); assert.equal(pauses, 1); sound.destroy();
-});
+require('./test-game-audio.cjs');
 
 test('death timeout is canceled by restart and destroy, with no ghost map reload', () => {
   for (const action of ['restart', 'destroy']) {
