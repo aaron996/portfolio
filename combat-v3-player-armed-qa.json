@@ -1,0 +1,267 @@
+{
+  "groups": [
+    "armed-knockback",
+    "armed-brace",
+    "armed-parry"
+  ],
+  "status": "qa-pass",
+  "canvas": [
+    512,
+    512
+  ],
+  "pivot": [
+    256,
+    480
+  ],
+  "commonScale": 0.4082934609250399,
+  "frames": [
+    {
+      "file": "public/game/combat-v3/player/armed-knockback-1.png",
+      "raw": "raw/combat-v3/player/armed-knockback-1-raw.png",
+      "transform": {
+        "scale": 0.4082934609250399,
+        "translation": [
+          0,
+          15
+        ],
+        "anchor": "support foot y=480"
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 77.9555
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 78.3569,
+        "solidBBox": [
+          136,
+          66,
+          394,
+          481
+        ]
+      },
+      "facialQa": "no duplicate eye/pupil observed in raw contact inspection",
+      "sha256": "8cb74a21ed3b64583a6ea3718ad5d72761e51658c1a0730bf4e7db4eb84318dc"
+    },
+    {
+      "file": "public/game/combat-v3/player/armed-knockback-2.png",
+      "raw": "raw/combat-v3/player/armed-knockback-2-raw.png",
+      "transform": {
+        "scale": 0.4082934609250399,
+        "translation": [
+          0,
+          20
+        ],
+        "anchor": "support foot y=480"
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 77.8169
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 78.2684,
+        "solidBBox": [
+          118,
+          76,
+          427,
+          481
+        ]
+      },
+      "facialQa": "no duplicate eye/pupil observed in raw contact inspection",
+      "sha256": "3c88acbf94986f26f58eb8e26a73edb18222229951fa66e0e6601a086b39d0b6"
+    },
+    {
+      "file": "public/game/combat-v3/player/armed-knockback-3.png",
+      "raw": "raw/combat-v3/player/armed-knockback-3-raw.png",
+      "transform": {
+        "scale": 0.4082934609250399,
+        "translation": [
+          0,
+          16
+        ],
+        "anchor": "support foot y=480"
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 78.6048
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 78.9204,
+        "solidBBox": [
+          148,
+          79,
+          399,
+          481
+        ]
+      },
+      "facialQa": "no duplicate eye/pupil observed in raw contact inspection",
+      "sha256": "0f4faf4e71d93d22a8ce27679b0ba2f09c04a841d0e7f160fdafb9e2fcdee4ea"
+    },
+    {
+      "file": "public/game/combat-v3/player/armed-brace-1.png",
+      "raw": "raw/combat-v3/player/armed-brace-1-raw.png",
+      "transform": {
+        "scale": 0.4082934609250399,
+        "translation": [
+          0,
+          8
+        ],
+        "anchor": "support foot y=480"
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 76.857
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 77.2381,
+        "solidBBox": [
+          127,
+          57,
+          393,
+          481
+        ]
+      },
+      "facialQa": "no duplicate eye/pupil observed in raw contact inspection",
+      "sha256": "fd74281b2a5c378fe55f2e1c2ccf50bc2d46cebbc8a9dc5a74910c97d4a2a54b"
+    },
+    {
+      "file": "public/game/combat-v3/player/armed-brace-2.png",
+      "raw": "raw/combat-v3/player/armed-brace-2-raw.png",
+      "transform": {
+        "scale": 0.4082934609250399,
+        "translation": [
+          0,
+          -17
+        ],
+        "anchor": "support foot y=480"
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 73.7612
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 74.2508,
+        "solidBBox": [
+          141,
+          0,
+          373,
+          481
+        ]
+      },
+      "facialQa": "no duplicate eye/pupil observed in raw contact inspection",
+      "sha256": "89b722ea7bd6db1bb93fb2fc4cad37707c655cceb4c6ee4b5e7df4812110921d"
+    },
+    {
+      "file": "public/game/combat-v3/player/armed-parry-1.png",
+      "raw": "raw/combat-v3/player/armed-parry-1-raw.png",
+      "transform": {
+        "scale": 0.4082934609250399,
+        "translation": [
+          0,
+          -11
+        ],
+        "anchor": "support foot y=480"
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 72.1719
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 72.6967,
+        "solidBBox": [
+          130,
+          9,
+          441,
+          481
+        ]
+      },
+      "facialQa": "no duplicate eye/pupil observed in raw contact inspection",
+      "sha256": "176ede613eb422c1d9eb9862d893ca70d55abb339ae5a413f4488e120e2ab452"
+    },
+    {
+      "file": "public/game/combat-v3/player/armed-parry-2.png",
+      "raw": "raw/combat-v3/player/armed-parry-2-raw.png",
+      "transform": {
+        "scale": 0.4082934609250399,
+        "translation": [
+          0,
+          -2
+        ],
+        "anchor": "support foot y=480"
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 75.0244
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 75.399,
+        "solidBBox": [
+          144,
+          28,
+          429,
+          481
+        ]
+      },
+      "facialQa": "no duplicate eye/pupil observed in raw contact inspection",
+      "sha256": "2a24f369930faca6dfc7d7e709ae91229bd28aaf9d9ee1a106944093f79e7315"
+    },
+    {
+      "file": "public/game/combat-v3/player/armed-parry-3.png",
+      "raw": "raw/combat-v3/player/armed-parry-3-raw.png",
+      "transform": {
+        "scale": 0.4082934609250399,
+        "translation": [
+          0,
+          -3
+        ],
+        "anchor": "support foot y=480"
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 77.3332
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 77.7813,
+        "solidBBox": [
+          155,
+          34,
+          372,
+          481
+        ]
+      },
+      "facialQa": "no duplicate eye/pupil observed in raw contact inspection",
+      "sha256": "43934daa8a8317fdfb06329d9694e62f401b7491a7332cda51faceb39035aa5a"
+    }
+  ],
+  "checks": {
+    "facial": "manual visual contact-sheet review: no duplicate eye/pupil in selected armed frames",
+    "separation": "tool retained while all projectile/muzzle/impact effects excluded",
+    "lightDark": [
+      "previews/combat-v3/player-armed-pivot-light.png",
+      "previews/combat-v3/player-armed-pivot-dark.png"
+    ]
+  }
+}

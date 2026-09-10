@@ -1,0 +1,156 @@
+{
+  "transform": {
+    "source_canvas": [
+      1254,
+      1254
+    ],
+    "destination_canvas": [
+      768,
+      768
+    ],
+    "uniform_scale": 0.6124401913875598,
+    "crop": false,
+    "alpha_cleanup": "alpha <= 8 set to 0; alpha >= 9 retained",
+    "ground_anchor_rule": "contact row is lowest y with >=5 pixels alpha >32; entire frame translated so support contact y=714",
+    "target_pivot": [
+      384,
+      714
+    ],
+    "per_frame_root_translations_are_anchor_corrections": [
+      4,
+      9,
+      8,
+      7,
+      -20,
+      2
+    ]
+  },
+  "frames": [
+    {
+      "frame": 1,
+      "raw": "raw/combat-v3/boss/b1-stomp-1-alpha-edit-revision-2-raw.png",
+      "raw_sha256": "d3a86c6a3beab7466756a5004829387a383f5e6308fdc5f48526ada3b95adeaa",
+      "output": "public/game/combat-v3/boss/b1-stomp-1.png",
+      "output_sha256": "3b50f2e82d1cdd696ff13a0f470dfe887015827a6fd4f3e7c2cb0aaecec702f8",
+      "alpha_min": 0,
+      "alpha_max": 255,
+      "transparent_percent": 50.1524,
+      "partial_alpha_pixels": 292084,
+      "alpha_noise_zeroed_at_or_below": 8,
+      "contact_y_before_translation": 710,
+      "root_translation_y": 4,
+      "contact_y_after_translation": 714,
+      "alpha_bbox": [
+        29,
+        75,
+        734,
+        715
+      ]
+    },
+    {
+      "frame": 2,
+      "raw": "raw/combat-v3/boss/b1-stomp-2-alpha-edit-revision-2-raw.png",
+      "raw_sha256": "dfd005656468852cc8899aea5885039d22bafd41b28d4456e9651671d6b04073",
+      "output": "public/game/combat-v3/boss/b1-stomp-2.png",
+      "output_sha256": "2c15539b6a7635bdc5e07ce09f3bea1dccfa1831fde18624adef5d8fe6f83ce6",
+      "alpha_min": 0,
+      "alpha_max": 255,
+      "transparent_percent": 50.7589,
+      "partial_alpha_pixels": 288734,
+      "alpha_noise_zeroed_at_or_below": 8,
+      "contact_y_before_translation": 705,
+      "root_translation_y": 9,
+      "contact_y_after_translation": 714,
+      "alpha_bbox": [
+        29,
+        78,
+        734,
+        715
+      ]
+    },
+    {
+      "frame": 3,
+      "raw": "raw/combat-v3/boss/b1-stomp-3-alpha-edit-revision-2-raw.png",
+      "raw_sha256": "582c19e77bf399de0823648c0cfba1ea28dfece50c89adb6e31e0cb85575b7e9",
+      "output": "public/game/combat-v3/boss/b1-stomp-3.png",
+      "output_sha256": "2383efdabf262f79c91557bd696430ceb1d21663c905a8fed14fcf2c9a9a1c3f",
+      "alpha_min": 0,
+      "alpha_max": 255,
+      "transparent_percent": 51.6868,
+      "partial_alpha_pixels": 283217,
+      "alpha_noise_zeroed_at_or_below": 8,
+      "contact_y_before_translation": 706,
+      "root_translation_y": 8,
+      "contact_y_after_translation": 714,
+      "alpha_bbox": [
+        29,
+        77,
+        735,
+        715
+      ]
+    },
+    {
+      "frame": 4,
+      "raw": "raw/combat-v3/boss/b1-stomp-4-impact-revision-3-raw.png",
+      "raw_sha256": "558101b53414fe42e0e922f5910fb34f7e26614c88e8ed6ce36d038f136319fc",
+      "output": "public/game/combat-v3/boss/b1-stomp-4.png",
+      "output_sha256": "9425e380504a1a1a3a28022b580cca17ee238db3fd9e4b00fb9d253f52168517",
+      "alpha_min": 0,
+      "alpha_max": 255,
+      "transparent_percent": 55.6949,
+      "partial_alpha_pixels": 259564,
+      "alpha_noise_zeroed_at_or_below": 8,
+      "contact_y_before_translation": 707,
+      "root_translation_y": 7,
+      "contact_y_after_translation": 714,
+      "alpha_bbox": [
+        42,
+        129,
+        722,
+        715
+      ]
+    },
+    {
+      "frame": 5,
+      "raw": "raw/combat-v3/boss/b1-stomp-5-alpha-edit-revision-2-raw.png",
+      "raw_sha256": "254af4e2efac169e343cef0f3b8a31709577c3a4079a0286252cb27844349811",
+      "output": "public/game/combat-v3/boss/b1-stomp-5.png",
+      "output_sha256": "b7314dd79cbd01303e90ebf052e29b49b033a2d1b871a21a8c455fba57b8abdc",
+      "alpha_min": 0,
+      "alpha_max": 255,
+      "transparent_percent": 48.4738,
+      "partial_alpha_pixels": 301774,
+      "alpha_noise_zeroed_at_or_below": 8,
+      "contact_y_before_translation": 734,
+      "root_translation_y": -20,
+      "contact_y_after_translation": 714,
+      "alpha_bbox": [
+        25,
+        41,
+        738,
+        715
+      ]
+    },
+    {
+      "frame": 6,
+      "raw": "raw/combat-v3/boss/b1-stomp-6-idle-revision-3-raw.png",
+      "raw_sha256": "24cfe91e4b52754a22cf79036c703439695cc1da225e395c5b37af9236eb7870",
+      "output": "public/game/combat-v3/boss/b1-stomp-6.png",
+      "output_sha256": "de65c5e4f4f2cff47430e7fd1b3fa74011d03f7f983fb066b95c76a9d90da131",
+      "alpha_min": 0,
+      "alpha_max": 255,
+      "transparent_percent": 47.0871,
+      "partial_alpha_pixels": 310146,
+      "alpha_noise_zeroed_at_or_below": 8,
+      "contact_y_before_translation": 712,
+      "root_translation_y": 2,
+      "contact_y_after_translation": 714,
+      "alpha_bbox": [
+        12,
+        76,
+        756,
+        716
+      ]
+    }
+  ]
+}

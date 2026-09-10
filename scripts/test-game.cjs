@@ -274,6 +274,50 @@ test('the two fronts of one slam cannot deal damage twice after immunity ends', 
   assert.equal(g.lab.shockwaves.length, 0, 'both fronts reached their terminal collision');
 });
 
+test('B1 stomp art follows tell, active shockwave event, then recovery', () => {
+  const g = fixture({ bossKind: 'slam' });
+  g.lab.spawnBoss();
+  const b = g.lab.boss;
+  Object.assign(b, { attackKind: 'slam', tel: .8, act: 0, recover: 0, cd: 100, attackId: 62 });
+  assert.match(g.lab.combatBossFrame(b), /b1-stomp-1/);
+  b.tel = .21;
+  assert.match(g.lab.combatBossFrame(b), /b1-stomp-3/);
+
+  b.tel = .001;
+  g.lab.step(1 / 120);
+  assert.equal(g.lab.shockwaves.length, 2, 'frame 4 must share the active shockwave event');
+  assert.ok(g.lab.combatFx.some((fx) => fx.kind === 'ground'));
+  assert.match(g.lab.combatBossFrame(b), /b1-stomp-4/);
+
+  b.act = 0; b.recover = 1.1;
+  assert.match(g.lab.combatBossFrame(b), /b1-stomp-5/);
+  b.recover = .08;
+  assert.match(g.lab.combatBossFrame(b), /b1-stomp-6/);
+});
+
+test('B3 repel and player armed brace/parry require resolved collision state', () => {
+  const g = fixture({}, { maps: content.game.maps });
+  g.loadMap(2); g.resume(); g.lab.spawnBoss();
+  const p = g.lab.player; const b = g.lab.boss;
+  Object.assign(p, { x: 400, y: 304, ground: true, face: 1, ammo: 3 });
+  Object.assign(b, { x: 424, dir: -1, dash: .5, attackId: 82, cd: 100 });
+  g.press('guard'); advance(g, .03);
+  assert.ok(b.repelT > 0 && b.impulseT > 0, 'only a resolved block/parry opens repel');
+  assert.match(g.lab.combatBossFrame(b), /b3-repel-/);
+
+  b.repelT = 0; b.impulseT = 0; b.hurt = .14;
+  assert.doesNotMatch(g.lab.combatBossFrame(b) ?? '', /b3-repel-/,
+    'ordinary hurt must keep the legacy hit path, not consume the repel clip');
+
+  Object.assign(p, { parryT: .28, braceT: 0, guarding: false });
+  assert.match(g.lab.playerFrame().src, /armed-parry-1/);
+  Object.assign(p, { parryT: 0, braceT: .24, guarding: false });
+  assert.match(g.lab.playerFrame().src, /armed-brace-1/);
+  Object.assign(p, { parryT: 0, braceT: 0, guarding: true, guardT: 0 });
+  assert.doesNotMatch(g.lab.playerFrame().src, /combat-v3\/player\/armed-(parry|brace)-/,
+    'raising guard alone must not masquerade as a collision response');
+});
+
 test('attack ids resolve exactly once while different attacks remain independent', () => {
   const g = fixture(); const p = g.lab.player;
   assert.equal(g.lab.hurtPlayer(1, false, { attackId: 71 }), 'damaged');

@@ -1,0 +1,85 @@
+{
+  "group": "skid",
+  "status": "qa-pass",
+  "canvas": [
+    256,
+    128
+  ],
+  "pivot": [
+    128,
+    112
+  ],
+  "frames": [
+    {
+      "file": "public/game/combat-v3/fx/skid-1.png",
+      "raw": "raw/combat-v3/fx/skid-1-raw.png",
+      "transform": {
+        "scale": [
+          0.14430665163472378,
+          0.14430665163472378
+        ],
+        "canvas": [
+          256,
+          128
+        ],
+        "noCrop": true
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 92.7976
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 92.5385,
+        "bbox": [
+          60,
+          54,
+          200,
+          97
+        ]
+      },
+      "sha256": "88e46fc6a343e54805c1157a1b4d6fc36d869ba25fd1e0c694c6724bdaa66a65"
+    },
+    {
+      "file": "public/game/combat-v3/fx/skid-2.png",
+      "raw": "raw/combat-v3/fx/skid-2-raw.png",
+      "transform": {
+        "scale": [
+          0.14430665163472378,
+          0.14430665163472378
+        ],
+        "canvas": [
+          256,
+          128
+        ],
+        "noCrop": true
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 243,
+        "zeroPercent": 94.9251
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 94.8029,
+        "bbox": [
+          65,
+          57,
+          194,
+          93
+        ]
+      },
+      "sha256": "65be45d69e9206ce070f9017c36fac08536979cb14c12d44b73a8a264149f467"
+    }
+  ],
+  "checks": {
+    "noShoeActorFloor": true,
+    "edgePreviews": [
+      "previews/combat-v3/skid-light.png",
+      "previews/combat-v3/skid-dark.png"
+    ]
+  }
+}

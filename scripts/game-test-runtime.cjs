@@ -14,9 +14,10 @@ function compile(file, browser = false) {
     source = source.replace(/\r\n/g, '\n');
     if (!source.includes(anchor)) throw new Error('Engine test anchor changed');
     source = source.replace(anchor, `  return {
-    lab: { player, step, stepMob, stepBoss, playerFrame, draw, fire, spawnBoss, hurtPlayer, onKeyDown,
+    lab: { player, step, stepMob, stepBoss, playerFrame, combatBossFrame, draw, fire, spawnBoss, hurtPlayer, onKeyDown,
       get mobs() { return mobs; }, get shots() { return shots; },
       get shockwaves() { return shockwaves; },
+      get combatFx() { return combatFx; },
       get bullets() { return bullets; }, get boss() { return boss; },
       get liftY() { return liftY; }, get camera() { return {x:cam,y:camY}; },
       get platforms() { return surfaces(); }, get pickups() { return pickups; } },

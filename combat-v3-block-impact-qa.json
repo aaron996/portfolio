@@ -1,0 +1,118 @@
+{
+  "group": "block-impact",
+  "status": "qa-pass-after-rejecting-oversized-first-candidate",
+  "canvas": [
+    256,
+    256
+  ],
+  "pivot": [
+    128,
+    128
+  ],
+  "frames": [
+    {
+      "file": "public/game/combat-v3/fx/block-impact-1.png",
+      "raw": "raw/combat-v3/fx/block-impact-1-regenerated-raw.png",
+      "transform": {
+        "scale": [
+          0.20414673046251994,
+          0.20414673046251994
+        ],
+        "canvas": [
+          256,
+          256
+        ],
+        "noCrop": true
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 98.9957
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 99.0234,
+        "bbox": [
+          101,
+          101,
+          156,
+          159
+        ]
+      },
+      "sha256": "8a6eed29eee73b2192e6fe74cf9665dd1b1a8a4fcf0c52a7031d199f23e11a8f"
+    },
+    {
+      "file": "public/game/combat-v3/fx/block-impact-2.png",
+      "raw": "raw/combat-v3/fx/block-impact-2-raw.png",
+      "transform": {
+        "scale": [
+          0.20414673046251994,
+          0.20414673046251994
+        ],
+        "canvas": [
+          256,
+          256
+        ],
+        "noCrop": true
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 98.3565
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 98.4589,
+        "bbox": [
+          97,
+          98,
+          162,
+          163
+        ]
+      },
+      "sha256": "9762b206992d2b330aa86f2f5ef302b67cf2ec321ba71f40ef23a621594c8d9d"
+    },
+    {
+      "file": "public/game/combat-v3/fx/block-impact-3.png",
+      "raw": "raw/combat-v3/fx/block-impact-3-raw.png",
+      "transform": {
+        "scale": [
+          0.20414673046251994,
+          0.20414673046251994
+        ],
+        "canvas": [
+          256,
+          256
+        ],
+        "noCrop": true
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 253,
+        "zeroPercent": 99.281
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 99.4232,
+        "bbox": [
+          116,
+          103,
+          153,
+          155
+        ]
+      },
+      "sha256": "ffb75ecdc6a5850d0e4bfda412d0cc683241448282c7e77839eccb4e40dc5e79"
+    }
+  ],
+  "rejectedRaw": "raw/combat-v3/fx/block-impact-1-raw.png",
+  "checks": {
+    "localMarkNotFullShield": true,
+    "edgePreviews": [
+      "previews/combat-v3/block-impact-light.png",
+      "previews/combat-v3/block-impact-dark.png"
+    ]
+  }
+}

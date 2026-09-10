@@ -1,0 +1,200 @@
+{
+  "clip": "b3-rush",
+  "status": "qa-pass-with-source-placement-correction",
+  "canvas": [
+    768,
+    768
+  ],
+  "pivot": [
+    384,
+    714
+  ],
+  "identityCheck": {
+    "fixedParts": "clock-face, crown, purple casing, silver arm cuffs preserved; measured final alpha bbox width range 727..740 px (1.8% drift), height range 588..605 px (2.8% drift)",
+    "decision": "accepted; consistent source scale, only translation corrected generated camera placement"
+  },
+  "alphaPolicy": "source alpha checked; alpha <=8 cleaned to 0, alpha >=9 retained for anti-aliasing",
+  "frames": [
+    {
+      "file": "public/game/combat-v3/boss/b3-rush-1.png",
+      "raw": "raw/combat-v3/boss/b3-rush-1-alpha-raw.png",
+      "rawAlpha": {
+        "size": [
+          1380,
+          1140
+        ],
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "alphaZeroPercent": 50.1344,
+        "bbox": [
+          31,
+          53,
+          1339,
+          1140
+        ]
+      },
+      "transform": {
+        "scale": 0.556521739,
+        "scaledCanvas": [
+          768,
+          634
+        ],
+        "translation": [
+          0,
+          109
+        ],
+        "anchor": "lowest solid support-foot pixel to y=714; scale shared across all four frames; no crop"
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 58.7121,
+        "bbox": [
+          39,
+          140,
+          746,
+          717
+        ]
+      },
+      "sha256": "fed1b671d21818ba73a3b055e912326953d4e148d51109288d6ecf3a6085b206"
+    },
+    {
+      "file": "public/game/combat-v3/boss/b3-rush-2.png",
+      "raw": "raw/combat-v3/boss/b3-rush-2-alpha-raw.png",
+      "rawAlpha": {
+        "size": [
+          1380,
+          1140
+        ],
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "alphaZeroPercent": 52.6451,
+        "bbox": [
+          41,
+          51,
+          1356,
+          1108
+        ]
+      },
+      "transform": {
+        "scale": 0.556521739,
+        "scaledCanvas": [
+          768,
+          634
+        ],
+        "translation": [
+          0,
+          109
+        ],
+        "anchor": "lowest solid support-foot pixel to y=714; scale shared across all four frames; no crop"
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 60.7585,
+        "bbox": [
+          50,
+          176,
+          755,
+          717
+        ]
+      },
+      "sha256": "9bcedafdefbe380d7601318b7ec267703aae85e5b64c265370212248a958ef9e"
+    },
+    {
+      "file": "public/game/combat-v3/boss/b3-rush-3.png",
+      "raw": "raw/combat-v3/boss/b3-rush-3-alpha-raw.png",
+      "rawAlpha": {
+        "size": [
+          1380,
+          1140
+        ],
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "alphaZeroPercent": 52.942,
+        "bbox": [
+          73,
+          51,
+          1380,
+          1140
+        ]
+      },
+      "transform": {
+        "scale": 0.556521739,
+        "scaledCanvas": [
+          768,
+          634
+        ],
+        "translation": [
+          0,
+          111
+        ],
+        "anchor": "lowest solid support-foot pixel to y=714; scale shared across all four frames; no crop"
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 61.0087,
+        "bbox": [
+          47,
+          177,
+          766,
+          717
+        ]
+      },
+      "sha256": "3a7f70a3d15e9dabccdcea73cb5299317dd59fe0c9552b181f2ee72734eee8e1"
+    },
+    {
+      "file": "public/game/combat-v3/boss/b3-rush-4.png",
+      "raw": "raw/combat-v3/boss/b3-rush-4-alpha-raw.png",
+      "rawAlpha": {
+        "size": [
+          1380,
+          1140
+        ],
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "alphaZeroPercent": 49.2039,
+        "bbox": [
+          49,
+          35,
+          1379,
+          1104
+        ]
+      },
+      "transform": {
+        "scale": 0.556521739,
+        "scaledCanvas": [
+          768,
+          634
+        ],
+        "translation": [
+          0,
+          106
+        ],
+        "anchor": "lowest solid support-foot pixel to y=714; scale shared across all four frames; no crop"
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 57.8593,
+        "bbox": [
+          56,
+          143,
+          766,
+          717
+        ]
+      },
+      "sha256": "227d78ff6a403b3c9cb42c9c21933d54a38addf6977afe0663cfd64fe09f568a"
+    }
+  ],
+  "visualChecks": {
+    "lightDarkEdgePreview": [
+      "previews/combat-v3/b3-rush-pivot-contact-light.png",
+      "previews/combat-v3/b3-rush-pivot-contact-dark.png"
+    ],
+    "transparentGaps": "background remains visible around/inside separated limbs; no opaque checkerboard background",
+    "ground": "support feet end at y=714 after translation; no lifted foot was forced down"
+  },
+  "preview": "previews/combat-v3/b3-rush-pivot-loop.gif"
+}
