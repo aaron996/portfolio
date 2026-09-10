@@ -1209,6 +1209,7 @@ export function createGame(
   function resolveAttack() {
     if (player.attackHit) return;
     player.attackHit = true;
+    handlers.onSound?.("attack");
     const heavy = player.combo === 2;
     const buffed = player.attackBuffed;
     const reach = (buffed ? 84 : 58) * (heavy ? 1.22 : 1);
@@ -1238,13 +1239,14 @@ export function createGame(
     };
     const m = maps[lv];
     let hitAny = false;
+    let defeatedAny = false;
 
     for (const o of mobs) {
       if (o.dead || !overlap(hb, o)) continue;
+      if (!hitAny) handlers.onSound?.("hit");
       hitAny = true;
       o.hp -= dmg;
       handlers.onTutorialAction?.("atk");
-      handlers.onSound?.("hit");
       o.hurt = 0.18;
       o.x = Math.max(o.a, Math.min(o.b, o.x + player.face * (heavy ? 22 : 14)));
       o.tel = 0;
@@ -1253,6 +1255,8 @@ export function createGame(
       spark(o.x + o.w / 2, o.y + o.h / 2, player.face);
       puff(o.x + o.w / 2, o.y + o.h / 2, m.palette.mob, 6);
       if (o.hp <= 0) {
+        if (!defeatedAny) handlers.onSound?.("enemyDefeat");
+        defeatedAny = true;
         o.dead = true;
         o.deadT = 0;
         puff(o.x + o.w / 2, o.y + o.h / 2, LIME, 16);
@@ -1262,9 +1266,9 @@ export function createGame(
 
     if (boss && overlap(hb, boss)) {
       if (mission && mission.exposure <= 0) { say(mission.definition.locked, 1.5); return; }
+      if (!hitAny) handlers.onSound?.("hit");
       hitAny = true;
       boss.hp -= dmg;
-      handlers.onSound?.("hit");
       boss.hurt = 0.16;
       spark(boss.x + boss.w / 2, boss.y + boss.h / 2, player.face);
       puff(boss.x + boss.w / 2, boss.y + boss.h / 2, m.palette.boss, 8);
@@ -1320,6 +1324,7 @@ export function createGame(
       // The visible head extends above the compact body/contact box, like melee reach.
       if (o.dead || !overlap(box, { x: o.x, y: o.y - ATTACK_UP, w: o.w, h: o.h + ATTACK_UP })) continue;
       o.hp -= GUN_DMG;
+      handlers.onSound?.("hit");
       o.hurt = 0.16;
       o.tel = 0;
       o.dash = 0;
@@ -1330,6 +1335,7 @@ export function createGame(
       if (o.hp <= 0) {
         o.dead = true;
         o.deadT = 0;
+        handlers.onSound?.("enemyDefeat");
         puff(o.x + o.w / 2, o.y + o.h / 2, LIME, 16);
         ring(o.x + o.w / 2, o.y + o.h / 2, LIME);
       }
@@ -1338,6 +1344,7 @@ export function createGame(
     if (boss && overlap(box, boss)) {
       if (mission && mission.exposure <= 0) { say(mission.definition.locked, 1.5); return true; }
       boss.hp -= GUN_DMG;
+      handlers.onSound?.("hit");
       boss.hurt = 0.14;
       combatEffect("bullet", b.x, b.y);
       spark(b.x, b.y, Math.sign(b.vx) || 1);
@@ -1836,6 +1843,7 @@ export function createGame(
           }
           b.recover = 0.82;
         } else if (b.attackKind === "slam") {
+          handlers.onSound?.("bossSlam");
           emitShockwaves(b);
           dust(b.x + b.w / 2, b.y + b.h, 10, 2.2);
           combatEffect("ground", b.x + b.w / 2, b.y + b.h, 0.22);
@@ -1883,7 +1891,10 @@ export function createGame(
       if (mission?.definition.mode === "trace" && mission.exposure <= 0) {
         b.cd += mission.completed.length * 0.55;
       }
-      if (b.attackKind === "slam") say(labels.slamHint, 0.9);
+      if (b.attackKind === "slam") {
+        handlers.onSound?.("bossWarning");
+        say(labels.slamHint, 0.9);
+      }
       return;
     }
     b.dir = player.x < b.x ? -1 : 1;

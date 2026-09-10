@@ -1,147 +1,239 @@
-export type GameSound = "jump" | "hit" | "shoot" | "hurt" | "reflect" | "pickup" | "checkpoint" | "clear" | "interact";
+import { AUDIO_MIX, MAP_AUDIO, SOUND_CUES, sampleIndex, type GameSound, type AudioLoop } from "./audioManifest";
+export type { GameSound } from "./audioManifest";
+type Voice = { source: AudioBufferSourceNode | OscillatorNode; gain: GainNode; sound: GameSound; priority: number };
+type LoopVoice = { source: AudioBufferSourceNode; gain: GainNode };
 
-/**
- * Sound stays local to the game: short action cues, a sparse synthesized bed,
- * and one CC0 warehouse loop where a real industrial recording adds more life.
- * Nothing plays before a player gesture.
- */
+/** Owns every source/node. Selecting a bank never activates audio before a gesture. */
 export class GameAudio {
   private context: AudioContext | null = null;
-  private output: GainNode | null = null;
+  private master: GainNode | null = null;
   private music: GainNode | null = null;
-  private musicPads: OscillatorNode[] = [];
-  private ambient: HTMLAudioElement | null = null;
+  private ambience: GainNode | null = null;
+  private sfx: GainNode | null = null;
+  private limiter: DynamicsCompressorNode | null = null;
   private muted = false;
   private paused = false;
   private musicActive = false;
-  private musicMap = 0;
-  private lastAt = -1;
+  private map = 0;
+  private destroyed = false;
+  private generation = 0;
+  private cueGeneration = 0;
+  private loadingBank: number | null = null;
+  private loadedBank: number | null = null;
+  private loops = new Set<LoopVoice>();
+  private retiring = new Set<LoopVoice>();
+  private voices = new Set<Voice>();
+  private buffers = new Map<string, AudioBuffer>();
+  private pending = new Map<string, Promise<AudioBuffer | null>>();
+  private failed = new Set<string>();
+  private requests = new Set<AbortController>();
+  private lastAt = new Map<GameSound, number>();
+  private lastVariant = new Map<GameSound, number>();
+  constructor(private random: () => number = Math.random) {}
 
+  /** Call from a user gesture: Start, Continue, retry or sound toggle. */
   activate() {
+    if (this.destroyed) return;
     try {
       if (!this.context) {
-        this.context = new AudioContext();
-        this.output = this.context.createGain();
-        this.output.gain.value = this.muted || this.paused ? 0 : 0.07;
-        this.output.connect(this.context.destination);
-        this.music = this.context.createGain();
-        this.music.gain.value = 0;
-        this.music.connect(this.context.destination);
-        if (typeof Audio !== "undefined") {
-          this.ambient = new Audio("/game/audio/factory-ambiance.ogg");
-          this.ambient.loop = true;
-          this.ambient.preload = "auto";
-          this.ambient.volume = 0.12;
-        }
+        const context = new AudioContext();
+        this.context = context;
+        this.master = context.createGain(); this.music = context.createGain();
+        this.ambience = context.createGain(); this.sfx = context.createGain();
+        this.sfx.gain.value = AUDIO_MIX.sfxGain;
+        this.limiter = context.createDynamicsCompressor();
+        this.limiter.threshold.value = -8; this.limiter.knee.value = 12;
+        this.limiter.ratio.value = 8; this.limiter.attack.value = 0.003; this.limiter.release.value = 0.15;
+        this.master.gain.value = this.muted || this.paused ? 0 : 1;
+        this.music.connect(this.master); this.ambience.connect(this.master); this.sfx.connect(this.master);
+        this.master.connect(this.limiter); this.limiter.connect(context.destination);
+        this.ensureBank();
+        for (const cue of Object.values(SOUND_CUES)) for (const path of cue.samples) void this.load(path);
       }
-      if (this.context.state === "suspended") {
-        void this.context.resume().then(() => this.ensureMusic()).catch(() => {});
-      }
-    } catch { /* Audio support must never block play. */ }
+      const context = this.context;
+      if (context.state !== "running") {
+        void context.resume().then(() => { if (this.context === context) this.ensureBank(); }).catch(() => {});
+      } else this.ensureBank();
+    } catch { /* Unsupported audio must not block the game. */ }
   }
-
-  setMuted(value: boolean) { this.muted = value; this.updateVolume(); }
-  setPaused(value: boolean) { this.paused = value; this.updateVolume(); }
-  /** Select a map's tonal palette. It is safe to call before AudioContext exists. */
-  setMusicMap(map: number) {
-    this.musicMap = map;
-    if (this.musicPads.length) this.tuneMusic();
-    this.updateAmbient();
+  setMuted(value: boolean) {
+    this.muted = value;
+    if (value) this.cancelCues();
+    this.updateMaster();
+    if (!value) this.ensureBank();
   }
-  /** Fade the music bed without silencing confirmation / clear SFX. */
+  setPaused(value: boolean) {
+    this.paused = value;
+    if (value) this.cancelCues();
+    this.updateMaster();
+    if (!value) this.ensureBank();
+  }
+  setMap(map: number) {
+    this.cancelCues(); // Same-map restart also invalidates pending one-shots.
+    if (this.map === map) { this.ensureBank(); return; }
+    this.map = map;
+    this.invalidateBank(); this.ensureBank();
+  }
+  setMusicMap(map: number) { this.setMap(map); }
   setMusicActive(value: boolean) {
+    if (this.musicActive === value) { if (value) this.ensureBank(); return; }
     this.musicActive = value;
-    if (value) this.ensureMusic();
-    this.updateVolume();
-    this.updateAmbient();
+    if (!value) this.invalidateBank(); else this.ensureBank();
   }
-  private updateVolume() {
-    if (!this.context) return;
-    if (this.output) this.output.gain.setTargetAtTime(this.muted || this.paused ? 0 : 0.07, this.context.currentTime, 0.01);
-    if (this.music) this.music.gain.setTargetAtTime(this.muted || this.paused || !this.musicActive ? 0 : 0.022, this.context.currentTime, 0.24);
+  private updateMaster() {
+    if (!this.context || !this.master) return;
+    const at = this.context.currentTime, param = this.master.gain;
+    param.cancelScheduledValues(at);
+    // Immediate pause/mute; resume fades without duplicating loops.
+    if (this.muted || this.paused) param.setValueAtTime(0, at);
+    else { param.setValueAtTime(param.value, at); param.linearRampToValueAtTime(1, at + 0.12); }
   }
-
-  /** The actual CC0 loop belongs to the three-floor warehouse chapter. */
-  private updateAmbient() {
-    const ambient = this.ambient;
-    if (!ambient) return;
-    const shouldPlay = !this.muted && !this.paused && this.musicActive && this.musicMap === 1;
-    if (shouldPlay) void ambient.play().catch(() => {});
-    else ambient.pause();
-  }
-
-  private ensureMusic() {
+  private load(path: string): Promise<AudioBuffer | null> {
     const context = this.context;
-    const music = this.music;
-    if (!context || !music || context.state !== "running" || this.musicPads.length) return;
-    const levels = [0.48, 0.29, 0.16, 0.045];
-    const kinds: OscillatorType[] = ["sine", "triangle", "sine", "triangle"];
-    levels.forEach((level, index) => {
-      const oscillator = context.createOscillator();
-      const envelope = context.createGain();
-      oscillator.type = kinds[index];
-      envelope.gain.value = level;
-      oscillator.connect(envelope);
-      envelope.connect(music);
-      oscillator.start();
-      this.musicPads.push(oscillator);
-    });
-    this.tuneMusic();
+    if (!context || this.destroyed || this.failed.has(path)) return Promise.resolve(null);
+    const cached = this.buffers.get(path);
+    if (cached) return Promise.resolve(cached);
+    const existing = this.pending.get(path);
+    if (existing) return existing;
+    const controller = new AbortController();
+    this.requests.add(controller);
+    const timeout = setTimeout(() => controller.abort(), 12000);
+    const request = (async () => {
+      try {
+        const response = await fetch(path, { signal: controller.signal });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const bytes = await response.arrayBuffer();
+        if (this.context !== context || this.destroyed) return null;
+        const buffer = await context.decodeAudioData(bytes);
+        if (this.context !== context || this.destroyed) return null;
+        this.buffers.set(path, buffer);
+        return buffer;
+      } catch (error) {
+        if (!this.destroyed) { this.failed.add(path); console.warn(`[game audio] ${path}`, error); }
+        return null;
+      } finally {
+        clearTimeout(timeout); this.requests.delete(controller); this.pending.delete(path);
+      }
+    })();
+    this.pending.set(path, request);
+    return request;
   }
-
-  private tuneMusic() {
-    // One unobtrusive palette per chapter: yard → warehouse → dispatch → data → product.
-    const palettes = [
-      [55, 82.41, 110, 220],
-      [49, 73.42, 98, 196],
-      [58.27, 87.31, 116.54, 233.08],
-      [46.25, 69.3, 92.5, 185],
-      [65.41, 98, 130.81, 261.63],
-    ];
-    const palette = palettes[Math.min(Math.max(this.musicMap, 0), palettes.length - 1)];
-    this.musicPads.forEach((oscillator, index) => {
-      oscillator.frequency.setTargetAtTime(palette[index], this.context!.currentTime, 0.6);
-    });
+  private invalidateBank() {
+    this.generation++; this.loadedBank = this.loadingBank = null;
+    for (const voice of this.retiring) this.stopLoop(voice);
+    this.retiring.clear();
+    for (const voice of this.loops) {
+      if (this.context) {
+        const at = this.context.currentTime;
+        voice.gain.gain.cancelScheduledValues(at);
+        voice.gain.gain.setValueAtTime(voice.gain.gain.value, at);
+        voice.gain.gain.linearRampToValueAtTime(0, at + AUDIO_MIX.loopFadeSeconds);
+        voice.source.stop(at + AUDIO_MIX.loopFadeSeconds);
+        this.retiring.add(voice);
+      } else this.stopLoop(voice);
+    }
+    this.loops.clear();
   }
-
+  private ensureBank() {
+    const context = this.context;
+    if (!context || this.destroyed || context.state !== "running" || !this.musicActive || this.muted || this.paused) return;
+    const token = this.generation;
+    if (this.loadedBank === token || this.loadingBank === token) return;
+    this.loadingBank = token;
+    const bank = MAP_AUDIO[this.map] ?? {};
+    const start = (asset: AudioLoop | undefined, bus: GainNode | null, buffer: AudioBuffer | null) => {
+      if (!asset || !bus || !buffer) return;
+      const source = context.createBufferSource(), gain = context.createGain();
+      source.buffer = buffer; source.loop = true;
+      gain.gain.setValueAtTime(0, context.currentTime);
+      gain.gain.linearRampToValueAtTime(asset.gain, context.currentTime + AUDIO_MIX.loopFadeSeconds);
+      source.connect(gain); gain.connect(bus);
+      const voice = { source, gain };
+      source.onended = () => { source.disconnect(); gain.disconnect(); this.loops.delete(voice); this.retiring.delete(voice); };
+      this.loops.add(voice); source.start();
+    };
+    // Resolve the pair together: pause/resume during a partial load cannot lose one layer.
+    void Promise.all([bank.music ? this.load(bank.music.path) : null, bank.ambience ? this.load(bank.ambience.path) : null]).then(([music, ambience]) => {
+      if (token !== this.generation) return;
+      this.loadingBank = null;
+      if (this.destroyed || this.context !== context || !this.musicActive || this.paused || this.muted) return;
+      start(bank.music, this.music, music); start(bank.ambience, this.ambience, ambience);
+      this.loadedBank = token;
+    }).catch(() => { if (token === this.generation) this.loadingBank = null; });
+  }
   play(sound: GameSound) {
     const context = this.context;
-    if (!context || !this.output || context.state !== "running" || this.muted || this.paused) return;
-    const at = context.currentTime;
-    if (at - this.lastAt < 0.035) return;
-    this.lastAt = at;
-    const tones: Record<GameSound, number[]> = {
-      jump: [280, 420], hit: [140], shoot: [680, 220], hurt: [120, 80],
-      reflect: [600, 900], pickup: [440, 660], checkpoint: [330, 440, 550],
-      clear: [440, 550, 660, 880], interact: [520, 650],
-    };
-    tones[sound].forEach((frequency, index) => {
-      const oscillator = context.createOscillator();
-      const envelope = context.createGain();
-      const start = at + index * 0.065;
-      oscillator.type = sound === "hurt" || sound === "hit" ? "triangle" : "sine";
-      oscillator.frequency.value = frequency;
-      envelope.gain.setValueAtTime(0, start);
-      envelope.gain.linearRampToValueAtTime(1, start + 0.008);
-      envelope.gain.exponentialRampToValueAtTime(0.001, start + 0.12);
-      oscillator.connect(envelope); envelope.connect(this.output!);
-      oscillator.onended = () => { oscillator.disconnect(); envelope.disconnect(); };
-      oscillator.start(start); oscillator.stop(start + 0.13);
-    });
-  }
-
-  destroy() {
-    this.musicPads.forEach((oscillator) => {
-      try { oscillator.stop(); oscillator.disconnect(); } catch { /* already closed */ }
-    });
-    this.musicPads = [];
-    if (this.ambient) {
-      this.ambient.pause();
-      this.ambient.removeAttribute("src");
-      this.ambient.load();
-      this.ambient = null;
+    if (!context || this.destroyed || !this.sfx || context.state !== "running" || this.muted || this.paused) return;
+    const cue = SOUND_CUES[sound], at = context.currentTime;
+    if (at - (this.lastAt.get(sound) ?? -Infinity) < cue.cooldown) return;
+    this.lastAt.set(sound, at);
+    let index = sampleIndex(cue.samples.length, this.random());
+    if (cue.samples.length > 1 && index === this.lastVariant.get(sound)) index = (index + 1) % cue.samples.length;
+    this.lastVariant.set(sound, index);
+    const path = cue.samples[index], buffer = this.buffers.get(path);
+    if (buffer) this.playVoice(sound, buffer);
+    else if (this.failed.has(path)) this.playVoice(sound, null);
+    else {
+      const token = this.cueGeneration;
+      void this.load(path).then(buffer => {
+        if (this.context === context && token === this.cueGeneration && context.currentTime - at < 0.12) this.playVoice(sound, buffer);
+      });
     }
+  }
+  private playVoice(sound: GameSound, buffer: AudioBuffer | null) {
+    const context = this.context;
+    if (!context || !this.sfx || this.destroyed || this.muted || this.paused || context.state !== "running") return;
+    const cue = SOUND_CUES[sound], same = [...this.voices].filter(v => v.sound === sound);
+    if (same.length >= cue.maxVoices) this.stopVoice(same[0]);
+    if (this.voices.size >= AUDIO_MIX.maxVoices) {
+      const victim = [...this.voices].find(v => v.priority < cue.priority);
+      if (!victim) return;
+      this.stopVoice(victim);
+    }
+    const source = buffer ? context.createBufferSource() : context.createOscillator();
+    const gain = context.createGain(), at = context.currentTime;
+    if (buffer) { (source as AudioBufferSourceNode).buffer = buffer; gain.gain.value = cue.gain; }
+    else {
+      // Only after sample fetch/decode failure; never the normal music/SFX path.
+      (source as OscillatorNode).frequency.value = cue.fallbackHz;
+      gain.gain.setValueAtTime(0, at); gain.gain.linearRampToValueAtTime(0.12, at + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.001, at + 0.12);
+    }
+    source.connect(gain); gain.connect(this.sfx);
+    const voice = { source, gain, sound, priority: cue.priority };
+    source.onended = () => { source.disconnect(); gain.disconnect(); this.voices.delete(voice); };
+    this.voices.add(voice); source.start();
+    if (!buffer) source.stop(at + 0.13);
+    if (sound === "hurt" || sound === "reflect" || sound === "bossSlam") this.duck();
+  }
+  private duck() {
+    if (!this.context || !this.music) return;
+    const at = this.context.currentTime, gain = this.music.gain;
+    gain.cancelScheduledValues(at); gain.setValueAtTime(gain.value, at);
+    gain.linearRampToValueAtTime(AUDIO_MIX.duckRatio, at + 0.025);
+    gain.linearRampToValueAtTime(1, at + AUDIO_MIX.duckSeconds);
+  }
+  private stopVoice(voice: Voice) {
+    try { voice.source.stop(); } catch { /* Already ended. */ }
+    voice.source.disconnect(); voice.gain.disconnect(); this.voices.delete(voice);
+  }
+  private stopLoop(voice: LoopVoice) {
+    try { voice.source.stop(); } catch { /* Already ended. */ }
+    voice.source.disconnect(); voice.gain.disconnect();
+  }
+  private cancelCues() {
+    this.cueGeneration++;
+    for (const voice of this.voices) this.stopVoice(voice);
+    this.lastAt.clear();
+  }
+  destroy() {
+    this.destroyed = true; this.generation++; this.cancelCues();
+    for (const controller of this.requests) controller.abort();
+    this.requests.clear(); this.pending.clear(); this.buffers.clear(); this.failed.clear();
+    for (const voice of [...this.loops, ...this.retiring]) this.stopLoop(voice);
+    this.loops.clear(); this.retiring.clear();
+    for (const node of [this.music, this.ambience, this.sfx, this.master, this.limiter]) node?.disconnect();
     if (this.context) void this.context.close().catch(() => {});
-    this.context = null; this.output = null; this.music = null;
+    this.context = null; this.master = this.music = this.ambience = this.sfx = null; this.limiter = null;
   }
 }

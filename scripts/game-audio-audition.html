@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="vi">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Audio V1 · Cát Lái audition</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#111a20;color:#e8eef0;font:15px/1.5 system-ui}main{max-width:1180px;margin:auto;padding:24px}h1{font-size:28px;margin:4px 0}h2{font-size:18px}p{color:#b9c9cd}small{color:#b9c9cd}button,select,textarea{font:inherit;background:#22333d;color:#fff;border:1px solid #68818c;border-radius:6px;padding:9px}button{cursor:pointer;min-height:44px}button:disabled{opacity:.5;cursor:wait}button:focus-visible,select:focus-visible{outline:3px solid #ffc76f}label{display:block;margin:12px 0}select{width:100%}input[type=range]{width:100%;accent-color:#ffc76f}.layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(260px,1fr);gap:24px}.row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}canvas{width:100%;aspect-ratio:800/420;border:1px solid #39515d;background:#111}#events{height:90px;overflow:auto;white-space:pre-wrap;font:12px monospace;color:#aac3cc}#status{color:#ffc76f;min-height:24px}.panel{background:#18262e;border:1px solid #354b57;padding:16px;border-radius:8px}textarea{width:100%;min-height:100px}a{color:#ffc76f}.touch button{touch-action:none;user-select:none}#sources{font-size:13px}#sources a{display:block}#scores{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}@media(max-width:760px){main{padding:12px}.layout{grid-template-columns:1fr}h1{font-size:23px}}
+</style>
+<main>
+<small>PHASE A · VÒNG 2 · NHẠC VUI / PHIÊU LƯU</small>
+<h1>Cảng Cát Lái — nghe trong gameplay</h1>
+<p>Ba lựa chọn mới theo hướng vui, dễ nhớ và phiêu lưu nhẹ bạn muốn ở MapleStory. Nghe nhạc riêng trước, rồi thêm ambience/SFX để so sánh trong Cát Lái.</p>
+<div class="layout"><section>
+<canvas aria-label="Gameplay Cảng Cát Lái"></canvas>
+<div class="row"><button id="start">Bắt đầu audition</button><button id="pause" disabled>Tạm dừng</button><button id="restart" disabled>Chơi lại Cát Lái</button><button id="stop">Dừng âm thanh</button></div>
+<div id="status" role="status">Chưa tải hoặc phát audio. Bấm Bắt đầu để tải.</div>
+<div class="row touch" aria-label="Điều khiển gameplay">
+<button data-key="left">←</button><button data-key="right">→</button><button data-key="jump">Nhảy</button><button data-key="atk">Chém</button><button data-key="shoot">Bắn</button><button data-key="guard">Đỡ</button><button data-key="interact">E</button>
+</div>
+<small>Phím: A/D di chuyển · Space nhảy · J chém · K bắn · L đỡ · E tương tác. Bấm Chơi lại khi hết máu.</small>
+<h2>Thử cue trong bản mix</h2><div class="row" id="cues"></div>
+<small>13 cue nối với gameplay hiện tại; các nút cho phép nghe từng sample riêng. Trang này dùng bộ mix audition, không thay thế việc kiểm tra bản mix trong /game.</small>
+<pre id="events" aria-label="Event vừa phát"></pre>
+</section><aside class="panel">
+<label>Nhạc <select id="music"><optgroup label="Vòng 2 · Vui và phiêu lưu"><option value="loop-town">C · Loop Town — Fupi</option><option value="town-theme">D · Town Theme RPG — cynicmusic</option><option value="magic-town">E · Magic Town — controllerhead</option></optgroup><optgroup label="Vòng 1 · Chưa hợp, giữ để so sánh"><option value="searching">A · Searching — yd</option><option value="bleak">B · Bleak Terminal — Ruskerdax</option></optgroup><option value="">Không nhạc</option></select></label>
+<p id="musicDescription">C · Piano/harp, bass và trống; hướng thị trấn vui, có chuyển động.</p>
+<label>Music <output id="musicValue">0.24</output><input id="musicGain" type="range" min="0" max="0.6" step="0.01" value="0.24"></label>
+<label>Ambience <select id="ambience"><option value="" selected>Không ambience · nghe rõ nhạc trước</option><option value="diesel">B · Cargo ship engine — DBlover</option><option value="harbour">A · Small harbour — Carlvus</option></select></label>
+<label>Ambience <output id="ambienceValue">0.12</output><input id="ambienceGain" type="range" min="0" max="0.4" step="0.01" value="0.12"></label>
+<label>SFX <output id="sfxValue">0.45</output><input id="sfxGain" type="range" min="0" max="0.8" step="0.01" value="0.45"></label>
+<p><small>Khi đang nghe, chọn nhạc sẽ đổi trực tiếp. Vòng 2 giữ nguyên bài để chọn chất nhạc; chưa cắt loop 60–90 giây. Music cân gần −20 LUFS; các mô tả chất nhạc dựa trên trang tác giả, chưa phải kết quả nghe duyệt.</small></p>
+<button id="apply" disabled>Áp dụng bản mix</button>
+<div id="sources"></div>
+</aside></div>
+<section class="panel" style="margin-top:24px"><h2>Ghi nhận sau khi nghe</h2>
+<p>Nghe ít nhất 3 vòng mỗi tổ hợp. Chấm 1–5; 5 là tốt nhất. Tách kết quả headphone, loa laptop và điện thoại thật.</p>
+<label>Thiết bị <select id="device"><option>Headphone</option><option>Loa laptop</option><option>Loa điện thoại thật</option></select></label>
+<div id="scores"></div><label>Ghi chú <textarea id="notes" placeholder="Cue bị che, nhạc quá căng, tiếng còi/giọng nói, điểm nối lộ…"></textarea></label>
+<button id="save">Lưu đánh giá vào máy này</button><button id="export">Xuất đánh giá JSON</button><p id="saved" role="status"></p>
+</section>
+</main>
+<script type="module">
+import {createGame} from './engine.js';
+import {content} from './content.js';
+const $=id=>document.getElementById(id);
+const manifest=await fetch('/preview/manifest.json').then(r=>{if(!r.ok)throw Error('Thiếu manifest preview');return r.json()});
+for(const option of $('music').options){if(option.value&&!manifest.loops.some(x=>x.id===option.value)){option.disabled=true;option.textContent+=' · đang chuẩn bị'}}
+let context,master,musicBus,ambienceBus,sfxBus,game,active=false,generation=0,paused=false;
+const buffers=new Map(), loops=[], voices=new Set(), variants=new Map();
+const log=[];
+window.auditionDiagnostics={loads:0,starts:0,errors:[],get loops(){return loops.length},get masterGain(){return master?.gain.value??0},get voices(){return voices.size},get paused(){return paused},get contextState(){return context?.state||'not-created'}};
+const diag=window.auditionDiagnostics;
+const notice=message=>$('status').textContent=message;
+function record(message){log.unshift(message);$('events').textContent=log.slice(0,6).join('\n')}
+function fail(error){diag.errors.push(String(error));notice(String(error));console.error(error)}
+function init(){if(context)return;context=new AudioContext();master=context.createGain();master.connect(context.destination);musicBus=context.createGain();ambienceBus=context.createGain();sfxBus=context.createGain();for(const bus of [musicBus,ambienceBus,sfxBus])bus.connect(master);volume()}
+function volume(){for(const [name,bus] of [['music',musicBus],['ambience',ambienceBus],['sfx',sfxBus]]){const v=Number($(name+'Gain').value);$(name+'Value').value=v.toFixed(2);if(bus)bus.gain.value=v}}
+async function load(file){if(!buffers.has(file)){diag.loads++;buffers.set(file,fetch('/preview/'+file).then(r=>{if(!r.ok)throw Error('Audio HTTP '+r.status+': '+file);return r.arrayBuffer()}).then(b=>context.decodeAudioData(b)).catch(e=>{buffers.delete(file);throw e}))}return buffers.get(file)}
+function stopLoops(){for(const source of loops.splice(0)){source.stop();source.disconnect()}}
+function stopVoices(){for(const source of voices){source.stop();source.disconnect()}voices.clear()}
+async function mix(){const token=++generation;stopLoops();const chosen=[$('music').value,$('ambience').value];const loaded=await Promise.all(chosen.map(id=>id?load(manifest.loops.find(x=>x.id===id).file):null));if(token!==generation||!active)return;loaded.forEach((buffer,i)=>{if(!buffer)return;const source=context.createBufferSource();source.buffer=buffer;source.loop=true;source.connect(i===0?musicBus:ambienceBus);source.start();diag.starts++;loops.push(source)});notice('Đang audition · '+chosen.filter(Boolean).join(' + '))}
+function cue(event){if(!active||paused||context?.state!=='running')return;const files=manifest.sfx[event];if(!files||voices.size>=12)return;const n=variants.get(event)||0;variants.set(event,n+1);const token=generation;load(files[n%files.length].file).then(buffer=>{if(token!==generation||!active||paused)return;const source=context.createBufferSource();source.buffer=buffer;source.connect(sfxBus);voices.add(source);source.onended=()=>{voices.delete(source);source.disconnect()};source.start();diag.starts++;record(event+' · '+files[n%files.length].originalFile)}).catch(fail)}
+function newGame(){game?.destroy();game=createGame(document.querySelector('canvas'),content.game.maps,content.game,{onSound:cue,onPause:value=>{paused=value;if(master)master.gain.value=value?0:1;$('pause').textContent=value?'Tiếp tục':'Tạm dừng'},onCleared:()=>{stopLoops();notice('Đã clear. Bấm Chơi lại để audition tiếp.')}});game.loadMap(0);game.setPauseOnPickup(false);game.resume()}
+$('start').onclick=async()=>{try{$('start').disabled=true;init();await context.resume();active=true;paused=false;master.gain.value=1;notice('Đang tải bản preview…');await Promise.all(Object.values(manifest.sfx).flat().map(x=>load(x.file)));await mix();if(!active)return;newGame();for(const id of ['pause','restart','apply'])$(id).disabled=false}catch(e){fail(e)}finally{$('start').disabled=false}};
+$('pause').onclick=()=>{if(paused){game?.resume();paused=false;if(master)master.gain.value=1;$('pause').textContent='Tạm dừng'}else game?.pause()};
+$('restart').onclick=async()=>{try{active=true;paused=false;await context.resume();master.gain.value=1;stopVoices();await mix();if(active)newGame()}catch(e){fail(e)}};
+$('apply').onclick=()=>{if(active)mix().catch(fail)};
+$('stop').onclick=()=>{active=false;generation++;game?.pause();stopLoops();stopVoices();if(master)master.gain.value=0;notice('Đã dừng. Bấm Bắt đầu để nghe lại.')};
+for(const name of ['music','ambience','sfx'])$(name+'Gain').oninput=volume;
+for(const event of Object.keys(manifest.sfx)){const button=document.createElement('button');button.textContent=event;button.onclick=()=>cue(event);$('cues').append(button)}
+for(const button of document.querySelectorAll('[data-key]')){button.onpointerdown=e=>{e.preventDefault();button.setPointerCapture(e.pointerId);game?.press(button.dataset.key)};button.onpointerup=button.onpointercancel=()=>game?.release(button.dataset.key)}
+const descriptions={'loop-town':'C · Piano/harp, bass và trống; hướng thị trấn vui, có chuyển động.','town-theme':'D · Harp và sáo recorder; hướng làng quê fantasy ấm áp, nhẹ nhàng.','magic-town':'E · Fantasy tinh nghịch pha bí ẩn, màu âm SNES RPG cổ điển.','searching':'A · Vòng 1: industrial/drone, chưa hợp hướng bạn muốn.','bleak':'B · Vòng 1: industrial/horror, chưa hợp hướng bạn muốn.'};
+$('music').onchange=()=>{$('musicDescription').textContent=descriptions[$('music').value]||'Nghe ambience/SFX riêng.';if(active)mix().catch(fail)};
+for(const item of [...manifest.loops].sort((a,b)=>(b.round||1)-(a.round||1))){const a=document.createElement('a');a.href=item.page;a.target='_blank';a.rel='noopener';a.textContent=(item.title||item.id)+' · '+item.author+' · CC0';$('sources').append(a)}
+const criteria=['Hợp bối cảnh','Không gây mệt','Không che cue','Khó nhận điểm nối'];
+criteria.forEach((name,i)=>{const label=document.createElement('label');label.textContent=name;const select=document.createElement('select');select.id='score'+i;for(const value of ['',1,2,3,4,5]){const option=document.createElement('option');option.value=value;option.textContent=value||'Chưa đánh giá';select.append(option)}label.append(select);$('scores').append(label)});
+const storageKey='opsgame:audio-v1-audition';
+function ratings(){try{return JSON.parse(localStorage.getItem(storageKey)||'[]')}catch{return []}}
+$('save').onclick=()=>{const entry={at:new Date().toISOString(),music:$('music').value,ambience:$('ambience').value,device:$('device').value,gains:Object.fromEntries(['music','ambience','sfx'].map(x=>[x,Number($(x+'Gain').value)])),scores:Object.fromEntries(criteria.map((x,i)=>[x,$('score'+i).value?Number($('score'+i).value):null])),notes:$('notes').value};try{const all=ratings();all.push(entry);localStorage.setItem(storageKey,JSON.stringify(all));$('saved').textContent='Đã lưu '+all.length+' lượt đánh giá.'}catch(e){$('saved').textContent='Không lưu được: '+e.message}};
+$('export').onclick=()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(ratings(),null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='audio-v1-audition-ratings.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+window.addEventListener('pagehide',()=>{generation++;active=false;stopLoops();stopVoices();game?.destroy();context?.close()});
+</script>
+</html>

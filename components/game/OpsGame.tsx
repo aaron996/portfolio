@@ -120,7 +120,7 @@ export function OpsGame() {
       {
         onSound: (sound) => audio.play(sound),
         onMap: (i) => {
-          audio.setMusicMap(i);
+          audio.setMap(i);
           setMapIndex(i);
           if (i !== 0) setTutorial(null);
         },
@@ -235,10 +235,10 @@ export function OpsGame() {
 
   /** Vào màn chơi: dùng chung cho bắt đầu, qua ải, chơi lại */
   const enterPlay = useCallback((index?: number) => {
-    audioRef.current?.activate();
-    audioRef.current?.setPaused(false);
-    audioRef.current?.setMusicMap(index ?? mapIndex);
+    audioRef.current?.setMap(index ?? gameRef.current?.status().mapIndex ?? 0);
     audioRef.current?.setMusicActive(true);
+    audioRef.current?.setPaused(false);
+    audioRef.current?.activate();
     if (clearTimer.current) window.clearTimeout(clearTimer.current);
     if (pickupTimer.current) window.clearTimeout(pickupTimer.current);
     setPickup(null);
