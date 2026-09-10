@@ -1,0 +1,182 @@
+{
+  "groups": [
+    "player-brace",
+    "player-parry"
+  ],
+  "status": "qa-hold-scale-and-lineweight-drift",
+  "canvas": [
+    512,
+    512
+  ],
+  "pivot": [
+    256,
+    480
+  ],
+  "commonScale": 0.4082934609250399,
+  "frames": [
+    {
+      "file": "public/game/combat-v3/player/brace-1.png",
+      "raw": "raw/combat-v3/player/brace-1-raw.png",
+      "transform": {
+        "scale": 0.4082934609250399,
+        "translation": [
+          0,
+          7
+        ],
+        "anchor": "support foot y=480"
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 75.635
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 75.9686,
+        "solidBBox": [
+          95,
+          69,
+          421,
+          481
+        ]
+      },
+      "sha256": "1a98b27a4a647af69c93b50f6b1f5a52cee771e4044adf4acc13a60cb4af9d17"
+    },
+    {
+      "file": "public/game/combat-v3/player/brace-2.png",
+      "raw": "raw/combat-v3/player/brace-2-raw.png",
+      "transform": {
+        "scale": 0.4082934609250399,
+        "translation": [
+          0,
+          7
+        ],
+        "anchor": "support foot y=480"
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 78.5677
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 79.203,
+        "solidBBox": [
+          160,
+          55,
+          361,
+          481
+        ]
+      },
+      "sha256": "d122aba3fc515e8b26f52a7bf3516a443fba5a8b93c61ff76025ae03cd226f64"
+    },
+    {
+      "file": "public/game/combat-v3/player/parry-1.png",
+      "raw": "raw/combat-v3/player/parry-1-regenerated-raw.png",
+      "transform": {
+        "scale": 0.4082934609250399,
+        "translation": [
+          0,
+          -1
+        ],
+        "anchor": "support foot y=480"
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 79.3029
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 79.8866,
+        "solidBBox": [
+          132,
+          106,
+          397,
+          481
+        ]
+      },
+      "sha256": "990adc7a58b6d4f83060c835d9ecbc653a5a4e98151d110ffe4913c45ca0b13b",
+      "facialQa": "replacement selected: exactly one visible near-side eye; duplicate/far-eye artifact removed"
+    },
+    {
+      "file": "public/game/combat-v3/player/parry-2.png",
+      "raw": "raw/combat-v3/player/parry-2-raw.png",
+      "transform": {
+        "scale": 0.4082934609250399,
+        "translation": [
+          0,
+          0
+        ],
+        "anchor": "support foot y=480"
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 76.994
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 77.3991,
+        "solidBBox": [
+          128,
+          61,
+          380,
+          481
+        ]
+      },
+      "sha256": "50bfbb55b53b3b825225eab86e8966a10c2507ae64994b9acd5ad482db78336b"
+    },
+    {
+      "file": "public/game/combat-v3/player/parry-3.png",
+      "raw": "raw/combat-v3/player/parry-3-raw.png",
+      "transform": {
+        "scale": 0.4082934609250399,
+        "translation": [
+          0,
+          7
+        ],
+        "anchor": "support foot y=480"
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 76.3479
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 76.6899,
+        "solidBBox": [
+          141,
+          56,
+          382,
+          481
+        ]
+      },
+      "sha256": "a17e6a01f0fc95a8fd93ec230958a7e9902cd15703d739b059f2dff12b483210"
+    }
+  ],
+  "checks": {
+    "solidWidths": [
+      326,
+      201,
+      275,
+      252,
+      241
+    ],
+    "transparentGaps": "alpha is verified in spaces around limbs; no opaque backdrop",
+    "edgePreviews": [
+      "previews/combat-v3/player-brace-parry-pivot-light.png",
+      "previews/combat-v3/player-brace-parry-pivot-dark.png"
+    ],
+    "facialDefects": "parry-1 initial generation rejected for duplicate eye; replacement inspected at source and delivery size.",
+    "motionPreview": "previews/combat-v3/player-idle-brace-parry-idle-motion.gif",
+    "comparisonPreview": "previews/combat-v3/player-idle-guard-brace-parry-rig-compare.png",
+    "holdReason": "brace-1 and parry-1 head/outline do not match idle/guard rig; brace-1 regenerated candidate also rejected for same issue plus far-eye artifact."
+  }
+}

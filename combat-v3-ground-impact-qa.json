@@ -1,0 +1,118 @@
+{
+  "group": "ground-impact",
+  "status": "qa-pass",
+  "canvas": [
+    512,
+    256
+  ],
+  "pivot": [
+    256,
+    224
+  ],
+  "frames": [
+    {
+      "file": "public/game/combat-v3/fx/ground-impact-1.png",
+      "raw": "raw/combat-v3/fx/ground-impact-1-raw.png",
+      "transform": {
+        "scale": [
+          0.28861330326944756,
+          0.28861330326944756
+        ],
+        "canvas": [
+          512,
+          256
+        ],
+        "noCrop": true
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 93.3306
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 93.9102,
+        "bbox": [
+          124,
+          96,
+          388,
+          175
+        ]
+      },
+      "sha256": "ed0a3f7f371503ae4ca7a61f5ffeb08026b68c4b927ab1dc49bc5e7dee9d77e8"
+    },
+    {
+      "file": "public/game/combat-v3/fx/ground-impact-2.png",
+      "raw": "raw/combat-v3/fx/ground-impact-2-raw.png",
+      "transform": {
+        "scale": [
+          0.28861330326944756,
+          0.28861330326944756
+        ],
+        "canvas": [
+          512,
+          256
+        ],
+        "noCrop": true
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 82.8027
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 83.609,
+        "bbox": [
+          28,
+          74,
+          492,
+          194
+        ]
+      },
+      "sha256": "f155e090b345c70dba273dc20e4c7dbd05aad207c44345f786eeb565272183a7"
+    },
+    {
+      "file": "public/game/combat-v3/fx/ground-impact-3.png",
+      "raw": "raw/combat-v3/fx/ground-impact-3-raw.png",
+      "transform": {
+        "scale": [
+          0.28861330326944756,
+          0.28861330326944756
+        ],
+        "canvas": [
+          512,
+          256
+        ],
+        "noCrop": true
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 95.7369
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 96.3333,
+        "bbox": [
+          157,
+          106,
+          353,
+          169
+        ]
+      },
+      "sha256": "40e9e0cfe538bb76c8a94e6431b4d045437653c92c078c79950293a3a6986dc9"
+    }
+  ],
+  "checks": {
+    "noFloorOrActor": true,
+    "particleGaps": "alpha checked; particles have transparent spacing",
+    "edgePreviews": [
+      "previews/combat-v3/ground-impact-light.png",
+      "previews/combat-v3/ground-impact-dark.png"
+    ]
+  }
+}

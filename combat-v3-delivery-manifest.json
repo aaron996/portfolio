@@ -1,0 +1,1817 @@
+{
+  "version": 2,
+  "sourceManifest": "C:\\Users\\admin\\AppData\\Local\\Temp\\combat-v3-handoff-0a7e\\game-combat-art-manifest.json",
+  "totalRequired": 138,
+  "summary": {
+    "filesExported": 49,
+    "filesQaPass": 44,
+    "filesHold": 5,
+    "filesMissing": 89,
+    "filesInProgress": 0
+  },
+  "groups": [
+    {
+      "id": "b1-stomp",
+      "batch": "A",
+      "status": "qa-pass",
+      "reason": null,
+      "requiredCount": 6,
+      "exportedCount": 6,
+      "files": [
+        {
+          "path": "public/game/combat-v3/boss/b1-stomp-1.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            768,
+            768
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 50.1524,
+          "sha256": "3b50f2e82d1cdd696ff13a0f470dfe887015827a6fd4f3e7c2cb0aaecec702f8",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/boss/b1-stomp-2.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            768,
+            768
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 50.7589,
+          "sha256": "2c15539b6a7635bdc5e07ce09f3bea1dccfa1831fde18624adef5d8fe6f83ce6",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/boss/b1-stomp-3.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            768,
+            768
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 51.6868,
+          "sha256": "2383efdabf262f79c91557bd696430ceb1d21663c905a8fed14fcf2c9a9a1c3f",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/boss/b1-stomp-4.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            768,
+            768
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 55.6949,
+          "sha256": "9425e380504a1a1a3a28022b580cca17ee238db3fd9e4b00fb9d253f52168517",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/boss/b1-stomp-5.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            768,
+            768
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 48.4738,
+          "sha256": "b7314dd79cbd01303e90ebf052e29b49b033a2d1b871a21a8c455fba57b8abdc",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/boss/b1-stomp-6.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            768,
+            768
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 47.0871,
+          "sha256": "de65c5e4f4f2cff47430e7fd1b3fa74011d03f7f983fb066b95c76a9d90da131",
+          "formatPass": true
+        }
+      ]
+    },
+    {
+      "id": "b2-eject",
+      "batch": "C",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 4,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/boss/b2-eject-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/boss/b2-eject-2.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/boss/b2-eject-3.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/boss/b2-eject-4.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "b2-jam",
+      "batch": "C",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/boss/b2-jam-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/boss/b2-jam-2.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "b3-rush",
+      "batch": "A",
+      "status": "qa-pass",
+      "reason": null,
+      "requiredCount": 4,
+      "exportedCount": 4,
+      "files": [
+        {
+          "path": "public/game/combat-v3/boss/b3-rush-1.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            768,
+            768
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 58.7121,
+          "sha256": "fed1b671d21818ba73a3b055e912326953d4e148d51109288d6ecf3a6085b206",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/boss/b3-rush-2.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            768,
+            768
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 60.7585,
+          "sha256": "9bcedafdefbe380d7601318b7ec267703aae85e5b64c265370212248a958ef9e",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/boss/b3-rush-3.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            768,
+            768
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 61.0087,
+          "sha256": "3a7f70a3d15e9dabccdcea73cb5299317dd59fe0c9552b181f2ee72734eee8e1",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/boss/b3-rush-4.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            768,
+            768
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 57.8593,
+          "sha256": "227d78ff6a403b3c9cb42c9c21933d54a38addf6977afe0663cfd64fe09f568a",
+          "formatPass": true
+        }
+      ]
+    },
+    {
+      "id": "b3-repel",
+      "batch": "A",
+      "status": "qa-pass",
+      "reason": null,
+      "requiredCount": 3,
+      "exportedCount": 3,
+      "files": [
+        {
+          "path": "public/game/combat-v3/boss/b3-repel-1.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            768,
+            768
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 61.7218,
+          "sha256": "70839cb7fde14666ef47392bccc7965a415e62e5f6b3bee837244420ce61dd65",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/boss/b3-repel-2.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            768,
+            768
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 68.986,
+          "sha256": "baef4ec6eea6031b76673bb55360f727e9ef0ab795c8ef2ee09479cd7741be26",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/boss/b3-repel-3.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            768,
+            768
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 67.453,
+          "sha256": "d620611f1c307447f295fec9d2b9ca53fd6a33e97df858cce61ac676186266f9",
+          "formatPass": true
+        }
+      ]
+    },
+    {
+      "id": "b5-rush",
+      "batch": "C",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 4,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/boss/b5-rush-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/boss/b5-rush-2.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/boss/b5-rush-3.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/boss/b5-rush-4.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "b5-repel",
+      "batch": "C",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 3,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/boss/b5-repel-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/boss/b5-repel-2.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/boss/b5-repel-3.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "b3-recover",
+      "batch": "A",
+      "status": "qa-pass",
+      "reason": null,
+      "requiredCount": 1,
+      "exportedCount": 1,
+      "files": [
+        {
+          "path": "public/game/combat-v3/boss/b3-recover-1.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            768,
+            768
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 45.4719,
+          "sha256": "1d38d5db82fda3898c3ebbbbde520b77ca9db974d245234d77ebdec37037f5af",
+          "formatPass": true
+        }
+      ]
+    },
+    {
+      "id": "b4-cast",
+      "batch": "C",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 4,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/boss/b4-cast-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/boss/b4-cast-2.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/boss/b4-cast-3.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/boss/b4-cast-4.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "b5-slam",
+      "batch": "C",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 3,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/boss/b5-slam-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/boss/b5-slam-2.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/boss/b5-slam-3.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "knockback",
+      "batch": "A",
+      "status": "qa-pass",
+      "reason": null,
+      "requiredCount": 3,
+      "exportedCount": 3,
+      "files": [
+        {
+          "path": "public/game/combat-v3/player/knockback-1.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            512,
+            512
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 80.3162,
+          "sha256": "ce021ecdf53bb26788308d981d0f7e002d6123aabfda7ec835a7c1cac3581348",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/player/knockback-2.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            512,
+            512
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 81.4438,
+          "sha256": "2fd01b0129c5db276be0b195e60f395e49a4d464bc23ffa384d89c0517212d90",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/player/knockback-3.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            512,
+            512
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 81.0318,
+          "sha256": "a23f120cfb246abb4e0425fc7c764b0cb2d124021724691d876c6bb6414b2afb",
+          "formatPass": true
+        }
+      ]
+    },
+    {
+      "id": "brace",
+      "batch": "A",
+      "status": "hold",
+      "reason": "brace-1 head scale and outline weight drift from player idle/guard rig; replacement candidate rejected for same scale drift plus far-eye artifact.",
+      "requiredCount": 2,
+      "exportedCount": 2,
+      "files": [
+        {
+          "path": "public/game/combat-v3/player/brace-1.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            512,
+            512
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 75.9686,
+          "sha256": "1a98b27a4a647af69c93b50f6b1f5a52cee771e4044adf4acc13a60cb4af9d17",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/player/brace-2.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            512,
+            512
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 79.203,
+          "sha256": "d122aba3fc515e8b26f52a7bf3516a443fba5a8b93c61ff76025ae03cd226f64",
+          "formatPass": true
+        }
+      ]
+    },
+    {
+      "id": "parry",
+      "batch": "A",
+      "status": "hold",
+      "reason": "parry-1 head scale and outline weight drift from player idle/guard rig; keep delivery file out of approved handoff pending targeted repair.",
+      "requiredCount": 3,
+      "exportedCount": 3,
+      "files": [
+        {
+          "path": "public/game/combat-v3/player/parry-1.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            512,
+            512
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 79.8866,
+          "sha256": "990adc7a58b6d4f83060c835d9ecbc653a5a4e98151d110ffe4913c45ca0b13b",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/player/parry-2.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            512,
+            512
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 77.3991,
+          "sha256": "50bfbb55b53b3b825225eab86e8966a10c2507ae64994b9acd5ad482db78336b",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/player/parry-3.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            512,
+            512
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 76.6899,
+          "sha256": "a17e6a01f0fc95a8fd93ec230958a7e9902cd15703d739b059f2dff12b483210",
+          "formatPass": true
+        }
+      ]
+    },
+    {
+      "id": "armed-knockback",
+      "batch": "A",
+      "status": "qa-pass",
+      "reason": null,
+      "requiredCount": 3,
+      "exportedCount": 3,
+      "files": [
+        {
+          "path": "public/game/combat-v3/player/armed-knockback-1.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            512,
+            512
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 78.3569,
+          "sha256": "8cb74a21ed3b64583a6ea3718ad5d72761e51658c1a0730bf4e7db4eb84318dc",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/player/armed-knockback-2.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            512,
+            512
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 78.2684,
+          "sha256": "3c88acbf94986f26f58eb8e26a73edb18222229951fa66e0e6601a086b39d0b6",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/player/armed-knockback-3.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            512,
+            512
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 78.9204,
+          "sha256": "0f4faf4e71d93d22a8ce27679b0ba2f09c04a841d0e7f160fdafb9e2fcdee4ea",
+          "formatPass": true
+        }
+      ]
+    },
+    {
+      "id": "armed-brace",
+      "batch": "A",
+      "status": "qa-pass",
+      "reason": null,
+      "requiredCount": 2,
+      "exportedCount": 2,
+      "files": [
+        {
+          "path": "public/game/combat-v3/player/armed-brace-1.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            512,
+            512
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 77.2381,
+          "sha256": "fd74281b2a5c378fe55f2e1c2ccf50bc2d46cebbc8a9dc5a74910c97d4a2a54b",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/player/armed-brace-2.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            512,
+            512
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 74.2508,
+          "sha256": "89b722ea7bd6db1bb93fb2fc4cad37707c655cceb4c6ee4b5e7df4812110921d",
+          "formatPass": true
+        }
+      ]
+    },
+    {
+      "id": "armed-parry",
+      "batch": "A",
+      "status": "qa-pass",
+      "reason": null,
+      "requiredCount": 3,
+      "exportedCount": 3,
+      "files": [
+        {
+          "path": "public/game/combat-v3/player/armed-parry-1.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            512,
+            512
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 72.6967,
+          "sha256": "176ede613eb422c1d9eb9862d893ca70d55abb339ae5a413f4488e120e2ab452",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/player/armed-parry-2.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            512,
+            512
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 75.399,
+          "sha256": "2a24f369930faca6dfc7d7e709ae91229bd28aaf9d9ee1a106944093f79e7315",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/player/armed-parry-3.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            512,
+            512
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 77.7813,
+          "sha256": "43934daa8a8317fdfb06329d9694e62f401b7491a7332cda51faceb39035aa5a",
+          "formatPass": true
+        }
+      ]
+    },
+    {
+      "id": "ground-impact",
+      "batch": "A",
+      "status": "qa-pass",
+      "reason": null,
+      "requiredCount": 3,
+      "exportedCount": 3,
+      "files": [
+        {
+          "path": "public/game/combat-v3/fx/ground-impact-1.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            512,
+            256
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 93.9102,
+          "sha256": "ed0a3f7f371503ae4ca7a61f5ffeb08026b68c4b927ab1dc49bc5e7dee9d77e8",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/fx/ground-impact-2.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            512,
+            256
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 83.609,
+          "sha256": "f155e090b345c70dba273dc20e4c7dbd05aad207c44345f786eeb565272183a7",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/fx/ground-impact-3.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            512,
+            256
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 96.3333,
+          "sha256": "40e9e0cfe538bb76c8a94e6431b4d045437653c92c078c79950293a3a6986dc9",
+          "formatPass": true
+        }
+      ]
+    },
+    {
+      "id": "shockwave",
+      "batch": "A",
+      "status": "qa-pass",
+      "reason": null,
+      "requiredCount": 3,
+      "exportedCount": 3,
+      "files": [
+        {
+          "path": "public/game/combat-v3/fx/shockwave-1.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            512,
+            256
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 95.6352,
+          "sha256": "d60f529cb1bc6100dde0e8fe4c5f7932a7fb93f25fb753b1deab740ad1b9468b",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/fx/shockwave-2.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            512,
+            256
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 86.6173,
+          "sha256": "8a88839da07eb3f504d64fa58e885208ec188728fd7c71f9fd9c0adfebaee4ee",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/fx/shockwave-3.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            512,
+            256
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 97.8714,
+          "sha256": "a39b0156bc9df2e1c44e8543e4a78317298bd222b5308e5b8cd6a48071dc93c8",
+          "formatPass": true
+        }
+      ]
+    },
+    {
+      "id": "skid",
+      "batch": "A",
+      "status": "qa-pass",
+      "reason": null,
+      "requiredCount": 2,
+      "exportedCount": 2,
+      "files": [
+        {
+          "path": "public/game/combat-v3/fx/skid-1.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            256,
+            128
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 92.5385,
+          "sha256": "88e46fc6a343e54805c1157a1b4d6fc36d869ba25fd1e0c694c6724bdaa66a65",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/fx/skid-2.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            256,
+            128
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 94.8029,
+          "sha256": "65be45d69e9206ce070f9017c36fac08536979cb14c12d44b73a8a264149f467",
+          "formatPass": true
+        }
+      ]
+    },
+    {
+      "id": "block-impact",
+      "batch": "A",
+      "status": "qa-pass",
+      "reason": null,
+      "requiredCount": 3,
+      "exportedCount": 3,
+      "files": [
+        {
+          "path": "public/game/combat-v3/fx/block-impact-1.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            256,
+            256
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 99.0234,
+          "sha256": "8a6eed29eee73b2192e6fe74cf9665dd1b1a8a4fcf0c52a7031d199f23e11a8f",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/fx/block-impact-2.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            256,
+            256
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 98.4589,
+          "sha256": "9762b206992d2b330aa86f2f5ef302b67cf2ec321ba71f40ef23a621594c8d9d",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/fx/block-impact-3.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            256,
+            256
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 99.4232,
+          "sha256": "ffb75ecdc6a5850d0e4bfda412d0cc683241448282c7e77839eccb4e40dc5e79",
+          "formatPass": true
+        }
+      ]
+    },
+    {
+      "id": "parry-impact",
+      "batch": "A",
+      "status": "qa-pass",
+      "reason": null,
+      "requiredCount": 3,
+      "exportedCount": 3,
+      "files": [
+        {
+          "path": "public/game/combat-v3/fx/parry-impact-1.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            256,
+            256
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 95.4971,
+          "sha256": "dbc46f75fa24f0a08ef9c8a4f598e02e90e746d9aba081bc519151e6e4c4ae41",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/fx/parry-impact-2.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            256,
+            256
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 83.4106,
+          "sha256": "64f28735460fe7eb0793a3ecc73d81876b7d1cf7402eecd56ab7d6e6578d6b86",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/fx/parry-impact-3.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            256,
+            256
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 95.7596,
+          "sha256": "eae5ecf4ad39dc1c0ad184617ba58a9eff3f2542f87f6674d3a03d79cf8b01f3",
+          "formatPass": true
+        }
+      ]
+    },
+    {
+      "id": "player-muzzle",
+      "batch": "B",
+      "status": "qa-pass",
+      "reason": null,
+      "requiredCount": 3,
+      "exportedCount": 3,
+      "files": [
+        {
+          "path": "public/game/combat-v3/fx/player-muzzle-1.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            256,
+            256
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 97.5586,
+          "sha256": "16be05f3e0b1aff8b509b1c3caa418df389667b07923f60174173c10cd5aadb8",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/fx/player-muzzle-2.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            256,
+            256
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 95.6909,
+          "sha256": "e5cd5dae237b344231f804f4beb8d1822674b5ae2d3f2fc6ea4e16a059c9b199",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/fx/player-muzzle-3.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            256,
+            256
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 98.7854,
+          "sha256": "8babd495484f2c04bdcd0625ac6201b8772e1b70ba78c419ea6622a8df35b9ca",
+          "formatPass": true
+        }
+      ]
+    },
+    {
+      "id": "player-bolt",
+      "batch": "B",
+      "status": "qa-pass",
+      "reason": null,
+      "requiredCount": 2,
+      "exportedCount": 2,
+      "files": [
+        {
+          "path": "public/game/combat-v3/fx/player-bolt-1.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            256,
+            128
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 94.7449,
+          "sha256": "2bf406b8995b13bfb7455186ff094bbd6ed2beffbae8fc3f767256937c38e760",
+          "formatPass": true
+        },
+        {
+          "path": "public/game/combat-v3/fx/player-bolt-2.png",
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            256,
+            128
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 92.5842,
+          "sha256": "76841c2b60564589daf13562599531203a64dff17ea77034dc714abf531ff193",
+          "formatPass": true
+        }
+      ]
+    },
+    {
+      "id": "bullet-impact",
+      "batch": "B",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 3,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/fx/bullet-impact-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/fx/bullet-impact-2.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/fx/bullet-impact-3.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "enemy-discharge",
+      "batch": "C",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/fx/enemy-discharge-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/fx/enemy-discharge-2.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "parcel-eject",
+      "batch": "C",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/fx/parcel-eject-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/fx/parcel-eject-2.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "parcel",
+      "batch": "C",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/projectile/parcel-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/projectile/parcel-2.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "data-packet",
+      "batch": "C",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/projectile/data-packet-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/projectile/data-packet-2.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m1-code-reader",
+      "batch": "B",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/prop/m1-code-reader-off.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/prop/m1-code-reader-on.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m2-power",
+      "batch": "B",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/prop/m2-power-off.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/prop/m2-power-on.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m2-route-switch",
+      "batch": "B",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/prop/m2-route-switch-off.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/prop/m2-route-switch-on.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m2-dispatch",
+      "batch": "B",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/prop/m2-dispatch-off.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/prop/m2-dispatch-on.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m3-balance",
+      "batch": "B",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/prop/m3-balance-off.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/prop/m3-balance-on.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m4-order",
+      "batch": "B",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/prop/m4-order-off.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/prop/m4-order-on.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m4-handoff",
+      "batch": "B",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/prop/m4-handoff-off.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/prop/m4-handoff-on.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m4-warehouse",
+      "batch": "B",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/prop/m4-warehouse-off.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/prop/m4-warehouse-on.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m5-required",
+      "batch": "B",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/prop/m5-required-off.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/prop/m5-required-on.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m5-unique",
+      "batch": "B",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/prop/m5-unique-off.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/prop/m5-unique-on.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m5-bypass",
+      "batch": "B",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/prop/m5-bypass-off.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/prop/m5-bypass-on.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m1-walker-attack",
+      "batch": "D",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/mob/m1-walker-attack-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/mob/m1-walker-attack-2.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m2-walker-attack",
+      "batch": "D",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/mob/m2-walker-attack-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/mob/m2-walker-attack-2.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m3-walker-attack",
+      "batch": "D",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/mob/m3-walker-attack-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/mob/m3-walker-attack-2.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m4-walker-attack",
+      "batch": "D",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/mob/m4-walker-attack-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/mob/m4-walker-attack-2.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m5-walker-attack",
+      "batch": "D",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/mob/m5-walker-attack-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/mob/m5-walker-attack-2.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m1-flyer-dive",
+      "batch": "D",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/mob/m1-flyer-dive-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/mob/m1-flyer-dive-2.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m2-flyer-dive",
+      "batch": "D",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/mob/m2-flyer-dive-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/mob/m2-flyer-dive-2.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m3-flyer-dive",
+      "batch": "D",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/mob/m3-flyer-dive-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/mob/m3-flyer-dive-2.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m5-flyer-dive",
+      "batch": "D",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/mob/m5-flyer-dive-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/mob/m5-flyer-dive-2.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m3-shooter-attack",
+      "batch": "D",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/mob/m3-shooter-attack-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/mob/m3-shooter-attack-2.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m4-shooter-attack",
+      "batch": "D",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/mob/m4-shooter-attack-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/mob/m4-shooter-attack-2.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m5-shooter-attack",
+      "batch": "D",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/mob/m5-shooter-attack-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/mob/m5-shooter-attack-2.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m4-charger-repel",
+      "batch": "D",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/mob/m4-charger-repel-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/mob/m4-charger-repel-2.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m5-charger-repel",
+      "batch": "D",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/mob/m5-charger-repel-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/mob/m5-charger-repel-2.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m3-rider-repel",
+      "batch": "D",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/mob/m3-rider-repel-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/mob/m3-rider-repel-2.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m2-shooter-base",
+      "batch": "C",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 4,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/mob/m2-shooter-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/mob/m2-shooter-2.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/mob/m2-shooter-3.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/mob/m2-shooter-4.png",
+          "exported": false
+        }
+      ]
+    },
+    {
+      "id": "m2-shooter-attack",
+      "batch": "C",
+      "status": "missing",
+      "reason": "No exported delivery files yet.",
+      "requiredCount": 2,
+      "exportedCount": 0,
+      "files": [
+        {
+          "path": "public/game/combat-v3/mob/m2-shooter-attack-1.png",
+          "exported": false
+        },
+        {
+          "path": "public/game/combat-v3/mob/m2-shooter-attack-2.png",
+          "exported": false
+        }
+      ]
+    }
+  ],
+  "files": {
+    "exported": [
+      "public/game/combat-v3/boss/b1-stomp-1.png",
+      "public/game/combat-v3/boss/b1-stomp-2.png",
+      "public/game/combat-v3/boss/b1-stomp-3.png",
+      "public/game/combat-v3/boss/b1-stomp-4.png",
+      "public/game/combat-v3/boss/b1-stomp-5.png",
+      "public/game/combat-v3/boss/b1-stomp-6.png",
+      "public/game/combat-v3/boss/b3-rush-1.png",
+      "public/game/combat-v3/boss/b3-rush-2.png",
+      "public/game/combat-v3/boss/b3-rush-3.png",
+      "public/game/combat-v3/boss/b3-rush-4.png",
+      "public/game/combat-v3/boss/b3-repel-1.png",
+      "public/game/combat-v3/boss/b3-repel-2.png",
+      "public/game/combat-v3/boss/b3-repel-3.png",
+      "public/game/combat-v3/boss/b3-recover-1.png",
+      "public/game/combat-v3/player/knockback-1.png",
+      "public/game/combat-v3/player/knockback-2.png",
+      "public/game/combat-v3/player/knockback-3.png",
+      "public/game/combat-v3/player/brace-1.png",
+      "public/game/combat-v3/player/brace-2.png",
+      "public/game/combat-v3/player/parry-1.png",
+      "public/game/combat-v3/player/parry-2.png",
+      "public/game/combat-v3/player/parry-3.png",
+      "public/game/combat-v3/player/armed-knockback-1.png",
+      "public/game/combat-v3/player/armed-knockback-2.png",
+      "public/game/combat-v3/player/armed-knockback-3.png",
+      "public/game/combat-v3/player/armed-brace-1.png",
+      "public/game/combat-v3/player/armed-brace-2.png",
+      "public/game/combat-v3/player/armed-parry-1.png",
+      "public/game/combat-v3/player/armed-parry-2.png",
+      "public/game/combat-v3/player/armed-parry-3.png",
+      "public/game/combat-v3/fx/ground-impact-1.png",
+      "public/game/combat-v3/fx/ground-impact-2.png",
+      "public/game/combat-v3/fx/ground-impact-3.png",
+      "public/game/combat-v3/fx/shockwave-1.png",
+      "public/game/combat-v3/fx/shockwave-2.png",
+      "public/game/combat-v3/fx/shockwave-3.png",
+      "public/game/combat-v3/fx/skid-1.png",
+      "public/game/combat-v3/fx/skid-2.png",
+      "public/game/combat-v3/fx/block-impact-1.png",
+      "public/game/combat-v3/fx/block-impact-2.png",
+      "public/game/combat-v3/fx/block-impact-3.png",
+      "public/game/combat-v3/fx/parry-impact-1.png",
+      "public/game/combat-v3/fx/parry-impact-2.png",
+      "public/game/combat-v3/fx/parry-impact-3.png",
+      "public/game/combat-v3/fx/player-muzzle-1.png",
+      "public/game/combat-v3/fx/player-muzzle-2.png",
+      "public/game/combat-v3/fx/player-muzzle-3.png",
+      "public/game/combat-v3/fx/player-bolt-1.png",
+      "public/game/combat-v3/fx/player-bolt-2.png"
+    ],
+    "qaPass": [
+      "public/game/combat-v3/boss/b1-stomp-1.png",
+      "public/game/combat-v3/boss/b1-stomp-2.png",
+      "public/game/combat-v3/boss/b1-stomp-3.png",
+      "public/game/combat-v3/boss/b1-stomp-4.png",
+      "public/game/combat-v3/boss/b1-stomp-5.png",
+      "public/game/combat-v3/boss/b1-stomp-6.png",
+      "public/game/combat-v3/boss/b3-rush-1.png",
+      "public/game/combat-v3/boss/b3-rush-2.png",
+      "public/game/combat-v3/boss/b3-rush-3.png",
+      "public/game/combat-v3/boss/b3-rush-4.png",
+      "public/game/combat-v3/boss/b3-repel-1.png",
+      "public/game/combat-v3/boss/b3-repel-2.png",
+      "public/game/combat-v3/boss/b3-repel-3.png",
+      "public/game/combat-v3/boss/b3-recover-1.png",
+      "public/game/combat-v3/player/knockback-1.png",
+      "public/game/combat-v3/player/knockback-2.png",
+      "public/game/combat-v3/player/knockback-3.png",
+      "public/game/combat-v3/player/armed-knockback-1.png",
+      "public/game/combat-v3/player/armed-knockback-2.png",
+      "public/game/combat-v3/player/armed-knockback-3.png",
+      "public/game/combat-v3/player/armed-brace-1.png",
+      "public/game/combat-v3/player/armed-brace-2.png",
+      "public/game/combat-v3/player/armed-parry-1.png",
+      "public/game/combat-v3/player/armed-parry-2.png",
+      "public/game/combat-v3/player/armed-parry-3.png",
+      "public/game/combat-v3/fx/ground-impact-1.png",
+      "public/game/combat-v3/fx/ground-impact-2.png",
+      "public/game/combat-v3/fx/ground-impact-3.png",
+      "public/game/combat-v3/fx/shockwave-1.png",
+      "public/game/combat-v3/fx/shockwave-2.png",
+      "public/game/combat-v3/fx/shockwave-3.png",
+      "public/game/combat-v3/fx/skid-1.png",
+      "public/game/combat-v3/fx/skid-2.png",
+      "public/game/combat-v3/fx/block-impact-1.png",
+      "public/game/combat-v3/fx/block-impact-2.png",
+      "public/game/combat-v3/fx/block-impact-3.png",
+      "public/game/combat-v3/fx/parry-impact-1.png",
+      "public/game/combat-v3/fx/parry-impact-2.png",
+      "public/game/combat-v3/fx/parry-impact-3.png",
+      "public/game/combat-v3/fx/player-muzzle-1.png",
+      "public/game/combat-v3/fx/player-muzzle-2.png",
+      "public/game/combat-v3/fx/player-muzzle-3.png",
+      "public/game/combat-v3/fx/player-bolt-1.png",
+      "public/game/combat-v3/fx/player-bolt-2.png"
+    ],
+    "hold": [
+      "public/game/combat-v3/player/brace-1.png",
+      "public/game/combat-v3/player/brace-2.png",
+      "public/game/combat-v3/player/parry-1.png",
+      "public/game/combat-v3/player/parry-2.png",
+      "public/game/combat-v3/player/parry-3.png"
+    ],
+    "missing": [
+      "public/game/combat-v3/boss/b2-eject-1.png",
+      "public/game/combat-v3/boss/b2-eject-2.png",
+      "public/game/combat-v3/boss/b2-eject-3.png",
+      "public/game/combat-v3/boss/b2-eject-4.png",
+      "public/game/combat-v3/boss/b2-jam-1.png",
+      "public/game/combat-v3/boss/b2-jam-2.png",
+      "public/game/combat-v3/boss/b5-rush-1.png",
+      "public/game/combat-v3/boss/b5-rush-2.png",
+      "public/game/combat-v3/boss/b5-rush-3.png",
+      "public/game/combat-v3/boss/b5-rush-4.png",
+      "public/game/combat-v3/boss/b5-repel-1.png",
+      "public/game/combat-v3/boss/b5-repel-2.png",
+      "public/game/combat-v3/boss/b5-repel-3.png",
+      "public/game/combat-v3/boss/b4-cast-1.png",
+      "public/game/combat-v3/boss/b4-cast-2.png",
+      "public/game/combat-v3/boss/b4-cast-3.png",
+      "public/game/combat-v3/boss/b4-cast-4.png",
+      "public/game/combat-v3/boss/b5-slam-1.png",
+      "public/game/combat-v3/boss/b5-slam-2.png",
+      "public/game/combat-v3/boss/b5-slam-3.png",
+      "public/game/combat-v3/fx/bullet-impact-1.png",
+      "public/game/combat-v3/fx/bullet-impact-2.png",
+      "public/game/combat-v3/fx/bullet-impact-3.png",
+      "public/game/combat-v3/fx/enemy-discharge-1.png",
+      "public/game/combat-v3/fx/enemy-discharge-2.png",
+      "public/game/combat-v3/fx/parcel-eject-1.png",
+      "public/game/combat-v3/fx/parcel-eject-2.png",
+      "public/game/combat-v3/projectile/parcel-1.png",
+      "public/game/combat-v3/projectile/parcel-2.png",
+      "public/game/combat-v3/projectile/data-packet-1.png",
+      "public/game/combat-v3/projectile/data-packet-2.png",
+      "public/game/combat-v3/prop/m1-code-reader-off.png",
+      "public/game/combat-v3/prop/m1-code-reader-on.png",
+      "public/game/combat-v3/prop/m2-power-off.png",
+      "public/game/combat-v3/prop/m2-power-on.png",
+      "public/game/combat-v3/prop/m2-route-switch-off.png",
+      "public/game/combat-v3/prop/m2-route-switch-on.png",
+      "public/game/combat-v3/prop/m2-dispatch-off.png",
+      "public/game/combat-v3/prop/m2-dispatch-on.png",
+      "public/game/combat-v3/prop/m3-balance-off.png",
+      "public/game/combat-v3/prop/m3-balance-on.png",
+      "public/game/combat-v3/prop/m4-order-off.png",
+      "public/game/combat-v3/prop/m4-order-on.png",
+      "public/game/combat-v3/prop/m4-handoff-off.png",
+      "public/game/combat-v3/prop/m4-handoff-on.png",
+      "public/game/combat-v3/prop/m4-warehouse-off.png",
+      "public/game/combat-v3/prop/m4-warehouse-on.png",
+      "public/game/combat-v3/prop/m5-required-off.png",
+      "public/game/combat-v3/prop/m5-required-on.png",
+      "public/game/combat-v3/prop/m5-unique-off.png",
+      "public/game/combat-v3/prop/m5-unique-on.png",
+      "public/game/combat-v3/prop/m5-bypass-off.png",
+      "public/game/combat-v3/prop/m5-bypass-on.png",
+      "public/game/combat-v3/mob/m1-walker-attack-1.png",
+      "public/game/combat-v3/mob/m1-walker-attack-2.png",
+      "public/game/combat-v3/mob/m2-walker-attack-1.png",
+      "public/game/combat-v3/mob/m2-walker-attack-2.png",
+      "public/game/combat-v3/mob/m3-walker-attack-1.png",
+      "public/game/combat-v3/mob/m3-walker-attack-2.png",
+      "public/game/combat-v3/mob/m4-walker-attack-1.png",
+      "public/game/combat-v3/mob/m4-walker-attack-2.png",
+      "public/game/combat-v3/mob/m5-walker-attack-1.png",
+      "public/game/combat-v3/mob/m5-walker-attack-2.png",
+      "public/game/combat-v3/mob/m1-flyer-dive-1.png",
+      "public/game/combat-v3/mob/m1-flyer-dive-2.png",
+      "public/game/combat-v3/mob/m2-flyer-dive-1.png",
+      "public/game/combat-v3/mob/m2-flyer-dive-2.png",
+      "public/game/combat-v3/mob/m3-flyer-dive-1.png",
+      "public/game/combat-v3/mob/m3-flyer-dive-2.png",
+      "public/game/combat-v3/mob/m5-flyer-dive-1.png",
+      "public/game/combat-v3/mob/m5-flyer-dive-2.png",
+      "public/game/combat-v3/mob/m3-shooter-attack-1.png",
+      "public/game/combat-v3/mob/m3-shooter-attack-2.png",
+      "public/game/combat-v3/mob/m4-shooter-attack-1.png",
+      "public/game/combat-v3/mob/m4-shooter-attack-2.png",
+      "public/game/combat-v3/mob/m5-shooter-attack-1.png",
+      "public/game/combat-v3/mob/m5-shooter-attack-2.png",
+      "public/game/combat-v3/mob/m4-charger-repel-1.png",
+      "public/game/combat-v3/mob/m4-charger-repel-2.png",
+      "public/game/combat-v3/mob/m5-charger-repel-1.png",
+      "public/game/combat-v3/mob/m5-charger-repel-2.png",
+      "public/game/combat-v3/mob/m3-rider-repel-1.png",
+      "public/game/combat-v3/mob/m3-rider-repel-2.png",
+      "public/game/combat-v3/mob/m2-shooter-1.png",
+      "public/game/combat-v3/mob/m2-shooter-2.png",
+      "public/game/combat-v3/mob/m2-shooter-3.png",
+      "public/game/combat-v3/mob/m2-shooter-4.png",
+      "public/game/combat-v3/mob/m2-shooter-attack-1.png",
+      "public/game/combat-v3/mob/m2-shooter-attack-2.png"
+    ]
+  },
+  "handoff": {
+    "qaPassPreview": "previews/combat-v3/qa-pass-handoff-contact.png",
+    "holdPreview": "previews/combat-v3/player-idle-guard-brace-parry-rig-compare.png"
+  }
+}

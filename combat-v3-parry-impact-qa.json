@@ -1,0 +1,118 @@
+{
+  "group": "parry-impact",
+  "status": "qa-pass",
+  "canvas": [
+    256,
+    256
+  ],
+  "pivot": [
+    128,
+    128
+  ],
+  "frames": [
+    {
+      "file": "public/game/combat-v3/fx/parry-impact-1.png",
+      "raw": "raw/combat-v3/fx/parry-impact-1-raw.png",
+      "transform": {
+        "scale": [
+          0.20414673046251994,
+          0.20414673046251994
+        ],
+        "canvas": [
+          256,
+          256
+        ],
+        "noCrop": true
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 93.7412
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 95.4971,
+        "bbox": [
+          78,
+          69,
+          177,
+          188
+        ]
+      },
+      "sha256": "dbc46f75fa24f0a08ef9c8a4f598e02e90e746d9aba081bc519151e6e4c4ae41"
+    },
+    {
+      "file": "public/game/combat-v3/fx/parry-impact-2.png",
+      "raw": "raw/combat-v3/fx/parry-impact-2-raw.png",
+      "transform": {
+        "scale": [
+          0.20414673046251994,
+          0.20414673046251994
+        ],
+        "canvas": [
+          256,
+          256
+        ],
+        "noCrop": true
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 80.1781
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 83.4106,
+        "bbox": [
+          54,
+          43,
+          204,
+          217
+        ]
+      },
+      "sha256": "64f28735460fe7eb0793a3ecc73d81876b7d1cf7402eecd56ab7d6e6578d6b86"
+    },
+    {
+      "file": "public/game/combat-v3/fx/parry-impact-3.png",
+      "raw": "raw/combat-v3/fx/parry-impact-3-raw.png",
+      "transform": {
+        "scale": [
+          0.20414673046251994,
+          0.20414673046251994
+        ],
+        "canvas": [
+          256,
+          256
+        ],
+        "noCrop": true
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 254,
+        "zeroPercent": 93.7119
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 95.7596,
+        "bbox": [
+          78,
+          68,
+          177,
+          188
+        ]
+      },
+      "sha256": "eae5ecf4ad39dc1c0ad184617ba58a9eff3f2542f87f6674d3a03d79cf8b01f3"
+    }
+  ],
+  "checks": {
+    "limeCounterImpact": true,
+    "notBossCovering": true,
+    "edgePreviews": [
+      "previews/combat-v3/parry-impact-light.png",
+      "previews/combat-v3/parry-impact-dark.png"
+    ]
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "clip": "player-knockback",
+  "canvas": [
+    512,
+    512
+  ],
+  "pivot": [
+    256,
+    480
+  ],
+  "status": "qa-pass",
+  "frames": [
+    {
+      "file": "public/game/combat-v3/player/knockback-1.png",
+      "raw": "raw/combat-v3/player/knockback-1-raw.png",
+      "transform": {
+        "scale": 0.4082934609250399,
+        "translation": [
+          0,
+          13
+        ],
+        "anchor": "support foot y=480"
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 79.8554
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 80.3162,
+        "solidBBox": [
+          118,
+          56,
+          392,
+          481
+        ]
+      },
+      "sha256": "ce021ecdf53bb26788308d981d0f7e002d6123aabfda7ec835a7c1cac3581348"
+    },
+    {
+      "file": "public/game/combat-v3/player/knockback-2.png",
+      "raw": "raw/combat-v3/player/knockback-2-raw.png",
+      "transform": {
+        "scale": 0.4082934609250399,
+        "translation": [
+          0,
+          30
+        ],
+        "anchor": "support foot y=480"
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 81.0963
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 81.4438,
+        "solidBBox": [
+          124,
+          90,
+          416,
+          481
+        ]
+      },
+      "sha256": "2fd01b0129c5db276be0b195e60f395e49a4d464bc23ffa384d89c0517212d90"
+    },
+    {
+      "file": "public/game/combat-v3/player/knockback-3.png",
+      "raw": "raw/combat-v3/player/knockback-3-raw.png",
+      "transform": {
+        "scale": 0.4082934609250399,
+        "translation": [
+          0,
+          30
+        ],
+        "anchor": "support foot y=480"
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 80.5954
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 81.0318,
+        "solidBBox": [
+          142,
+          102,
+          402,
+          481
+        ]
+      },
+      "sha256": "a23f120cfb246abb4e0425fc7c764b0cb2d124021724691d876c6bb6414b2afb"
+    }
+  ],
+  "checks": {
+    "commonScale": 0.4082934609250399,
+    "supportFoot": "all frame support points y=480; no airborne foot re-anchored",
+    "lightDark": [
+      "previews/combat-v3/player-knockback-pivot-light.png",
+      "previews/combat-v3/player-knockback-pivot-dark.png"
+    ]
+  }
+}

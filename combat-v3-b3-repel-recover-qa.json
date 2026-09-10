@@ -1,0 +1,243 @@
+{
+  "groups": [
+    "b3-repel",
+    "b3-recover"
+  ],
+  "status": "qa-pass-with-documented-alpha-remediation",
+  "canvas": [
+    768,
+    768
+  ],
+  "pivot": [
+    384,
+    714
+  ],
+  "identityCheck": {
+    "fixedParts": "clock face, crown, purple casing, silver cuffs and outline style compared visually against B3 Rush master",
+    "solidSilhouetteWidths": [
+      704,
+      705,
+      704,
+      704
+    ],
+    "decision": "recovery first candidate rejected for scale drift; regenerated master-based candidate selected. Every source was measured using alpha >32 and normalized to 704px solid silhouette width without crop."
+  },
+  "alphaCheck": {
+    "policy": "values <=8 removed after resampling; anti-aliased edge retained",
+    "localMatteException": "b3-repel-2 ImageGen background edit twice returned opaque checkerboard (successful calls, not tool errors); saved original/retry raws and used a corner-connected neutral-checkerboard matte; reviewed light/dark preview"
+  },
+  "frames": [
+    {
+      "file": "public/game/combat-v3/boss/b3-repel-1.png",
+      "raw": "raw/combat-v3/boss/b3-repel-1-alpha-raw.png",
+      "rawSize": [
+        1380,
+        1140
+      ],
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 53.1142,
+        "bbox": [
+          51,
+          44,
+          1344,
+          1118
+        ],
+        "solidBBox": [
+          72,
+          46,
+          1338,
+          1091
+        ]
+      },
+      "transform": {
+        "scale": 0.556082148,
+        "targetSolidSilhouetteWidth": 704,
+        "translation": [
+          0,
+          108
+        ],
+        "anchor": "lowest solid support-foot pixel to y=714; no crop"
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 61.7218,
+        "bbox": [
+          39,
+          133,
+          744,
+          715
+        ],
+        "solidBBox": [
+          40,
+          134,
+          744,
+          715
+        ]
+      },
+      "sha256": "70839cb7fde14666ef47392bccc7965a415e62e5f6b3bee837244420ce61dd65"
+    },
+    {
+      "file": "public/game/combat-v3/boss/b3-repel-2.png",
+      "raw": "raw/combat-v3/boss/b3-repel-2-local-matte-raw.png",
+      "rawSize": [
+        1536,
+        1024
+      ],
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 59.9327,
+        "bbox": [
+          113,
+          39,
+          1426,
+          978
+        ],
+        "solidBBox": [
+          113,
+          39,
+          1426,
+          978
+        ]
+      },
+      "transform": {
+        "scale": 0.536176695,
+        "targetSolidSilhouetteWidth": 704,
+        "translation": [
+          -28,
+          190
+        ],
+        "anchor": "lowest solid support-foot pixel to y=714; no crop"
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 68.986,
+        "bbox": [
+          32,
+          210,
+          738,
+          715
+        ],
+        "solidBBox": [
+          32,
+          211,
+          737,
+          715
+        ]
+      },
+      "sha256": "baef4ec6eea6031b76673bb55360f727e9ef0ab795c8ef2ee09479cd7741be26"
+    },
+    {
+      "file": "public/game/combat-v3/boss/b3-repel-3.png",
+      "raw": "raw/combat-v3/boss/b3-repel-3-bg-removed-raw.png",
+      "rawSize": [
+        1536,
+        1024
+      ],
+      "rawAlpha": {
+        "min": 0,
+        "max": 254,
+        "zeroPercent": 55.4286,
+        "bbox": [
+          71,
+          44,
+          1516,
+          986
+        ],
+        "solidBBox": [
+          127,
+          46,
+          1464,
+          981
+        ]
+      },
+      "transform": {
+        "scale": 0.526551982,
+        "targetSolidSilhouetteWidth": 704,
+        "translation": [
+          -21,
+          198
+        ],
+        "anchor": "lowest solid support-foot pixel to y=714; no crop"
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 67.453,
+        "bbox": [
+          45,
+          222,
+          751,
+          715
+        ],
+        "solidBBox": [
+          46,
+          222,
+          750,
+          715
+        ]
+      },
+      "sha256": "d620611f1c307447f295fec9d2b9ca53fd6a33e97df858cce61ac676186266f9"
+    },
+    {
+      "file": "public/game/combat-v3/boss/b3-recover-1.png",
+      "raw": "raw/combat-v3/boss/b3-recover-1-regenerated-raw.png",
+      "rawSize": [
+        1380,
+        1140
+      ],
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 54.332,
+        "bbox": [
+          81,
+          51,
+          1324,
+          1108
+        ],
+        "solidBBox": [
+          174,
+          65,
+          1221,
+          1105
+        ]
+      },
+      "transform": {
+        "scale": 0.672397326,
+        "targetSolidSilhouetteWidth": 704,
+        "translation": [
+          -80,
+          -29
+        ],
+        "anchor": "lowest solid support-foot pixel to y=714; no crop"
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 45.4719,
+        "bbox": [
+          37,
+          14,
+          741,
+          715
+        ],
+        "solidBBox": [
+          37,
+          15,
+          741,
+          715
+        ]
+      },
+      "sha256": "1d38d5db82fda3898c3ebbbbde520b77ca9db974d245234d77ebdec37037f5af"
+    }
+  ],
+  "previews": [
+    "previews/combat-v3/b3-repel-recover-pivot-light.png",
+    "previews/combat-v3/b3-repel-recover-pivot-dark.png"
+  ]
+}

@@ -1,0 +1,118 @@
+{
+  "group": "shockwave",
+  "status": "qa-pass",
+  "canvas": [
+    512,
+    256
+  ],
+  "pivot": [
+    256,
+    224
+  ],
+  "frames": [
+    {
+      "file": "public/game/combat-v3/fx/shockwave-1.png",
+      "raw": "raw/combat-v3/fx/shockwave-1-raw.png",
+      "transform": {
+        "scale": [
+          0.28861330326944756,
+          0.28861330326944756
+        ],
+        "canvas": [
+          512,
+          256
+        ],
+        "noCrop": true
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 95.0731
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 95.6352,
+        "bbox": [
+          109,
+          99,
+          344,
+          178
+        ]
+      },
+      "sha256": "d60f529cb1bc6100dde0e8fe4c5f7932a7fb93f25fb753b1deab740ad1b9468b"
+    },
+    {
+      "file": "public/game/combat-v3/fx/shockwave-2.png",
+      "raw": "raw/combat-v3/fx/shockwave-2-raw.png",
+      "transform": {
+        "scale": [
+          0.28861330326944756,
+          0.28861330326944756
+        ],
+        "canvas": [
+          512,
+          256
+        ],
+        "noCrop": true
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 86.1535
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 86.6173,
+        "bbox": [
+          49,
+          79,
+          464,
+          196
+        ]
+      },
+      "sha256": "8a88839da07eb3f504d64fa58e885208ec188728fd7c71f9fd9c0adfebaee4ee"
+    },
+    {
+      "file": "public/game/combat-v3/fx/shockwave-3.png",
+      "raw": "raw/combat-v3/fx/shockwave-3-raw.png",
+      "transform": {
+        "scale": [
+          0.28861330326944756,
+          0.28861330326944756
+        ],
+        "canvas": [
+          512,
+          256
+        ],
+        "noCrop": true
+      },
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 97.4146
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 97.8714,
+        "bbox": [
+          128,
+          107,
+          338,
+          177
+        ]
+      },
+      "sha256": "a39b0156bc9df2e1c44e8543e4a78317298bd222b5308e5b8cd6a48071dc93c8"
+    }
+  ],
+  "checks": {
+    "sideViewRightward": true,
+    "noActorOrFloor": true,
+    "edgePreviews": [
+      "previews/combat-v3/shockwave-light.png",
+      "previews/combat-v3/shockwave-dark.png"
+    ]
+  }
+}

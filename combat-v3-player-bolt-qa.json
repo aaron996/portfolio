@@ -1,0 +1,63 @@
+{
+  "group": "player-bolt",
+  "status": "qa-pass",
+  "canvas": [
+    256,
+    128
+  ],
+  "pivot": [
+    192,
+    64
+  ],
+  "frames": [
+    {
+      "file": "public/game/combat-v3/fx/player-bolt-1.png",
+      "raw": "raw/combat-v3/fx/player-bolt-1-raw.png",
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 94.3403
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 94.7449,
+        "bbox": [
+          73,
+          48,
+          178,
+          82
+        ]
+      },
+      "sha256": "2bf406b8995b13bfb7455186ff094bbd6ed2beffbae8fc3f767256937c38e760"
+    },
+    {
+      "file": "public/game/combat-v3/fx/player-bolt-2.png",
+      "raw": "raw/combat-v3/fx/player-bolt-2-raw.png",
+      "rawAlpha": {
+        "min": 0,
+        "max": 254,
+        "zeroPercent": 92.4976
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 92.5842,
+        "bbox": [
+          64,
+          46,
+          192,
+          84
+        ]
+      },
+      "sha256": "76841c2b60564589daf13562599531203a64dff17ea77034dc714abf531ff193"
+    }
+  ],
+  "checks": {
+    "projectileOnly": true,
+    "edgePreviews": [
+      "previews/combat-v3/player-bolt-light.png",
+      "previews/combat-v3/player-bolt-dark.png"
+    ]
+  }
+}
