@@ -3,10 +3,10 @@
   "sourceManifest": "C:\\Users\\admin\\AppData\\Local\\Temp\\combat-v3-handoff-0a7e\\game-combat-art-manifest.json",
   "totalRequired": 138,
   "summary": {
-    "filesExported": 49,
-    "filesQaPass": 44,
+    "filesExported": 52,
+    "filesQaPass": 47,
     "filesHold": 5,
-    "filesMissing": 89,
+    "filesMissing": 86,
     "filesInProgress": 0
   },
   "groups": [
@@ -442,7 +442,7 @@
       "id": "brace",
       "batch": "A",
       "status": "hold",
-      "reason": "brace-1 head scale and outline weight drift from player idle/guard rig; replacement candidate rejected for same scale drift plus far-eye artifact.",
+      "reason": "brace-1 head scale and outline weight drift from player idle/guard rig; replacement rejected.",
       "requiredCount": 2,
       "exportedCount": 2,
       "files": [
@@ -480,7 +480,7 @@
       "id": "parry",
       "batch": "A",
       "status": "hold",
-      "reason": "parry-1 head scale and outline weight drift from player idle/guard rig; keep delivery file out of approved handoff pending targeted repair.",
+      "reason": "parry-1 head scale and outline weight drift from player idle/guard rig.",
       "requiredCount": 3,
       "exportedCount": 3,
       "files": [
@@ -1009,22 +1009,52 @@
     {
       "id": "bullet-impact",
       "batch": "B",
-      "status": "missing",
-      "reason": "No exported delivery files yet.",
+      "status": "qa-pass",
+      "reason": null,
       "requiredCount": 3,
-      "exportedCount": 0,
+      "exportedCount": 3,
       "files": [
         {
           "path": "public/game/combat-v3/fx/bullet-impact-1.png",
-          "exported": false
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            256,
+            256
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 98.6053,
+          "sha256": "acaa368eb72ee9511f7de1446779634ee73008bdaa203a569214868dfecfa055",
+          "formatPass": true
         },
         {
           "path": "public/game/combat-v3/fx/bullet-impact-2.png",
-          "exported": false
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            256,
+            256
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 95.7642,
+          "sha256": "78a688bd42381c9cc60e7fca69a0a1139c22e9384b68f40df9fa6e7e8176d0d0",
+          "formatPass": true
         },
         {
           "path": "public/game/combat-v3/fx/bullet-impact-3.png",
-          "exported": false
+          "exported": true,
+          "mode": "RGBA",
+          "canvas": [
+            256,
+            256
+          ],
+          "alphaMin": 0,
+          "alphaMax": 255,
+          "alphaZeroPercent": 99.176,
+          "sha256": "2b2bbd4d8ebd4aeb5f909121200e3dc1023d0fc212d7c9f61ce97296b072f9a9",
+          "formatPass": true
         }
       ]
     },
@@ -1663,7 +1693,10 @@
       "public/game/combat-v3/fx/player-muzzle-2.png",
       "public/game/combat-v3/fx/player-muzzle-3.png",
       "public/game/combat-v3/fx/player-bolt-1.png",
-      "public/game/combat-v3/fx/player-bolt-2.png"
+      "public/game/combat-v3/fx/player-bolt-2.png",
+      "public/game/combat-v3/fx/bullet-impact-1.png",
+      "public/game/combat-v3/fx/bullet-impact-2.png",
+      "public/game/combat-v3/fx/bullet-impact-3.png"
     ],
     "qaPass": [
       "public/game/combat-v3/boss/b1-stomp-1.png",
@@ -1709,7 +1742,10 @@
       "public/game/combat-v3/fx/player-muzzle-2.png",
       "public/game/combat-v3/fx/player-muzzle-3.png",
       "public/game/combat-v3/fx/player-bolt-1.png",
-      "public/game/combat-v3/fx/player-bolt-2.png"
+      "public/game/combat-v3/fx/player-bolt-2.png",
+      "public/game/combat-v3/fx/bullet-impact-1.png",
+      "public/game/combat-v3/fx/bullet-impact-2.png",
+      "public/game/combat-v3/fx/bullet-impact-3.png"
     ],
     "hold": [
       "public/game/combat-v3/player/brace-1.png",
@@ -1739,9 +1775,6 @@
       "public/game/combat-v3/boss/b5-slam-1.png",
       "public/game/combat-v3/boss/b5-slam-2.png",
       "public/game/combat-v3/boss/b5-slam-3.png",
-      "public/game/combat-v3/fx/bullet-impact-1.png",
-      "public/game/combat-v3/fx/bullet-impact-2.png",
-      "public/game/combat-v3/fx/bullet-impact-3.png",
       "public/game/combat-v3/fx/enemy-discharge-1.png",
       "public/game/combat-v3/fx/enemy-discharge-2.png",
       "public/game/combat-v3/fx/parcel-eject-1.png",
@@ -1809,9 +1842,5 @@
       "public/game/combat-v3/mob/m2-shooter-attack-1.png",
       "public/game/combat-v3/mob/m2-shooter-attack-2.png"
     ]
-  },
-  "handoff": {
-    "qaPassPreview": "previews/combat-v3/qa-pass-handoff-contact.png",
-    "holdPreview": "previews/combat-v3/player-idle-guard-brace-parry-rig-compare.png"
   }
 }

@@ -1,0 +1,84 @@
+{
+  "group": "bullet-impact",
+  "status": "qa-pass",
+  "canvas": [
+    256,
+    256
+  ],
+  "pivot": [
+    128,
+    128
+  ],
+  "frames": [
+    {
+      "file": "public/game/combat-v3/fx/bullet-impact-1.png",
+      "raw": "raw/combat-v3/fx/bullet-impact-1-raw.png",
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 98.0036
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 98.6053,
+        "bbox": [
+          107,
+          91,
+          170,
+          165
+        ]
+      },
+      "sha256": "acaa368eb72ee9511f7de1446779634ee73008bdaa203a569214868dfecfa055"
+    },
+    {
+      "file": "public/game/combat-v3/fx/bullet-impact-2.png",
+      "raw": "raw/combat-v3/fx/bullet-impact-2-raw.png",
+      "rawAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 94.2659
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 95.7642,
+        "bbox": [
+          101,
+          85,
+          180,
+          175
+        ]
+      },
+      "sha256": "78a688bd42381c9cc60e7fca69a0a1139c22e9384b68f40df9fa6e7e8176d0d0"
+    },
+    {
+      "file": "public/game/combat-v3/fx/bullet-impact-3.png",
+      "raw": "raw/combat-v3/fx/bullet-impact-3-raw.png",
+      "rawAlpha": {
+        "min": 0,
+        "max": 253,
+        "zeroPercent": 98.8052
+      },
+      "finalAlpha": {
+        "min": 0,
+        "max": 255,
+        "zeroPercent": 99.176,
+        "bbox": [
+          117,
+          101,
+          161,
+          156
+        ]
+      },
+      "sha256": "2b2bbd4d8ebd4aeb5f909121200e3dc1023d0fc212d7c9f61ce97296b072f9a9"
+    }
+  ],
+  "checks": {
+    "localImpactOnly": true,
+    "edgePreviews": [
+      "previews/combat-v3/bullet-impact-light.png",
+      "previews/combat-v3/bullet-impact-dark.png"
+    ]
+  }
+}
