@@ -1671,7 +1671,7 @@ export function createGame(
         if (o.tel <= 0) {
           o.recoil = 1;
           const kind: ShotKind = lv === 1 ? "parcel" : lv === 3 ? "packet" : "energy";
-          fire(o.x + o.w / 2 + o.dir * 14, o.y + o.h / 2, o.dir * 3.4, 0, kind, o.attackId);
+          fire(o.x + o.w / 2 + o.dir * 14, o.y + o.h / 2, o.dir * 3.4, 0, kind);
           puff(o.x + o.w / 2 + o.dir * 14, o.y + o.h * 0.5, HAZARD, 3);
           o.recover = 0.46;
         }
@@ -1758,11 +1758,11 @@ export function createGame(
           const dx = b.targetX - sx;
           const dy = b.targetY - sy;
           const distance = Math.max(1, Math.hypot(dx, dy));
-          fire(sx, sy, dx / distance * 3.4, dy / distance * 3.4, "packet", b.attackId);
+          fire(sx, sy, dx / distance * 3.4, dy / distance * 3.4, "packet");
           b.recover = 0.82;
         } else if (mission?.definition.mode === "route" && mission.exposure <= 0) {
           for (const node of mission.definition.nodes.slice(0, 2)) {
-            if (!mission.completed.includes(node.id)) fire(b.x + b.w / 2, b.y + 34, player.x < b.x ? -3.8 : 3.8, 0, "parcel", b.attackId);
+            if (!mission.completed.includes(node.id)) fire(b.x + b.w / 2, b.y + 34, player.x < b.x ? -3.8 : 3.8, 0, "parcel");
           }
           b.recover = 0.82;
         } else if (b.attackKind === "slam") {
@@ -1771,8 +1771,8 @@ export function createGame(
           b.recover = 1.1;
         } else if (b.attackKind === "parcel") {
           const dir = b.dir;
-          fire(b.x + b.w / 2, GY - 22, dir * 4.1, 0, "parcel", b.attackId);
-          fire(b.x + b.w / 2 - dir * 18, GY - 22, dir * 3.55, 0, "parcel", b.attackId);
+          fire(b.x + b.w / 2, GY - 22, dir * 4.1, 0, "parcel");
+          fire(b.x + b.w / 2 - dir * 18, GY - 22, dir * 3.55, 0, "parcel");
           b.recover = 0.95;
         } else if (b.attackKind === "cast") {
           const sx = b.x + b.w / 2 + b.dir * 24;
@@ -1780,14 +1780,14 @@ export function createGame(
           const dx = b.targetX - sx;
           const dy = b.targetY - sy;
           const distance = Math.max(1, Math.hypot(dx, dy));
-          fire(sx, sy, dx / distance * 3.6, dy / distance * 3.6, "packet", b.attackId);
+          fire(sx, sy, dx / distance * 3.6, dy / distance * 3.6, "packet");
           b.recover = 0.92;
         } else if (b.attackKind === "volley") {
           const dir = b.dir;
           const shotKind: ShotKind = lv === 1 ? "parcel" : lv === 3 ? "packet" : "energy";
-          fire(b.x + b.w / 2, b.y + 20, dir * 4.4, -1.1, shotKind, b.attackId);
-          fire(b.x + b.w / 2, b.y + 34, dir * 4.6, 0, shotKind, b.attackId);
-          fire(b.x + b.w / 2, b.y + 48, dir * 4.4, 1.1, shotKind, b.attackId);
+          fire(b.x + b.w / 2, b.y + 20, dir * 4.4, -1.1, shotKind);
+          fire(b.x + b.w / 2, b.y + 34, dir * 4.6, 0, shotKind);
+          fire(b.x + b.w / 2, b.y + 48, dir * 4.4, 1.1, shotKind);
           b.recover = 0.82;
         } else {
           b.dash = 0.55;
@@ -3315,7 +3315,9 @@ export function createGame(
         const mode = mission.definition.mode;
         // Match/rules không được dùng mission.next để vô tình chỉ sẵn đáp án.
         const next = mode === "match" || mode === "rules" ? false : mission.next?.id === node.id;
-        const available = mode === "rules" ? mission.definition.sequence.includes(node.id) : mode === "match" || next;
+        // Rules devices stay neutral until they are actually activated: their answer
+        // sequence is gameplay data, never a pre-interaction visual affordance.
+        const available = mode === "rules" ? true : mode === "match" || next;
         const nearby = mission.nearest(player.x + player.w / 2, player.y + player.h)?.id === node.id;
         g!.save();
         const threatening = boss && boss.tel > 0 && !done &&
@@ -3328,7 +3330,9 @@ export function createGame(
         g!.strokeRect(node.x - 20, node.y - 48, 40, 46);
         g!.fillStyle = done ? "#2f5b45" : "#253946";
         g!.fillRect(node.x - 13, node.y - 40, 26, 16);
-        g!.fillStyle = done ? LIME : available ? "#f2f1ec" : "#75828a";
+        // The lamp follows the same neutral/nearby/completed state as the frame;
+        // it must not become an answer key for a rules mission.
+        g!.fillStyle = color;
         g!.beginPath(); g!.arc(node.x + 12, node.y - 10, 3, 0, Math.PI * 2); g!.fill();
         g!.fillStyle = color;
         g!.font = `800 12px ${FONT_SANS}`; g!.textAlign = "center";
