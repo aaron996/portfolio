@@ -1348,6 +1348,36 @@ export const content: SiteContent = {
       closeLabel: "Đóng túi đồ",
     },
     pauseHint: "P tạm dừng · B túi đồ",
+    cutscene: {
+      nextLabel: "Tiếp", beginLabel: "Vào bãi", skipLabel: "Bỏ qua",
+      replayLabel: "Xem lại đoạn truyện ải này", counterLabel: "{current}/{total}",
+      scenes: {
+        map1Intro: {
+          id: "map-1-intro", kicker: "2019 · A.P. MOLLER MAERSK",
+          title: "Một ký tự, một cổng hàng khác.", backdrop: "port", focus: "mission",
+          cards: [
+            { speaker: "Ca ở bãi", text: "Một chứng từ lệch một ký tự cũng đủ đưa hàng sang cổng khác." },
+            { speaker: "Việc cần làm", text: "Đọc bằng mắt không đủ nhanh. Đối chiếu đúng mã trước khi chuyến tiếp theo tới." },
+          ],
+        },
+        map1Boss: {
+          id: "map-1-boss", kicker: "ĐỐI CHIẾU CHƯA XONG", title: "Trùm Sai Mã Container",
+          backdrop: "port", focus: "boss",
+          cards: [
+            { speaker: "Hệ thống", text: "Ba mã nhìn giống nhau. Chỉ một mã khớp chứng từ.", emphasis: "CT-018" },
+            { speaker: "Cảnh báo", text: "Khóa sai mã đã mở. Đừng đứng dưới chân nó khi container dậm xuống." },
+          ],
+        },
+        map1Outro: {
+          id: "map-1-outro", kicker: "MÃ VỎ ĐÃ KHỚP", title: "Đúng mã chưa chắc đúng tuyến.",
+          backdrop: "port", focus: "world",
+          cards: [
+            { speaker: "Kết quả", text: "Lô hàng ra đúng cổng. Cảnh báo ở bãi tắt." },
+            { speaker: "Chặng tiếp", text: "Nhưng ở kho kế tiếp, một kiện đúng mã vẫn có thể đi sai tuyến." },
+          ],
+        },
+      },
+    },
     pause: {
       heading: "Tạm dừng",
       controlsHeading: "Điều khiển",

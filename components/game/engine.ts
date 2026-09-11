@@ -82,6 +82,8 @@ export interface GameHandlers {
   onPickup?: (info: PickupInfo) => void;
   /** Một thao tác thật của người chơi, dùng cho tutorial đầu game. */
   onTutorialAction?: (key: GameKey) => void;
+  /** Trùm vừa xuất hiện, trước khi bắt đầu lượt tấn công đầu tiên. */
+  onBossSpawn?: (index: number) => void;
   /** Trùm vừa xuất hiện; game có thể báo rõ checkpoint đã đặt. */
   onCheckpoint?: (index: number) => void;
 }
@@ -1096,6 +1098,7 @@ export function createGame(
     flash = 0.5;
     shake = 7;
     handlers.onCheckpoint?.(lv);
+    handlers.onBossSpawn?.(lv);
     handlers.onSound?.("checkpoint");
   }
 

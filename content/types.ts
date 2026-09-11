@@ -313,6 +313,16 @@ export interface GameMap {
   pickups: GamePickup[];
 }
 
+/** Một scene kể chuyện ngắn phủ lên canvas; không thay đổi luật engine. */
+export interface GameCutscene {
+  id: string;
+  kicker: string;
+  title: string;
+  cards: { speaker?: string; text: string; emphasis?: string }[];
+  backdrop: "port";
+  focus: "mission" | "boss" | "world";
+}
+
 export interface GameContent {
   eyebrow: string;
   heading: string;
@@ -420,6 +430,14 @@ export interface GameContent {
   };
   /** Gợi ý phím tạm dừng, hiện ở góc màn chơi */
   pauseHint: string;
+  cutscene: {
+    nextLabel: string;
+    beginLabel: string;
+    skipLabel: string;
+    replayLabel: string;
+    counterLabel: string;
+    scenes: { map1Intro: GameCutscene; map1Boss: GameCutscene; map1Outro: GameCutscene };
+  };
   finish: { heading: string; body: string; cta: string };
   maps: GameMap[];
 }
