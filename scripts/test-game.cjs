@@ -59,6 +59,15 @@ test('death callback selects boss checkpoint only after the encounter has begun'
   }
 });
 
+test('boss spawn emits one UI transition event for the encounter', () => {
+  const spawns = [];
+  const g = fixture({}, { handlers: { onBossSpawn: (index) => spawns.push(index) } });
+  g.lab.spawnBoss();
+  assert.deepEqual(spawns, [0]);
+  g.restartFromCheckpoint();
+  assert.deepEqual(spawns, [0, 0]);
+});
+
 require('./test-game-audio.cjs');
 
 test('death timeout is canceled by restart and destroy, with no ghost map reload', () => {

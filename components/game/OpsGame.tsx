@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { GameBoard } from "./GameBoard";
+import { GameCutscene } from "./GameCutscene";
 import { GameHud } from "./GameHud";
 import { GameAudio } from "./gameAudio";
 import styles from "./OpsGame.module.css";
@@ -32,7 +33,10 @@ const PAUSE_ON_PICKUP_KEY = "opsgame:pause-on-pickup";
 const PROGRESS_KEY = "opsgame:progress-v1";
 const TUTORIAL_KEY = "opsgame:tutorial-v1";
 const SOUND_KEY = "opsgame:muted";
+const CUTSCENE_KEY = "opsgame:cutscenes-v1";
 type SavedProgress = { nextMap: number; skills: string[] };
+type CutsceneId = keyof typeof game.cutscene.scenes;
+type ActiveCutscene = { id: CutsceneId; after: "play" | "clear" };
 
 function readPauseOnPickup() {
   try {
@@ -58,6 +62,13 @@ function hasFinishedTutorial() {
   try { return localStorage.getItem(TUTORIAL_KEY) === "1"; } catch { return false; }
 }
 
+function readSeenCutscenes() {
+  try {
+    const value: unknown = JSON.parse(localStorage.getItem(CUTSCENE_KEY) ?? "[]");
+    return new Set(Array.isArray(value) ? value.filter((id): id is string => typeof id === "string") : []);
+  } catch { return new Set<string>(); }
+}
+
 export function OpsGame() {
   const surfaceRef = useRef<HTMLDivElement>(null);
   const [expanded, setExpanded] = useState(false);
@@ -74,6 +85,8 @@ export function OpsGame() {
   /** Engine đọc cờ này qua setPauseOnPickup; ref để handler không bị đóng băng giá trị cũ */
   const pauseOnPickupRef = useRef(true);
   const tutorialStepRef = useRef<number | null>(null);
+  const cutsceneRef = useRef<ActiveCutscene | null>(null);
+  const seenCutscenesRef = useRef<Set<string>>(new Set());
 
   const [phase, setPhase] = useState<Phase>("title");
   const [mapIndex, setMapIndex] = useState(0);
@@ -87,6 +100,7 @@ export function OpsGame() {
   const [pickup, setPickup] = useState<PickupInfo | null>(null);
   const [savedProgress, setSavedProgress] = useState<SavedProgress | null>(null);
   const [tutorialStep, setTutorialStep] = useState<number | null>(null);
+  const [cutscene, setCutscene] = useState<ActiveCutscene | null>(null);
 
   const setTutorial = useCallback((next: number | null) => {
     tutorialStepRef.current = next;
@@ -137,12 +151,32 @@ export function OpsGame() {
             setSavedProgress(null);
             try { localStorage.removeItem(PROGRESS_KEY); } catch { /* completed in this session */ }
           }
-          // Đợi hiệu ứng nổ và màn tối chạy xong rồi mới đưa bảng tổng kết lên
-          clearTimer.current = window.setTimeout(() => {
-            setPhase(i + 1 >= game.maps.length ? "end" : "clear");
-          }, game.maps[i].mission ? 1800 : 900);
+          if (i === 0 && !seenCutscenesRef.current.has(game.cutscene.scenes.map1Outro.id)) {
+            const nextScene: ActiveCutscene = { id: "map1Outro", after: "clear" };
+            cutsceneRef.current = nextScene;
+            setCutscene(nextScene);
+          } else {
+            // Đợi hiệu ứng nổ và màn tối chạy xong rồi mới đưa bảng tổng kết lên
+            clearTimer.current = window.setTimeout(() => {
+              setPhase(i + 1 >= game.maps.length ? "end" : "clear");
+            }, game.maps[i].mission ? 1800 : 900);
+          }
+        },
+        onBossSpawn: (i) => {
+          if (i !== 0 || seenCutscenesRef.current.has(game.cutscene.scenes.map1Boss.id)) return;
+          const nextScene: ActiveCutscene = { id: "map1Boss", after: "play" };
+          cutsceneRef.current = nextScene;
+          setCutscene(nextScene);
+          if (window.matchMedia("(any-pointer: coarse), (max-width: 767px)").matches) setExpanded(true);
+          audio.setPaused(true);
+          instance.pause();
         },
         onPause: (next, reason) => {
+          if (cutsceneRef.current) {
+            setPaused(next);
+            setPauseWhy("manual");
+            return;
+          }
           audio.setPaused(next);
           setPaused(next);
           setPauseWhy(reason);
@@ -180,6 +214,7 @@ export function OpsGame() {
     setPauseOnPickupState(saved);
     instance.setPauseOnPickup(saved);
     setSavedProgress(readProgress());
+    seenCutscenesRef.current = readSeenCutscenes();
     return () => {
       if (pickupTimer.current) window.clearTimeout(pickupTimer.current);
       if (clearTimer.current) window.clearTimeout(clearTimer.current);
@@ -248,6 +283,34 @@ export function OpsGame() {
     gameRef.current?.resume();
   }, []);
 
+  const openCutscene = useCallback((id: CutsceneId) => {
+    const nextScene: ActiveCutscene = { id, after: "play" };
+    cutsceneRef.current = nextScene;
+    setCutscene(nextScene);
+    if (window.matchMedia("(any-pointer: coarse), (max-width: 767px)").matches) setExpanded(true);
+    setTutorial(null);
+    audioRef.current?.setPaused(true);
+    gameRef.current?.pause();
+  }, [setTutorial]);
+
+  const closeCutscene = useCallback(() => {
+    const active = cutsceneRef.current;
+    if (!active) return;
+    const seen = new Set(seenCutscenesRef.current).add(game.cutscene.scenes[active.id].id);
+    seenCutscenesRef.current = seen;
+    try { localStorage.setItem(CUTSCENE_KEY, JSON.stringify([...seen])); } catch { /* session still continues */ }
+    cutsceneRef.current = null;
+    setCutscene(null);
+    if (active.after === "clear") {
+      setPaused(false);
+      setPhase("clear");
+      return;
+    }
+    setPaused(false);
+    audioRef.current?.setPaused(false);
+    gameRef.current?.resume();
+  }, []);
+
   const start = useCallback(() => {
     if (window.matchMedia("(any-pointer: coarse), (max-width: 767px)").matches) setExpanded(true);
     setGot([]);
@@ -255,7 +318,8 @@ export function OpsGame() {
     try { localStorage.removeItem(PROGRESS_KEY); } catch { /* current run remains playable */ }
     setTutorial(hasFinishedTutorial() ? null : 0);
     enterPlay(0);
-  }, [enterPlay, setTutorial]);
+    if (!seenCutscenesRef.current.has(game.cutscene.scenes.map1Intro.id)) openCutscene("map1Intro");
+  }, [enterPlay, openCutscene, setTutorial]);
   const continueSaved = useCallback(() => {
     if (!savedProgress) return;
     if (window.matchMedia("(any-pointer: coarse), (max-width: 767px)").matches) setExpanded(true);
@@ -274,7 +338,8 @@ export function OpsGame() {
     setTutorial(hasFinishedTutorial() ? null : 0);
     try { localStorage.removeItem(PROGRESS_KEY); } catch { /* current run remains new */ }
     enterPlay(0);
-  }, [enterPlay, setTutorial]);
+    if (!seenCutscenesRef.current.has(game.cutscene.scenes.map1Intro.id)) openCutscene("map1Intro");
+  }, [enterPlay, openCutscene, setTutorial]);
   const restartMap = useCallback(() => enterPlay(mapIndex), [enterPlay, mapIndex]);
   const togglePause = useCallback(() => gameRef.current?.togglePause(), []);
   const toggleBag = useCallback(() => gameRef.current?.toggleInventory(), []);
@@ -310,6 +375,7 @@ export function OpsGame() {
   const pause = game.pause;
   const bag = game.inventory;
   const panel = game.pickupPanel;
+  const activeScene = cutscene ? game.cutscene.scenes[cutscene.id] : null;
 
   return (
     <div ref={surfaceRef} tabIndex={-1} aria-label={game.heading}
@@ -325,7 +391,7 @@ export function OpsGame() {
             setMuted(off); audioRef.current?.setMuted(off); audioRef.current?.activate();
             try { localStorage.setItem(SOUND_KEY, off ? "1" : "0"); } catch { /* session preference */ }
           }}>{muted ? game.soundOnLabel : game.soundOffLabel}</button>
-          {phase === "play" ? <>
+          {phase === "play" && !cutscene ? <>
             <button type="button" onClick={toggleBag} disabled={paused} aria-label={bag.heading}>{bag.heading}</button>
             <button type="button" onClick={togglePause} aria-label={paused ? pause.resumeLabel : pause.heading}>
               {paused ? pause.resumeLabel : pause.heading}
@@ -336,7 +402,7 @@ export function OpsGame() {
           </button>
         </div>
       </div>
-      <div className={`${styles.frame} ${paused ? styles.reading : ""} relative overflow-hidden rounded-2xl border border-ink-700 bg-ink-900`}>
+      <div className={`${styles.frame} ${(paused || cutscene) ? styles.reading : ""} relative overflow-hidden rounded-2xl border border-ink-700 bg-ink-900`}>
         {phase === "play" ? <GameHud instanceRef={gameRef} touch={showTouch} /> : null}
         <div className={`${styles.stage} ${phase !== "play" ? styles.instructions : ""} relative`}>
           <canvas
@@ -375,6 +441,15 @@ export function OpsGame() {
               }}>{game.tutorial.skip}</button> : null}
             </div>
           ) : null}
+
+          {activeScene ? <GameCutscene
+            scene={activeScene}
+            nextLabel={game.cutscene.nextLabel}
+            beginLabel={game.cutscene.beginLabel}
+            skipLabel={game.cutscene.skipLabel}
+            counterLabel={game.cutscene.counterLabel}
+            onComplete={closeCutscene}
+          /> : null}
 
           {phase !== "play" ? (
             <GameBoard label={phase === "title" ? game.heading : phase === "end" ? game.finish.heading : game.clearHeading.replace("{n}", String((lastClear?.index ?? 0) + 1))} centered>
@@ -454,7 +529,7 @@ export function OpsGame() {
         </div>
 
         {/* Bảng vật phẩm vừa nhặt — game dừng hẳn cho tới khi đọc xong */}
-        {phase === "play" && paused && pauseWhy === "pickup" && pickup ? (
+        {phase === "play" && paused && !cutscene && pauseWhy === "pickup" && pickup ? (
           <GameBoard label={panel.heading} supply centered>
             <div
               className="w-full max-w-md py-4"
@@ -495,7 +570,7 @@ export function OpsGame() {
         ) : null}
 
         {/* Túi đồ — mở bằng B hoặc nút 🎒, đọc từ ảnh chụp lúc dừng */}
-        {phase === "play" && paused && pauseWhy === "inventory" ? (
+        {phase === "play" && paused && !cutscene && pauseWhy === "inventory" ? (
           <GameBoard label={bag.heading} supply actions={
             <button type="button" onClick={toggleBag}
               className="rounded-lg bg-lime px-5 py-2 font-display text-xs font-bold uppercase tracking-wide text-ink-950">
@@ -568,7 +643,7 @@ export function OpsGame() {
         ) : null}
 
         {/* Bảng tạm dừng: hướng dẫn điều khiển + mục tiêu ải hiện tại */}
-        {phase === "play" && paused && pauseWhy === "manual" ? (
+        {phase === "play" && paused && !cutscene && pauseWhy === "manual" ? (
           <GameBoard label={pause.heading} actions={
             <div className="flex flex-wrap gap-2.5">
               <button type="button" onClick={togglePause}
@@ -579,6 +654,10 @@ export function OpsGame() {
                 className="rounded-lg border border-ink-700 px-4 py-2 text-xs text-mute">
                 {pause.restartLabel}
               </button>
+              {mapIndex === 0 ? <button type="button" onClick={() => openCutscene("map1Intro")}
+                className="rounded-lg border border-ink-700 px-4 py-2 text-xs text-mute">
+                {game.cutscene.replayLabel}
+              </button> : null}
             </div>
           }>
             <div className="flex items-baseline justify-between gap-3">
