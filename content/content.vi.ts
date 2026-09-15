@@ -29,7 +29,7 @@ export const content: SiteContent = {
     },
     labels: {
       cv: "Xem CV (PDF)", skip: "Đến nội dung chính", navigation: "Điều hướng chính",
-      works: "Công việc tiêu biểu", otherWorks: "Kết quả và công việc khác",
+      works: "Công việc tiêu biểu", otherWorks: "Kết quả và hệ thống",
       process: "Cách làm việc", about: "Tôi đến với dữ liệu từ phía vận hành",
       experience: "Kinh nghiệm", skills: "Năng lực qua công việc",
       demo: "Giao diện thật · dữ liệu minh hoạ", enlarge: "Xem ảnh lớn",
