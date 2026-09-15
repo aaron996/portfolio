@@ -415,3 +415,40 @@ body:has(.portfolio-v2)::after { display: none; }
   .pf-action-link svg { transform: none !important; transition: none !important; }
   .pf-showcase-card { transition: none !important; }
 }
+
+/* Portfolio Visual Assets System V1 */
+.pf-result-visual {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--pf-line);
+  background: var(--pf-elevated);
+}
+.pf-visual-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+.pf-visual-badge {
+  display: block;
+  font-family: var(--hero-mono), monospace;
+  font-size: 11px;
+  color: var(--pf-secondary);
+  padding: 6px 12px;
+  background: var(--pf-soft);
+  border-top: 1px solid var(--pf-line);
+}
+.pf-process-visual {
+  margin: 32px 0 0;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--pf-line);
+  background: var(--pf-elevated);
+}
+@media (min-width: 960px) {
+  .pf-result-strip {
+    grid-template-columns: 1.1fr 1fr 1.2fr;
+    gap: 36px;
+  }
+}

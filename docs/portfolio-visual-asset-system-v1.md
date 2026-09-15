@@ -23,8 +23,8 @@ Không tạo hoặc sử dụng chân dung của chủ portfolio. Không tạo n
 
 - Nền: deep green `#0c110e` đến `#23382c`, texture giấy hạt rất nhẹ và lưới kỹ thuật thưa.
 - Accent: lime `#d4f236` chỉ là điểm tín hiệu; Maersk blue `#42b0d5` chỉ đánh dấu logistics/data-flow.
-- Vật liệu: thép sơn mờ, nhựa công nghiệp, giấy in báo cáo, nhãn kho trống, container xanh, dây tín hiệu, bản đồ tuyến trừu tượng.
-- Góc máy: editorial tabletop hoặc isometric nhẹ; không dùng ảnh phong cảnh stock, neon glow, gradient blob, glassmorphism hoặc nhân vật AI.
+- Vật liệu: khối kho và parcel token trừu tượng, mặt sàn vận hành mờ, giấy in báo cáo, container xanh và đường tuyến. Chất liệu chỉ hỗ trợ quy mô hệ thống, không biến ảnh thành product photography.
+- Góc máy: spatial/isometric ở quy mô sơ đồ vận hành. Tránh tabletop close-up, macro vật thể, mô hình cơ khí, ray chuyển hướng, chi tiết brass hoặc ảnh sản phẩm trên bàn.
 - Chữ trong ảnh: không có. Nhãn, số liệu và lời giải thích phải nằm trong DOM để dịch, truy cập bằng keyboard và không bị lỗi sinh ảnh.
 - Định dạng: WebP chính, PNG chỉ khi transparency cần thiết. Hero/asset trên fold phải có `<Image>` width, height, `sizes` và reserved aspect ratio.
 
@@ -63,7 +63,7 @@ Không tạo hoặc sử dụng chân dung của chủ portfolio. Không tạo n
 | P&G Sales Operations | Dashboard, import, target preview | `pg-pricing-layers.webp`, `pg-target-route.webp` | Hai visual giải thích giá theo hiệu lực và target theo lịch cửa hàng; không thay screenshot UI |
 | App điều hành Shopee GHN | Matrix, hub drill, insight, access log | `ghn-control-tower-network.webp` | Opening visual nối các màn hình thành một control-loop, không tạo dashboard mới |
 | Reporting KA | Một dashboard monitor | `ka-source-of-truth.webp`, `ka-distribution-loop.webp` | Neo cho semantic layer và pipeline phân phối, thay phần decision card quá chữ |
-| Quy trách nhiệm đơn trễ | Không có screenshot công khai | `sla-event-trace.webp`, `sla-priority-path.webp` | Hai visual evidence-system bắt buộc: log qua kho và đường chọn rule có ưu tiên |
+| Quy trách nhiệm đơn trễ | Không có screenshot công khai | `sla-event-trace.webp`, `sla-priority-path.webp` | Hai visual evidence-system bắt buộc: event trail đi qua các khu kho và route chịu trách nhiệm được chọn theo thứ tự rule. Phải đọc được như một hệ thống, không như máy móc hoặc sản phẩm vật lý |
 | Hiệu suất đối tác 3PL | Không có screenshot công khai | `3pl-carrier-review.webp` | Một visual ngắn cho case result: carrier lane, exception note, feedback checkpoint. Không làm nó dài như full case |
 
 Tổng batch generate đề xuất: 16 asset raster. Screenshot game thật là asset thứ 17 nhưng được capture, không generate.
@@ -72,9 +72,20 @@ Tổng batch generate đề xuất: 16 asset raster. Screenshot game thật là 
 
 Mọi prompt dùng phần lõi sau, sau đó thêm brief riêng của bảng trên:
 
-> Restrained editorial technical still life for a Vietnamese logistics and data-operations portfolio. Deep forest green background, matte industrial steel, off-white paper, a single restrained signal-lime accent and Maersk-blue logistics accent. Isometric or tabletop composition, diffuse soft studio light, credible physical materials, generous negative space for nearby HTML copy. No people, portraits, faces, hands, text, letters, numbers, dashboards, charts, logos, brands, watermarks, UI mockups, neon glow, glassmorphism, gradients, or stock-photo look. Landscape composition, 3:2 unless specified.
+> Restrained spatial editorial illustration for a Vietnamese logistics and data-operations portfolio. Show an operational system from a clear isometric or elevated view, using large readable zones and objects rather than a close-up object on a table. Deep forest green background, matte industrial surfaces, off-white paper, a single restrained signal-lime accent and Maersk-blue logistics accent. Use generous negative space for nearby HTML copy. No people, portraits, faces, hands, text, letters, numbers, dashboards, charts, logos, brands, watermarks, UI mockups, neon glow, glassmorphism, gradients, stock-photo look, product photography, tabletop still life, macro machinery, rails, brass parts, diverters, gears, or laboratory apparatus. Landscape composition, 16:9 unless a placement specifies another ratio.
 
-Mỗi asset cần thêm một câu mô tả chủ thể, ví dụ `sla-event-trace.webp`: “abstract parcel event tokens moving through three warehouse gates, one route becomes clearly selected by a physical priority rail, visible but unreadable event marks only”.
+Mỗi asset cần thêm một câu mô tả chủ thể. Với `sla-event-trace.webp`, dùng: “three abstract warehouse zones connected by a parcel event trail; several neutral parcel markers pass through each zone, while one accountable route is selected in restrained signal lime and alternate routes recede into deep green; large spatial forms, sparse operational-map composition, dot and parcel markers only, with no marks resembling type”. Không dùng các từ `physical`, `brass`, `tactile`, `steel track`, `rail` hoặc `diverter` cho asset SLA.
+
+### Gate riêng cho SLA
+
+Reject ngay nếu kết quả có một hoặc nhiều dấu hiệu sau:
+
+- Chủ thể chính là máy, ray, cơ cấu chuyển hướng, robot, dụng cụ bàn thao tác hoặc một product shot.
+- Cần nhìn lớn mới hiểu đây là vận hành qua nhiều khu kho; thumbnail phải đọc được ba zone và một route được chọn.
+- Route chịu trách nhiệm phụ thuộc vào chữ hoặc số được sinh trong bitmap để hiểu.
+- Có màu brass/vàng kim loại thành accent chính thay vì lime là tín hiệu route.
+
+Chỉ nhận asset khi nó đọc ngay là “hành trình event qua kho và đường chịu trách nhiệm được chọn”, còn chi tiết rule được HTML copy giải thích bên cạnh.
 
 ## Kích thước và performance budget
 
@@ -112,7 +123,7 @@ docs/portfolio-visual-asset-system-v1.md
 ## Trình tự Task 2
 
 1. Generate một contact sheet gồm 4 asset đại diện: `carrier-feedback-loop`, `operating-loop`, `sla-event-trace`, `operations-desk-after-hours`.
-2. Chốt palette, vật liệu, camera và negative space qua screenshot inspection. Nếu một asset trông như fake dashboard hoặc stock illustration, bỏ và generate lại.
+2. Chốt palette, vật liệu, camera và negative space qua screenshot inspection. Nếu một asset trông như fake dashboard, stock illustration, product photography hoặc mô hình cơ khí tabletop, bỏ và generate lại.
 3. Generate các asset còn lại theo group homepage, KA/SLA/3PL, P&G/GHN.
 4. Convert runtime copies sang WebP, kiểm pixel dimensions, alpha, file size và filename manifest.
 5. Tích hợp từng nhóm với fallback, alt, caption “Minh hoạ hệ thống” ở nơi cần thiết, desktop/mobile crop và reduced-motion-safe behavior.

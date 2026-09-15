@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { content } from "@/content/content.vi";
 import { PortfolioIcon } from "./PortfolioIcon";
@@ -32,6 +33,18 @@ export function OtherWorkSection() {
                 {brief.homepage!.cta}
                 <PortfolioIcon />
               </Link>
+            </div>
+            <div className="pf-result-visual">
+              <Image
+                src="/portfolio/visuals/homepage/carrier-feedback-loop.webp"
+                alt="Minh hoạ hệ thống: Vòng phản hồi vận hành nối depot giao nhận, tuyến vận chuyển và sổ đối chiếu báo cáo"
+                width={1264}
+                height={848}
+                className="pf-visual-img"
+                loading="lazy"
+                sizes="(max-width: 768px) 100vw, 360px"
+              />
+              <span className="pf-visual-badge">Minh hoạ hệ thống</span>
             </div>
             <div className="pf-result-metric">
               <p className="pf-result-number" aria-label={`Pickup on-time của Viettel Post cải thiện từ ${brief.homepage!.evidence}`}>
