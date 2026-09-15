@@ -19,10 +19,10 @@ export function PortfolioHome() {
         <HeroExperiment />
         <FeaturedWork />
         <OtherWorkSection />
-        <ProcessSection />
-        <AboutSection />
         <ExperienceSection />
+        <ProcessSection />
         <SkillsSection />
+        <AboutSection />
         <PortfolioContact />
       </main>
       <SensorBotCanvas />

@@ -29,7 +29,7 @@ export const content: SiteContent = {
     },
     labels: {
       cv: "Xem CV (PDF)", skip: "Đến nội dung chính", navigation: "Điều hướng chính",
-      works: "Công việc tiêu biểu", otherWorks: "Kết quả và công việc khác",
+      works: "Công việc tiêu biểu", otherWorks: "Kết quả và hệ thống",
       process: "Cách làm việc", about: "Tôi đến với dữ liệu từ phía vận hành",
       experience: "Kinh nghiệm", skills: "Năng lực qua công việc",
       demo: "Giao diện thật · dữ liệu minh hoạ", enlarge: "Xem ảnh lớn",
@@ -993,6 +993,18 @@ export const content: SiteContent = {
           { from: "pick", to: "out" },
         ],
       },
+            media: [
+        {
+          id: "sla-event-trace",
+          kind: "image",
+          brief: "Tuyến truy vết bưu kiện qua ba khu vực kho và lộ trình chịu trách nhiệm được xác định theo thứ tự ưu tiên",
+          src: "/portfolio/visuals/cases/sla/sla-event-trace.webp",
+          alt: "Minh hoạ hệ thống: Tuyến truy vết bưu kiện qua ba khu vực kho vận và lộ trình chịu trách nhiệm được xác định theo thứ tự ưu tiên",
+          isDemoData: false,
+          wide: true,
+          caption: "Minh hoạ hệ thống: Tuyến event qua các phân khu kho và lộ trình chịu trách nhiệm được xác định theo thứ tự ưu tiên",
+        },
+      ],
       stack: [{ group: "Dữ liệu", items: ["Trino SQL", "Iceberg", "log ra/vào kho"] }],
     },
 

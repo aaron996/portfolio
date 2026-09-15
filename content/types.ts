@@ -127,6 +127,8 @@ export interface Media {
    * chỉ còn là hoa văn, tức là ảnh mất hết công dụng làm bằng chứng.
    */
   wide?: boolean;
+  /** Chú thích hiển thị dưới ảnh, ví dụ "Minh hoạ hệ thống" */
+  caption?: string;
 }
 
 export interface CaseStudy {
