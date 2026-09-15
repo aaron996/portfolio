@@ -36,10 +36,10 @@ Không tạo hoặc sử dụng chân dung của chủ portfolio. Không tạo n
 | --- | --- | --- | --- | --- |
 | Hero | Không tạo mới | - | Giữ container, keyboard và sensor bot 3D hiện có | Không cạnh tranh thêm một raster hero |
 | Hai flagship card | Screenshot hiện có | 16:9 gần đúng | Evidence của P&G và GHN | Giữ caption “dữ liệu minh hoạ” |
-| Kết quả 3PL | `carrier-feedback-loop.webp` | 3:2 | Một vòng phản hồi giữa depot, tuyến giao và báo cáo, không có KPI | Nền/hình cạnh result strip, không nằm dưới số 90,1% → 97,5% |
+| Kết quả 3PL | `carrier-feedback-loop.webp` | 3:2 | Một vòng phản hồi giữa depot, tuyến giao và báo cáo, không có KPI | Không dùng trên homepage. Giữ làm source tham khảo, chỉ cân nhắc trong case khi có nhu cầu kể bối cảnh mà không có screenshot thật |
 | Hệ thống và rule | `rule-ledger-still.webp` | 4:3 | Sổ rule, event strip và dấu kiểm theo thứ tự ưu tiên | Dùng làm visual neo cho dossier, không thay title/link từng case |
 | Kinh nghiệm | `career-route-map.webp` | 16:9 | Bản đồ tuyến hàng hoá trừu tượng nối năm mốc nghề nghiệp | Đặt một lần trong timeline, mốc và text vẫn là DOM |
-| Cách làm việc | `operating-loop.webp` | 16:9 | Bốn vật thể tương ứng quan sát, định nghĩa, đối chiếu, bàn giao | Cắt thành bốn vùng CSS nếu cần; không ghi số bước trong ảnh |
+| Cách làm việc | Không dùng asset | - | Bốn bước là nội dung DOM: quan sát, định nghĩa, đối chiếu, bàn giao | Không minh hoạ bằng vật thể, không có caption hoặc khung. Nhịp và thứ tự được thể hiện bằng typography cùng đường tiến trình HTML |
 | Ba nhóm kỹ năng | `skill-data-reconcile.webp`, `skill-product-build.webp`, `skill-ops-collaboration.webp` | Mỗi ảnh 4:3 | Cho mỗi khung kỹ năng một hệ vật thể riêng | Ảnh nằm trên title, link chứng minh vẫn là text |
 | About | `operations-desk-after-hours.webp` | 3:2 | Bàn làm việc vận hành gồm route map, report printout và game controller đặt xa | Không có người hoặc thiết bị có thương hiệu rõ |
 | Liên hệ và game | Screenshot game thật, chụp ở Task 2 | 16:9 | Nối sở thích làm game với hệ thống vận hành thật | Không generate game screenshot giả |
@@ -122,11 +122,11 @@ docs/portfolio-visual-asset-system-v1.md
 
 ## Trình tự Task 2
 
-1. Generate một contact sheet gồm 4 asset đại diện: `carrier-feedback-loop`, `operating-loop`, `sla-event-trace`, `operations-desk-after-hours`.
+1. Generate một contact sheet gồm các asset dùng cho case trước: `sla-event-trace`, `operations-desk-after-hours` và hai asset case khác phù hợp.
 2. Chốt palette, vật liệu, camera và negative space qua screenshot inspection. Nếu một asset trông như fake dashboard, stock illustration, product photography hoặc mô hình cơ khí tabletop, bỏ và generate lại.
 3. Generate các asset còn lại theo group homepage, KA/SLA/3PL, P&G/GHN.
 4. Convert runtime copies sang WebP, kiểm pixel dimensions, alpha, file size và filename manifest.
-5. Tích hợp từng nhóm với fallback, alt, caption “Minh hoạ hệ thống” ở nơi cần thiết, desktop/mobile crop và reduced-motion-safe behavior.
+5. Tích hợp từng nhóm vào case khi nó bổ sung được bằng chứng. Không thêm asset AI vào homepage chỉ để lấp layout; ưu tiên screenshot thật, typography và cấu trúc HTML.
 6. Browser review tại 390×844, 768×1024, 1280×800, 1440×900 cho homepage và cả năm case. Kiểm riêng `/game` để chắc global CSS không ảnh hưởng game.
 
 ## Acceptance gate trước khi merge

@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { content } from "@/content/content.vi";
 import { SectionReveal } from "./SectionReveal";
 
@@ -19,21 +18,6 @@ export function ProcessSection() {
               và đưa ra công cụ mà các team thực sự tin dùng.
             </p>
           </div>
-        </SectionReveal>
-
-        <SectionReveal delay={0.05}>
-          <figure className="pf-process-visual">
-            <Image
-              src="/portfolio/visuals/homepage/operating-loop.webp"
-              alt="Minh hoạ hệ thống: Bốn khâu vận hành gồm quan sát bài toán hiện trường, chốt tài liệu đặc tả, đối chiếu dữ liệu và bàn giao vận hành"
-              width={1376}
-              height={768}
-              className="pf-visual-img"
-              loading="lazy"
-              sizes="(max-width: 1200px) 100vw, 1200px"
-            />
-            <figcaption className="pf-visual-badge">Minh hoạ hệ thống: Bốn khâu từ hiện trường đến bàn giao</figcaption>
-          </figure>
         </SectionReveal>
 
         <ol className="pf-process-grid">
