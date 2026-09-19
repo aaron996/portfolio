@@ -1,0 +1,9 @@
+Use case: photorealistic-natural
+Asset type: wide atmospheric chapter image for the career-experience section of a Vietnamese logistics and data portfolio.
+Input images: the provided portfolio screenshots are reference images for a deep forest-green, off-white and restrained lime visual family only.
+Primary request: A high-resolution horizontal editorial photograph from an elevated quiet corner of a container terminal at blue hour. Layered container stacks and a narrow steel catwalk create depth; several distant dock lights form soft lime-and-amber points. Leave broad dark negative space on the right for semantic HTML career copy. The scene should be calm, exact, and materially real, without depicting a specific company or job.
+Style/medium: documentary industrial photography, tactile atmospheric depth, not illustration.
+Composition/framing: 16:9 wide landscape, one continuous scene, no baked typography, no border, no card or collage.
+Lighting/mood: blue hour, deep forest greens and graphite, off-white haze, restrained lime signal lights.
+Constraints: visual atmosphere only. No people, faces, hands, company logos, brand colors, readable labels, numbers, dashboards, charts, or claims.
+Avoid: stock-advertising scene, 3D render, presentation slide, diagrams, flowcharts, watermarks, decorative divider lines.

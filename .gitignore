@@ -17,3 +17,11 @@ output/playwright/
 output/imagegen/
 output/audio-audition/
 .playwright-cli/
+
+# Artefact review nội bộ của Impeccable. Giữ prompt source có phiên bản,
+# nhưng không đưa decision-board/mock render vào repository production.
+.impeccable/decision-payload.json
+.impeccable/editorial-proofline-brief.md
+.impeccable/mocks/
+.impeccable/questions/
+.impeccable/surfaces/

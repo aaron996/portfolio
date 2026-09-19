@@ -580,6 +580,14 @@ export interface PrototypeMedia {
   crop?: { left: number; top: number; width: number; height: number };
 }
 
+export interface PrototypeVisual {
+  src: string;
+  alt: string;
+  caption: string;
+  width: number;
+  height: number;
+}
+
 export interface PortfolioPrototype {
   nav: Cta[];
   hero: {
@@ -597,6 +605,7 @@ export interface PortfolioPrototype {
   };
   worksIntro: string;
   media: Record<string, PrototypeMedia>;
+  visuals: Record<"carrier" | "method" | "experience", PrototypeVisual>;
   resultNote: string;
   process: { title: string; body: string }[];
   about: string[];

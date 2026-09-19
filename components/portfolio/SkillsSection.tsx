@@ -11,7 +11,6 @@ export function SkillsSection() {
       <SectionReveal>
         <div className="pf-section-intro">
           <div>
-            <span className="pf-eyebrow">Trọng tâm kỹ năng</span>
             <h2>{p.labels.skills}</h2>
           </div>
           <p>

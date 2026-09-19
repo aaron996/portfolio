@@ -157,7 +157,9 @@ function SensorRig({ reducedMotion }: { reducedMotion: boolean }) {
 export function SensorBot() {
   const reducedMotion = Boolean(useReducedMotion());
   const wrap = useRef<HTMLDivElement>(null);
+  const activeEditorialVisuals = useRef(new Set<Element>());
   const [visible, setVisible] = useState(false);
+  const [editorialVisualVisible, setEditorialVisualVisible] = useState(false);
 
   useEffect(() => {
     const fit = () => setVisible(window.innerWidth >= MIN_WIDTH);
@@ -166,10 +168,38 @@ export function SensorBot() {
     return () => window.removeEventListener("resize", fit);
   }, []);
 
+  /* Ảnh editorial là điểm neo của phần nội dung: SensorBot không được đè lên
+     chúng. Theo dõi trực tiếp các figure thay vì dựa vào vị trí con trỏ để bot
+     biến mất cả khi người đọc chỉ đang cuộn qua một visual rộng. */
+  useEffect(() => {
+    if (!visible) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) activeEditorialVisuals.current.add(entry.target);
+          else activeEditorialVisuals.current.delete(entry.target);
+        });
+        setEditorialVisualVisible(activeEditorialVisuals.current.size > 0);
+      },
+      { threshold: 0.12 },
+    );
+
+    document.querySelectorAll(".pf-editorial-still").forEach((element) => observer.observe(element));
+
+    return () => {
+      observer.disconnect();
+      activeEditorialVisuals.current.clear();
+      setEditorialVisualVisible(false);
+    };
+  }, [visible]);
+
+  const shouldRender = visible && !editorialVisualVisible;
+
   /* Con trỏ lại gần thì bot lùi về hậu cảnh — nếu không nó sẽ chắn mất chữ ở
      góc phải dưới đúng lúc người đọc đang trỏ vào đó. */
   useEffect(() => {
-    if (!visible) return;
+    if (!shouldRender) return;
     const onMove = (event: MouseEvent) => {
       const el = wrap.current;
       if (!el) return;
@@ -180,9 +210,9 @@ export function SensorBot() {
     };
     window.addEventListener("mousemove", onMove, { passive: true });
     return () => window.removeEventListener("mousemove", onMove);
-  }, [visible]);
+  }, [shouldRender]);
 
-  if (!visible) return null;
+  if (!shouldRender) return null;
 
   return (
     <div
