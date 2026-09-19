@@ -58,6 +58,23 @@ export const content: SiteContent = {
       import: { src: "/case-pg-import-preview.png", width: 780, height: 595,
         alt: "Hộp xem trước phạm vi ngày, cách xử lý trùng và chênh lệch trước khi thay dữ liệu", caption: "Xem phạm vi và chênh lệch dữ liệu trước khi xác nhận thay thế." },
     },
+    visuals: {
+      carrier: {
+        src: "/portfolio/visuals/homepage/carrier-transfer-bay.webp", width: 1600, height: 900,
+        alt: "Băng tải và khu vực chuyển tải hàng hóa trong ánh đèn buổi tối",
+        caption: "Hình minh hoạ nhịp vận hành logistics · không phải ảnh của dự án hoặc đối tác cụ thể.",
+      },
+      method: {
+        src: "/portfolio/visuals/homepage/method-worktable.webp", width: 1600, height: 900,
+        alt: "Bàn làm việc với bản đồ tuyến, biểu mẫu, sổ tay và laptop",
+        caption: "Hình minh hoạ cho quá trình làm rõ bài toán và đối chiếu đầu ra · không tái hiện một dự án cụ thể.",
+      },
+      experience: {
+        src: "/portfolio/visuals/homepage/terminal-blue-hour.webp", width: 1600, height: 900,
+        alt: "Bến container trong ánh sáng xanh cuối ngày",
+        caption: "Hình minh hoạ bối cảnh ngành · không đại diện cho một công ty hoặc vị trí làm việc cụ thể.",
+      },
+    },
     resultNote: "Pickup on-time của Viettel Post. Theo hồ sơ công việc tại Shopee, 2021–2025; kết quả phối hợp với đối tác. Hai mốc không đại diện cho toàn bộ diễn biến trong kỳ.",
     process: [
       { title: "Hiểu bài toán", body: "Trao đổi với người dùng để biết họ cần quyết định gì từ báo cáo." },

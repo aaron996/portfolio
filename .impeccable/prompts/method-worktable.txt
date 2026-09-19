@@ -1,0 +1,10 @@
+Use case: photorealistic-natural
+Asset type: wide atmospheric chapter image for the working-method section of a Vietnamese operations portfolio.
+Input images: the provided portfolio screenshots are reference images for a deep forest-green, off-white and restrained lime visual family only.
+Primary request: A high-resolution overhead editorial photograph of a real operational worktable before a shift: a large off-white paper route sheet with unlabeled grids, a dark closed notebook, two translucent tracing sheets, a slim steel ruler, a few lime paper tabs and the edge of an open laptop with an intentionally unreadable dark interface. Objects are naturally spread across the frame, with soft daylight and a deep-green desk surface. Leave a calm lower-right negative area for semantic HTML copy.
+Style/medium: real editorial still-life photography, tactile paper and brushed metal, no illustration.
+Composition/framing: 16:9 wide landscape, top-down with material depth, no baked text, no borders, no card frame.
+Lighting/mood: observant, precise, human but no people present.
+Color palette: forest green, warm off-white paper, industrial graphite, sparse lime notes.
+Constraints: a generic visual metaphor only, not a claimed project artefact. No logos, brands, people, faces, hands, readable text, numbers, charts, dashboards, or barcodes.
+Avoid: four separate icon objects, PowerPoint diagram, staged product photography, 3D render, flowcharts, watermarks, visual dividers.

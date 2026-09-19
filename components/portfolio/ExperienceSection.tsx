@@ -1,6 +1,7 @@
 import { content } from "@/content/content.vi";
 import { PortfolioIcon } from "./PortfolioIcon";
 import { SectionReveal } from "./SectionReveal";
+import { EditorialStill } from "./EditorialStill";
 
 export function ExperienceSection() {
   const p = content.prototype;
@@ -10,7 +11,6 @@ export function ExperienceSection() {
       <SectionReveal>
         <div className="pf-experience-header">
           <div>
-            <span className="pf-eyebrow">Hành trình nghề nghiệp</span>
             <h2>{p.labels.experience}</h2>
           </div>
           <a className="pf-button pf-secondary-btn" href={content.contact.cvHref}>
@@ -20,21 +20,17 @@ export function ExperienceSection() {
         </div>
       </SectionReveal>
 
-      <div className="pf-timeline" aria-label="Dòng thời gian kinh nghiệm">
-        {p.experience.map((job, idx) => {
-          // Quy tắc node: job gần nhất dùng lime (#d4f236), các job trước dùng Maersk blue (#42b0d5)
-          const nodeColorClass = idx === 0 ? "pf-node-lime" : "pf-node-blue";
+      <SectionReveal delay={0.06}>
+        <EditorialStill visual={p.visuals.experience} className="pf-experience-still" />
+      </SectionReveal>
 
+      <div className="pf-timeline" aria-label="Dòng thời gian kinh nghiệm">
+        {p.experience.map((job, index) => {
           return (
-            <SectionReveal key={job.company} delay={idx * 0.06}>
+            <SectionReveal key={job.company} delay={index * 0.06}>
               <article className="pf-timeline-item">
                 <div className="pf-timeline-period">
                   <span className="pf-meta pf-period-text">{job.period}</span>
-                </div>
-
-                <div className="pf-timeline-track">
-                  <span className={`pf-timeline-node ${nodeColorClass}`} aria-hidden="true" />
-                  <span className="pf-timeline-line" aria-hidden="true" />
                 </div>
 
                 <div className="pf-timeline-content">

@@ -39,7 +39,6 @@ export function PortfolioContact() {
         <SectionReveal>
           <div className="pf-shell pf-contact-grid">
             <div>
-              <span className="pf-eyebrow">Kết nối hợp tác</span>
               <h2>{p.contact.heading}</h2>
             </div>
             <div className="pf-contact-details">

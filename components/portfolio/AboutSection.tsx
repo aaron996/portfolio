@@ -7,8 +7,7 @@ export function AboutSection() {
   return (
     <section id="about" className="pf-shell pf-section pf-about">
       <SectionReveal className="pf-about-lead">
-        <div>
-          <span className="pf-eyebrow">Hồ sơ cá nhân</span>
+          <div>
           <h2 className="pf-about-title">{p.labels.about}</h2>
           <p className="pf-about-tagline">
             Từ bài toán hiện trường, dữ liệu chuỗi cung ứng đến việc xây dựng công cụ phần mềm phục vụ

@@ -1,0 +1,9 @@
+Use case: photorealistic-natural
+Asset type: wide atmospheric chapter image for the 3PL-result section of a Vietnamese operations portfolio.
+Input images: the provided portfolio screenshots are reference images for a deep forest-green, off-white and restrained lime visual family only.
+Primary request: A high-resolution horizontal editorial photograph of a logistics transfer bay after rain, viewed from a low wide angle. A few anonymous parcels move along a dark steel conveyor toward open loading doors; wet concrete catches soft amber dock lights. There is a strong open negative area on the left for HTML copy to sit beside the image edge. The image feels precise and quietly operational, not like stock advertising.
+Style/medium: cinematic documentary photography, authentic industrial materials, fine film grain.
+Composition/framing: 16:9 wide landscape, no UI text baked in, no border, no card, no vignette, no visual frame.
+Lighting/mood: evening, deep green shadow grade, off-white paper detail, small restrained lime safety accent.
+Constraints: visual atmosphere only; must not show logos, brands, people, faces, hands, readable labels, readable barcodes, numbers, dashboards or claims.
+Avoid: illustration, 3D render, center-staged product objects, generic warehouse stock-photo smiles, flowcharts, charts, watermark, text.

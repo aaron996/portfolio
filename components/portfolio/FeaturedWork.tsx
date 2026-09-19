@@ -13,7 +13,6 @@ export function FeaturedWork() {
       <SectionReveal>
         <div className="pf-section-intro">
           <div>
-            <span className="pf-eyebrow">Dự án trọng tâm</span>
             <h2>{p.labels.works}</h2>
           </div>
           <p>{p.worksIntro}</p>
