@@ -40,6 +40,37 @@ export const content: SiteContent = {
       source: "Nguồn và phương pháp", email: "Gửi email", linkedin: "LinkedIn",
       top: "Lên đầu trang", location: "TP.HCM",
     },
+    logistics: {
+      heroStage: "Không gian 3D minh hoạ hành trình logistics",
+      scrollCue: "Cuộn để xem các phần hồ sơ",
+      navigationLabel: "Điều hướng các phần hồ sơ",
+      progressLabel: "Tiến độ đọc hồ sơ",
+      motion: {
+        enable: "Bật chuyển động 3D",
+        disable: "Tắt chuyển động 3D",
+        enabledState: "Chuyển động 3D: bật",
+        disabledState: "Chuyển động 3D: tắt",
+      },
+      chapters: {
+        inbound: { label: "Mở đầu", description: "Giới thiệu và cách liên hệ" },
+        sorting: { label: "Dự án", description: "Các công việc tiêu biểu" },
+        fleet: { label: "Kết quả", description: "Kết quả và hệ thống" },
+        control: { label: "Cách làm", description: "Quy trình làm việc với dữ liệu" },
+        dispatch: { label: "Liên hệ", description: "Thông tin liên hệ" },
+      },
+      callouts: [
+        {
+          badge: "DỮ LIỆU VẬN HÀNH",
+          title: "Kinh nghiệm dữ liệu vận hành quy mô lớn",
+          body: "Qua công việc tại J&T, Shopee và GHN, tôi quen làm việc với dữ liệu đơn hàng và vận hành ở quy mô khoảng 300.000–500.000 đơn/ngày.",
+        },
+        {
+          badge: "PHẠM VI DIỄN GIẢI",
+          title: "Đặt quy mô vào đúng ngữ cảnh công việc",
+          body: "Quy mô dữ liệu trong các phạm vi công việc đã tham gia; không phải sản lượng cá nhân trực tiếp quản lý.",
+        },
+      ],
+    },
     worksIntro: "Những sản phẩm và phân tích tôi đã thực hiện, từ tổng hợp doanh số đến theo dõi hiệu suất giao nhận.",
     media: {
       "pg-sales-operations": {

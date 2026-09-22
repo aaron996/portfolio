@@ -1,7 +1,6 @@
 import { content } from "@/content/content.vi";
 import { PortfolioIcon } from "./PortfolioIcon";
 import { SectionReveal } from "./SectionReveal";
-import { EditorialStill } from "./EditorialStill";
 
 export function ExperienceSection() {
   const p = content.prototype;
@@ -18,10 +17,6 @@ export function ExperienceSection() {
             <PortfolioIcon name="forward" />
           </a>
         </div>
-      </SectionReveal>
-
-      <SectionReveal delay={0.06}>
-        <EditorialStill visual={p.visuals.experience} className="pf-experience-still" />
       </SectionReveal>
 
       <div className="pf-timeline" aria-label="Dòng thời gian kinh nghiệm">

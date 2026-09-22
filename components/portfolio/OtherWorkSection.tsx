@@ -2,7 +2,6 @@ import Link from "next/link";
 import { content } from "@/content/content.vi";
 import { PortfolioIcon } from "./PortfolioIcon";
 import { SectionReveal } from "./SectionReveal";
-import { EditorialStill } from "./EditorialStill";
 
 export function OtherWorkSection() {
   const p = content.prototype;
@@ -10,7 +9,7 @@ export function OtherWorkSection() {
   const deepCases = content.cases.filter((c) => c.tier === "deep" && c.homepage);
 
   return (
-    <section className="pf-shell pf-section pf-other">
+    <section id="other-works" className="pf-shell pf-section pf-other">
       <SectionReveal>
           <div className="pf-section-intro">
             <div>
@@ -23,7 +22,6 @@ export function OtherWorkSection() {
       <SectionReveal delay={0.08}>
         <div className="pf-other-group">
           <h3 className="pf-other-group-title">Kết quả vận hành</h3>
-          <EditorialStill visual={p.visuals.carrier} className="pf-result-still" />
           <article className="pf-result-strip">
             <div className="pf-result-info">
               <span className="pf-meta">{brief.homepage!.role}</span>

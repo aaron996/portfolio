@@ -43,8 +43,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="vi" className={`${archivo.variable} ${inter.variable}`}>
-      <body className="grain">
+    <html lang="vi" className={`${archivo.variable} ${inter.variable}`} suppressHydrationWarning>
+      <body className="grain" suppressHydrationWarning>
         <template
           aria-hidden="true"
           dangerouslySetInnerHTML={{
