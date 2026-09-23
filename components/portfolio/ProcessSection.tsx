@@ -1,6 +1,6 @@
 import { content } from "@/content/content.vi";
 import { SectionReveal } from "./SectionReveal";
-import { EditorialStill } from "./EditorialStill";
+import { LogisticsReticleCallout } from "./hud/LogisticsReticleCallout";
 
 export function ProcessSection() {
   const p = content.prototype;
@@ -20,10 +20,6 @@ export function ProcessSection() {
           </div>
         </SectionReveal>
 
-        <SectionReveal delay={0.06}>
-          <EditorialStill visual={p.visuals.method} className="pf-method-still" />
-        </SectionReveal>
-
         <ol className="pf-process-grid">
           {p.process.map((step, i) => (
             <SectionReveal as="li" key={step.title} delay={i * 0.08} className="pf-process-step-wrap">
@@ -35,6 +31,11 @@ export function ProcessSection() {
             </SectionReveal>
           ))}
         </ol>
+
+        {/* Ocean Vessel Telemetry Callouts */}
+        <SectionReveal delay={0.12}>
+          <LogisticsReticleCallout />
+        </SectionReveal>
       </div>
     </section>
   );

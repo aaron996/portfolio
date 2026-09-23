@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test:logistics": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test scripts/test-logistics-choreography.mjs",
     "test:game": "node --test scripts/test-game.cjs scripts/test-game-traversal.cjs"
   },
   "dependencies": {
