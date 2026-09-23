@@ -5,16 +5,20 @@ import { LogisticsSemiTruck } from "./models/LogisticsSemiTruck";
 import { ContainerShip } from "./models/ContainerShip";
 import { DispatchTerminalZone } from "./zones/DispatchTerminalZone";
 import { LogisticsCameraRig } from "./LogisticsCameraRig";
-import { BoxPart } from "./zones/PortTerminalZone";
+import { BoxPart, ShippingContainer } from "./zones/PortTerminalZone";
+import { getTransferPose, TRANSFER_GEOMETRY, type LogisticsJourneyStore } from "./LogisticsJourney";
+import { useFrame } from "@react-three/fiber";
+import { useRef } from "react";
+import * as THREE from "three";
 
 interface LogisticsWorldSceneProps {
-  scrollProgressRef: { current: number };
+  journeyStore: LogisticsJourneyStore;
   pointerRef: { current: { x: number; y: number } };
   motionEnabled?: boolean;
 }
 
 export function LogisticsWorldScene({
-  scrollProgressRef,
+  journeyStore,
   pointerRef,
   motionEnabled = true,
 }: LogisticsWorldSceneProps) {
@@ -47,9 +51,10 @@ export function LogisticsWorldScene({
         {/* Reach stacker and container */}
         <ReachStacker
           position={[0, 0, 0]}
-          scrollProgressRef={scrollProgressRef}
+          journeyStore={journeyStore}
           motionEnabled={motionEnabled}
         />
+        <TransferContainer journeyStore={journeyStore} motionEnabled={motionEnabled} />
 
         {/* Background Secondary Container Stacks */}
         <group position={[-5.8, 0, -2.5]}>
@@ -63,10 +68,10 @@ export function LogisticsWorldScene({
       </group>
 
       {/* ZONE 2 & 3: Highway Transit & 90° Top-Down Curve (Featured Cases & Other Works) */}
-      <group position={[0, 0, -18]}>
+      <group position={[0, 0, 0]}>
         <LogisticsSemiTruck
           position={[0, 0, 0]}
-          scrollProgressRef={scrollProgressRef}
+          journeyStore={journeyStore}
           motionEnabled={motionEnabled}
         />
       </group>
@@ -83,10 +88,22 @@ export function LogisticsWorldScene({
 
       {/* Multi-Perspective Camera Rig */}
       <LogisticsCameraRig
-        scrollProgressRef={scrollProgressRef}
+        journeyStore={journeyStore}
         pointerRef={pointerRef}
         motionEnabled={motionEnabled}
       />
     </>
   );
+}
+
+/** The only transfer container. Its pose is a pure function of the shared chapter state. */
+function TransferContainer({ journeyStore, motionEnabled }: { journeyStore: LogisticsJourneyStore; motionEnabled: boolean }) {
+  const ref = useRef<THREE.Group>(null);
+  useFrame(() => {
+    if (!ref.current || !motionEnabled) return;
+    const pose = getTransferPose(journeyStore.current).container;
+    ref.current.position.set(pose.x, pose.y, pose.z);
+    ref.current.rotation.set(0, pose.yaw, 0);
+  });
+  return <group ref={ref} position={[TRANSFER_GEOMETRY.startX, TRANSFER_GEOMETRY.containerHeight / 2, TRANSFER_GEOMETRY.startZ]}><ShippingContainer color="#42b0d5" active /></group>;
 }

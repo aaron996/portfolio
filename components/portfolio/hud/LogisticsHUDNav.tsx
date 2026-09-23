@@ -3,40 +3,28 @@
 import { useEffect, useState } from "react";
 import { content } from "@/content/content.vi";
 import { LOGISTICS_WAYPOINTS, type LogisticsWaypoint } from "../3d/LogisticsTypes";
+import type { LogisticsJourneyStore } from "../3d/LogisticsJourney";
 
 interface LogisticsHUDNavProps {
   motionEnabled: boolean;
   onToggleMotion: () => void;
+  journeyStore: LogisticsJourneyStore;
 }
 
-export function LogisticsHUDNav({ motionEnabled, onToggleMotion }: LogisticsHUDNavProps) {
+export function LogisticsHUDNav({ motionEnabled, onToggleMotion, journeyStore }: LogisticsHUDNavProps) {
   const logistics = content.prototype.logistics;
   const [activeWaypoint, setActiveWaypoint] = useState<LogisticsWaypoint>(LOGISTICS_WAYPOINTS[0]);
   const [progressPercent, setProgressPercent] = useState(0);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const maxScroll = Math.max(
-        1,
-        document.documentElement.scrollHeight - window.innerHeight
-      );
-      const progress = Math.max(0, Math.min(1, scrollY / maxScroll));
-      setProgressPercent(Math.round(progress * 100));
-
-      // Determine active waypoint based on scrollRange
-      const current = LOGISTICS_WAYPOINTS.find(
-        (wp) => progress >= wp.scrollRange[0] && progress <= wp.scrollRange[1]
-      ) || (progress > 0.8 ? LOGISTICS_WAYPOINTS[LOGISTICS_WAYPOINTS.length - 1] : LOGISTICS_WAYPOINTS[0]);
-
-      setActiveWaypoint(current);
+    const sync = () => {
+      const state = journeyStore.current;
+      setProgressPercent(Math.round(state.pageProgress * 100));
+      setActiveWaypoint(LOGISTICS_WAYPOINTS.find((waypoint) => waypoint.id === state.activeChapterId) ?? LOGISTICS_WAYPOINTS[0]);
     };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    sync();
+    return journeyStore.subscribe(sync);
+  }, [journeyStore]);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);

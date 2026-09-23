@@ -19,6 +19,8 @@ export function FeaturedWork() {
         </div>
       </SectionReveal>
 
+      <div className="pf-logistics-action-stage" aria-hidden="true" />
+
       <div className="pf-lateral-showcase-list">
         {featured.map((c, index) => {
           const isRightDocked = index % 2 === 1;

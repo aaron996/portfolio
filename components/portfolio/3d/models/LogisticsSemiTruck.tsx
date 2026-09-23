@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { BoxPart } from "../zones/PortTerminalZone";
+import { getTransferPose, TRANSFER_GEOMETRY, type LogisticsJourneyStore } from "../LogisticsJourney";
 
 /**
  * European Style Semi-Truck & 40ft Container Trailer
@@ -11,51 +12,31 @@ import { BoxPart } from "../zones/PortTerminalZone";
  * and Top-Down 90° Bird's Eye View (Screenshot 3)
  */
 export function LogisticsSemiTruck({
-  scrollProgressRef,
+  journeyStore,
   position = [0, 0, 0],
   motionEnabled = true,
 }: {
-  scrollProgressRef?: { current: number };
+  journeyStore: LogisticsJourneyStore;
   position?: [number, number, number];
   motionEnabled?: boolean;
 }) {
   const truckGroupRef = useRef<THREE.Group>(null);
   const wheelsGroupRef = useRef<THREE.Group>(null);
 
-  // Define sweeping road path for the truck as scroll progresses between 0.18 and 0.58
-  // 1. Straight highway drive (0.18 to 0.35)
-  // 2. 90-degree sweeping curve at T-junction (0.35 to 0.55)
-  useFrame(({ clock }) => {
+  useFrame(() => {
     if (!motionEnabled) return;
-    const elapsed = clock.getElapsedTime();
-    const scrollProgress = scrollProgressRef ? scrollProgressRef.current : 0;
+    const pose = getTransferPose(journeyStore.current);
 
     if (truckGroupRef.current) {
-      // Normalizing progress between 0.20 and 0.65
-      const p = Math.max(0, Math.min(1, (scrollProgress - 0.20) / 0.45));
-
-      if (p < 0.48) {
-        // Straight side-driving section (Screenshot 2, cases)
-        const straightProgress = p / 0.48;
-        truckGroupRef.current.position.x = -10 + straightProgress * 14;
-        truckGroupRef.current.position.z = 0;
-        truckGroupRef.current.rotation.y = Math.PI / 2;
-      } else {
-        // Turning through 90° asphalt junction (Screenshot 3, other-works)
-        const turnProgress = (p - 0.48) / 0.52;
-        const angle = Math.PI / 2 - turnProgress * (Math.PI / 2);
-        const radius = 6.5;
-
-        truckGroupRef.current.position.x = 4 + Math.cos(angle) * radius;
-        truckGroupRef.current.position.z = -radius + Math.sin(angle) * radius;
-        truckGroupRef.current.rotation.y = angle + Math.PI / 2;
-      }
+      truckGroupRef.current.position.set(pose.truck.x, 0, pose.truck.z);
+      truckGroupRef.current.rotation.y = pose.truck.yaw;
     }
 
-    // Wheel rotation animation
     if (wheelsGroupRef.current) {
+      // Distance-derived, reversible wheel rotation: parked wheels remain still.
+      const travelDistance = pose.truck.distance;
       wheelsGroupRef.current.children.forEach((w) => {
-        w.rotation.x = elapsed * 14;
+        w.rotation.x = travelDistance / 0.5;
       });
     }
   });
@@ -63,7 +44,7 @@ export function LogisticsSemiTruck({
   return (
     <group position={position}>
       {/* Truck Entity */}
-      <group ref={truckGroupRef} position={[-8, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+      <group ref={truckGroupRef} position={[0, 0, 2]}>
         {/* Cab Tractor (Black European High-Roof Sleeper) */}
         <group position={[0, 0, 3.2]}>
           {/* Main Cab Body */}
@@ -106,36 +87,8 @@ export function LogisticsSemiTruck({
         </group>
 
         {/* 40ft Trailer Chassis Frame */}
-        <BoxPart size={[1.7, 0.2, 8.8]} position={[0, 0.85, -1.8]} color="#1e293b" metal={0.8} />
+        <BoxPart size={[TRANSFER_GEOMETRY.trailerWidth, 0.2, 8.8]} position={[0, TRANSFER_GEOMETRY.trailerDeckY - 0.1, TRANSFER_GEOMETRY.trailerCenterZ]} color="#1e293b" metal={0.8} />
 
-        {/* 40ft Corrugated White/Silver Container (Matching Screenshot 2 & 3) */}
-        <group position={[0, 2.05, -1.8]}>
-          <BoxPart size={[1.82, 2.15, 8.4]} color="#e2e8f0" radius={0.04} roughness={0.35} />
-
-          {/* Side Corrugations */}
-          {[-0.92, 0.92].map((sideX) =>
-            Array.from({ length: 32 }, (_, idx) => (
-              <BoxPart
-                key={`${sideX}-${idx}`}
-                size={[0.04, 1.95, 0.12]}
-                position={[sideX, 0, -3.9 + idx * 0.25]}
-                color="#cbd5e1"
-                radius={0.008}
-              />
-            ))
-          )}
-
-          {/* Roof Corrugation Ribs (Prominent in Top-down view) */}
-          {Array.from({ length: 32 }, (_, idx) => (
-            <BoxPart
-              key={`roof-${idx}`}
-              size={[1.7, 0.04, 0.12]}
-              position={[0, 1.09, -3.9 + idx * 0.25]}
-              color="#cbd5e1"
-              radius={0.008}
-            />
-          ))}
-        </group>
 
         {/* Heavy Wheels Assembly */}
         <group ref={wheelsGroupRef}>

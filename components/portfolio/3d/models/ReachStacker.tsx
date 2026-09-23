@@ -3,18 +3,19 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { BoxPart, ShippingContainer } from "../zones/PortTerminalZone";
+import { BoxPart } from "../zones/PortTerminalZone";
+import { getTransferPose, TRANSFER_GEOMETRY, type LogisticsJourneyStore } from "../LogisticsJourney";
 
 /**
  * Reach Stacker / Container Handler Crane (Matching Screenshot 1)
  */
 export function ReachStacker({
   position = [0, 0, 0],
-  scrollProgressRef,
+  journeyStore,
   motionEnabled = true,
 }: {
   position?: [number, number, number];
-  scrollProgressRef?: { current: number };
+  journeyStore: LogisticsJourneyStore;
   motionEnabled?: boolean;
 }) {
   const liftGroupRef = useRef<THREE.Group>(null);
@@ -22,22 +23,16 @@ export function ReachStacker({
   useFrame(() => {
     if (!motionEnabled) return;
     if (liftGroupRef.current) {
-      const p = scrollProgressRef ? scrollProgressRef.current : 0;
-      // Container stays docked while on homepage (p < 0.12), then lifts vertically as user leaves homepage (0.12 to 0.26)
-      const liftFactor = Math.max(0, Math.min(1, (p - 0.12) / 0.14));
-      const targetY = 1.0 + liftFactor * 2.5;
-      liftGroupRef.current.position.y = THREE.MathUtils.lerp(
-        liftGroupRef.current.position.y,
-        targetY,
-        0.1
-      );
+      const spreader = getTransferPose(journeyStore.current).spreader;
+      liftGroupRef.current.position.set(spreader.x, spreader.y, spreader.z);
+      liftGroupRef.current.rotation.set(0, spreader.yaw, 0);
     }
   });
 
   return (
     <group position={position}>
       {/* Heavy Wheel Base Chassis (Cyan/Teal industrial brand) */}
-      <group position={[0, 0, -2.8]}>
+      <group position={[TRANSFER_GEOMETRY.startX, 0, -2.8]}>
         {/* Main Chassis Body */}
         <BoxPart size={[2.6, 1.2, 4.2]} position={[0, 0.9, 0]} color="#0284c7" radius={0.06} metal={0.6} />
 
@@ -69,7 +64,7 @@ export function ReachStacker({
       </group>
 
       {/* Hydraulic Boom Arm & Spreader Assembly (Lifting Vertically) */}
-      <group ref={liftGroupRef} position={[0, 1.6, 0]}>
+      <group ref={liftGroupRef} position={[TRANSFER_GEOMETRY.startX, 0.4, TRANSFER_GEOMETRY.startZ]}>
         {/* Telescopic Arm extending to container */}
         <BoxPart
           size={[0.7, 0.6, 3.4]}
@@ -104,13 +99,6 @@ export function ReachStacker({
           )}
         </group>
 
-        {/* Maersk Shipping Container (Suspended in the air) */}
-        <ShippingContainer
-          position={[0, 0, 0]}
-          rotation={[0, 0, 0]}
-          color="#42b0d5"
-          active
-        />
       </group>
     </group>
   );

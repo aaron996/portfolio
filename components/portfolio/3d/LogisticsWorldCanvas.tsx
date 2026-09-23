@@ -3,9 +3,12 @@
 import { Component, type ErrorInfo, type ReactNode, useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { LogisticsWorldScene } from "./LogisticsWorldScene";
+import { deriveJourneyState, measureChapterBounds, type LogisticsJourneyStore } from "./LogisticsJourney";
+import { LOGISTICS_WAYPOINTS } from "./LogisticsTypes";
 
 interface LogisticsWorldCanvasProps {
   motionEnabled: boolean;
+  journeyStore: LogisticsJourneyStore;
 }
 
 function StaticSceneFallback() {
@@ -34,8 +37,7 @@ class SceneErrorBoundary extends Component<{ children: ReactNode; fallback: Reac
   }
 }
 
-export function LogisticsWorldCanvas({ motionEnabled }: LogisticsWorldCanvasProps) {
-  const scrollProgressRef = useRef({ current: 0 });
+export function LogisticsWorldCanvas({ motionEnabled, journeyStore }: LogisticsWorldCanvasProps) {
   const pointerRef = useRef({ current: { x: 0, y: 0 } });
   const [mounted, setMounted] = useState(false);
   const [webglSupported, setWebglSupported] = useState<boolean | null>(null);
@@ -51,14 +53,20 @@ export function LogisticsWorldCanvas({ motionEnabled }: LogisticsWorldCanvasProp
       setWebglSupported(false);
     }
 
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const maxScroll = Math.max(
-        1,
-        document.documentElement.scrollHeight - window.innerHeight
-      );
-      scrollProgressRef.current.current = Math.max(0, Math.min(1, scrollY / maxScroll));
+    let bounds = measureChapterBounds();
+    let measureFrame = 0;
+    const updateJourney = () => journeyStore.update(deriveJourneyState(bounds, window.scrollY, window.innerHeight, document.documentElement.scrollHeight));
+    const remeasure = () => { bounds = measureChapterBounds(); updateJourney(); };
+    const scheduleRemeasure = () => {
+      cancelAnimationFrame(measureFrame);
+      measureFrame = requestAnimationFrame(remeasure);
     };
+    const resizeObserver = new ResizeObserver(scheduleRemeasure);
+    bounds.forEach(({ id }) => {
+      const sectionId = LOGISTICS_WAYPOINTS.find((waypoint) => waypoint.id === id)?.sectionId;
+      const section = sectionId ? document.getElementById(sectionId) : null;
+      if (section) resizeObserver.observe(section);
+    });
 
     const handlePointerMove = (e: MouseEvent) => {
       const nx = (e.clientX / window.innerWidth) * 2 - 1;
@@ -66,17 +74,23 @@ export function LogisticsWorldCanvas({ motionEnabled }: LogisticsWorldCanvasProp
       pointerRef.current.current = { x: nx, y: ny };
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("scroll", updateJourney, { passive: true });
+    window.addEventListener("resize", scheduleRemeasure, { passive: true });
     window.addEventListener("mousemove", handlePointerMove, { passive: true });
+    window.addEventListener("load", scheduleRemeasure, { once: true });
+    document.fonts?.ready.then(scheduleRemeasure).catch(() => undefined);
 
     // Initial check
-    handleScroll();
+    remeasure();
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("scroll", updateJourney);
+      window.removeEventListener("resize", scheduleRemeasure);
       window.removeEventListener("mousemove", handlePointerMove);
+      resizeObserver.disconnect();
+      cancelAnimationFrame(measureFrame);
     };
-  }, []);
+  }, [journeyStore]);
 
   if (!mounted || webglSupported !== true) {
     return <StaticSceneFallback />;
@@ -116,7 +130,7 @@ export function LogisticsWorldCanvas({ motionEnabled }: LogisticsWorldCanvasProp
           }}
         >
           <LogisticsWorldScene
-            scrollProgressRef={scrollProgressRef.current}
+            journeyStore={journeyStore}
             pointerRef={pointerRef.current}
             motionEnabled={motionEnabled}
           />

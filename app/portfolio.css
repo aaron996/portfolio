@@ -971,6 +971,11 @@ body:has(.portfolio-v2)::after { display: none; }
   margin-top: 56px;
 }
 
+.pf-logistics-action-stage {
+  height: clamp(96px, 16vh, 132px);
+  pointer-events: none;
+}
+
 .pf-lateral-row {
   display: flex;
   width: 100%;
@@ -1115,6 +1120,9 @@ body:has(.portfolio-v2)::after { display: none; }
   }
   .pf-lateral-showcase-list {
     gap: 64px;
+  }
+  .pf-logistics-action-stage {
+    height: clamp(190px, 30vh, 250px);
   }
 }
 

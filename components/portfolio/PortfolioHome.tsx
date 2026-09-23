@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PortfolioNav, PortfolioContact } from "./PortfolioShell";
 import { HeroExperiment } from "./HeroExperiment";
 import { FeaturedWork } from "./FeaturedWork";
@@ -12,10 +12,12 @@ import { SkillsSection } from "./SkillsSection";
 import { portfolioFontVariables } from "./PortfolioFonts";
 import { LogisticsHUDNav } from "./hud/LogisticsHUDNav";
 import { LogisticsWorldCanvas } from "./3d/LogisticsWorldCanvas";
+import { createLogisticsJourneyStore } from "./3d/LogisticsJourney";
 
 export function PortfolioHome() {
   const [motionOverride, setMotionOverride] = useState<boolean | null>(null);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState<boolean | null>(null);
+  const journeyStoreRef = useRef(createLogisticsJourneyStore());
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -31,7 +33,7 @@ export function PortfolioHome() {
   return (
     <div className={`portfolio-v2 pf-home-experiment pf-3d-logistics-site ${!motionEnabled ? "pf-motion-paused" : ""} ${portfolioFontVariables}`}>
       {/* 1. Full-Screen Sticky 3D Logistics Canvas */}
-      <LogisticsWorldCanvas motionEnabled={motionEnabled} />
+      <LogisticsWorldCanvas motionEnabled={motionEnabled} journeyStore={journeyStoreRef.current} />
 
       {/* 2. Primary navigation remains in normal reading order. */}
       <div className="pf-nav-wrapper">
@@ -41,6 +43,7 @@ export function PortfolioHome() {
       {/* 3. Chapter navigation: fixed rail on desktop, in-flow controls on mobile. */}
       <LogisticsHUDNav
         motionEnabled={motionEnabled}
+        journeyStore={journeyStoreRef.current}
         onToggleMotion={() => setMotionOverride((previous) => !(previous ?? motionEnabled))}
       />
 
