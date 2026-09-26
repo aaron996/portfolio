@@ -6,17 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test:logistics": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test scripts/test-logistics-choreography.mjs",
     "test:game": "node --test scripts/test-game.cjs scripts/test-game-traversal.cjs"
   },
   "dependencies": {
-    "@react-three/drei": "^10.7.7",
-    "@react-three/fiber": "^9.7.0",
     "motion": "^11.15.0",
     "next": "^15.1.6",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "three": "^0.185.1"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.0",

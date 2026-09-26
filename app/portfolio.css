@@ -315,7 +315,7 @@ body:has(.portfolio-v2)::after { display: none; }
   .pf-related { padding-top: 0; }
 }
 
-/* Homepage-only hero: transparent stage allowing 3D viewport depth without dark void */
+/* Homepage hero */
 .pf-home-experiment > .pf-dark { background: transparent; }
 .pf-home-experiment .pf-nav { padding-block: 18px; }
 .pf-name-with-mark { display: inline-flex; align-items: center; gap: 14px; }
@@ -412,18 +412,6 @@ body:has(.portfolio-v2)::after { display: none; }
   justify-content: flex-end;
 }
 
-.pf-hero-3d-strip {
-  width: 100%;
-  max-width: 360px;
-  background: rgba(11, 21, 16, 0.82);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(75, 93, 77, 0.55);
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
-}
-
 .pf-telemetry-state-pill {
   margin-left: auto;
   font-family: var(--hero-mono), monospace;
@@ -452,16 +440,7 @@ body:has(.portfolio-v2)::after { display: none; }
   .pf-hero-compact-grid { grid-template-columns: 1fr; gap: 28px; }
   .portfolio-v2 h1.pf-poster-title { font-size: clamp(34px, 7vw, 48px); }
   .pf-hero-sidebar { justify-content: flex-start; }
-  .pf-hero-3d-strip { max-width: 100%; }
 }
-/* Bounds come from the camera projection. Labels remain native-link children,
-   outside the model, and the fallback links work even without WebGL. */
-.pf-object-link[data-projected="true"] .pf-object-label {
-  top: 100%; bottom: auto; left: 0; right: auto;
-  min-height: 26px; max-width: none; white-space: nowrap;
-}
-.pf-object-link[data-projected="false"] { pointer-events: none; }
-.pf-object-link[data-projected="false"] .pf-object-hit { display: none; }
 @media (min-width: 860px) and (max-width: 900px) {
   .pf-poster-intro { max-width: calc(100% - 190px); }
 }
@@ -474,8 +453,6 @@ body:has(.portfolio-v2)::after { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .portfolio-v2 * { transition: none !important; animation: none !important; }
-  .pf-object-link.pf-pressed .pf-object-hit { transform: none !important; }
-  .pf-object-label svg { transform: none !important; transition: none !important; }
   .pf-action-link svg { transform: none !important; transition: none !important; }
   .pf-showcase-card { transition: none !important; }
 }
@@ -593,16 +570,7 @@ body:has(.portfolio-v2)::after { display: none; }
   .pf-game-invite-banner .pf-game-btn { margin-top: 20px; }
 }
 
-/* ==========================================================================
-   IMMERSIVE SCROLL-DRIVEN 3D LOGISTICS MICROSITE STYLES
-   ========================================================================== */
-
-/* 1. Base Container & Translucency overrides */
-.pf-3d-logistics-site {
-  position: relative;
-  background: transparent !important;
-  min-height: 100vh;
-}
+/* Portfolio homepage layout */
 
 .pf-nav-wrapper {
   position: sticky;
@@ -619,18 +587,7 @@ body:has(.portfolio-v2)::after { display: none; }
   z-index: 10;
 }
 
-/* 2. Hero 3D Stage & Focal Overlay */
-.pf-hero-3d-stage {
-  position: relative;
-  width: 100%;
-  min-height: 380px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  margin-block: 24px 16px;
-  pointer-events: none;
-}
-
+/* Hero editorial details */
 .pf-hero-focal-zone {
   display: flex;
   flex-direction: column;
@@ -1417,17 +1374,6 @@ body:has(.portfolio-v2)::after { display: none; }
 .pf-motion-paused *::before,
 .pf-motion-paused *::after { animation: none !important; scroll-behavior: auto !important; }
 
-.pf-3d-scene-fallback {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  background: linear-gradient(155deg, #101e17 0%, #0a0f0d 52%, #07120e 100%);
-}
-.pf-3d-fallback-horizon { position: absolute; inset: 46% 0 auto; height: 1px; background: rgba(212, 242, 54, .26); }
-.pf-3d-fallback-container { position: absolute; width: min(38vw, 440px); aspect-ratio: 2.4; right: 12vw; top: 27%; border: 1px solid rgba(147, 197, 253, .5); background: rgba(14, 62, 82, .36); box-shadow: 0 24px 56px rgba(0, 0, 0, .3); }
-.pf-3d-fallback-route { position: absolute; width: 65vw; height: 26vh; right: -13vw; bottom: -9vh; border: 1px solid rgba(212, 242, 54, .26); border-left: 0; border-bottom: 0; transform: skewY(-12deg); }
-
 @media (min-width: 901px) {
   .pf-content-flow { padding-right: 184px; }
   .pf-lateral-dossier { max-width: 520px; }
@@ -1463,5 +1409,33 @@ body:has(.portfolio-v2)::after { display: none; }
   .pf-hud-toggle-btn { width: 44px; padding: 6px; }
   .pf-toggle-text-desktop { display: none; }
   .pf-toggle-text-mobile { display: block; font-family: var(--hero-mono), monospace; font-size: 11px; }
-  .pf-3d-fallback-container { width: 62vw; right: 7vw; top: 25%; }
 }
+
+/* The gradient stays visible while the film loads and when motion is reduced. */
+.pf-home-experiment { position: relative; min-height: 100vh; background: transparent; }
+.pf-background-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(155deg, #101e17 0%, #0a0f0d 52%, #07120e 100%);
+}
+.pf-background-video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.pf-background-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 12, 9, .38);
+}
+.pf-home-experiment .pf-nav-wrapper,
+.pf-home-experiment .pf-content-flow { position: relative; }
+.pf-home-experiment .pf-nav-wrapper { z-index: 40; }
+.pf-home-experiment .pf-content-flow { z-index: 1; padding-right: 0; }
+.pf-home-experiment .pf-hero-compact-grid { grid-template-columns: minmax(0, 1fr); }
+.pf-home-experiment .pf-hero-main-content { max-width: 680px; }

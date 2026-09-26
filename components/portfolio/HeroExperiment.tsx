@@ -33,7 +33,6 @@ export function HeroExperiment() {
             </div>
           </div>
 
-          <p className="pf-hero-stage-note" aria-hidden="true">{content.prototype.logistics.heroStage}</p>
         </div>
       </div>
     </header>
