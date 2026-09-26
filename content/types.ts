@@ -604,12 +604,6 @@ export interface PortfolioPrototype {
     email: string; linkedin: string; top: string; location: string;
   };
   logistics: {
-    heroStage: string;
-    scrollCue: string;
-    navigationLabel: string;
-    progressLabel: string;
-    motion: { enable: string; disable: string; enabledState: string; disabledState: string };
-    chapters: Record<"inbound" | "sorting" | "fleet" | "control" | "dispatch", { label: string; description: string }>;
     callouts: { badge: string; title: string; body: string }[];
   };
   worksIntro: string;

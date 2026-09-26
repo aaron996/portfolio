@@ -4,7 +4,6 @@ import type { CaseStudy } from "@/content/types";
 import { content } from "@/content/content.vi";
 import { PortfolioNav, PortfolioContact } from "./PortfolioShell";
 import { ProjectImage } from "./ProjectImage";
-import { SensorBotCanvas } from "@/components/ui/SensorBotCanvas";
 import { portfolioFontVariables } from "./PortfolioFonts";
 
 export function PgCase({ caseStudy: c }: { caseStudy: CaseStudy }) {
@@ -27,7 +26,6 @@ export function PgCase({ caseStudy: c }: { caseStudy: CaseStudy }) {
     <section className="pf-shell pf-section pf-related"><h2>{p.labels.related}</h2>{content.cases.filter(item => ["kas-shopee-performance", "kas-reporting-automation"].includes(item.slug)).map(item => <Link key={item.slug} href={`/case/${item.slug}`}><h3>{item.homepage!.title}</h3><PortfolioIcon /></Link>)}</section>
     <PortfolioContact />
       </main>
-      <SensorBotCanvas />
     </div>
   );
 }

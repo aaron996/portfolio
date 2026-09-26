@@ -41,23 +41,6 @@ export const content: SiteContent = {
       top: "Lên đầu trang", location: "TP.HCM",
     },
     logistics: {
-      heroStage: "Không gian 3D minh hoạ hành trình logistics",
-      scrollCue: "Cuộn để xem các phần hồ sơ",
-      navigationLabel: "Điều hướng các phần hồ sơ",
-      progressLabel: "Tiến độ đọc hồ sơ",
-      motion: {
-        enable: "Bật chuyển động 3D",
-        disable: "Tắt chuyển động 3D",
-        enabledState: "Chuyển động 3D: bật",
-        disabledState: "Chuyển động 3D: tắt",
-      },
-      chapters: {
-        inbound: { label: "Mở đầu", description: "Giới thiệu và cách liên hệ" },
-        sorting: { label: "Dự án", description: "Các công việc tiêu biểu" },
-        fleet: { label: "Kết quả", description: "Kết quả và hệ thống" },
-        control: { label: "Cách làm", description: "Quy trình làm việc với dữ liệu" },
-        dispatch: { label: "Liên hệ", description: "Thông tin liên hệ" },
-      },
       callouts: [
         {
           badge: "DỮ LIỆU VẬN HÀNH",
