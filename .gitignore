@@ -25,3 +25,6 @@ output/audio-audition/
 .impeccable/mocks/
 .impeccable/questions/
 .impeccable/surfaces/
+
+# Đầu ra render của teaser (MP4 master, WAV) — tạo lại bằng teaser/render.mjs
+teaser/export/

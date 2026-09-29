@@ -606,6 +606,11 @@ export interface PortfolioPrototype {
   logistics: {
     callouts: { badge: string; title: string; body: string }[];
   };
+  /** Video intro phủ toàn màn hình khi mở trang chủ (một lần mỗi phiên). `countdown` chứa {s} = số giây còn lại. */
+  intro: {
+    src: string; label: string; skip: string; soundOn: string; soundOff: string;
+    play: string; enter: string; countdown: string;
+  };
   worksIntro: string;
   media: Record<string, PrototypeMedia>;
   visuals: Record<"carrier" | "method" | "experience", PrototypeVisual>;
