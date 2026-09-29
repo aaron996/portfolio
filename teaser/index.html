@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Teaser — Lương Thế Vinh</title>
+<style>
+  /* Font lấy nguyên từ bản build của portfolio (Archivo Black, Space Grotesk, IBM Plex Mono). */
+  @font-face{font-family:"Archivo Black";font-weight:400;src:url(assets/fonts/archivo-black-latin.woff2) format("woff2");unicode-range:U+00??,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+  @font-face{font-family:"Archivo Black";font-weight:400;src:url(assets/fonts/archivo-black-latin-ext.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1E9F,U+1EF2-1EFF,U+20A0-20AB,U+20AD-20C0}
+  @font-face{font-family:"Space Grotesk";font-weight:300 700;src:url(assets/fonts/space-grotesk-latin.woff2) format("woff2");unicode-range:U+00??,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+  @font-face{font-family:"Space Grotesk";font-weight:300 700;src:url(assets/fonts/space-grotesk-latin-ext.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1E9F,U+1EF2-1EFF,U+20A0-20AB,U+20AD-20C0}
+  @font-face{font-family:"Space Grotesk";font-weight:300 700;src:url(assets/fonts/space-grotesk-vietnamese.woff2) format("woff2");unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB}
+  @font-face{font-family:"IBM Plex Mono";font-weight:600;src:url(assets/fonts/plex-mono-600-latin.woff2) format("woff2");unicode-range:U+00??,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+  @font-face{font-family:"IBM Plex Mono";font-weight:600;src:url(assets/fonts/plex-mono-600-vietnamese.woff2) format("woff2");unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB}
+  @font-face{font-family:"IBM Plex Mono";font-weight:500;src:url(assets/fonts/plex-mono-500-latin.woff2) format("woff2");unicode-range:U+00??,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+  @font-face{font-family:"IBM Plex Mono";font-weight:500;src:url(assets/fonts/plex-mono-500-vietnamese.woff2) format("woff2");unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB}
+  html,body{margin:0;background:#000;overflow:hidden}
+  canvas{display:block;width:1920px;height:1080px}
+  body.fit canvas{width:100vw;height:auto}
+</style>
+</head>
+<body>
+<canvas id="cv" width="1920" height="1080"></canvas>
+<script>
+"use strict";
+/* ─────────────────────────────────────────────────────────────────────────────
+   TEASER 15s · 1920×1080 · 60fps — "Sense" (Lương Thế Vinh)
+   Mọi thứ là hàm THUẦN của thời gian t (giây) → render lại bất kỳ khung nào giống hệt nhau.
+   Nhịp: 128 BPM ⇒ 1 beat = 0.46875s ⇒ 15s = đúng 32 beat. audio/audio.py dùng cùng lưới này.
+   ───────────────────────────────────────────────────────────────────────────── */
+const W = 1920, H = 1080, FPS = 60, DUR = 15;
+const BPM = 128, BEAT = 60 / BPM;
+const b = n => n * BEAT;
+
+const C = {
+  ink: "#070d0a", ground: "#0b1510", green: "#132119", soft: "#23382c", line: "#4b5d4d",
+  text: "#f2f5ec", sec: "#c2cdbb", lime: "#d4f236", blue: "#42b0d5", dim: "#3a3a33", hot: "#f6ffb8",
+};
+
+/* ── mốc thời gian chính (giây) ── */
+const T = {
+  sense: b(12), data: b(13),
+  step: [b(16), b(18), b(20), b(22)], img2: b(22.5), img3: b(23),
+  num: b(24), numLock: b(25.25),
+  make: b(25.5), things: b(26), work: b(26.5),
+  cut: b(27), spark: b(27.55), hit: b(28),
+};
+
+/* ── tiện ích ── */
+const clamp = (x, a = 0, c = 1) => Math.min(c, Math.max(a, x));
+const lerp = (a, c, t) => a + (c - a) * t;
+const eOut3 = t => 1 - Math.pow(1 - clamp(t), 3);
+const eOut5 = t => 1 - Math.pow(1 - clamp(t), 5);
+const eInOut3 = t => { t = clamp(t); return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
+const eInOutExpo = t => { t = clamp(t); return t === 0 ? 0 : t === 1 ? 1 : t < .5 ? Math.pow(2, 20 * t - 10) / 2 : (2 - Math.pow(2, -20 * t + 10)) / 2; };
+const eOutBack = t => { t = clamp(t); const c1 = 1.9, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
+function hash(n) { n = (n ^ 61) ^ (n >>> 16); n = (n + (n << 3)) | 0; n = n ^ (n >>> 4); n = Math.imul(n, 0x27d4eb2d); n = n ^ (n >>> 15); return (n >>> 0) / 4294967296; }
+const H2 = (a, c) => hash(Math.imul(a | 0, 73856093) ^ Math.imul(c | 0, 19349663) ^ 0x9e3779b9);
+const q = (v, s) => Math.round(v / s) * s;
+
+/* ── canvas ── */
+const cv = document.getElementById("cv"); const ctx = cv.getContext("2d", { alpha: false });
+const mk = (w = W, h = H) => { const c = document.createElement("canvas"); c.width = w; c.height = h; return c; };
+const scn = mk(), sx = scn.getContext("2d", { alpha: false });     // cảnh thô
+const acc = mk(), ax = acc.getContext("2d", { alpha: false });     // tích luỹ motion-blur
+const mips = [1, 2, 4, 8, 16].map(d => mk(Math.ceil(W / d), Math.ceil(H / d)));
+const bloomC = mk(480, 270), bloomX = bloomC.getContext("2d");
+const tmpC = mk(), tmpX = tmpC.getContext("2d");
+const txtC = mk(), txtX = txtC.getContext("2d");
+
+/* ── ảnh app thật (screenshot đã có trong portfolio) ── */
+const IMG = {};
+function loadImg(k, src) { return new Promise(r => { const i = new Image(); i.onload = () => { IMG[k] = i; r(); }; i.src = src; }); }
+
+/* ─────────────── Pixel-resolve: khung mới vào bằng khối to rồi nét dần ─────────────── */
+const P_BIG = [96, 72, 56, 44, 34, 26, 20, 15, 11, 8, 5, 3, 2, 1];
+const P_SMALL = [40, 30, 24, 18, 14, 10, 7, 5, 3, 2, 1];
+const P_SNAP = [24, 12, 6, 3, 1];   // cắt 1/8 nốt: nét lại sau 5 khung để kịp nhìn ảnh
+/* [thời điểm, rung(px), flash α, màu flash, bảng pixel, ca(px)] */
+const HITS = [
+  [T.sense, 14, .16, C.hot, null, 0], [T.data, 8, .10, C.hot, null, 0],
+  [T.step[0], 22, .38, C.hot, P_BIG, 4], [b(17), 6, .10, C.lime, null, 0],
+  [T.step[1], 18, .25, C.ink, P_BIG, 3], [b(19), 6, .10, C.ink, null, 0],
+  [T.step[2], 18, .25, C.hot, P_BIG, 3], [b(21), 8, .10, C.lime, null, 0],
+  [T.step[3], 18, .22, C.hot, P_BIG, 3], [T.img2, 14, .16, C.hot, P_SNAP, 2], [T.img3, 14, .16, C.hot, P_SNAP, 2],
+  [T.num, 20, .30, C.hot, P_BIG, 4], [T.numLock, 10, .30, C.lime, null, 2],
+  [T.make, 22, .30, C.ink, P_SNAP, 3], [T.things, 24, .30, C.ink, P_SNAP, 3], [T.work, 30, .45, C.ink, P_SMALL, 4],
+  [T.hit, 46, 1.0, C.lime, P_BIG, 8],
+];
+function hitState(t) {
+  let pix = 1, shake = 0, flash = 0, fcol = "#fff", ca = 0;
+  for (const [ht, amp, fl, col, tab, cab] of HITS) {
+    const u = t - ht; if (u < 0) continue;
+    if (tab && u < tab.length / FPS) pix = tab[Math.min(tab.length - 1, Math.floor(u * FPS + 1e-6))];
+    if (u < .30) shake = Math.max(shake, amp * Math.exp(-u * 16));
+    const fd = ht === T.hit ? .12 : .09;
+    if (u < fd) { const a = fl * (1 - u / fd); if (a > flash) { flash = a; fcol = col; } }
+    if (u < .12) ca = Math.max(ca, cab * (1 - u / .12));
+  }
+  return { pix, shake, flash, fcol, ca };
+}
+/* khung có chuyển động nhanh → cộng dồn nhiều mẫu con cho motion-blur */
+function isHot(t) { for (const h of HITS) { const u = t - h[0]; if (u >= -1e-4 && u < .22 && h[1] >= 14) return true; } return false; }
+
+/* ─────────────── Thành phần dùng chung ─────────────── */
+function cam(c, s = 1, rot = 0, ox = 0, oy = 0) { c.translate(W / 2 + ox, H / 2 + oy); c.rotate(rot); c.scale(s, s); c.translate(-W / 2, -H / 2); }
+function fill(c, col) { c.fillStyle = col; c.fillRect(-200, -200, W + 400, H + 400); }
+function dotField(c, a, col = C.text, size = 4, pitch = 40, off = 0) {
+  c.fillStyle = col; c.globalAlpha = a;
+  for (let x = pitch / 2 + off; x < W + 40; x += pitch) for (let y = pitch / 2; y < H + 40; y += pitch) c.fillRect(x - size / 2, y - size / 2, size, size);
+  c.globalAlpha = 1;
+}
+function glow(c, x, y, r, col, a) {
+  const g = c.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, col); g.addColorStop(1, "rgba(0,0,0,0)");
+  const p = c.globalCompositeOperation; c.globalCompositeOperation = "lighter"; c.globalAlpha = a; c.fillStyle = g; c.fillRect(x - r, y - r, r * 2, r * 2); c.globalAlpha = 1; c.globalCompositeOperation = p;
+}
+function ringSq(c, cx, cy, r, w, col, a) { // vòng vuông lan ra (Chebyshev) — hợp với lưới pixel
+  if (a <= 0) return; c.strokeStyle = col; c.globalAlpha = a; c.lineWidth = w; c.strokeRect(cx - r, cy - r, r * 2, r * 2); c.globalAlpha = 1;
+}
+function font(weight, size, fam) { return `${weight} ${size}px "${fam}"`; }
+function text(c, s, x, y, f, col, align = "left", ls = 0) {
+  c.font = f; c.fillStyle = col; c.textAlign = align; c.textBaseline = "alphabetic"; c.letterSpacing = ls + "px"; c.fillText(s, x, y); c.letterSpacing = "0px";
+}
+function measure(c, s, f, ls = 0) { c.font = f; c.letterSpacing = ls + "px"; const w = c.measureText(s).width; c.letterSpacing = "0px"; return w; }
+
+/* logo 3×3 của portfolio (BrandMark): IDLE = [2,4,6], bốn thế đường chéo "ma trận được sắp lại" */
+const PERMS = [[0, 4, 8], [1, 4, 7], [2, 4, 6], [3, 4, 5]];
+function drawMark(c, x, y, cell, gap, lit, alpha = 1, litCol = C.lime, dimCol = C.dim, dimA = 1) {
+  for (let i = 0; i < 9; i++) {
+    const on = lit.includes(i);
+    c.globalAlpha = alpha * (on ? 1 : dimA); c.fillStyle = on ? litCol : dimCol;
+    c.fillRect(x + (i % 3) * (cell + gap), y + Math.floor(i / 3) * (cell + gap), cell, cell);
+  }
+  c.globalAlpha = 1;
+}
+
+/* tiêu đề bước: wipe từng khối 40px từ trái sang */
+function stepChrome(c, t0, t, idx, title, col, accent) {
+  const u = t - t0;
+  // 4 ô tiến độ + số bước
+  for (let i = 0; i < 4; i++) {
+    const on = i <= idx; const px = 100 + i * 52, py = 78;
+    if (on) { c.fillStyle = accent; c.fillRect(px, py, 40, 40); } else { c.strokeStyle = col; c.globalAlpha = .4; c.lineWidth = 2; c.strokeRect(px + 1, py + 1, 38, 38); c.globalAlpha = 1; }
+  }
+  text(c, "0" + (idx + 1), 100 + 4 * 52 + 24, 108, font(600, 34, "IBM Plex Mono"), col, "left", 2);
+  // tiêu đề
+  let fsz = 132; const w0 = measure(c, title, font(700, fsz, "Space Grotesk"), -3); if (w0 > 1700) fsz = Math.floor(fsz * 1700 / w0);
+  const f = font(700, fsz, "Space Grotesk"); const w = measure(c, title, f, -3);
+  const e = eOut5(u / .22); const reveal = Math.min(w + 40, Math.ceil(e * (w + 40) / 40) * 40);
+  c.save(); c.beginPath(); c.rect(80, 820, reveal, 240); c.clip();
+  text(c, title, 100 + (1 - e) * -50, 985, f, col, "left", -3); c.restore();
+}
+
+/* ─────────────── Cảnh 1: Mở đầu + xây (0 → b16): ma trận, nhiễu, MAKE SENSE OF DATA. ─────────────── */
+const MAT = { x0: 1200, y0: 440, pitch: 80, size: 40 };
+const MATRIX_SEQ = [[1, [6]], [2.5, [6, 4]], [3.5, [6, 4, 2]], [5, [7, 4, 1]], [6, [8, 4, 0]], [7, [5, 4, 3]], [8, [6, 4, 2]]];
+function matrixLit(beat) {
+  if (beat >= 8) return PERMS[Math.floor(beat - 8 + 2) % 4];      // từ b8 đổi thế mỗi beat như hover của logo
+  let cur = [], from = [];
+  for (const [bb, s] of MATRIX_SEQ) if (beat >= bb) { from = cur; cur = s; }
+  return cur;
+}
+const MAT_EVENTS = (() => { const ev = []; let prev = []; for (const [bb, s] of MATRIX_SEQ) { for (const i of s) if (!prev.includes(i)) ev.push([b(bb), i]); prev = s; } for (let k = 9; k <= 10; k++) ev.push([b(k), PERMS[(k - 8 + 2) % 4][0]]); return ev; })();
+
+let GL = null; // dữ liệu hạt của chữ
+function buildGlyphs() {
+  const size = 214, f = font(400, size, "Archivo Black");
+  const c = txtX; c.clearRect(0, 0, W, H);
+  const l1a = "MAKE ", l1b = "SENSE", l2 = "OF DATA.";
+  const wa = measure(c, l1a, f), wb = measure(c, l1b, f), w2 = measure(c, l2, f);
+  const x1 = (W - (wa + wb)) / 2, x2 = (W - w2) / 2, y1 = 490, y2 = 490 + 236;
+  const cells = [];
+  const sample = (s, x, y, col, line) => {
+    c.clearRect(0, 0, W, H); c.font = f; c.fillStyle = "#fff"; c.textBaseline = "alphabetic"; c.fillText(s, x, y);
+    const d = c.getImageData(0, 0, W, H).data;
+    for (let py = 0; py < H; py += 10) for (let px = 0; px < W; px += 10) if (d[((py + 5) * W + (px + 5)) * 4 + 3] > 140) cells.push({ tx: px, ty: py, col, line });
+  };
+  sample(l1a, x1, y1, C.text, 1); sample(l1b, x1 + wa, y1, C.lime, 1); sample(l2, x2, y2, C.text, 2);
+  c.clearRect(0, 0, W, H);
+  const N = cells.length;
+  cells.forEach((p, i) => {
+    const r1 = H2(i, 1), r2 = H2(i, 2), r3 = H2(i, 3);
+    const arrive = p.line === 1 ? T.sense : T.data;
+    p.dur = .34 + .26 * r2; p.launch = arrive - p.dur - .34 * r1; p.arrive = arrive;
+    p.ap = Math.min(2.2 + 3.4 * Math.sqrt(r3), p.launch - .08);
+    p.curve = (r1 - .5) * 260; p.rate = .35 + 1.3 * r2; p.big = H2(i, 9) < .07;
+  });
+  GL = { cells, N, cx: W / 2, cy: (y1 + y2) / 2 - 90 };
+}
+const wanderPos = (i, t, rate) => { const slot = Math.floor(t * rate + i * .37); return [Math.floor(H2(i, slot) * 192) * 10, Math.floor(H2(i + 7777, slot) * 108) * 10]; };
+
+function sceneField(c, t) {
+  fill(c, C.ink);
+  const beat = t / BEAT;
+  const zoom = 1 + .06 * clamp(t / T.sense) + (t > b(15) ? .10 * eOut3((t - b(15)) / BEAT) : 0);
+  c.save(); cam(c, zoom, 0, 0, 0);
+  // nền chấm: hiện dần từ giây 0.3
+  dotField(c, .075 * eOut3((t - .3) / 1.2), C.text, 4, 40);
+  // ── ma trận 3×3 (logo phóng to) ──
+  const bob = Math.sin(t * 1.3) * 3;
+  if (t < b(11.6)) {
+    const lit = matrixLit(beat), fade = 1 - eOut3((t - b(10.8)) / (b(11.6) - b(10.8)));
+    for (let i = 0; i < 9; i++) {
+      const x = MAT.x0 + (i % 3) * MAT.pitch, y = MAT.y0 + Math.floor(i / 3) * MAT.pitch + bob;
+      const on = lit.includes(i);
+      // độ sáng theo thời điểm ô bật
+      let k = 0; for (const [et, ei] of MAT_EVENTS) if (ei === i && t >= et) k = t - et;
+      const pulse = on ? (1 + .5 * Math.exp(-k * 7)) : 1;
+      const appear = eOut3((t - .3) / .8);
+      c.globalAlpha = fade * appear * (on ? 1 : .55); c.fillStyle = on ? C.lime : C.dim;
+      const s = MAT.size * (on ? Math.min(1.25, pulse) : 1); c.fillRect(x + (MAT.size - s) / 2, y + (MAT.size - s) / 2, s, s);
+      c.globalAlpha = 1;
+      if (on) glow(c, x + 20, y + 20, 150, C.lime, .30 * fade * Math.min(1.4, pulse));
+    }
+    // vòng vuông lan ra mỗi khi ô bật / đổi thế
+    for (const [et, i] of MAT_EVENTS) {
+      const u = t - et; if (u < 0 || u > 1.6) continue;
+      const x = MAT.x0 + (i % 3) * MAT.pitch + 20, y = MAT.y0 + Math.floor(i / 3) * MAT.pitch + 20 + bob;
+      ringSq(c, x, y, 20 + u * 300, 2, C.lime, .26 * (1 - u / 1.6) * fade);
+    }
+  }
+  // ── nhãn gõ chữ (nguồn: hero.domain) ──
+  const label = "LOGISTICS · E-COMMERCE";
+  if (t > 1.9 && t < b(12)) {
+    const n = Math.min(label.length, Math.floor((t - 1.9) / .045));
+    const out = t > b(9.5) ? Math.max(0, label.length - Math.floor((t - b(9.5)) / .03)) : label.length;
+    const shown = Math.min(n, out);
+    const blink = Math.floor(t * 2.5) % 2 === 0 || n < label.length;
+    text(c, label.slice(0, shown), 120, 982, font(500, 26, "IBM Plex Mono"), C.sec, "left", 2);
+    if (blink && shown > 0 || (shown === 0 && n === label.length ? false : blink)) { c.fillStyle = C.lime; const w = measure(c, label.slice(0, shown), font(500, 26, "IBM Plex Mono"), 2); c.fillRect(120 + w + 6, 962, 14, 26); }
+  }
+  // ── hạt nhiễu → chữ ──
+  if (GL) {
+    const rate = lerp(4, 26, clamp((t - 2.6) / 2.6));
+    const cx = GL.cx, cy = GL.cy;
+    const blast = clamp((t - (T.step[0] - .30)) / .30);
+    const gl = t > b(14.4) ? clamp((t - b(14.4)) / (b(16) - b(14.4))) : 0;      // glitch tăng dần
+    const popS = 1 + .05 * Math.exp(-Math.max(0, t - T.sense) * 9) * (t >= T.sense ? 1 : 0);
+    for (let i = 0; i < GL.N; i++) {
+      const p = GL.cells[i]; if (t < p.ap) continue;
+      let x, y, col, a = 1, s = 8;
+      if (t < p.launch) {
+        [x, y] = wanderPos(i, t, rate * p.rate); col = p.big ? C.lime : "#4f6f58"; a = p.big ? .9 : .75;
+        if ((i & 7) === 0) col = "#8aa08f";
+      } else {
+        const u = clamp((t - p.launch) / p.dur); const e = eInOut3(u);
+        const [sx0, sy0] = wanderPos(i, p.launch, rate * p.rate);
+        const dx = p.tx - sx0, dy = p.ty - sy0, L = Math.hypot(dx, dy) || 1;
+        x = lerp(sx0, p.tx, e) + (-dy / L) * p.curve * Math.sin(Math.PI * u) * .5;
+        y = lerp(sy0, p.ty, e) + (dx / L) * p.curve * Math.sin(Math.PI * u) * .5;
+        if (u < 1) { col = u > .7 ? p.col : "#8fae63"; }
+        else {
+          col = p.col; const since = t - p.arrive;
+          if (since < .10) col = C.hot;
+          else if (H2(i, Math.floor(t * 12)) < .012) x += (H2(i, 5) < .5 ? -10 : 10);
+          if (popS !== 1) { x = cx + (x - cx) * popS; y = cy + (y - cy) * popS; }
+        }
+      }
+      if (blast > 0) { const k = blast * blast, v = .6 + 1.4 * H2(i, 21); x += (x - cx) * k * v * 2.2; y += (y - cy) * k * v * 2.2; s = 8 + 10 * k; a = 1 - .4 * k; }
+      if (gl > 0 && t >= p.arrive) { const band = Math.floor(y / 30); if (H2(band, Math.floor(t * 24)) < gl * .32) x += (H2(band, 33) - .5) * 220 * gl; }
+      c.globalAlpha = a; c.fillStyle = col; const qx = q(x, 10), qy = q(y, 10); c.fillRect(qx + 1 - (s - 8) / 2, qy + 1 - (s - 8) / 2, s, s);
+    }
+    c.globalAlpha = 1;
+    // sóng xung kích khi chữ vào chỗ
+    for (const [ht, cy0, r0] of [[T.sense, GL.cy, 40], [T.data, GL.cy, 40]]) {
+      const u = t - ht; if (u >= 0 && u < .7) ringSq(c, W / 2, cy0, r0 + u * 2600, 3, C.lime, .5 * (1 - u / .7));
+    }
+    if (t >= T.sense && t < T.sense + .6) glow(c, W / 2, GL.cy, 900, C.lime, .16 * (1 - (t - T.sense) / .6));
+  }
+  c.restore();
+}
+
+/* ─────────────── Bước 01: Hiểu bài toán — ống ngắm khoá vào một ô ─────────────── */
+function sceneUnderstand(c, t) {
+  const t0 = T.step[0], u = t - t0; fill(c, C.ink);
+  c.save(); cam(c, 1 + .04 * clamp(u / .94), 0);
+  const col = 48, row = 27;
+  for (let cx = 0; cx < col; cx++) for (let cy = 0; cy < row; cy++) {
+    const r = H2(cx * 131 + cy, Math.floor(t * 30)); const on = r < .10, hot = r < .025;
+    c.globalAlpha = on ? .6 : .13; c.fillStyle = hot ? C.lime : C.text;
+    const s = on ? 10 : 6; c.fillRect(cx * 40 + 20 - s / 2, cy * 40 + 20 - s / 2, s, s);
+  }
+  c.globalAlpha = 1;
+  const tx = 1220, ty = 420, e = eInOutExpo((u - .04) / (b(17) - t0 - .06));
+  const fw = lerp(1560, 120, e), fh = lerp(860, 120, e), fx = lerp(W / 2, tx, e), fy = lerp(H / 2, ty, e);
+  const locked = t >= b(17);
+  c.strokeStyle = C.lime; c.lineWidth = 2; c.globalAlpha = .38 + (locked ? .3 : 0);
+  c.beginPath(); c.moveTo(0, fy); c.lineTo(W, fy); c.moveTo(fx, 0); c.lineTo(fx, H); c.stroke(); c.globalAlpha = 1;
+  // ô mục tiêu + khung ngoặc
+  if (locked) { const k = t - b(17); c.fillStyle = C.lime; c.fillRect(tx - 20, ty - 20, 40, 40); glow(c, tx, ty, 220, C.lime, .5 * Math.exp(-k * 5));
+    for (let i = 0; i < 3; i++) ringSq(c, tx, ty, 30 + k * (900 - i * 220), 3, C.lime, .5 * Math.max(0, 1 - k / (.7 + i * .1)) ); }
+  const arm = 56 + (1 - e) * 60; c.strokeStyle = locked ? C.hot : C.lime; c.lineWidth = 6; c.globalAlpha = 1;
+  const x0 = fx - fw / 2, x1 = fx + fw / 2, y0 = fy - fh / 2, y1 = fy + fh / 2;
+  c.beginPath();
+  c.moveTo(x0, y0 + arm); c.lineTo(x0, y0); c.lineTo(x0 + arm, y0);
+  c.moveTo(x1 - arm, y0); c.lineTo(x1, y0); c.lineTo(x1, y0 + arm);
+  c.moveTo(x1, y1 - arm); c.lineTo(x1, y1); c.lineTo(x1 - arm, y1);
+  c.moveTo(x0 + arm, y1); c.lineTo(x0, y1); c.lineTo(x0, y1 - arm); c.stroke();
+  c.restore();
+  stepChrome(c, t0, t, 0, "UNDERSTAND THE PROBLEM", C.text, C.lime);
+}
+
+/* ─────────────── Bước 02: Chốt định nghĩa — đống thanh lộn xộn khớp vào bảng ─────────────── */
+function sceneDefine(c, t) {
+  const t0 = T.step[1], u = t - t0; fill(c, C.lime);
+  c.save(); cam(c, 1 + .035 * clamp(u / .94), 0);
+  dotField(c, .10, C.ink, 4, 40);
+  const W_ALIGNED = [980, 720, 1140, 860, 600, 1020, 780, 900, 660];
+  const snap0 = .234, snapT = i => snap0 + i * .016;
+  for (let i = 0; i < 9; i++) {
+    const y = 184 + i * 68; const s = u >= snapT(i);
+    const jt = Math.floor(t * 20);
+    const lx = s ? 200 : 200 + (H2(i * 3 + jt, 1) - .5) * 300, lw = s ? 260 : 150 + H2(i, 2) * 260;
+    const vx = s ? 560 : 520 + (H2(i * 5 + jt, 3) - .5) * 420, vw = s ? W_ALIGNED[i] : 260 + H2(i, 4) * 900;
+    const yy = s ? y : y + (H2(i * 7 + jt, 5) - .5) * 36, rot = s ? 0 : (H2(i * 11 + jt, 6) - .5) * .05;
+    const e = eOut5((u - .0 - i * .008) / .12);
+    c.save(); c.translate(W / 2, yy + 17); c.rotate(rot); c.translate(-W / 2, -(yy + 17));
+    c.globalAlpha = clamp(e * 1.4); c.fillStyle = C.ink;
+    c.fillRect(lx, yy, lw, 34);
+    const hi = s && i === 3 && u > b(19) - t0;
+    c.fillStyle = hi ? C.ink : "rgba(7,13,10,.86)"; c.fillRect(vx, yy, vw * (s ? eOut5((u - snapT(i)) / .12) : 1), 34);
+    if (hi) { c.fillStyle = C.lime; c.fillRect(vx + 16, yy + 9, 16, 16); }
+    c.restore();
+  }
+  c.globalAlpha = 1;
+  // đường kẻ cột + đường khung khi đã "chốt"
+  if (u > snap0 + .16) { const e = eOut5((u - snap0 - .16) / .16); c.fillStyle = C.ink; c.fillRect(516, 150, 6, 610 * e); c.fillRect(180, 146, 1500 * e, 6); }
+  if (t >= b(19)) { const k = t - b(19); ringSq(c, 700, 184 + 3 * 68 + 17, 30 + k * 1800, 4, C.ink, .35 * Math.max(0, 1 - k / .5)); }
+  c.restore();
+  stepChrome(c, t0, t, 1, "LOCK THE DEFINITIONS", C.ink, C.ink);
+}
+
+/* ─────────────── Bước 03: Xây và đối chiếu — hai bộ số phải khớp ─────────────── */
+function sceneReconcile(c, t) {
+  const t0 = T.step[2], u = t - t0; fill(c, C.ink);
+  c.save(); cam(c, 1 + .04 * clamp(u / .94), 0);
+  dotField(c, .07, C.text, 4, 40);
+  const n = 14, bw = 70, gp = 46, x0 = (W - (n * bw + (n - 1) * gp)) / 2, base = 760;
+  const bad = { 3: 96, 8: -84, 11: 110 };
+  const tSnap = b(21) - t0; // beat 21 = u 0.469
+  for (let i = 0; i < n; i++) {
+    const h = 130 + 400 * H2(i, 3); const x = x0 + i * (bw + gp);
+    const grow = eOut5((u - i * .010) / .16);
+    // cột A (nguồn): trắng đặc
+    c.fillStyle = C.text; c.fillRect(x, base - h * grow, bw, h * grow);
+    // cột B (dựng lại): viền lime, lệch ở 3 cột
+    const err = bad[i] || 0; const k = eOutBack((u - tSnap) / .16);
+    const hb = h + (u >= tSnap ? err * (1 - clamp(k)) : err);
+    const showB = eOut3((u - .20 - i * .006) / .10);
+    if (showB > 0) {
+      c.strokeStyle = err && u < tSnap ? C.lime : C.blue; c.lineWidth = 5; c.globalAlpha = showB;
+      c.strokeRect(x - 7, base - hb * grow - 7, bw + 14, hb * grow + 14); c.globalAlpha = 1;
+      if (err && u >= .28 && u < tSnap) { if (Math.floor(u * 30) % 2 === 0) { c.fillStyle = C.lime; c.globalAlpha = .9; c.fillRect(x, base - hb * grow, bw, Math.abs(err)); c.globalAlpha = 1; } }
+    }
+    // hàng ô "khớp" bên dưới đường nền
+    const okT = tSnap + .03 + i * .016;
+    c.fillStyle = u >= okT ? C.lime : "rgba(242,245,236,.16)"; c.fillRect(x + bw / 2 - 10, base + 34, 20, 20);
+  }
+  c.fillStyle = C.line; c.fillRect(x0 - 24, base, n * bw + (n - 1) * gp + 48, 3);
+  if (u >= tSnap) { const k = u - tSnap; ringSq(c, W / 2, base - 200, 60 + k * 2400, 3, C.lime, .35 * Math.max(0, 1 - k / .5)); glow(c, W / 2, base - 100, 900, C.lime, .10 * Math.max(0, 1 - k / .4)); }
+  c.restore();
+  stepChrome(c, t0, t, 2, "BUILD & RECONCILE", C.text, C.lime);
+}
+
+/* ─────────────── Bước 04: Đưa vào sử dụng — giao diện thật của ba app, cắt theo nốt đen ─────────────── */
+const SHIP = [
+  { at: () => T.step[3], img: "ghn", sw: { x: 250, y: 60, w: 1550, h: 840 }, rot: -.012, scan: .70 },
+  { at: () => T.img2, img: "pg", sw: { x: 0, y: 0, w: 1838, h: 800 }, rot: .012, scan: .55 },
+  { at: () => T.img3, img: "tts", sw: { x: 0, y: 0, w: 1590, h: 690 }, rot: -.008, scan: .62 },
+];
+function sceneShip(c, t) {
+  const t0 = T.step[3], u = t - t0; fill(c, C.ink);
+  let k = 0; for (let i = 0; i < SHIP.length; i++) if (t >= SHIP[i].at()) k = i;
+  const shot = SHIP[k], u2 = t - shot.at();
+  c.save(); cam(c, 1 + .03 * clamp(u / .94), 0);
+  dotField(c, .07, C.text, 4, 40);
+  // ô lớn chạy nền
+  for (let i = 0; i < 6; i++) { const x = ((i * 380 + t * 60) % 2400) - 240; c.fillStyle = "rgba(212,242,54,.06)"; c.fillRect(x, 120 + (i % 3) * 260, 200, 200); }
+  const img = IMG[shot.img], sw = shot.sw;
+  const dw = 1300, dh = Math.round(dw * sw.h / sw.w);
+  const e = eOut5(u2 / .20), sc = lerp(1.45, 1, e), rot = lerp(shot.rot * 4, shot.rot, e), al = clamp(e * 3);
+  const dx = 560, dy = 110;
+  c.save(); c.translate(dx + dw / 2, dy + dh / 2); c.rotate(rot); c.scale(sc, sc); c.globalAlpha = al;
+  c.shadowColor = "rgba(0,0,0,.6)"; c.shadowBlur = 60; c.shadowOffsetY = 24; c.fillStyle = C.ink; c.fillRect(-dw / 2, -dh / 2, dw, dh); c.shadowColor = "transparent";
+  c.drawImage(img, sw.x, sw.y, sw.w, sw.h, -dw / 2, -dh / 2, dw, dh);
+  c.strokeStyle = C.line; c.lineWidth = 3; c.strokeRect(-dw / 2, -dh / 2, dw, dh);
+  c.restore(); c.globalAlpha = 1;
+  // ô lime "con trỏ" quét trên bảng
+  const cu = u2 - .12; if (cu > 0) { const px = dx + 60 + (cu * 1400) % (dw - 160), py = dy + dh * shot.scan; c.fillStyle = C.lime; c.globalAlpha = .9; c.fillRect(q(px, 40), q(py, 40), 40, 40); c.globalAlpha = 1; }
+  // bộ đếm 1/3 · 2/3 · 3/3 cạnh nhãn
+  for (let i = 0; i < SHIP.length; i++) { c.fillStyle = i <= k ? C.lime : "rgba(242,245,236,.18)"; c.fillRect(dx + i * 22, dy + dh + 30, 14, 14); }
+  text(c, "REAL INTERFACE · DEMO DATA", dx + SHIP.length * 22 + 14, dy + dh + 46, font(500, 22, "IBM Plex Mono"), C.sec, "left", 2);
+  c.restore();
+  stepChrome(c, t0, t, 3, "PUT INTO USE", C.text, C.lime);
+}
+
+/* ─────────────── Con số: 90,1% → 97,5% (pickup on-time, nguồn: case 3PL) ─────────────── */
+function sceneNumber(c, t) {
+  const u = t - T.num; fill(c, C.ink);
+  c.save(); cam(c, 1 + .05 * clamp(u / .70), 0);
+  dotField(c, .06, C.text, 4, 40);
+  // 6 nấc đếm theo nốt 1/32 bắt đầu từ b24.625
+  const tk0 = b(24.625), step = b(.125);
+  const tick = clamp(Math.floor((t - tk0) / step + 1), 0, 6);
+  const val = t < tk0 ? 90.1 : lerp(90.1, 97.5, tick / 6);
+  const done = t >= T.numLock;
+  const fmt = v => v.toFixed(1) + "%";
+  const f = font(400, 430, "Archivo Black");
+  const s = fmt(val);
+  glow(c, W / 2, 500, 900, C.lime, done ? .18 : .05);
+  text(c, s, W / 2, 660, f, done ? C.lime : C.text, "center", -8);
+  // nhãn (nguồn: resultNote / evidence của case 3PL)
+  text(c, "PICKUP ON-TIME", 100, 120, font(600, 34, "IBM Plex Mono"), C.lime, "left", 3);
+  text(c, "VIETTEL POST · SHOPEE · 2021–2025", 100, 168, font(500, 26, "IBM Plex Mono"), C.sec, "left", 2);
+  // thanh 48 ô = 100%
+  const on = Math.round(48 * val / 100); const y = 880;
+  for (let i = 0; i < 48; i++) {
+    const lit = i < on, newer = lit && i >= 43 && t >= tk0;
+    c.fillStyle = newer || (done && lit && i >= 43) ? C.lime : (lit ? C.text : "rgba(242,245,236,.14)");
+    c.globalAlpha = lit ? 1 : 1; c.fillRect(i * 40 + 6, y, 28, 56);
+  }
+  if (done) { const k = t - T.numLock; ringSq(c, W / 2, 540, 120 + k * 2600, 4, C.lime, .5 * Math.max(0, 1 - k / .5)); }
+  c.restore();
+}
+
+/* ─────────────── MAKE / THINGS / WORK. — MAKE, THINGS đè lên hai game tự làm; WORK. nện lại trên nền lime ─────────────── */
+const WORDS = [
+  { txt: "MAKE", at: () => T.make, img: "game2d", anchor: 0, top: true, cap: "2D MINIGAME · BUILT INTO THIS PORTFOLIO" },
+  { txt: "THINGS", at: () => T.things, img: "game3d", anchor: .5, cap: "3D OPEN WORLD · PERSONAL PROJECT" },
+  { txt: "WORK.", at: () => T.work },
+];
+function coverImage(c, img, anchorX, s) {   // phủ kín khung, neo theo trục ngang (0 = mép trái)
+  const k = Math.max(W / img.width, H / img.height) * s, w = img.width * k, h = img.height * k;
+  c.drawImage(img, (W - w) * anchorX, (H - h) / 2, w, h);
+}
+function sceneWork(c, t) {
+  let k = 0; for (let i = 0; i < WORDS.length; i++) if (t >= WORDS[i].at()) k = i;
+  const w = WORDS[k], u = t - w.at(), e = eOut5(u / .10);
+  if (w.img) {
+    fill(c, C.ink);
+    c.save(); coverImage(c, IMG[w.img], w.anchor, lerp(1.10, 1.02, eOut3(u / .24))); c.restore();
+    // chữ đặt ở nửa không có nhân vật: MAKE ở trên (game 2D, nhân vật ở đáy), THINGS ở dưới (game 3D, nhân vật giữa)
+    const g = w.top ? c.createLinearGradient(0, H * .62, 0, 0) : c.createLinearGradient(0, H * .40, 0, H);
+    g.addColorStop(0, "rgba(7,13,10,0)"); g.addColorStop(.55, "rgba(7,13,10,.78)"); g.addColorStop(1, "rgba(7,13,10,.94)");
+    c.fillStyle = g; c.fillRect(0, 0, W, H);
+    let size = 400; const wid = measure(c, w.txt, font(400, size, "Archivo Black"), -8); size = Math.min(400, size * 1640 / wid);
+    text(c, w.txt, W / 2, (w.top ? 330 : 1000) + (1 - e) * (w.top ? -50 : 50), font(400, size, "Archivo Black"), C.lime, "center", -8);
+    // nhãn nguồn ảnh, đặt trên nền tối cho dễ đọc
+    const cf = font(600, 24, "IBM Plex Mono"), cw = measure(c, w.cap, cf, 3), cy = w.top ? H - 126 : 150;
+    c.fillStyle = "rgba(7,13,10,.82)"; c.fillRect(84, cy, cw + 64, 56); c.fillStyle = C.lime; c.fillRect(100, cy + 20, 16, 16);
+    text(c, w.cap, 132, cy + 37, cf, C.text, "left", 3);
+  } else {
+    fill(c, C.lime);
+    c.save(); cam(c, 1 + .10 * clamp(u / .24), 0);
+    dotField(c, .10, C.ink, 4, 40);
+    let size = 640; const wid = measure(c, w.txt, font(400, size, "Archivo Black"), -10);
+    size = Math.min(700, size * 1730 / wid);
+    text(c, w.txt, W / 2, 540 + size * .35 + (1 - e) * 60, font(400, size, "Archivo Black"), C.ink, "center", -10);
+    c.restore();
+  }
+  // gạch tiến độ ba nhát
+  for (let i = 0; i < 3; i++) { c.fillStyle = w.img ? C.lime : C.ink; c.globalAlpha = k >= i ? 1 : .22; c.fillRect(W / 2 - 96 + i * 72, w.top ? 40 : 1040, 48, 12); }
+  c.globalAlpha = 1;
+}
+
+/* ─────────────── Im lặng → tên ─────────────── */
+function sceneSilence(c, t) {
+  fill(c, "#000");
+  if (t >= T.spark && t < T.hit) { // một pixel lime — nốt đầu tiên của cả câu chuyện
+    const on = Math.floor((t - T.spark) / .055) % 2 === 0 || t > T.hit - .07;
+    if (on) { c.fillStyle = C.lime; c.fillRect(W / 2 - 6, H / 2 - 6, 12, 12); glow(c, W / 2, H / 2, 90, C.lime, .5); }
+  }
+}
+let NAME = { txt: "VINH LUONG" };
+const PILLARS = ["DATA", "PRODUCT", "AI", "SOLUTION"];
+function sceneName(c, t) {
+  const u = t - T.hit; fill(c, C.ink);
+  const zoom = 1 + .05 * clamp(u / 1.9);
+  c.save(); cam(c, zoom, 0);
+  dotField(c, .08 * eOut3(u / .6), C.text, 4, 40);
+  glow(c, W / 2, 560, 1100, C.lime, .10 * eOut3(u / .5));
+  // vòng vuông lan
+  for (let i = 0; i < 3; i++) { const k = u - i * .07; if (k > 0 && k < 1.1) ringSq(c, W / 2, 560, 80 + k * 2600, 4 - i, C.lime, .55 * (1 - k / 1.1)); }
+  // logo — ma trận tự sắp lại rồi dừng ở thế IDLE
+  const perm = u < .12 ? PERMS[0] : u < .24 ? PERMS[1] : u < .36 ? PERMS[3] : u < .48 ? PERMS[0] : PERMS[2];
+  const cell = 34, gap = 8, mx = W / 2 - (3 * cell + 2 * gap) / 2, my = 262;
+  const me = eOut5(u / .18);
+  drawMark(c, mx, my - (1 - me) * 40, cell, gap, perm, me, C.lime, C.dim, 1);
+  // tên
+  const fN = font(700, 178, "Space Grotesk"); let fs = 178; const wN = measure(c, NAME.txt, fN, -4); if (wN > 1560) fs = 178 * 1560 / wN;
+  const f = font(700, fs, "Space Grotesk"), reveal = eOut5((u - .02) / .30);
+  txtX.clearRect(0, 0, W, H);
+  txtX.font = f; txtX.letterSpacing = "-4px"; txtX.textAlign = "center"; txtX.fillStyle = C.text; txtX.fillText(NAME.txt, W / 2, 660);
+  // vệt sáng quét qua chữ (source-atop)
+  const sw = (t - 14.05) / .55; if (sw > 0 && sw < 1) {
+    const gx = lerp(-300, W + 300, sw); const g = txtX.createLinearGradient(gx - 260, 0, gx + 260, 0);
+    g.addColorStop(0, "rgba(212,242,54,0)"); g.addColorStop(.5, "rgba(230,255,120,1)"); g.addColorStop(1, "rgba(212,242,54,0)");
+    txtX.globalCompositeOperation = "source-atop"; txtX.fillStyle = g; txtX.fillRect(0, 0, W, H); txtX.globalCompositeOperation = "source-over";
+  }
+  c.save(); c.beginPath(); const tw = Math.min(W, Math.ceil(reveal * W / 80) * 80); c.rect((W - tw) / 2, 0, tw, H); c.clip();
+  c.drawImage(txtC, 0, 0); c.restore();
+  // bốn trụ — mỗi chữ bật trên một nốt móc, ngăn bằng ô lime của logo
+  const pf = font(600, 40, "IBM Plex Mono"), gapW = 76;
+  const ws = PILLARS.map(p => measure(c, p, pf, 12)), total = ws.reduce((a, x) => a + x, 0) + gapW * (PILLARS.length - 1);
+  let px = (W - total) / 2;
+  PILLARS.forEach((p, i) => {
+    const pu = t - b(29 + i * .5), pe = eOut5(pu / .12);
+    if (pu >= 0) {
+      const hot = pu < .10;
+      c.globalAlpha = clamp(pe * 2); text(c, p, px, 770 + (1 - pe) * 18, pf, hot ? C.lime : C.text, "left", 12);
+      if (hot) glow(c, px + ws[i] / 2, 755, 160, C.lime, .35 * (1 - pu / .10));
+      c.globalAlpha = 1;
+      if (i < PILLARS.length - 1) { c.fillStyle = C.lime; c.fillRect(px + ws[i] + gapW / 2 - 12, 747, 12, 12); }
+    }
+    px += ws[i] + gapW;
+  });
+  const ua = eOut3((u - 1.30) / .4) * .75;
+  c.globalAlpha = ua; text(c, "vinhluong-here.vercel.app", W / 2, 985, font(500, 28, "IBM Plex Mono"), C.sec, "center", 2); c.globalAlpha = 1;
+  c.restore();
+}
+
+/* ─────────────── Điều phối cảnh ─────────────── */
+function drawScene(c, t) {
+  if (t < b(16)) return sceneField(c, t);
+  if (t < T.step[1]) return sceneUnderstand(c, t);
+  if (t < T.step[2]) return sceneDefine(c, t);
+  if (t < T.step[3]) return sceneReconcile(c, t);
+  if (t < T.num) return sceneShip(c, t);
+  if (t < T.make) return sceneNumber(c, t);
+  if (t < T.cut) return sceneWork(c, t);
+  if (t < T.hit) return sceneSilence(c, t);
+  return sceneName(c, t);
+}
+
+/* ─────────────── Hậu kỳ ─────────────── */
+function pixelate(dst, src, p) {
+  dst.imageSmoothingEnabled = false;
+  if (p <= 1) { dst.drawImage(src, 0, 0); return; }
+  let lv = 0; while (lv < 4 && (1 << (lv + 1)) <= p) lv++;
+  for (let i = 1; i <= lv; i++) { const m = mips[i].getContext("2d"); m.imageSmoothingEnabled = true; m.imageSmoothingQuality = "high"; m.drawImage(i === 1 ? src : mips[i - 1], 0, 0, mips[i].width, mips[i].height); }
+  const from = lv === 0 ? src : mips[lv], sw = Math.ceil(W / p), sh = Math.ceil(H / p);
+  const m = tmpX; m.imageSmoothingEnabled = true; m.imageSmoothingQuality = "high"; m.clearRect(0, 0, W, H);
+  m.drawImage(from, 0, 0, from.width, from.height, 0, 0, sw, sh);
+  dst.imageSmoothingEnabled = false; dst.drawImage(tmpC, 0, 0, sw, sh, 0, 0, sw * p, sh * p);
+}
+function chroma(dst, px) {
+  const im = dst.getImageData(0, 0, W, H), d = im.data, o = new Uint8ClampedArray(d);
+  const s = Math.round(px);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const i = (y * W + x) * 4, xr = Math.min(W - 1, x + s), xb = Math.max(0, x - s);
+    d[i] = o[(y * W + xr) * 4]; d[i + 2] = o[(y * W + xb) * 4 + 2];
+  }
+  dst.putImageData(im, 0, 0);
+}
+let NOISE = null, VIG = null;
+function initPost() {
+  NOISE = mk(512, 512); const nx = NOISE.getContext("2d"), im = nx.createImageData(512, 512);
+  for (let i = 0; i < 512 * 512; i++) { const v = Math.floor(hash(i + 99) * 255); im.data[i * 4] = im.data[i * 4 + 1] = im.data[i * 4 + 2] = v; im.data[i * 4 + 3] = 255; }
+  nx.putImageData(im, 0, 0);
+  VIG = mk(); const vx = VIG.getContext("2d"); const g = vx.createRadialGradient(W / 2, H / 2, H * .35, W / 2, H / 2, H * 1.05);
+  g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,.55)"); vx.fillStyle = g; vx.fillRect(0, 0, W, H);
+}
+
+/* một mẫu thời gian → cảnh thô (scn) → pixelate → out */
+function renderSample(t, out, frameSeed) {
+  const st = hitState(t);
+  sx.setTransform(1, 0, 0, 1, 0, 0); sx.globalAlpha = 1; sx.globalCompositeOperation = "source-over";
+  sx.save();
+  if (st.shake > .3) { // rung + xoay nhẹ, quyết định theo khung (không ngẫu nhiên thật)
+    const fi = Math.floor(t * FPS + 1e-6);
+    sx.translate((H2(fi, 1) - .5) * 2 * st.shake, (H2(fi, 2) - .5) * 2 * st.shake);
+    sx.translate(W / 2, H / 2); sx.rotate((H2(fi, 3) - .5) * .004 * st.shake); sx.translate(-W / 2, -H / 2);
+  }
+  drawScene(sx, t);
+  sx.restore();
+  out.setTransform(1, 0, 0, 1, 0, 0); out.globalAlpha = 1; out.globalCompositeOperation = "source-over";
+  pixelate(out, scn, st.pix);
+  if (st.ca > .4) chroma(out, st.ca);
+  if (st.flash > 0) { out.globalAlpha = st.flash; out.fillStyle = st.fcol; out.fillRect(0, 0, W, H); out.globalAlpha = 1; }
+}
+function renderFrame(i) {
+  const t = i / FPS;
+  const S = isHot(t) ? 5 : 1;
+  if (S === 1) renderSample(t, ctx, i);
+  else {
+    ax.globalCompositeOperation = "source-over";
+    for (let k = 0; k < S; k++) {
+      const ts = t + ((k + .5) / S - .5) * (1 / FPS) * .6;   // màn trập ~216°
+      renderSample(Math.max(0, ts), ctx, i);
+      ax.globalAlpha = 1 / (k + 1); ax.drawImage(cv, 0, 0); ax.globalAlpha = 1;
+    }
+    ctx.globalAlpha = 1; ctx.drawImage(acc, 0, 0);
+  }
+  // bloom nhẹ cho vùng sáng
+  bloomX.filter = "brightness(.62) contrast(2.2)"; bloomX.drawImage(cv, 0, 0, 480, 270); bloomX.filter = "none";
+  ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = .13; ctx.filter = "blur(18px)"; ctx.drawImage(bloomC, 0, 0, W, H); ctx.restore();
+  // vignette + grain phim
+  ctx.drawImage(VIG, 0, 0);
+  ctx.save(); ctx.globalCompositeOperation = "soft-light"; ctx.globalAlpha = .16;
+  const ox = Math.floor(hash(i * 3 + 1) * 512), oy = Math.floor(hash(i * 3 + 2) * 512);
+  for (let x = -ox; x < W; x += 512) for (let y = -oy; y < H; y += 512) ctx.drawImage(NOISE, x, y);
+  ctx.restore();
+  // mở đầu / kết: chuyển đen mềm ở khung đầu tiên
+  if (t < .25) { ctx.fillStyle = "#000"; ctx.globalAlpha = 1 - t / .25; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
+  return true;
+}
+window.renderFrame = renderFrame;
+
+(async function boot() {
+  const q = new URLSearchParams(location.search);
+  const need = [
+    ['400 100px "Archivo Black"', "MAKE SENSE OF DATA.0123456789,%"],
+    ['700 100px "Space Grotesk"', "UNDERSTAND THE PROBLEM LOCK THE DEFINITIONS BUILD & RECONCILE PUT INTO USE VINH LUONG"],
+    ['600 30px "IBM Plex Mono"', "PICKUP ON-TIME DATA PRODUCT AI SOLUTION 2D MINIGAME · BUILT INTO THIS PORTFOLIO 3D OPEN WORLD · PERSONAL PROJECT 0123456789 ·–×"],
+    ['500 30px "IBM Plex Mono"', "LOGISTICS · E-COMMERCE VIETTEL POST · SHOPEE · 2021–2025 REAL INTERFACE · DEMO DATA vinhluong-here.vercel.app"],
+  ];
+  await Promise.all(need.map(([f, s]) => document.fonts.load(f, s)));
+  await Promise.all([loadImg("ghn", "assets/app-ghn-matrix.png"), loadImg("pg", "assets/app-pg-dashboard.png"),
+    loadImg("tts", "assets/app-ka-tts-monitor.png"), loadImg("game2d", "assets/game-ai-van-hanh.webp"), loadImg("game3d", "assets/game-3d-explore.webp")]);
+  initPost(); buildGlyphs();
+  window.__ready = true;
+  if (q.has("t")) { document.body.classList.add("fit"); renderFrame(Math.round(parseFloat(q.get("t")) * FPS)); }
+  else if (q.has("play")) { document.body.classList.add("fit"); const s = performance.now(); (function loop() { const i = Math.floor((performance.now() - s) / 1000 * FPS) % (DUR * FPS); renderFrame(i); requestAnimationFrame(loop); })(); }
+})();
+</script>
+</body>
+</html>

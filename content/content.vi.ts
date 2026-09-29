@@ -54,6 +54,16 @@ export const content: SiteContent = {
         },
       ],
     },
+    intro: {
+      src: "/portfolio/video/intro-teaser.mp4",
+      label: "Video giới thiệu portfolio",
+      skip: "Bỏ qua intro",
+      soundOn: "Bật tiếng",
+      soundOff: "Tắt tiếng",
+      play: "Xem intro",
+      enter: "Vào portfolio",
+      countdown: "Tự động vào sau {s} giây",
+    },
     worksIntro: "Những sản phẩm và phân tích tôi đã thực hiện, từ tổng hợp doanh số đến theo dõi hiệu suất giao nhận.",
     media: {
       "pg-sales-operations": {

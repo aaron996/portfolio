@@ -8,10 +8,12 @@ import { ExperienceSection } from "./ExperienceSection";
 import { SkillsSection } from "./SkillsSection";
 import { portfolioFontVariables } from "./PortfolioFonts";
 import { BackgroundVideo } from "./BackgroundVideo";
+import { IntroVideo } from "./IntroVideo";
 
 export function PortfolioHome() {
   return (
     <div className={`portfolio-v2 pf-home-experiment ${portfolioFontVariables}`}>
+      <IntroVideo />
       <BackgroundVideo />
       <div className="pf-nav-wrapper">
         <PortfolioNav showMark />
