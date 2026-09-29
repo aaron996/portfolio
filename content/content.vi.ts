@@ -63,6 +63,7 @@ export const content: SiteContent = {
       play: "Xem intro",
       enter: "Vào portfolio",
       countdown: "Tự động vào sau {s} giây",
+      replay: "Xem lại intro",
     },
     worksIntro: "Những sản phẩm và phân tích tôi đã thực hiện, từ tổng hợp doanh số đến theo dõi hiệu suất giao nhận.",
     media: {
