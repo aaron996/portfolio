@@ -3,6 +3,7 @@ import Link from "next/link";
 import { content } from "@/content/content.vi";
 import { BrandMark } from "@/components/ui/BrandMark";
 import { SectionReveal } from "./SectionReveal";
+import { IntroReplayButton } from "./IntroReplayButton";
 
 export function PortfolioNav({ showMark = false }: { showMark?: boolean }) {
   const { prototype: p, meta, contact } = content;
@@ -21,6 +22,7 @@ export function PortfolioNav({ showMark = false }: { showMark?: boolean }) {
             {link.label}
           </Link>
         ))}
+        {showMark && <IntroReplayButton />}
         <a className="pf-cv" href={contact.cvHref}>
           {p.labels.cv}
           <PortfolioIcon />

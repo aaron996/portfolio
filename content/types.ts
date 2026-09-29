@@ -609,7 +609,7 @@ export interface PortfolioPrototype {
   /** Video intro phủ toàn màn hình khi mở trang chủ (một lần mỗi phiên). `countdown` chứa {s} = số giây còn lại. */
   intro: {
     src: string; label: string; skip: string; soundOn: string; soundOff: string;
-    play: string; enter: string; countdown: string;
+    play: string; enter: string; countdown: string; replay: string;
   };
   worksIntro: string;
   media: Record<string, PrototypeMedia>;
