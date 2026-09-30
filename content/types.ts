@@ -596,7 +596,8 @@ export interface PortfolioPrototype {
     objects: { container: Cta; keyboard: Cta; description: string };
   };
   labels: {
-    cv: string; skip: string; navigation: string; works: string; otherWorks: string;
+    cv: string; navCv: string; navGame: string; navIntro: string;
+    skip: string; navigation: string; works: string; otherWorks: string;
     process: string; about: string; experience: string; skills: string;
     demo: string; enlarge: string; closeImage: string; imageViewer: string;
     back: string; decisions: string; details: string; results: string; ownership: string;
