@@ -26,7 +26,7 @@ export function PortfolioHome() {
         <SkillsSection />
         <ExperienceSection />
         <AboutSection />
-        <PortfolioContact />
+        <PortfolioContact withEndingArt />
       </main>
     </div>
   );

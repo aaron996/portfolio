@@ -1465,3 +1465,73 @@ html[data-intro-seen] .pf-intro { display: none; }
 
 .pf-intro-replay { display: inline-flex; align-items: center; gap: 8px; padding-block: 10px; background: none; border: 0; color: inherit; font: inherit; cursor: pointer; }
 .pf-intro-replay:hover { color: var(--pf-accent); }
+
+/* Compact, tactile homepage navigation. Keep the case-page navigation unchanged. */
+.pf-home-experiment .pf-nav-links { gap: 7px; }
+.pf-home-experiment .pf-nav-links .pf-nav-link,
+.pf-home-experiment .pf-nav-links .pf-nav-game,
+.pf-home-experiment .pf-nav-links .pf-cv,
+.pf-home-experiment .pf-nav-links .pf-intro-replay {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid rgba(194, 205, 187, .25);
+  border-radius: 7px;
+  background: rgba(19, 33, 25, .72);
+  color: var(--pf-text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 160ms ease-out, border-color 160ms ease-out, transform 160ms ease-out;
+}
+.pf-home-experiment .pf-nav-links .pf-cv { padding-left: 12px; }
+.pf-home-experiment .pf-nav-links .pf-nav-game {
+  background: var(--pf-accent);
+  border-color: var(--pf-accent);
+  color: var(--pf-dark);
+}
+.pf-home-experiment .pf-nav-links .pf-nav-link:hover,
+.pf-home-experiment .pf-nav-links .pf-cv:hover,
+.pf-home-experiment .pf-nav-links .pf-intro-replay:hover {
+  background: rgba(34, 55, 42, .95);
+  border-color: rgba(212, 242, 54, .68);
+  color: var(--pf-accent);
+  transform: translateY(-1px);
+}
+.pf-home-experiment .pf-nav-links .pf-nav-game:hover {
+  background: #e2ff5a;
+  border-color: #e2ff5a;
+  transform: translateY(-1px);
+}
+.pf-home-experiment .pf-nav-links :is(a, button):active { transform: translateY(1px); }
+.pf-home-experiment .pf-nav-links :is(a, button):focus-visible {
+  outline: 2px solid var(--pf-accent);
+  outline-offset: 3px;
+}
+.pf-home-experiment .pf-nav-links .pf-icon { width: 15px; height: 15px; }
+
+@media (max-width: 760px) {
+  .pf-home-experiment .pf-nav-links { justify-content: flex-start; gap: 7px; }
+  .pf-home-experiment .pf-nav-links .pf-nav-link,
+  .pf-home-experiment .pf-nav-links .pf-nav-game,
+  .pf-home-experiment .pf-nav-links .pf-cv,
+  .pf-home-experiment .pf-nav-links .pf-intro-replay { min-height: 40px; padding: 8px 10px; font-size: 12px; }
+}
+
+/* Decorative open frame at the very end of the homepage. */
+.pf-home-experiment .pf-ending { background: var(--pf-dark); }
+.pf-home-experiment .pf-ending-art {
+  width: 100%;
+  aspect-ratio: 3 / 1;
+  background: url("/portfolio/visuals/homepage/warehouse-to-port-footer-v1.png") center bottom / contain no-repeat;
+  pointer-events: none;
+}
+
+@media (max-width: 760px) {
+  .pf-home-experiment .pf-footer > .pf-footer-bottom { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+}

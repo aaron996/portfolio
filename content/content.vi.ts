@@ -13,7 +13,7 @@ const NEEDS_INPUT = (hint: string) => `⚠️ NEEDS_INPUT: ${hint}`;
 
 export const content: SiteContent = {
   prototype: {
-    nav: [{ label: "Công việc", href: "/#cases" }, { label: "Về tôi", href: "/#about" }, { label: "Liên hệ", href: "/#contact" }],
+    nav: [{ label: "Dự án", href: "/#cases" }, { label: "Về tôi", href: "/#about" }, { label: "Liên hệ", href: "/#contact" }],
     hero: {
       domain: "Logistics · Thương mại điện tử",
       heading: "MAKE SENSE OF DATA. MAKE THINGS WORK.",
@@ -28,7 +28,8 @@ export const content: SiteContent = {
       secondary: { label: "Trao đổi cùng tôi", href: "#contact" },
     },
     labels: {
-      cv: "Xem CV (PDF)", skip: "Đến nội dung chính", navigation: "Điều hướng chính",
+      cv: "Xem CV (PDF)", navCv: "CV", navGame: "Chơi game", navIntro: "Intro",
+      skip: "Đến nội dung chính", navigation: "Điều hướng chính",
       works: "Công việc tiêu biểu", otherWorks: "Kết quả và hệ thống",
       process: "Cách làm việc", about: "Tôi đến với dữ liệu từ phía vận hành",
       experience: "Kinh nghiệm", skills: "Năng lực qua công việc",
