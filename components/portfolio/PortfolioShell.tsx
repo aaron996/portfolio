@@ -24,8 +24,8 @@ export function PortfolioNav({ showMark = false }: { showMark?: boolean }) {
         ))}
         {showMark && (
           <Link href={p.contact.gameCta.href} className="pf-nav-game">
+            <PortfolioIcon name="play" />
             {p.labels.navGame}
-            <PortfolioIcon name="forward" />
           </Link>
         )}
         {showMark && <IntroReplayButton />}
@@ -39,10 +39,10 @@ export function PortfolioNav({ showMark = false }: { showMark?: boolean }) {
 }
 
 export function PortfolioContact({ withEndingArt = false }: { withEndingArt?: boolean }) {
-  const { prototype: p, contact, meta } = content;
+  const { prototype: p, contact } = content;
 
   return (
-    <>
+    <div className={withEndingArt ? "pf-ending" : undefined}>
       <section id="contact" className="pf-contact pf-section">
         <SectionReveal>
           <div className="pf-shell pf-contact-grid">
@@ -52,6 +52,7 @@ export function PortfolioContact({ withEndingArt = false }: { withEndingArt?: bo
             <div className="pf-contact-details">
               <p className="pf-contact-lead">{p.contact.body}</p>
               <a className="pf-email" href={`mailto:${contact.email}`}>
+                <PortfolioIcon name="mail" />
                 {contact.email}
                 <PortfolioIcon />
               </a>
@@ -62,10 +63,12 @@ export function PortfolioContact({ withEndingArt = false }: { withEndingArt?: bo
                   rel="noopener noreferrer"
                   className="pf-button pf-secondary-btn"
                 >
+                  <PortfolioIcon name="linkedin" />
                   {p.labels.linkedin}
                   <PortfolioIcon />
                 </a>
                 <a href={contact.cvHref} className="pf-button pf-secondary-btn">
+                  <PortfolioIcon name="pdf" />
                   {p.labels.cv}
                   <PortfolioIcon />
                 </a>
@@ -74,37 +77,32 @@ export function PortfolioContact({ withEndingArt = false }: { withEndingArt?: bo
           </div>
         </SectionReveal>
 
-        {/* Khối lời mời chơi game riêng biệt có viền */}
         <SectionReveal delay={0.1}>
           <div className="pf-shell pf-game-invite-container">
             <div className="pf-game-invite-banner">
-              <div className="pf-game-invite-text">
-                <span className="pf-game-badge">Mini-game</span>
-                <p className="pf-game-desc">{p.contact.game}</p>
+              <span className="pf-game-status">{p.contact.gameStatus}</span>
+              <div className="pf-game-invite-row">
+                <h3 className="pf-game-title"><span aria-hidden="true">&gt; </span>{p.contact.gameTitle}</h3>
+                <Link href={p.contact.gameCta.href} className="pf-button pf-game-btn">
+                  <span className="pf-game-key" aria-hidden="true">{p.contact.gameEntryKey}</span>
+                  {p.contact.gameCta.label}
+                  <PortfolioIcon name="forward" />
+                </Link>
               </div>
-              <Link href={p.contact.gameCta.href} className="pf-button pf-game-btn">
-                {p.contact.gameCta.label}
-                <PortfolioIcon name="forward" />
-              </Link>
             </div>
           </div>
         </SectionReveal>
       </section>
 
-      <div className={withEndingArt ? "pf-ending" : undefined}>
-        <footer className="pf-shell pf-footer">
-          <div className="pf-footer-bottom">
-            <span>
-              {meta.name} · {p.labels.location}
-            </span>
-            <a href="#main" className="pf-back-to-top">
-              {p.labels.top}
-              <PortfolioIcon name="up" />
-            </a>
-          </div>
-        </footer>
-        {withEndingArt && <div className="pf-ending-art" aria-hidden="true" />}
-      </div>
-    </>
+      <footer className="pf-shell pf-footer">
+        <div className="pf-footer-bottom">
+          <a href="#main" className="pf-back-to-top">
+            {p.labels.top}
+            <PortfolioIcon name="up" />
+          </a>
+        </div>
+      </footer>
+      {withEndingArt && <div className="pf-ending-art" aria-hidden="true" />}
+    </div>
   );
 }

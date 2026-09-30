@@ -127,8 +127,10 @@ export const content: SiteContent = {
     contact: {
       heading: "Trao đổi về công việc hoặc dự án",
       body: "Bạn đang tuyển BI/Data Analyst hoặc cần xây dashboard, chuẩn hoá báo cáo cho đội ngũ? Hãy gửi tôi bối cảnh công việc và điều bạn muốn giải quyết.",
-      game: "Ải Vận Hành — một minigame lấy cảm hứng từ những nơi tôi từng làm việc.",
-      gameCta: { label: "Khám phá minigame", href: "/game" },
+      gameStatus: "NHIỆM VỤ SẴN SÀNG",
+      gameTitle: "ẢI VẬN HÀNH",
+      gameEntryKey: "[ ENTER ]",
+      gameCta: { label: "BẮT ĐẦU", href: "/game" },
     },
     pg: {
       period: "Interdist · Từ T5/2026 · Bán thời gian, từ xa",

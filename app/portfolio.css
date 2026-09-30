@@ -191,14 +191,8 @@ body:has(.portfolio-v2)::after { display: none; }
 .pf-email { display: inline-flex; gap: 14px; align-items: center; color: var(--pf-accent); font-size: clamp(1.2rem, 2.2vw, 1.7rem); font-family: var(--hero-grotesk), var(--font-sans); font-weight: 600; text-decoration: none; margin-block: 8px 16px; overflow-wrap: anywhere; }
 .pf-email:hover { text-decoration: underline; }
 .pf-game-invite-container { margin-top: 24px; }
-.pf-game-invite-banner { display: flex; justify-content: space-between; align-items: center; gap: 24px; background: var(--pf-elevated); border: 1px solid var(--pf-line); border-radius: 12px; padding: 22px 28px; transition: border-color 180ms ease-out; }
-.pf-game-invite-banner:hover { border-color: var(--pf-line-strong); }
-.pf-game-invite-text { display: flex; align-items: center; gap: 16px; }
-.pf-game-badge { font-family: var(--hero-mono), monospace; font-size: 11px; text-transform: uppercase; color: var(--pf-accent); padding: 3px 8px; background: rgba(212, 242, 54, 0.1); border-radius: 4px; }
-.pf-game-desc { font-size: 14px; color: var(--pf-text); margin: 0; }
-.pf-game-btn { background: var(--pf-accent); color: var(--pf-dark); font-weight: 600; border-radius: 999px; padding: 10px 22px; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; transition: transform 140ms ease-out, filter 140ms ease-out; }
-.pf-game-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
-.pf-game-btn:active { transform: translateY(1px); }
+.pf-game-invite-banner { transition: border-color 180ms ease-out; }
+.pf-game-btn { display: inline-flex; align-items: center; text-decoration: none; }
 
 .pf-footer { padding-block: 32px 24px; font-size: 13px; }
 .pf-footer-bottom { display: flex; align-items: center; justify-content: space-between; gap: 20px; border-top: 1px solid var(--pf-line); padding-top: 20px; color: var(--pf-secondary); }
@@ -534,9 +528,6 @@ body:has(.portfolio-v2)::after { display: none; }
 .pf-about-narrative { border-left: 0; padding-left: 0; }
 .pf-about-sidebar-note { margin-top: 4px; padding: 0; border: 0; border-radius: 0; background: transparent; }
 .pf-contact { background: var(--pf-dark); }
-.pf-game-invite-banner { padding: 28px 0 0; border: 0; border-radius: 0; background: transparent; }
-.pf-game-invite-banner:hover { border-color: transparent; }
-.pf-game-badge { padding: 0; border-radius: 0; background: transparent; }
 
 @media (max-width: 900px) {
   .pf-showcase-list { gap: 72px; }
@@ -566,8 +557,6 @@ body:has(.portfolio-v2)::after { display: none; }
   .pf-experience-still { margin-bottom: 36px; }
   .pf-timeline-item { grid-template-columns: 1fr; gap: 8px; }
   .pf-skills-grid { grid-template-columns: 1fr; gap: 36px; }
-  .pf-game-invite-banner { display: block; }
-  .pf-game-invite-banner .pf-game-btn { margin-top: 20px; }
 }
 
 /* Portfolio homepage layout */
@@ -1466,72 +1455,222 @@ html[data-intro-seen] .pf-intro { display: none; }
 .pf-intro-replay { display: inline-flex; align-items: center; gap: 8px; padding-block: 10px; background: none; border: 0; color: inherit; font: inherit; cursor: pointer; }
 .pf-intro-replay:hover { color: var(--pf-accent); }
 
-/* Compact, tactile homepage navigation. Keep the case-page navigation unchanged. */
-.pf-home-experiment .pf-nav-links { gap: 7px; }
-.pf-home-experiment .pf-nav-links .pf-nav-link,
-.pf-home-experiment .pf-nav-links .pf-nav-game,
-.pf-home-experiment .pf-nav-links .pf-cv,
-.pf-home-experiment .pf-nav-links .pf-intro-replay {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  min-height: 42px;
-  padding: 9px 12px;
-  border: 1px solid rgba(194, 205, 187, .25);
-  border-radius: 7px;
-  background: rgba(19, 33, 25, .72);
+/* Selected 4A: quiet section links, a game entry, and an intro control that reveals its name. */
+.pf-home-experiment .pf-nav-links { gap: 6px; }
+.pf-home-experiment .pf-nav-links .pf-nav-link {
+  padding: 10px;
+  border-bottom: 2px solid transparent;
   color: var(--pf-text);
   font-size: 13px;
   font-weight: 600;
-  line-height: 1.2;
   text-decoration: none;
   white-space: nowrap;
-  transition: background-color 160ms ease-out, border-color 160ms ease-out, transform 160ms ease-out;
-}
-.pf-home-experiment .pf-nav-links .pf-cv { padding-left: 12px; }
-.pf-home-experiment .pf-nav-links .pf-nav-game {
-  background: var(--pf-accent);
-  border-color: var(--pf-accent);
-  color: var(--pf-dark);
+  transition: color 180ms ease-out, border-color 180ms ease-out;
 }
 .pf-home-experiment .pf-nav-links .pf-nav-link:hover,
-.pf-home-experiment .pf-nav-links .pf-cv:hover,
-.pf-home-experiment .pf-nav-links .pf-intro-replay:hover {
-  background: rgba(34, 55, 42, .95);
-  border-color: rgba(212, 242, 54, .68);
-  color: var(--pf-accent);
-  transform: translateY(-1px);
+.pf-home-experiment .pf-nav-links .pf-nav-link:focus-visible { color: var(--pf-accent); border-bottom-color: var(--pf-accent); }
+.pf-home-experiment .pf-nav-links .pf-nav-game {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 9px 16px;
+  background: var(--pf-accent);
+  clip-path: polygon(0 0, 100% 0, 100% 76%, 90% 100%, 0 100%);
+  color: var(--pf-dark);
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 180ms ease-out, transform 180ms ease-out;
 }
-.pf-home-experiment .pf-nav-links .pf-nav-game:hover {
-  background: #e2ff5a;
-  border-color: #e2ff5a;
-  transform: translateY(-1px);
+.pf-home-experiment .pf-nav-links .pf-nav-game:hover { background: #e5fa73; transform: translateY(-1px); }
+.pf-home-experiment .pf-nav-links .pf-intro-replay {
+  justify-content: flex-start;
+  gap: 9px;
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
+  padding: 0 11px;
+  overflow: hidden;
+  border: 1px solid #687767;
+  border-radius: 6px;
+  background: #183020;
+  color: var(--pf-text);
+  white-space: nowrap;
+  transition: width 280ms cubic-bezier(.2, .8, .2, 1), background-color 180ms ease-out;
 }
-.pf-home-experiment .pf-nav-links :is(a, button):active { transform: translateY(1px); }
-.pf-home-experiment .pf-nav-links :is(a, button):focus-visible {
-  outline: 2px solid var(--pf-accent);
-  outline-offset: 3px;
+.pf-home-experiment .pf-nav-links .pf-intro-replay:hover,
+.pf-home-experiment .pf-nav-links .pf-intro-replay:focus-visible { width: 154px; background: #294730; }
+.pf-home-experiment .pf-intro-replay .pf-icon { flex: none; transition: transform 280ms cubic-bezier(.2, .8, .2, 1); }
+.pf-home-experiment .pf-intro-replay:hover .pf-icon,
+.pf-home-experiment .pf-intro-replay:focus-visible .pf-icon { transform: rotate(-45deg); }
+.pf-home-experiment .pf-intro-replay-label { opacity: 0; transition: opacity 150ms 80ms ease-out; }
+.pf-home-experiment .pf-intro-replay:hover .pf-intro-replay-label,
+.pf-home-experiment .pf-intro-replay:focus-visible .pf-intro-replay-label { opacity: 1; }
+.pf-home-experiment .pf-nav-links .pf-cv {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 42px;
+  padding: 9px 11px;
+  border: 1px solid #b65a59;
+  border-radius: 5px;
+  background: #2b1b1b;
+  color: #ffb5b4;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 180ms ease-out;
 }
-.pf-home-experiment .pf-nav-links .pf-icon { width: 15px; height: 15px; }
+.pf-home-experiment .pf-nav-links .pf-cv:hover { background: #482525; }
+.pf-home-experiment .pf-nav-links :is(a, button):focus-visible { outline: 2px solid var(--pf-accent); outline-offset: 3px; }
+.pf-home-experiment .pf-nav-links .pf-icon { width: 16px; height: 16px; }
 
+@media (hover: none) {
+  .pf-home-experiment .pf-nav-links .pf-intro-replay { width: 154px; }
+  .pf-home-experiment .pf-intro-replay-label { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pf-home-experiment .pf-nav-links .pf-intro-replay,
+  .pf-home-experiment .pf-intro-replay .pf-icon,
+  .pf-home-experiment .pf-intro-replay-label { transition: none; }
+}
 @media (max-width: 760px) {
-  .pf-home-experiment .pf-nav-links { justify-content: flex-start; gap: 7px; }
-  .pf-home-experiment .pf-nav-links .pf-nav-link,
+  .pf-home-experiment .pf-nav-links { justify-content: flex-start; gap: 4px; }
+  .pf-home-experiment .pf-nav-links .pf-nav-link { padding: 8px; font-size: 12px; }
   .pf-home-experiment .pf-nav-links .pf-nav-game,
-  .pf-home-experiment .pf-nav-links .pf-cv,
-  .pf-home-experiment .pf-nav-links .pf-intro-replay { min-height: 40px; padding: 8px 10px; font-size: 12px; }
+  .pf-home-experiment .pf-nav-links .pf-cv { min-height: 40px; padding: 8px 10px; font-size: 12px; }
+  .pf-home-experiment .pf-nav-links .pf-intro-replay { height: 40px; }
 }
 
-/* Decorative open frame at the very end of the homepage. */
-.pf-home-experiment .pf-ending { background: var(--pf-dark); }
+/* Selected 3A: email leads, with recognizable LinkedIn and PDF color cues. */
+.portfolio-v2 .pf-contact .pf-email {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 100%;
+  margin-block: 4px 0;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--pf-line);
+  color: var(--pf-text);
+  font-size: clamp(18px, 2.2vw, 27px);
+  font-weight: 700;
+  line-height: 1.2;
+}
+.portfolio-v2 .pf-contact .pf-email:hover { color: var(--pf-accent); text-decoration: none; }
+.portfolio-v2 .pf-contact .pf-email .pf-icon { flex: none; }
+.portfolio-v2 .pf-contact .pf-links { gap: 9px; }
+.portfolio-v2 .pf-contact .pf-links .pf-secondary-btn {
+  gap: 9px;
+  min-height: 42px;
+  padding: 9px 15px;
+  border: 0;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  transition: background-color 180ms ease-out, transform 180ms ease-out;
+}
+.portfolio-v2 .pf-contact .pf-links .pf-secondary-btn:first-child { background: #0a66c2; }
+.portfolio-v2 .pf-contact .pf-links .pf-secondary-btn:first-child:hover { background: #09559e; transform: translateY(-1px); }
+.portfolio-v2 .pf-contact .pf-links .pf-secondary-btn:last-child { background: #c83339; }
+.portfolio-v2 .pf-contact .pf-links .pf-secondary-btn:last-child:hover { background: #a9262d; transform: translateY(-1px); }
+.portfolio-v2 .pf-contact :is(.pf-email, .pf-secondary-btn, .pf-game-btn):focus-visible { outline: 2px solid var(--pf-accent); outline-offset: 3px; }
+
+/* Selected 2C: a small mission screen with one direct way into the game. */
+.portfolio-v2 .pf-contact .pf-game-invite-banner {
+  display: block;
+  padding: 15px;
+  border: 1px solid #61906a;
+  border-radius: 0;
+  background: #0c1b12;
+  box-shadow: inset 0 0 0 3px #172d1c;
+  font-family: var(--hero-mono), monospace;
+}
+.portfolio-v2 .pf-contact .pf-game-invite-banner:hover { border-color: #87b98e; }
+.portfolio-v2 .pf-contact .pf-game-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: #a5e5ab;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+.portfolio-v2 .pf-contact .pf-game-status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--pf-accent); }
+.portfolio-v2 .pf-contact .pf-game-invite-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin-top: 13px;
+  padding-top: 13px;
+  border-top: 1px solid #33523b;
+}
+.portfolio-v2 .pf-contact .pf-game-title {
+  margin: 0;
+  color: var(--pf-text);
+  font: 700 21px/1.2 var(--hero-mono), monospace;
+}
+.portfolio-v2 .pf-contact .pf-game-btn {
+  flex: none;
+  gap: 9px;
+  min-height: 46px;
+  margin: 0;
+  padding: 9px 15px;
+  border: 1px solid var(--pf-accent);
+  border-radius: 0;
+  background: transparent;
+  color: var(--pf-accent);
+  font: 700 12px/1.2 var(--hero-mono), monospace;
+  text-transform: uppercase;
+  transition: background-color 180ms ease-out, color 180ms ease-out;
+}
+.portfolio-v2 .pf-contact .pf-game-btn:hover { background: var(--pf-accent); color: var(--pf-dark); filter: none; transform: none; }
+.portfolio-v2 .pf-contact .pf-game-btn:active { transform: translateY(1px); }
+
+@media (max-width: 600px) {
+  .portfolio-v2 .pf-contact .pf-game-invite-row { align-items: flex-start; flex-direction: column; }
+  .portfolio-v2 .pf-contact .pf-game-btn { min-height: 44px; }
+  .portfolio-v2 .pf-contact .pf-email { font-size: clamp(17px, 5vw, 22px); }
+}
+
+/* The corner scenery rises behind the contact area without adding a blank image row. */
+.pf-home-experiment .pf-ending {
+  position: relative;
+  isolation: isolate;
+  background: var(--pf-dark);
+}
+.pf-home-experiment .pf-ending .pf-contact {
+  position: relative;
+  z-index: 2;
+  background: transparent !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.pf-home-experiment .pf-ending .pf-game-invite-container { width: min(100% - 48px, 800px); }
+.pf-home-experiment .pf-ending .pf-footer {
+  position: relative;
+  z-index: 2;
+  width: min(100% - 48px, 720px);
+  padding-block: 24px 40px;
+}
+.pf-home-experiment .pf-ending .pf-footer-bottom { justify-content: flex-end; }
 .pf-home-experiment .pf-ending-art {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 1;
   width: 100%;
-  aspect-ratio: 3 / 1;
-  background: url("/portfolio/visuals/homepage/warehouse-to-port-footer-v1.png") center bottom / contain no-repeat;
+  height: clamp(130px, 24vw, 420px);
+  background: url("/portfolio/visuals/homepage/warehouse-to-port-footer-v1.png") center bottom / 100% auto no-repeat;
   pointer-events: none;
 }
 
 @media (max-width: 760px) {
-  .pf-home-experiment .pf-footer > .pf-footer-bottom { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+  .pf-home-experiment .pf-ending .pf-game-invite-container { width: calc(100% - 40px); }
+  .pf-home-experiment .pf-footer > .pf-footer-bottom { display: flex; justify-content: center; align-items: center; text-align: center; }
 }
