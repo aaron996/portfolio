@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { GameCutscene } from "@/content/types";
+import { containDialogTab } from "@/components/ui/dialogFocus";
 import styles from "./GameCutscene.module.css";
 
 export function GameCutscene({ scene, nextLabel, beginLabel, skipLabel, counterLabel, onComplete }: {
@@ -13,6 +14,7 @@ export function GameCutscene({ scene, nextLabel, beginLabel, skipLabel, counterL
   onComplete: () => void;
 }) {
   const [card, setCard] = useState(0);
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
   const last = card === scene.cards.length - 1;
   const advance = () => {
@@ -20,21 +22,55 @@ export function GameCutscene({ scene, nextLabel, beginLabel, skipLabel, counterL
     else setCard((current) => current + 1);
   };
 
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") { event.preventDefault(); onComplete(); }
-      else if (event.key === "Enter" || event.key === " ") { event.preventDefault(); advance(); }
+  useLayoutEffect(() => {
+    const dialog = dialogRef.current;
+    const stage = dialog?.parentElement;
+    if (!dialog || !stage) return;
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    // A modal dialog lives in the top layer; anchor it to the existing game stage.
+    const fit = () => {
+      const rect = stage.getBoundingClientRect();
+      const height = Math.min(rect.height, window.innerHeight);
+      dialog.style.left = `${rect.left}px`;
+      dialog.style.top = `${Math.max(0, Math.min(rect.top, window.innerHeight - height))}px`;
+      dialog.style.width = `${rect.width}px`;
+      dialog.style.height = `${height}px`;
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [last, onComplete]);
+    fit();
+    dialog.showModal();
+    nextRef.current?.focus({ preventScroll: true });
+    const observer = new ResizeObserver(fit);
+    observer.observe(stage);
+    window.addEventListener("resize", fit);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", fit);
+      dialog.close();
+      const destination = previousFocus?.isConnected && previousFocus.matches('button, a[href], input, select, textarea, [tabindex]') && previousFocus.getClientRects().length > 0
+        ? previousFocus : stage.closest<HTMLElement>('[tabindex="-1"]');
+      destination?.focus({ preventScroll: true });
+    };
+  }, []);
 
   useEffect(() => { nextRef.current?.focus({ preventScroll: true }); }, [card]);
 
   const current = scene.cards[card];
   const counter = counterLabel.replace("{current}", String(card + 1)).replace("{total}", String(scene.cards.length));
   return (
-    <section className={styles.overlay} role="dialog" aria-modal="true" aria-label={scene.title}>
+    <dialog ref={dialogRef} className={styles.overlay} role="dialog" aria-label={scene.title}
+      onCancel={event => { event.preventDefault(); event.stopPropagation(); onComplete(); }}
+      onKeyDown={event => {
+        // Keep cutscene keys away from the engine's window-level controls.
+        event.stopPropagation();
+        containDialogTab(event);
+        if (event.key === "Escape") { event.preventDefault(); onComplete(); }
+        else if (event.key === "Enter" || event.key === " ") {
+          if (event.repeat) event.preventDefault();
+          else if (!(event.target instanceof HTMLElement && event.target.closest("button"))) {
+            event.preventDefault(); advance();
+          }
+        }
+      }}>
       <div className={`${styles.backdrop} ${styles[scene.focus]}`} aria-hidden="true">
         <div className={styles.world} />
         {scene.focus === "boss" ? <img className={styles.boss} src="/game/boss/b1-tel.png" alt="" /> : null}
@@ -53,6 +89,6 @@ export function GameCutscene({ scene, nextLabel, beginLabel, skipLabel, counterL
           <button ref={nextRef} type="button" className={styles.next} onClick={advance}>{last ? beginLabel : nextLabel}</button>
         </div>
       </div>
-    </section>
+    </dialog>
   );
 }

@@ -4,6 +4,7 @@ import { content } from "@/content/content.vi";
 import { BrandMark } from "@/components/ui/BrandMark";
 import { SectionReveal } from "./SectionReveal";
 import { IntroReplayButton } from "./IntroReplayButton";
+import { MobileNavMenu } from "./MobileNavMenu";
 
 export function PortfolioNav({ showMark = false }: { showMark?: boolean }) {
   const { prototype: p, meta, contact } = content;
@@ -34,6 +35,11 @@ export function PortfolioNav({ showMark = false }: { showMark?: boolean }) {
           <PortfolioIcon />
         </a>
       </div>
+      <div className="pf-mobile-nav">
+        <Link href={p.nav[0].href} className="pf-mobile-work">{p.labels.navWork}</Link>
+        <a href={contact.cvHref} aria-label={p.labels.cv} className="pf-mobile-cv">{p.labels.navCv}<PortfolioIcon /></a>
+        <MobileNavMenu showIntro={showMark} />
+      </div>
     </nav>
   );
 }
@@ -53,7 +59,7 @@ export function PortfolioContact({ withEndingArt = false }: { withEndingArt?: bo
               <p className="pf-contact-lead">{p.contact.body}</p>
               <a className="pf-email" href={`mailto:${contact.email}`}>
                 <PortfolioIcon name="mail" />
-                {contact.email}
+                <span className="pf-email-address">{contact.email}</span>
                 <PortfolioIcon />
               </a>
               <div className="pf-links">

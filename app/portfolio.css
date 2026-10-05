@@ -1430,8 +1430,12 @@ body:has(.portfolio-v2)::after { display: none; }
 .pf-home-experiment .pf-hero-main-content { max-width: 680px; }
 
 /* Intro video — phủ toàn màn hình khi mở trang chủ, một lần mỗi phiên */
-html[data-intro-seen] .pf-intro { display: none; }
-.pf-intro { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; background: #000; opacity: 1; transition: opacity 450ms ease-out; }
+.pf-intro { position: fixed; inset: 0; width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; z-index: 1000; display: none; place-items: center; background: #000; color: #f2f5ec; opacity: 1; transition: opacity 450ms ease-out; }
+.pf-intro[open] { display: grid; }
+.pf-intro::backdrop { background: #000; }
+.pf-intro-skip { display: inline-flex; align-items: center; gap: 10px; }
+.pf-mobile-nav { display: none; }
+.pf-email-address { min-width: 0; }
 .pf-intro[data-phase="closing"] { opacity: 0; pointer-events: none; }
 .pf-intro-frame { position: relative; width: min(100vw, 177.78vh); aspect-ratio: 16 / 9; }
 .pf-intro-video { display: block; width: 100%; height: 100%; object-fit: contain; background: #000; }
@@ -1673,4 +1677,28 @@ html[data-intro-seen] .pf-intro { display: none; }
 @media (max-width: 760px) {
   .pf-home-experiment .pf-ending .pf-game-invite-container { width: calc(100% - 40px); }
   .pf-home-experiment .pf-footer > .pf-footer-bottom { display: flex; justify-content: center; align-items: center; text-align: center; }
+}
+
+/* Mobile keeps work and CV visible; secondary destinations use a disclosure. */
+@media (max-width: 760px) {
+  .portfolio-v2 .pf-nav-links { display: none; }
+  .pf-mobile-nav { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 12px; font-size: 14px; }
+  .pf-mobile-nav > a, .pf-mobile-more-trigger { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 12px; font: inherit; color: inherit; }
+  .pf-mobile-nav .pf-mobile-work { padding-left: 0; font-weight: 700; }
+  .pf-mobile-nav .pf-mobile-cv { color: var(--pf-accent); }
+  .pf-mobile-more { position: relative; }
+  .pf-mobile-more-trigger { border: 1px solid var(--pf-line); border-radius: 6px; background: transparent; cursor: pointer; }
+  .pf-mobile-more-trigger[aria-expanded="true"] .pf-icon { transform: rotate(180deg); }
+  .pf-mobile-more-panel { position: absolute; top: calc(100% + 8px); right: 0; z-index: 50; display: flex; flex-direction: column; min-width: 200px; max-width: calc(100vw - 40px); padding: 8px; border: 1px solid var(--pf-line); border-radius: 8px; background: var(--pf-dark); box-shadow: 0 12px 24px rgba(0, 0, 0, .24); }
+  .pf-mobile-more-panel[hidden] { display: none; }
+  .pf-mobile-more-panel :is(a, button) { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 10px 12px; border: 0; border-radius: 4px; background: transparent; color: var(--pf-text); text-align: left; font: inherit; }
+  .pf-mobile-more-panel :is(a, button):hover { background: var(--pf-elevated); }
+  .pf-mobile-more-panel .pf-intro-replay-label { opacity: 1; transition: none; }
+  .pf-mobile-nav :is(a, button):focus-visible { outline: 2px solid var(--pf-accent); outline-offset: 3px; }
+  .portfolio-v2 .pf-contact .pf-email { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; min-height: 44px; gap: 6px; font-size: clamp(14px, 4.4vw, 18px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-intro { transition: none; }
+  .pf-intro-end { animation: none; }
 }

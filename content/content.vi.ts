@@ -28,7 +28,7 @@ export const content: SiteContent = {
       secondary: { label: "Trao đổi cùng tôi", href: "#contact" },
     },
     labels: {
-      cv: "Xem CV (PDF)", navCv: "CV", navGame: "Chơi game", navIntro: "Intro",
+      cv: "Xem CV (PDF)", navCv: "CV", navGame: "Chơi game", navIntro: "Intro", navWork: "Công việc", more: "Thêm",
       skip: "Đến nội dung chính", navigation: "Điều hướng chính",
       works: "Công việc tiêu biểu", otherWorks: "Kết quả và hệ thống",
       process: "Cách làm việc", about: "Tôi đến với dữ liệu từ phía vận hành",
