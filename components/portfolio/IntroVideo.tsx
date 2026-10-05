@@ -2,56 +2,79 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { content } from "@/content/content.vi";
+import { containDialogTab } from "@/components/ui/dialogFocus";
 
 const SEEN_KEY = "pf-intro-seen";
 const AUTO_ENTER_SECONDS = 5;
 export const INTRO_REPLAY_EVENT = "pf-intro-replay";
 
-/* Chạy trước khi React hydrate: người đã xem trong phiên này hoặc bật giảm chuyển động
-   thì ẩn lớp intro bằng CSS ngay từ lần vẽ đầu, không chớp màn đen. */
-const PRE_PAINT = `try{if(sessionStorage.getItem("${SEEN_KEY}")||matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.dataset.introSeen="1"}catch(e){}`;
-
 type Phase = "playing" | "blocked" | "ended" | "closing" | "gone";
 
 export function IntroVideo() {
   const { intro } = content.prototype;
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const skipRef = useRef<HTMLButtonElement>(null);
   const enterRef = useRef<HTMLButtonElement>(null);
-  const [phase, setPhase] = useState<Phase>("playing");
+  // SSR renders a closed dialog; only the client decides whether to autoplay.
+  const [phase, setPhase] = useState<Phase>("gone");
   const [muted, setMuted] = useState(false);
   const [left, setLeft] = useState(AUTO_ENTER_SECONDS);
   const [run, setRun] = useState(0);
 
   const close = useCallback(() => {
     try { sessionStorage.setItem(SEEN_KEY, "1"); } catch {}
+    document.documentElement.dataset.introSeen = "1";
     videoRef.current?.pause();
     setPhase((p) => (p === "gone" || p === "closing" ? p : "closing"));
   }, []);
 
-  // Quyết định có chạy intro không, khoá cuộn trang khi đang mở. Chạy lại mỗi lần `run` đổi (xem lại intro).
+  // Read storage on every mount, including client navigation back from a case.
   useEffect(() => {
-    if (document.documentElement.dataset.introSeen) { setPhase("gone"); return; }
+    let seen = document.documentElement.dataset.introSeen === "1";
+    try { seen ||= sessionStorage.getItem(SEEN_KEY) === "1"; } catch {}
+    if (!seen && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) setPhase("playing");
+  }, []);
+
+  const active = phase !== "gone";
+  useEffect(() => {
+    if (!active) return;
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    let cancelled = false;
+    const returnTo = returnFocusRef.current;
+    returnFocusRef.current = null;
     const v = videoRef.current;
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    if (!dialog.open) dialog.showModal();
     skipRef.current?.focus();
     if (v) {
       // Mặc định mở tiếng. Trình duyệt chặn autoplay có tiếng thì lùi về phát câm, người xem bấm loa để bật.
       v.currentTime = 0;
       v.muted = false;
       v.play().catch(() => {
+        if (cancelled) return;
         v.muted = true;
-        v.play().catch(() => setPhase("blocked"));
+        v.play().catch(() => { if (!cancelled) setPhase("blocked"); });
       });
     }
-    return () => { document.body.style.overflow = prevOverflow; };
-  }, [run]);
+    return () => {
+      cancelled = true;
+      v?.pause();
+      if (dialog.open) dialog.close();
+      document.body.style.overflow = prevOverflow;
+      const destination = returnTo?.isConnected && returnTo.getClientRects().length > 0
+        ? returnTo : document.getElementById("main");
+      destination?.focus({ preventScroll: true });
+    };
+  }, [active, run]);
 
   // Nút "Xem lại intro" ở thanh điều hướng gửi sự kiện này.
   useEffect(() => {
     const replay = () => {
-      delete document.documentElement.dataset.introSeen;
+      returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
       setLeft(AUTO_ENTER_SECONDS);
       setPhase("playing");
       setRun((n) => n + 1);
@@ -61,9 +84,9 @@ export function IntroVideo() {
   }, []);
 
   useEffect(() => {
-    if (phase === "gone") document.body.style.overflow = "";
     if (phase === "closing") {
-      const id = setTimeout(() => setPhase("gone"), 450);
+      const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 450;
+      const id = setTimeout(() => setPhase("gone"), duration);
       return () => clearTimeout(id);
     }
     if (phase === "ended") {
@@ -76,15 +99,6 @@ export function IntroVideo() {
 
   useEffect(() => { if (phase === "ended" && left <= 0) close(); }, [phase, left, close]);
 
-  useEffect(() => {
-    if (phase === "gone") return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [phase, close]);
-
-  if (phase === "gone") return null;
-
   const toggleSound = () => {
     const v = videoRef.current; if (!v) return;
     v.muted = !v.muted;
@@ -95,9 +109,9 @@ export function IntroVideo() {
   };
 
   return (
-    <>
-      <script dangerouslySetInnerHTML={{ __html: PRE_PAINT }} />
-      <div className="pf-intro" data-phase={phase} role="dialog" aria-modal="true" aria-label={intro.label}>
+      <dialog ref={dialogRef} className="pf-intro" data-phase={phase} aria-label={intro.label} onKeyDown={containDialogTab}
+        onCancel={event => { event.preventDefault(); close(); }}>
+      {active && <>
         <div className="pf-intro-frame">
           <video
             ref={videoRef}
@@ -126,13 +140,13 @@ export function IntroVideo() {
             </button>
           )}
           {phase !== "ended" && (
-            <button ref={skipRef} type="button" className="pf-intro-icon-btn" onClick={close} aria-label={intro.skip} title={intro.skip}>
-              <SkipIcon />
+            <button ref={skipRef} type="button" className="pf-intro-btn pf-intro-skip" onClick={close}>
+              {intro.skip}<SkipIcon />
             </button>
           )}
         </div>
-      </div>
-    </>
+      </>}
+      </dialog>
   );
 }
 
