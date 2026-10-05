@@ -1,5 +1,5 @@
 import { CareerObjectsPreview } from "./CareerObjectsPreview";
-import "./career-objects.css";
+import "@/components/portfolio/career-objects/career-objects.css";
 
 export default function CareerObjectsPage() {
   return <CareerObjectsPreview />;
