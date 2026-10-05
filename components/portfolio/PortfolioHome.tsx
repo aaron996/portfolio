@@ -1,10 +1,9 @@
 import { PortfolioNav, PortfolioContact } from "./PortfolioShell";
 import { HeroExperiment } from "./HeroExperiment";
-import { FeaturedWork } from "./FeaturedWork";
-import { OtherWorkSection } from "./OtherWorkSection";
+import { CareerObjects } from "./career-objects/CareerObjects";
+import "./career-objects/career-objects.css";
 import { ProcessSection } from "./ProcessSection";
 import { AboutSection } from "./AboutSection";
-import { ExperienceSection } from "./ExperienceSection";
 import { SkillsSection } from "./SkillsSection";
 import { portfolioFontVariables } from "./PortfolioFonts";
 import { BackgroundVideo } from "./BackgroundVideo";
@@ -20,11 +19,9 @@ export function PortfolioHome() {
       </div>
       <main id="main" tabIndex={-1} className="pf-content-flow">
         <HeroExperiment />
-        <FeaturedWork />
-        <OtherWorkSection />
+        <CareerObjects embedded />
         <ProcessSection />
         <SkillsSection />
-        <ExperienceSection />
         <AboutSection />
         <PortfolioContact withEndingArt />
       </main>

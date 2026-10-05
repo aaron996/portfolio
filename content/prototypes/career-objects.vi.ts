@@ -3,6 +3,7 @@ export type CareerObjectEntry = { id: CareerObjectId; label: string; company: st
 
 export const careerObjectsPreview = {
   title: "Khám phá công việc",
+  description: "Từ vận hành logistics đến phân tích dữ liệu và xây hệ thống. Chọn một mô hình để xem vai trò, công việc và các case liên quan.",
   status: "Bản nháp bố cục · mô hình mô phỏng, chưa phải GLB",
   back: "So với bản ảnh dẫn",
   navigation: "Chọn nơi làm việc",
