@@ -3,6 +3,7 @@
 import { content } from "@/content/content.vi";
 import { INTRO_REPLAY_EVENT } from "./IntroVideo";
 import { PortfolioIcon } from "./PortfolioIcon";
+import "./intro.css";
 
 export function IntroReplayButton({ onReplay }: { onReplay?: () => void }) {
   return (

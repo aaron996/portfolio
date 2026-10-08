@@ -1,0 +1,46 @@
+/* Trang 404 — đêm, con trỏ là đèn pin (--lx, --ly). Ô nhân vật dùng lại .hs-buddy ở home.css. */
+.nf { --buddy: 22px; background: var(--night); color: var(--night-text); }
+.nf-stage { --lx: 50%; --ly: 82%; position: relative; min-height: 100svh; overflow: hidden; outline: none; cursor: none; touch-action: pan-y; }
+.nf-stage[data-found="true"] { cursor: default; }
+.nf-brand { position: absolute; top: 20px; left: var(--gutter); z-index: 4; font-weight: 700; font-size: 15px; color: var(--night-muted); }
+.nf-brand:hover { color: var(--night-text); }
+
+.nf-scene { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 18px; padding: 0 var(--gutter) 120px; text-align: center; }
+.nf-code { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -62%); margin: 0; font-family: var(--hero-poster), sans-serif; font-size: clamp(140px, 30vw, 380px); line-height: 1; color: rgb(238 240 238 / .06); pointer-events: none; }
+.nf-null { position: relative; width: 64px; height: 64px; border: 2px dashed var(--night-muted); border-radius: 4px; }
+.nf-null .hs-eyes { opacity: 1; left: 22%; right: 22%; top: 28%; }
+.nf-null .hs-eyes i { width: 10px; height: 12px; background: var(--night-text); }
+.nf-scene h1 { position: relative; margin: 8px 0 0; font-size: clamp(30px, 4.4vw, 56px); font-weight: 700; letter-spacing: -.035em; }
+.nf-body { position: relative; margin: 0; max-width: 46ch; font-size: 17px; line-height: 1.6; color: var(--night-muted); }
+
+/* Bóng tối phủ toàn trang, chừa một vòng sáng ở chỗ đèn đang rọi. */
+.nf-dark { position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background: radial-gradient(circle 170px at var(--lx) var(--ly), transparent 0, transparent 40%, rgb(4 6 9 / .9) 75%, rgb(4 6 9) 100%);
+  transition: opacity 900ms ease; }
+.nf-stage[data-found="true"] .nf-dark { opacity: .12; }
+
+/* Ba ô đứng dưới đáy, mắt dạ quang nhìn theo đèn. */
+.nf-crew { position: absolute; left: 50%; bottom: 96px; z-index: 3; display: flex; align-items: flex-end; gap: 14px; transform: translateX(-50%); }
+.nf-crew .hs-buddy { position: relative; opacity: 1; background: #1a2331; }
+.nf-crew .hs-buddy[data-variant="green"] { background: #16301f; margin-left: 18px; }
+.nf-crew .hs-eyes { opacity: 1; }
+.nf-crew .hs-eyes i { background: var(--mark); box-shadow: 0 0 6px 1px rgb(220 242 90 / .75); }
+.nf-crew .hs-blink { animation: hs-blink 4.2s 1s infinite; }
+.nf-bubble { position: absolute; left: 6px; top: -34px; font-size: 22px; font-weight: 800; color: var(--mark); animation: nf-bob 1.6s ease-in-out infinite; }
+@keyframes nf-bob { 50% { transform: translateY(-4px); } }
+.nf-stage[data-found="true"] .nf-crew .hs-buddy { animation: nf-cheer 520ms cubic-bezier(.3,.7,.3,1) 2; transform-origin: 50% 100%; }
+.nf-stage[data-found="true"] .nf-crew .hs-buddy:nth-child(2) { animation-delay: 90ms; }
+.nf-stage[data-found="true"] .nf-crew .hs-buddy:nth-child(3) { animation-delay: 180ms; }
+@keyframes nf-cheer { 30% { transform: translateY(-18px) scale(.95, 1.08); } 60% { transform: translateY(0) scale(1.15, .85); } }
+
+.nf-bar { position: absolute; left: 0; right: 0; bottom: 24px; z-index: 4; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 12px 24px; padding: 0 var(--gutter); font-size: 14px; color: var(--night-muted); }
+.nf-bar a { display: inline-flex; align-items: center; gap: 8px; color: var(--night-text); }
+.nf-bar a:hover { color: var(--mark); }
+.nf-bar button { padding: 6px 12px; border: 1px solid var(--night-line); border-radius: var(--r-control); background: transparent; color: var(--night-text); font: inherit; cursor: pointer; }
+.nf-bar button:hover { border-color: var(--night-muted); }
+.nf :is(a, button):focus-visible { outline: 2px solid var(--mark); outline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .nf-dark { transition: none; }
+  .nf-bubble, .nf-stage[data-found="true"] .nf-crew .hs-buddy, .nf-crew .hs-blink { animation: none; }
+}

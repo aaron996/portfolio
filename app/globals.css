@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "./portfolio.css";
 
 @theme {
   /* Nền tối */
@@ -107,6 +106,9 @@ body {
 }
 
 .prose-lede { max-width: 62ch; line-height: 1.7; }
+
+/* Icon SVG dùng chung (components/portfolio/PortfolioIcon). */
+.pf-icon { display: inline-block; flex: 0 0 auto; vertical-align: middle; }
 
 /* Nhiễu hạt rất nhẹ phủ toàn trang */
 .grain::after {

@@ -1,4 +1,4 @@
-type IconName = "external" | "forward" | "back" | "up" | "close" | "plus" | "play" | "replay" | "mail" | "linkedin" | "pdf" | "chevron";
+type IconName = "external" | "forward" | "back" | "up" | "close" | "plus" | "play" | "replay" | "mail" | "linkedin" | "pdf" | "chevron" | "shuffle" | "sort" | "down";
 
 const paths: Record<IconName, string> = {
   external: "M5 15 15 5M5 5h10v10",
@@ -13,6 +13,9 @@ const paths: Record<IconName, string> = {
   linkedin: "M4 8v8M4 5v.1M8 16V8m0 3a3 3 0 0 1 6 0v5",
   pdf: "M5 2h7l3 3v13H5zM12 2v4h3M7 10h6M7 13h6",
   chevron: "m5 7 5 5 5-5",
+  shuffle: "M3 6h3.5l7 8H17M3 14h3.5l2-2.3M12 8.3 13.5 6H17m-2-2 2 2-2 2m0 4 2 2-2 2",
+  sort: "M4 16v-3M8 16V9.5M12 16V6.5M16 16V3.5",
+  down: "M10 3v14m-6-6 6 6 6-6",
 };
 
 export function PortfolioIcon({ name = "external" }: { name?: IconName }) {
