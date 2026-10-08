@@ -16,8 +16,8 @@ export const content: SiteContent = {
     nav: [{ label: "Dự án", href: "/#cases" }, { label: "Về tôi", href: "/#about" }, { label: "Liên hệ", href: "/#contact" }],
     hero: {
       domain: "Logistics · Thương mại điện tử",
-      heading: "MAKE SENSE OF DATA. MAKE THINGS WORK.",
-      headlineLines: ["MAKE SENSE", "OF DATA.", "MAKE THINGS", "WORK."],
+      heading: "MAKE SENSE OF DATA, MAKE THINGS WORK",
+      headlineLines: ["MAKE SENSE", "OF DATA", "MAKE THINGS", "WORK"],
       objects: {
         container: { label: "Từ logistics", href: "#experience" },
         keyboard: { label: "Đến chơi & làm game", href: "/game" },
@@ -152,6 +152,113 @@ export const content: SiteContent = {
       lesson: "Ở giai đoạn đầu, tôi dựng dashboard trước khi chốt xong định nghĩa chỉ tiêu và phải làm lại phần tính toán khi nghiệp vụ được làm rõ. Từ đó tôi viết định nghĩa ra và cho người dùng xác nhận trước khi bắt đầu code. Tôi cũng cần đo thời gian quy trình cũ ngay từ đầu để có mốc đánh giá tác động.",
     },
   },
+  /* Homepage mới (10/2026): bỏ video nền và object 3D; hero chỉ còn headline,
+     người xem tự rê chuột để "make sense of data". Mỗi section giữ ít chữ —
+     phần đọc sâu nằm ở trang case. */
+  home: {
+    nav: { work: "Công việc", contact: "Liên hệ", game: "Chơi game", cv: "CV", cvLabel: "Xem CV (PDF)" },
+    sort: {
+      hint: "Rê chuột qua các ô để sắp xếp",
+      hintTouch: "Kéo ngón tay qua các ô để sắp xếp",
+      sortAll: "Sắp xếp ngay",
+      reshuffle: "Xáo lại",
+      progress: "đã sắp xếp",
+      canvasLabel: "Các ô dữ liệu lộn xộn, rê chuột qua để chúng xếp thành biểu đồ cột",
+      /* Bong bóng của mấy ô "lạc" sau khi sắp xong — xem components/home/heroBuddies.ts. */
+      confused: "?",
+      spotted: "!",
+    },
+    work: {
+      heading: "Công việc tiêu biểu",
+      count: "case",
+      hint: "Rê vào một dòng để xem trước",
+      chart: {
+        slug: "shopee-3pl-performance",
+        before: { year: "2021", value: 90.1 },
+        after: { year: "2025", value: 97.5 },
+        aria: "Pickup đúng hạn tăng từ 90.1% năm 2021 lên 97.5% năm 2025",
+      },
+    },
+    timeline: {
+      heading: "Từ vận hành đến dữ liệu",
+      hint: "Chọn một chặng trên đường",
+      now: "nay",
+      sideJob: "song song",
+      axisOps: "Vận hành",
+      axisData: "Dữ liệu & sản phẩm",
+      chartLabel: "Đường đi nghề nghiệp từ 2019 đến nay, đi dần từ vận hành sang dữ liệu và sản phẩm",
+      /* level là vị trí tự đánh giá trên trục vận hành → dữ liệu, không in ra số. */
+      items: [
+        { company: "A.P. Moller Maersk", short: "Maersk", start: 2019, end: 2020, level: 0.08, role: "Export Care Business Partner", note: "Hàng xuất khẩu và master data khách hàng." },
+        { company: "J&T Express", short: "J&T", start: 2020, end: 2021, level: 0.3, role: "Key Account Specialist", note: "Luồng đơn Shopee, khoảng 300.000 đơn/ngày." },
+        { company: "Shopee", short: "Shopee", start: 2021, end: 2025, level: 0.52, role: "Logistics Management Specialist", note: "Hiệu suất đối tác vận chuyển: 90.1% → 97.5%." },
+        { company: "Giao Hàng Nhanh", short: "GHN", start: 2025, end: null, level: 0.8, role: "Key Account Solution / Data Analyst", note: "Chuẩn hoá báo cáo, app điều hành, quy trách nhiệm đơn trễ." },
+        { company: "Interdist", short: "Interdist", start: 2026, end: null, level: 0.97, parallel: true, role: "Dữ liệu & sản phẩm · bán thời gian", note: "Hệ thống doanh số P&G, song song với GHN." },
+      ],
+    },
+    about: {
+      lead: "Một con số chỉ có nghĩa khi trả lời được",
+      questions: [
+        { q: "Đơn đi qua đâu?", slug: "sla-attribution" },
+        { q: "Ai đọc báo cáo?", slug: "kas-reporting-automation" },
+        { q: "Họ làm gì tiếp theo?", slug: "kas-shopee-performance" },
+      ],
+      footnote: "AI giúp tôi viết code. Chốt logic và kiểm chứng đầu ra là việc của tôi.",
+      aside: "Ngoài giờ, tôi làm game.",
+      asideCta: "Thử Ải Vận Hành",
+    },
+    contact: {
+      heading: "Cùng làm rõ con số của bạn?",
+      copy: "Chép email",
+      copied: "Đã chép",
+      linkedin: "LinkedIn",
+      cv: "CV (PDF)",
+      gameTitle: "Hoặc vào ải trước đã",
+      gameCta: "Chơi Ải Vận Hành",
+    },
+    footer: { replay: "Xem lại intro", top: "Lên đầu trang" },
+    companions: { hide: "Ẩn bạn đồng hành", show: "Hiện bạn đồng hành", tired: "…" },
+  },
+
+  /* Trang case theo theme giấy (10/2026) — một template cho cả 5 case. */
+  casePage: {
+    back: "Tất cả công việc",
+    client: "Khách hàng",
+    role: "Vai trò",
+    period: "Thời gian",
+    context: "Bối cảnh",
+    decisions: "Những quyết định đứng sau con số",
+    why: "Vì sao khó",
+    decision: "Tôi đã quyết định",
+    features: "Những gì đã ship",
+    flow: "Luồng dữ liệu",
+    media: "Hệ thống trông như thế nào",
+    demoData: "Dữ liệu minh hoạ — không phải số liệu kinh doanh thật",
+    results: "Số liệu",
+    owned: "Phần tôi sở hữu",
+    notOwned: "Phần do người khác làm",
+    stack: "Công nghệ",
+    reflection: "Nhìn lại",
+    next: "Case tiếp theo",
+    others: "Case khác",
+    unverified: "Chưa xác thực",
+    unverifiedTitle: "Ước tính, chưa được đối chiếu bởi bên thứ ba",
+    progress: "Tiến độ đọc",
+  },
+
+  /* Trang 404: con trỏ là đèn pin, rọi trúng giữa trang thì lộ ra Null. */
+  notFound: {
+    code: "404",
+    hint: "Rê chuột để rọi đèn",
+    hintTouch: "Chạm và kéo để rọi đèn",
+    found: "Trang này là NULL.",
+    body: "Đường dẫn không trỏ tới đâu cả — Null đứng đây từ đầu mà không ai thấy.",
+    lights: "Bật đèn",
+    home: "Về trang chủ",
+    work: "Xem công việc",
+    spotted: "!",
+  },
+
   meta: {
     name: "Lương Thế Vinh",
     roleLabel: "BI & Data Analyst",
@@ -783,6 +890,7 @@ export const content: SiteContent = {
           decision:
             "Chốt một khoá định danh duy nhất, xác nhận tỷ lệ coverage trên dữ liệu thật, và verify riêng điều kiện lọc phân định luồng đơn trước khi cho phép bất kỳ báo cáo nào chạy trên nó.",
           term: "Entity resolution — chốt khoá và đo coverage trước khi báo cáo",
+          companion: "dedupe",
         },
         {
           /* Lấy từ KAS-159 / KAS-164: chuyển data job GXT Dashboard sang StarRocks. */
@@ -1077,6 +1185,7 @@ export const content: SiteContent = {
         value: "90.1% → 97.5%",
         label: "pickup on-time của Viettel Post, theo dõi trong 4 năm",
         verified: true,
+        companion: "outlier",
       },
 
       context: [

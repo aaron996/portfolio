@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { content } from "@/content/content.vi";
 import { containDialogTab } from "@/components/ui/dialogFocus";
+import "./intro.css";
 
 const SEEN_KEY = "pf-intro-seen";
 const AUTO_ENTER_SECONDS = 5;

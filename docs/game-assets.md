@@ -23,6 +23,7 @@ một thứ mới nhìn thấy được thì cập nhật bảng này ngay trong
 | `player/armed-run-1..4.png`, `armed-jump-rise/fall.png` — đã tích hợp | 0 còn thiếu (6 tấm đã gen) | Chạy/nhảy vẫn nắm súng, alpha thật, rig 512² | 13 |
 | `ui/briefing-board.png`, `ui/supply-board.png` — đã tích hợp | 0 còn thiếu (2 tấm đã gen) | Nền bảng hướng dẫn và túi đồ, chữ vẫn là HTML | 13 |
 | `combat-v3/{boss,player,mob,fx,projectile,prop}` | 138 tấm do agent ảnh riêng bàn giao | Runtime hiện dùng asset cũ + fallback canvas; task combat này không generate/ghi đè PNG | Combat V3 handoff |
+| `fx/companion-cham.png`, `fx/companion-trung.png`, `fx/companion-lech.png` | 3 | Ba bạn đồng hành chạy theo nhân vật làm pet — hiện vẽ bằng code (ô vuông bo góc + hai mắt). Cờ `companionArt` đang **tắt** | 14 |
 
 Bổ sung combat: `armed-idle.png` + `raise-gun.png` ngoài bộ gốc. Vòng báo hướng
 lao, vòng hồi sức xanh và viền đạn phản dùng canvas, không cần sinh thêm ảnh.
@@ -1091,6 +1092,7 @@ nên gen dở dang cũng không sinh ra một tràng 404. Gen tới đâu sửa 
 | **`fx/shield.png` — ĐÃ XONG** | `shieldArt: true` | không |
 | **Ảnh rider — ĐÃ XONG** | `riderArt: true` | đủ số khung khai trong `mobFrames.rider` |
 | **`fx/slash-1..3` — ĐÃ XONG** | `slashFx: 3` | không — thiếu thì rơi về vệt vẽ bằng code |
+| `fx/companion-cham/trung/lech` — **CHƯA GEN** | `companionArt: true` | không — thiếu tấm nào, ô đó vẽ bằng code |
 | **Nền `mX-sky.png` — ĐÃ XONG** | `bgSky: true` | không — thiếu ải nào ải đó dùng dốc màu code |
 | **Nền `mX-far.png` — ĐÃ XONG** | `bgFar: true` | không — thiếu ải nào ải đó dùng silhouette code |
 | **Nền `mX-near.png` — ĐÃ XONG** | `bgNear: true` | không — thiếu thì bỏ qua lớp đó |
@@ -1172,6 +1174,7 @@ public/game/
   item/    heal-1..5.png  tool-1..5.png  gun-1..5.png
   fx/      slash-1..3.png  hit.png  dust.png  ring.png  shot.png
            bullet.png  muzzle.png  shield.png
+           companion-cham.png  companion-trung.png  companion-lech.png
   bg/      m1..m5-sky.png  m1..m5-far.png  m1..m5-mid.png  m1..m5-near.png
   ui/      briefing-board.png  supply-board.png
 ```
@@ -1268,3 +1271,40 @@ mục 1.2. Màu quy ước, đừng thêm màu thứ tư mà không có lý do:
 | `#E0563F` đỏ | mọi thứ của địch và mọi thứ gây sát thương |
 | `#D4F236` lime | đòn chém của người chơi, đồ nghề, mọi thứ "tốt" |
 | `#9FD8FF` xanh nhạt | súng quét và khiên đỡ của người chơi |
+
+---
+
+## 14. Bạn đồng hành (pet) — 3 tấm · **CHƯA GEN**
+
+Ba nhân vật của trang chủ — Chấm, Trùng, Lệch (kịch bản: `docs/companions.md`) — chạy
+theo nhân vật chính trong game. Engine đang vẽ chúng bằng code: ô vuông bo góc cạnh
+11 đơn vị, hai mắt kem nhìn theo hướng nhân vật quay mặt (`drawPets` trong
+`components/game/engine.ts`). Ảnh chỉ để nâng chất, không bắt buộc trọn bộ.
+
+Engine vẽ mỗi tấm vừa khít một ô 11×11 đơn vị game và **lật ngang** theo hướng nhân
+vật, nên gen nhìn sang phải, thân vuông chiếm gần hết khung, không thừa đuôi hay tay.
+Gen xong bỏ vào `public/game/fx/`, rồi bật `companionArt: true` ở `ASSETS`.
+
+Dán khối style chung ở mục 2 trước, rồi một trong ba khối dưới:
+
+```
+companion-cham (256×256): a tiny cute square creature that is literally one data
+point — a perfectly square body with slightly rounded corners, solid near-black
+(#161614) with one soft highlight on the top left edge, two small cream (#F3F1EA)
+oval eyes placed high on the face looking right, no mouth, no limbs, no ears, no
+tail. Curious, brave expression made only by the eye shapes. The square fills about
+80 percent of the frame. Transparent background.
+
+companion-trung (256×256): the exact same tiny square creature as companion-cham —
+same near-black (#161614) square body, same cream eyes looking right — but shy: eyes
+slightly lower and glancing sideways, and a faint second outline of itself offset a
+few pixels behind it like a duplicated copy. No mouth, no limbs. The square fills
+about 80 percent of the frame. Transparent background.
+
+companion-lech (256×256): the same tiny square creature shape as companion-cham but
+deep forest green (#1F5A3D) with a lime (#DCF25A) rim highlight on the top edge,
+eyes wide open and excited looking right, body tilted about 10 degrees forward as if
+about to dash ahead. No mouth, no limbs. The square fills about 80 percent of the
+frame. Transparent background.
+```
+

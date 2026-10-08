@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useCompanions } from "@/components/companions/store";
 
 const IDLE = [2, 4, 6];
 /* Bốn thế "đường chéo" mà ô sáng lần lượt chuyển sang — giống một ma trận đang
@@ -18,8 +19,14 @@ const CELLS = Array.from({ length: 9 }, (_, index) => ({
   y: Math.floor(index / 3) * 9.5,
 }));
 
-export function BrandMark({ className = "" }: { className?: string }) {
+/* Ba ô sáng của logo là nhà của ba bạn đồng hành (docs/companions.md). Bật
+   `companions` thì khi chúng ra ngoài, ba ô đó thành ô trống viền nét đứt. */
+export function BrandMark({ className = "", companions = false }: { className?: string; companions?: boolean }) {
   const svgRef = useRef<SVGSVGElement>(null);
+  const state = useCompanions();
+  const away = companions && state.enabled && state.place !== "home";
+  const awayRef = useRef(away);
+  awayRef.current = away;
 
   useEffect(() => {
     const svg = svgRef.current;
@@ -38,6 +45,7 @@ export function BrandMark({ className = "" }: { className?: string }) {
 
     let timer: ReturnType<typeof setInterval> | undefined;
     const onEnter = () => {
+      if (awayRef.current) return; // nhà đang vắng — không có ô nào để xếp lại
       if (timer) clearInterval(timer);
       let step = 0;
       timer = setInterval(() => {
@@ -60,17 +68,21 @@ export function BrandMark({ className = "" }: { className?: string }) {
 
   return (
     <svg ref={svgRef} viewBox="0 0 26 26" className={className} aria-hidden="true">
-      {CELLS.map((cell) => (
-        <rect
+      {CELLS.map((cell) => {
+        const empty = away && IDLE.includes(cell.index);
+        return <rect
           key={cell.index}
-          x={cell.x}
-          y={cell.y}
-          width={7}
-          height={7}
-          fill={IDLE.includes(cell.index) ? "#d4f236" : "#3a3a33"}
+          x={empty ? cell.x + 0.5 : cell.x}
+          y={empty ? cell.y + 0.5 : cell.y}
+          width={empty ? 6 : 7}
+          height={empty ? 6 : 7}
+          fill={empty ? "transparent" : IDLE.includes(cell.index) ? "#d4f236" : "#3a3a33"}
+          stroke={empty ? "#9b978a" : "none"}
+          strokeWidth={1}
+          strokeDasharray={empty ? "1.6 1.2" : undefined}
           style={{ transition: "fill 250ms ease" }}
-        />
-      ))}
+        />;
+      })}
     </svg>
   );
 }

@@ -307,6 +307,12 @@ const ASSETS = {
   bgFar: true,
   /** bg/mX-near.png — lớp tiền cảnh phủ trước nhân vật */
   bgNear: true,
+  /**
+   * fx/companion-cham.png, companion-trung.png, companion-lech.png — 3 tấm, ba bạn
+   * đồng hành của trang chủ chạy theo làm pet (docs/companions.md). Không bắt buộc
+   * trọn bộ: thiếu tấm nào, ô đó vẽ bằng code (ô vuông bo góc + hai mắt).
+   */
+  companionArt: false,
 };
 
 const ASSET_BASE = "/game";
@@ -1908,10 +1914,63 @@ export function createGame(
     bossStride(b, b.x - from);
   }
 
+  /* Ba bạn đồng hành của trang chủ chạy theo làm pet: Chấm bám sát sau lưng, Trùng
+     chậm nửa nhịp phía sau Chấm, Lệch chạy lên trước (outlier). Tắt ở footer trang
+     chủ thì ở đây cũng tắt — cùng khoá localStorage "companions". */
+  const companionsOn = (() => { try { return localStorage.getItem("companions") !== "off"; } catch { return true; } })();
+  const PET = 11;
+  const pets = [
+    { x: 0, y: GY, ease: 7, gap: -30, hop: 0, art: "fx/companion-cham.png", body: "#161614" },
+    { x: 0, y: GY, ease: 3.2, gap: -50, hop: 0.9, art: "fx/companion-trung.png", body: "#161614" },
+    { x: 0, y: GY, ease: 9, gap: 36, hop: 1.7, art: "fx/companion-lech.png", body: "#1f5a3d" },
+  ];
+
+  function updatePets(dt: number) {
+    if (!companionsOn) return;
+    const cx = player.x + player.w / 2;
+    const feet = player.y + player.h;
+    for (const p of pets) {
+      const tx = cx + p.gap * player.face;
+      // Qua ải mới hoặc hồi sinh thì nhảy thẳng tới chỗ, không chạy ngang cả bản đồ.
+      if (Math.abs(tx - p.x) > 320) { p.x = tx; p.y = feet; }
+      const dx = (tx - p.x) * (1 - Math.exp(-p.ease * dt));
+      p.x += dx;
+      p.y += (feet - p.y) * (1 - Math.exp(-10 * dt));
+      p.hop += Math.abs(dx) * 0.35;
+    }
+  }
+
+  function drawPets() {
+    if (!companionsOn) return;
+    for (const p of pets) {
+      const lift = Math.abs(Math.sin(p.hop)) * 4;
+      const x = p.x - PET / 2, y = p.y - PET - lift;
+      const art = ASSETS.companionArt ? img(p.art) : null;
+      if (art) {
+        g!.save();
+        g!.translate(p.x, 0);
+        g!.scale(player.face, 1);
+        g!.drawImage(art, -PET / 2, y, PET, PET);
+        g!.restore();
+        continue;
+      }
+      g!.fillStyle = p.body;
+      g!.beginPath();
+      g!.roundRect(x, y, PET, PET, 1.5);
+      g!.fill();
+      // Hai mắt nhìn theo hướng nhân vật đang quay mặt.
+      const look = player.face * 1.1;
+      g!.fillStyle = "#f3f1ea";
+      g!.fillRect(x + 2.3 + look, y + 3, 2.2, 2.7);
+      g!.fillRect(x + PET - 4.5 + look, y + 3, 2.2, 2.7);
+    }
+  }
+
   function step(dt: number) {
     if (phase !== "play" && phase !== "clear") return;
     const m = maps[lv];
     worldTime += dt;
+    updatePets(dt);
 
     player.cd = Math.max(0, player.cd - dt);
     player.gunCd = Math.max(0, player.gunCd - dt);
@@ -3705,6 +3764,7 @@ export function createGame(
       g!.fill();
     }
 
+    drawPets();
     // Nhấp nháy khi đang bất tử sau lúc trúng đòn
     if (player.inv <= 0 || Math.floor(player.inv * 16) % 2 === 0) drawPlayer();
     drawCombatEffects(false);

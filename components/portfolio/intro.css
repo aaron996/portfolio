@@ -1,0 +1,31 @@
+/* Video intro ở trang chủ (IntroVideo, IntroReplayButton). Tách khỏi portfolio.css cũ khi dọn theme tối (10/2026). */
+.pf-intro { position: fixed; inset: 0; width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; z-index: 1000; display: none; place-items: center; background: #000; color: #f2f5ec; opacity: 1; transition: opacity 450ms ease-out; }
+.pf-intro[open] { display: grid; }
+.pf-intro::backdrop { background: #000; }
+.pf-intro-skip { display: inline-flex; align-items: center; gap: 10px; }
+.pf-intro[data-phase="closing"] { opacity: 0; pointer-events: none; }
+.pf-intro-frame { position: relative; width: min(100vw, 177.78vh); aspect-ratio: 16 / 9; }
+.pf-intro-video { display: block; width: 100%; height: 100%; object-fit: contain; background: #000; }
+.pf-intro-controls { position: fixed; top: 20px; right: 20px; display: flex; gap: 10px; }
+.pf-intro-btn { min-height: 44px; padding: 10px 18px; border-radius: 6px; border: 1px solid rgba(242, 245, 236, .35); background: rgba(7, 13, 10, .6); color: #f2f5ec; font: 600 14px/1 var(--hero-mono, ui-monospace), monospace; letter-spacing: .04em; white-space: nowrap; cursor: pointer; backdrop-filter: blur(6px); transition: background-color 160ms ease-out, border-color 160ms ease-out; }
+.pf-intro-icon-btn { display: grid; place-items: center; width: 48px; height: 48px; padding: 0; border-radius: 50%; border: 1px solid rgba(242, 245, 236, .35); background: rgba(7, 13, 10, .6); color: #f2f5ec; cursor: pointer; backdrop-filter: blur(6px); transition: background-color 160ms ease-out, border-color 160ms ease-out, transform 160ms ease-out; }
+.pf-intro-icon-btn:hover { background: rgba(35, 56, 44, .85); border-color: rgba(242, 245, 236, .6); transform: scale(1.06); }
+.pf-intro-icon-btn:focus-visible { outline: 2px solid #d4f236; outline-offset: 4px; }
+.pf-intro-btn:hover { background: rgba(35, 56, 44, .85); border-color: rgba(242, 245, 236, .6); }
+.pf-intro-btn:focus-visible { outline: 2px solid #d4f236; outline-offset: 4px; }
+.pf-intro-primary { background: #d4f236; color: #0c110e; border-color: transparent; }
+.pf-intro-primary:hover { background: #e2ff5a; border-color: transparent; }
+.pf-intro-end { position: absolute; left: 50%; top: 76%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 10px; animation: pf-intro-in 360ms ease-out both; }
+.pf-intro-countdown { margin: 0; font: 500 13px/1.4 var(--hero-mono, ui-monospace), monospace; color: #c2cdbb; letter-spacing: .04em; }
+@keyframes pf-intro-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@media (max-width: 760px) {
+  .pf-intro-controls { top: auto; bottom: 20px; right: 50%; transform: translateX(50%); }
+  .pf-intro-end { top: calc(100% + 24px); }
+}
+
+.pf-intro-replay { display: inline-flex; align-items: center; gap: 8px; padding-block: 10px; background: none; border: 0; color: inherit; font: inherit; cursor: pointer; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-intro { transition: none; }
+  .pf-intro-end { animation: none; }
+}

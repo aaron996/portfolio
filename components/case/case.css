@@ -1,0 +1,111 @@
+/* Trang case theo theme giấy. Token màu, nav, footer đêm dùng chung từ home.css. */
+
+/* Thanh tiến độ đọc ở mép dưới nav — cũng là "sàn" cho bạn đồng hành. */
+.home-nav { position: sticky; }
+.site-progress { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: transparent; pointer-events: none; }
+.site-progress > span { display: block; height: 100%; background: var(--accent); transform: scaleX(0); transform-origin: left; }
+
+.ca main { outline: none; }
+.ca article { padding: 0 var(--gutter); }
+
+/* ---------- Đầu bài ---------- */
+.ca-head { max-width: 1100px; padding: clamp(40px, 7vw, 88px) 0 clamp(32px, 5vw, 56px); }
+.ca-back { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); }
+.ca-back:hover { color: var(--accent); }
+.ca-scope { margin: 32px 0 12px; font-family: var(--hero-mono), monospace; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.ca-head h1 { margin: 0; max-width: 20ch; font-size: clamp(36px, 5.6vw, 76px); font-weight: 700; letter-spacing: -.045em; line-height: 1.02; text-wrap: balance; }
+.ca-proves { margin: 28px 0 0; max-width: 46ch; font-size: clamp(19px, 1.9vw, 24px); font-weight: 600; line-height: 1.4; letter-spacing: -.01em; }
+.ca-one { margin: 14px 0 0; max-width: 62ch; font-size: 17px; line-height: 1.65; color: var(--muted); }
+
+.ca-facts { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: clamp(20px, 4vw, 48px); align-items: end; margin-top: 44px; padding-top: 24px; border-top: 2px solid var(--text); }
+.ca-facts dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin: 0; }
+.ca-facts dt { font-family: var(--hero-mono), monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.ca-facts dd { margin: 6px 0 0; font-size: 15px; line-height: 1.45; }
+.ca-facts dd small { display: block; margin-top: 4px; font-size: 13px; color: var(--muted); }
+.ca-key { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 20px 22px; border: 1px solid var(--line); border-radius: var(--r-card); background: var(--surface); }
+.ca-key strong { font-size: clamp(24px, 2.4vw, 32px); font-weight: 700; letter-spacing: -.03em; line-height: 1.15; color: var(--accent); }
+.ca-key span { font-size: 14px; line-height: 1.5; color: var(--muted); }
+.ca-unverified { display: inline-flex; margin-left: 10px; padding: 2px 8px; border: 1px dashed var(--muted); border-radius: 999px; vertical-align: middle; font-family: var(--hero-mono), monospace; font-size: 11px; font-weight: 500; letter-spacing: 0; color: var(--muted); }
+
+/* ---------- Ảnh ---------- */
+.ca-hero { margin-bottom: clamp(48px, 7vw, 96px); }
+.ca-figure { margin: 0; }
+.ca-figure img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: var(--r-card); background: var(--surface); box-shadow: 0 24px 48px -36px rgb(30 30 20 / .4); }
+.ca-figure figcaption { margin-top: 10px; font-size: 13px; line-height: 1.5; color: var(--muted); }
+.ca-gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 20px; }
+.ca-gallery .ca-figure[data-wide] { grid-column: 1 / -1; }
+
+/* ---------- Các mục: nhãn dính trái, nội dung phải ---------- */
+.ca-part { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr); gap: clamp(20px, 4vw, 64px); padding: clamp(36px, 5vw, 64px) 0; border-top: 1px solid var(--line); }
+.ca-part > h2 { position: sticky; top: 96px; align-self: start; margin: 0; font-size: clamp(22px, 2.2vw, 28px); font-weight: 700; letter-spacing: -.03em; line-height: 1.15; }
+.ca-part-body { max-width: 72ch; font-size: 17px; line-height: 1.7; }
+.ca-part-body > p { margin: 0 0 1em; }
+.ca-part-body > p:last-child { margin-bottom: 0; }
+.ca-label { margin: 0 0 6px; font-family: var(--hero-mono), monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.ca-sub { margin: 32px 0 12px; font-size: 15px; font-weight: 700; }
+
+.ca-decisions { display: flex; flex-direction: column; gap: 40px; margin: 0; padding: 0; list-style: none; }
+.ca-decisions li { display: grid; grid-template-columns: 40px minmax(0, 1fr) minmax(0, 1fr); column-gap: 20px; row-gap: 14px; }
+.ca-num { grid-row: span 3; padding-top: 4px; font-family: var(--hero-mono), monospace; font-size: 12px; color: var(--muted); }
+.ca-decisions h3 { grid-column: 2 / -1; margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -.02em; line-height: 1.3; }
+.ca-why p:last-child, .ca-did p:last-child { margin: 0; font-size: 15.5px; line-height: 1.65; }
+.ca-why p:last-child { color: var(--muted); }
+.ca-did { padding-left: 16px; border-left: 3px solid var(--mark); }
+.ca-term { grid-column: 2 / -1; justify-self: start; margin: 0; padding: 4px 12px; border-radius: 999px; background: var(--text); color: var(--bg); font-family: var(--hero-mono), monospace; font-size: 12px; line-height: 1.5; }
+
+.ca-features { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 0; padding: 0; list-style: none; }
+.ca-features li { padding: 18px 20px; border: 1px solid var(--line); border-radius: var(--r-card); background: var(--surface); }
+.ca-features h3 { margin: 0 0 6px; font-size: 16px; font-weight: 700; }
+.ca-features p { margin: 0; font-size: 14.5px; line-height: 1.6; color: var(--muted); }
+
+.ca-flow { display: flex; flex-wrap: wrap; gap: 10px; margin: 0; padding: 0; list-style: none; counter-reset: flow; }
+.ca-flow li { position: relative; display: flex; flex-direction: column; gap: 4px; flex: 1 1 180px; padding: 16px 18px 16px 18px; border: 1px solid var(--text); border-radius: var(--r-control); background: var(--surface); counter-increment: flow; }
+.ca-flow li::before { content: counter(flow, decimal-leading-zero); font-family: var(--hero-mono), monospace; font-size: 11px; color: var(--muted); }
+.ca-flow strong { font-size: 15px; line-height: 1.35; }
+.ca-flow span { font-size: 13.5px; line-height: 1.5; color: var(--muted); }
+
+.ca-results { display: flex; flex-direction: column; margin: 0; }
+.ca-results > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 20px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.ca-results > div:first-child { padding-top: 0; }
+.ca-results dt { font-size: 15px; color: var(--muted); }
+.ca-results dd { display: flex; flex-direction: column; gap: 4px; margin: 0; }
+.ca-results strong { font-size: 20px; font-weight: 700; letter-spacing: -.02em; }
+.ca-results span { font-size: 13.5px; line-height: 1.55; color: var(--muted); }
+
+.ca-owned, .ca-not-owned { margin: 0; padding-left: 1.1em; }
+.ca-owned li, .ca-not-owned li { margin-bottom: 8px; }
+.ca-not-owned { color: var(--muted); }
+.ca-stack { margin: 0; }
+.ca-stack > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.ca-stack dt { color: var(--muted); }
+.ca-stack dd { margin: 0; }
+.ca-reflection p { margin: 0 0 1em; font-size: clamp(18px, 1.6vw, 21px); line-height: 1.6; letter-spacing: -.01em; }
+
+/* ---------- Case tiếp theo ---------- */
+.ca-next { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: clamp(20px, 4vw, 56px); align-items: end; padding: clamp(56px, 8vw, 104px) var(--gutter); border-top: 2px solid var(--text); }
+.ca-next-main { display: flex; flex-direction: column; gap: 10px; }
+.ca-next-main span { font-family: var(--hero-mono), monospace; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.ca-next-main strong { display: inline-flex; align-items: center; gap: 14px; font-size: clamp(28px, 4vw, 52px); font-weight: 700; letter-spacing: -.04em; line-height: 1.08; transition: color 150ms; }
+.ca-next-main strong .pf-icon { width: 28px; height: 28px; flex: 0 0 auto; transition: transform 200ms cubic-bezier(.2,.7,.2,1); }
+.ca-next-main small { font-size: 14px; color: var(--muted); }
+.ca-next-main:hover strong { color: var(--accent); }
+.ca-next-main:hover strong .pf-icon { transform: translate(3px, 3px); }
+.ca-next ul { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+.ca-next li a { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.ca-next li a:hover { color: var(--accent); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .ca-facts { grid-template-columns: 1fr; }
+  .ca-part { grid-template-columns: 1fr; }
+  .ca-part > h2 { position: static; }
+  .ca-next { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .ca-facts dl { grid-template-columns: 1fr; gap: 14px; }
+  .ca-decisions li { grid-template-columns: 1fr; }
+  .ca-num { grid-row: auto; padding: 0; }
+  .ca-decisions h3, .ca-term { grid-column: auto; }
+  .ca-gallery, .ca-features { grid-template-columns: 1fr; }
+  .ca-results > div, .ca-stack > div { grid-template-columns: 1fr; gap: 6px; }
+}

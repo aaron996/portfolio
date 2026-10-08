@@ -66,6 +66,8 @@ export interface KeyResult {
   label: string;
   /** true = số đã được đối chiếu / có bên thứ ba xác nhận. false = ước tính vận hành. */
   verified: boolean;
+  /** "outlier" → Lệch (bạn đồng hành) đứng khoe trên thẻ kết quả. docs/companions.md */
+  companion?: "outlier";
 }
 
 export interface Decision {
@@ -76,6 +78,8 @@ export interface Decision {
   decision: string;
   /** Tên gọi chuẩn của pattern — tín hiệu cho người đọc có nền data. */
   term: string;
+  /** "dedupe" → tới đoạn này thì Trùng bị gộp vào Chấm. docs/companions.md */
+  companion?: "dedupe";
 }
 
 export interface Feature {
@@ -444,8 +448,72 @@ export interface GameContent {
   maps: GameMap[];
 }
 
+/** Homepage bản "ít chữ, nhiều tương tác": hero sắp ô dữ liệu, danh sách công việc
+ *  có xem trước, dòng thời gian. Chữ dùng chung (tên, headline, case) vẫn lấy từ
+ *  `prototype`, `meta`, `cases`. */
+export interface HomeContent {
+  nav: { work: string; contact: string; game: string; cv: string; cvLabel: string };
+  sort: {
+    hint: string; hintTouch: string; sortAll: string; reshuffle: string;
+    progress: string; canvasLabel: string; confused: string; spotted: string;
+  };
+  work: {
+    heading: string; count: string; hint: string;
+    /** Case không có ảnh thì xem trước bằng con số kết quả; slug nào vẽ slope chart. */
+    chart: { slug: string; before: { year: string; value: number }; after: { year: string; value: number }; aria: string };
+  };
+  timeline: {
+    heading: string; hint: string; now: string; sideJob: string;
+    axisOps: string; axisData: string; chartLabel: string;
+    /** `level` 0–1: Vinh tự đặt vị trí công việc trên trục vận hành → dữ liệu & sản phẩm.
+     *  Là cách kể chuyện, không phải số đo — biểu đồ không in giá trị này ra. */
+    items: { company: string; short: string; start: number; end: number | null; level: number; parallel?: boolean; role: string; note: string }[];
+  };
+  about: {
+    lead: string;
+    /** Mỗi câu hỏi dẫn tới case trả lời nó. */
+    questions: { q: string; slug: string }[];
+    footnote: string; aside: string; asideCta: string;
+  };
+  contact: { heading: string; copy: string; copied: string; linkedin: string; cv: string; gameTitle: string; gameCta: string };
+  footer: { replay: string; top: string };
+  /** Nút bật/tắt ba bạn đồng hành ở footer. */
+  companions: { hide: string; show: string; tired: string };
+}
+
+/** Nhãn của trang case (/case/[slug]) — bản theo theme giấy, dùng chung cho mọi case. */
+export interface CasePageContent {
+  back: string;
+  client: string; role: string; period: string;
+  context: string;
+  decisions: string; why: string; decision: string;
+  features: string;
+  flow: string;
+  media: string; demoData: string;
+  results: string;
+  owned: string; notOwned: string;
+  stack: string;
+  reflection: string;
+  next: string; others: string;
+  unverified: string; unverifiedTitle: string;
+  progress: string;
+}
+
+/** Trang 404: ba bạn đồng hành cầm đèn đi tìm, lộ ra Null. docs/companions.md */
+export interface NotFoundContent {
+  code: string;
+  hint: string; hintTouch: string;
+  found: string; body: string;
+  lights: string;
+  home: string; work: string;
+  spotted: string;
+}
+
 export interface SiteContent {
   prototype: PortfolioPrototype;
+  home: HomeContent;
+  casePage: CasePageContent;
+  notFound: NotFoundContent;
   meta: {
     name: string;
     roleLabel: string;
