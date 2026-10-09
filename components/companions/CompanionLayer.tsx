@@ -616,7 +616,7 @@ export function CompanionLayer({ nav, origin = "hero" }: { nav: string; origin?:
       {["ink", "ink", "green"].map((variant, i) =>
         <div key={i} className="hs-buddy" data-variant={variant}>
           <span className="hs-eyes"><span className="hs-gaze"><span className="hs-blink"><i /><i /></span></span></span>
-          <span className="hs-sword" /><span className="hs-gun" /><span className="hs-cam" />
+          <span className="hs-wpn wpn" />
         </div>)}
     </div>
     <div className="cmp-page">

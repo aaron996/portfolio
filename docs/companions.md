@@ -41,14 +41,30 @@ Nhà của chúng là logo 3×3 — logo có đúng 3 ô sáng. Cuối trang ch�
    `.hs-stage`, CSS `html:has(...)`): các section phía dưới chỉ kích hoạt được khi ba ô đã
    ở ngoài, nên không để người xem cuộn tới đó trước. Xong thì hiện nút pill "cuộn xuống"
    (`.hs-cue`) cho tới khi người xem tự cuộn. Tắt bạn đồng hành hoặc lỗi thì mở khoá ngay.
-5. **Liên hệ — trận đấu cuối trang** (`components/companions/fight.ts`). Ba ô đậu lên thẻ
-   "Chơi Ải Vận Hành"; khi sàn đấu `.hc-arena` hiện đủ, Chấm (kiếm) và Lệch (súng) nhảy
-   xuống sàn được rọi đèn, đấu khoảng 20 giây (thanh máu, né đạn, gạt đạn bật ngược, cận
-   chiến), Chấm kết liễu bằng cú nhảy xoay. Lệch nằm bẹp mắt chữ X, sao xoay quanh đầu;
-   Chấm nâng cúp, Trùng giơ máy ảnh chụp (3 lần loé), pháo giấy, ảnh lấy liền. Kịch bản cố
-   định — Chấm luôn thắng. Rời footer giữa chừng thì huỷ, diễn lại từ đầu khi quay lại;
-   diễn xong rồi thì không tự diễn lại, chỉ có nút "Xem đấu lại". Giảm chuyển động: chạy
-   tức thì tới cảnh cuối. Nền footer đã nâng sáng thành xanh đêm `#222f45` (chỉ trong `.hc`).
+   Không nhốt người xem: tới bằng neo (`/#contact`), Back/Forward, tải lại, hoặc đã xem
+   màn chào trong phiên (`sessionStorage` `pf-welcome-seen`) thì không khoá; cố cuộn khi
+   chưa sắp xong thì tự "Sắp xếp ngay"; Tab ra khỏi hero thì mở khoá; sắp xong mà màn chào
+   kẹt quá 12 giây cũng mở khoá.
+5. **Liên hệ — trận đấu lồng sắt cuối trang** (`components/companions/fight.ts`, sân khấu
+   `components/home/FightArena.tsx`). Footer là một club về đêm (nền `#12171f`, gần đen nhưng
+   sáng hơn `--night` một nấc). Ba ô đậu lên thẻ "Chơi Ải Vận Hành"; khi sàn đấu `.hc-arena`
+   hiện đủ, đèn và neon bật, khán giả (ô vuông nhỏ có mắt, vài người giơ điện thoại) ùa lên
+   sau lồng và hàng đầu dưới chân sàn. Chấm và Lệch nhảy xuống đấu ~20 giây bằng đồ khán giả
+   ném qua lồng: gậy bóng chày, ống nước, ghế xếp, chảo, súng, bình chữa cháy. Hai bên ăn
+   miếng trả miếng; **bên thắng bốc ngẫu nhiên** mỗi lần diễn. Ba lần quay chậm + zoom cận
+   cảnh: ghế đập, lộn người né đạn kiểu bullet time, cú kết liễu. Trùng đứng trên nóc lồng
+   chụp ảnh (đèn flash), hết trận xuống chụp bên thắng nâng cúp; ảnh lấy liền ghi tên bên
+   thắng. Rời footer giữa chừng hoặc đổi kích thước cửa sổ thì huỷ, diễn lại từ đầu khi
+   quay lại; diễn xong thì chỉ còn nút "Xem đấu lại". Giảm chuyển động: chạy tức thì tới
+   cảnh cuối, không zoom, không quay chậm.
+   - **Quay chậm**: `wait` đếm theo đồng hồ ảo; `slowmo()` đổi tốc độ đồng hồ và
+     `playbackRate` của mọi animation trong `.cmp-page` và `.hc-arena` (kể cả khán giả).
+   - **Zoom**: cùng một phép biến đổi áp lên `.cmp-page` (kèm `clip-path` cắt đúng khung
+     sàn đấu) và `.hc-cam`; HUD, viền đen điện ảnh, vạch tốc độ nằm ngoài `.hc-cam` nên
+     đứng yên. `.home` có `overflow: clip` để lớp phóng to không làm trang tràn.
+   - Test trong pane ẩn: trình duyệt bóp khung hình nên animation zoom treo ở "pending"
+     trong khi đồng hồ (setTimeout) vẫn chạy — hình và kịch bản lệch nhau. Chụp màn hình
+     liên tục để ép vẽ khung, hoặc test với pane đang hiện.
 2. **Cuộn sang Công việc — lên đường.** Chấm rời chữ I, cả ba trèo lên mép dưới nav dính
    và đi theo — chỗ đỗ mặc định cả trang.
 3. **Công việc tiêu biểu — ngó màn hình.** Rê vào case → Chấm ngồi trên mép khung xem

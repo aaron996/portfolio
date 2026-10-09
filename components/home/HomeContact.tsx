@@ -8,6 +8,7 @@ import { PortfolioIcon } from "@/components/portfolio/PortfolioIcon";
 import { IntroReplayButton } from "@/components/portfolio/IntroReplayButton";
 import { companions, useCompanions } from "@/components/companions/store";
 import { closeCurtain, curtainAllowed } from "@/components/companions/gameCurtain";
+import { FightArena } from "./FightArena";
 
 const copy = content.home.contact;
 const fight = content.home.fight;
@@ -56,15 +57,8 @@ export function HomeContact({ replay = true, gameCard = true }: { replay?: boole
         </Link>}
       </div>
 
-      {/* Sàn đấu của Chấm và Lệch (components/companions/fight.ts): chỉ là sân khấu — ánh đèn,
-          sàn, thanh máu; nhân vật và hiệu ứng do lớp bạn đồng hành vẽ lên trên. */}
-      {gameCard && enabled && <div className="hc-arena" data-companion="arena" data-lit="false" data-hud="false" aria-hidden="true">
-        <div className="hc-beam" />
-        <div className="hc-pool" />
-        <div className="hc-floor" />
-        <div className="hc-hp hc-hp-a"><b>{fight.aName}</b><i><u /></i></div>
-        <div className="hc-hp hc-hp-b"><b>{fight.bName}</b><i><u /></i></div>
-      </div>}
+      {/* Sàn đấu lồng sắt (FightArena) — trận đấu do components/companions/fight.ts diễn. */}
+      {gameCard && enabled && <FightArena />}
 
       <div className="hc-bottom">
         {replay && <IntroReplayButton />}

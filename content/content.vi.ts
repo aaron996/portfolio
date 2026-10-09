@@ -101,7 +101,12 @@ export const content: SiteContent = {
       gameCta: "Chơi Ải Vận Hành",
     },
     footer: { replay: "Xem lại intro", top: "Lên đầu trang" },
-    fight: { aName: "Chấm", bName: "Lệch", go: "Đấu!", clang: "Keng!", ko: "K.O.", shutter: "Tách!", win: "Chấm vô địch!", rematch: "Xem đấu lại" },
+    fight: {
+      aName: "Chấm", bName: "Lệch", go: "Đấu!", clang: "Keng!", smash: "Rầm!", ping: "Ping!", bong: "Boong!",
+      spray: "Xììì…", ko: "K.O.", shutter: "Tách!", win: "{name} vô địch!", rematch: "Xem đấu lại",
+      neon: "FIGHT NIGHT", bar: "BAR", exit: "EXIT",
+      cheers: ["Hú!", "Ồ!", "Đánh đi!", "Woa!", "Lên!"],
+    },
     companions: { hide: "Ẩn bạn đồng hành", show: "Hiện bạn đồng hành", tired: "…" },
   },
 

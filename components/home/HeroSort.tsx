@@ -23,6 +23,10 @@ const DEMO_DELAY = 900;
 const DEMO_IDLE = 7000;
 const DEMO_MS = 2600;
 const DEMO_PLAYS = 3;
+/* Khoá cuộn ở hero (xem effect `hold`): cờ "đã xem màn chào" trong phiên, và hạn chờ màn
+   chào sau khi đã sắp xong — quá hạn thì mở khoá dù hoạt cảnh chưa chạy hết. */
+const WELCOME_SEEN = "pf-welcome-seen";
+const WELCOME_TIMEOUT = 12000;
 
 /* Ba ô "lạc" — xếp xong vẫn nằm sai chỗ, rồi bị đá văng ra thành nhân vật.
    Thứ tự khớp .hs-buddy: 0 Chấm (nghiêng trên cột 4), 1 Trùng (chồng lệch lên Chấm
@@ -82,15 +86,49 @@ export function HeroSort() {
   const { enabled } = useCompanions();
   const playedRef = useRef(false);
 
-  /* CSS đã chặn cuộn; còn neo `#...`, phím tắt và cuộn khôi phục của trình duyệt thì
-     vẫn có thể kéo trang đi — đưa về đầu. */
+  /* CSS đã chặn cuộn; còn phím tắt và cuộn khôi phục của trình duyệt thì vẫn có thể kéo
+     trang đi — đưa về đầu. Nhưng không nhốt người xem:
+     - tới bằng neo (`/#contact`…), Back/Forward, tải lại, hoặc đã xem màn chào trong phiên
+       này → mở khoá ngay;
+     - cố cuộn (lăn chuột, vuốt, PageDown/Space/↓) khi chưa sắp xong → tự "Sắp xếp ngay"
+       để màn chào chạy tiếp thay vì đứng im;
+     - Tab ra khỏi hero → mở khoá, để ô đang focus không nằm ngoài màn hình;
+     - sắp xong mà màn chào kẹt quá WELCOME_TIMEOUT → mở khoá. */
   useEffect(() => {
-    if (welcomed) return;
-    const hold = () => { if (window.scrollY > 0) window.scrollTo(0, 0); };
+    if (welcomed) {
+      try { sessionStorage.setItem(WELCOME_SEEN, "1"); } catch {}
+      return;
+    }
+    let seen = false;
+    try { seen = sessionStorage.getItem(WELCOME_SEEN) === "1"; } catch {}
+    const nav = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+    if (seen || window.location.hash || nav?.type === "back_forward" || nav?.type === "reload") {
+      setWelcomed(true);
+      return;
+    }
+    const stage = stageRef.current;
+    const hold = () => { if (window.scrollY > 0) window.scrollTo({ top: 0, behavior: "instant" }); };
+    const nudge = (e: Event) => {
+      if (e instanceof KeyboardEvent && !["PageDown", "ArrowDown", " ", "End"].includes(e.key)) return;
+      if (!done) apiRef.current?.sortAll();
+    };
+    const away = (e: FocusEvent) => { if (stage && e.target instanceof Node && !stage.contains(e.target)) setWelcomed(true); };
     hold();
     window.addEventListener("scroll", hold);
-    return () => window.removeEventListener("scroll", hold);
-  }, [welcomed]);
+    window.addEventListener("wheel", nudge, { passive: true });
+    window.addEventListener("touchmove", nudge, { passive: true });
+    window.addEventListener("keydown", nudge);
+    document.addEventListener("focusin", away);
+    const timer = done ? setTimeout(() => setWelcomed(true), WELCOME_TIMEOUT) : undefined;
+    return () => {
+      window.removeEventListener("scroll", hold);
+      window.removeEventListener("wheel", nudge);
+      window.removeEventListener("touchmove", nudge);
+      window.removeEventListener("keydown", nudge);
+      document.removeEventListener("focusin", away);
+      clearTimeout(timer);
+    };
+  }, [welcomed, done]);
 
   /* Lời nhắc cuộn xuống tắt hẳn khi người xem đã tự cuộn. */
   useEffect(() => {
