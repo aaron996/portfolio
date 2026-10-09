@@ -125,6 +125,7 @@ export const content: SiteContent = {
     unverified: "Chưa xác thực",
     unverifiedTitle: "Ước tính, chưa được đối chiếu bởi bên thứ ba",
     progress: "Tiến độ đọc",
+    lightbox: { open: "Phóng to ảnh", close: "Đóng ảnh", peek: "Ồ!" },
   },
 
   /* Trang 404: con trỏ là đèn pin, rọi trúng giữa trang thì lộ ra Null. */

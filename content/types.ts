@@ -490,6 +490,8 @@ export interface CasePageContent {
   next: string; others: string;
   unverified: string; unverifiedTitle: string;
   progress: string;
+  /** Phóng ảnh: nút mở, nút đóng, bong bóng của Chấm lúc thò đầu (tối đa hai từ). */
+  lightbox: { open: string; close: string; peek: string };
 }
 
 /** Trang 404: ba bạn đồng hành cầm đèn đi tìm, lộ ra Null. docs/companions.md */

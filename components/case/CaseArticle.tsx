@@ -4,6 +4,7 @@ import { content } from "@/content/content.vi";
 import { portfolioFontVariables } from "@/components/portfolio/PortfolioFonts";
 import { PortfolioIcon } from "@/components/portfolio/PortfolioIcon";
 import { SiteNav } from "@/components/home/SiteNav";
+import { CaseFigure } from "./CaseFigure";
 import { HomeContact } from "@/components/home/HomeContact";
 import { CompanionLayer } from "@/components/companions/CompanionLayer";
 import "@/components/home/home.css";
@@ -18,11 +19,7 @@ function Unverified({ verified, title }: { verified: boolean; title?: string }) 
 
 function Figure({ media, priority = false }: { media: Media; priority?: boolean }) {
   const caption = media.caption ?? (media.isDemoData ? L.demoData : null);
-  return <figure className="ca-figure" data-wide={media.wide ? "true" : undefined}>
-    {/* eslint-disable-next-line @next/next/no-img-element */}
-    <img src={media.src} alt={media.alt} loading={priority ? "eager" : "lazy"} />
-    {caption && <figcaption>{caption}</figcaption>}
-  </figure>;
+  return <CaseFigure src={media.src} alt={media.alt} caption={caption} wide={media.wide} priority={priority} />;
 }
 
 /* Một mục của bài: nhãn dính cột trái, nội dung cột phải. */
