@@ -13,47 +13,13 @@ const NEEDS_INPUT = (hint: string) => `⚠️ NEEDS_INPUT: ${hint}`;
 
 export const content: SiteContent = {
   prototype: {
-    nav: [{ label: "Dự án", href: "/#cases" }, { label: "Về tôi", href: "/#about" }, { label: "Liên hệ", href: "/#contact" }],
     hero: {
-      domain: "Logistics · Thương mại điện tử",
       heading: "MAKE SENSE OF DATA, MAKE THINGS WORK",
       headlineLines: ["MAKE SENSE", "OF DATA", "MAKE THINGS", "WORK"],
-      objects: {
-        container: { label: "Từ logistics", href: "#experience" },
-        keyboard: { label: "Đến chơi & làm game", href: "/game" },
-        description: "Container xanh Maersk và bàn phím cơ thu gọn — công việc và sở thích của tôi.",
-      },
-      body: "Tôi xây dashboard và quy trình báo cáo cho đội ngũ vận hành: làm rõ cách tính chỉ tiêu, tổ chức dữ liệu và đối chiếu đầu ra trước khi đưa vào sử dụng.",
       primary: { label: "Xem công việc tiêu biểu", href: "#cases" },
-      secondary: { label: "Trao đổi cùng tôi", href: "#contact" },
     },
     labels: {
-      cv: "Xem CV (PDF)", navCv: "CV", navGame: "Chơi game", navIntro: "Intro", navWork: "Công việc", more: "Thêm",
       skip: "Đến nội dung chính", navigation: "Điều hướng chính",
-      works: "Công việc tiêu biểu", otherWorks: "Kết quả và hệ thống",
-      process: "Cách làm việc", about: "Tôi đến với dữ liệu từ phía vận hành",
-      experience: "Kinh nghiệm", skills: "Năng lực qua công việc",
-      demo: "Giao diện thật · dữ liệu minh hoạ", enlarge: "Xem ảnh lớn",
-      closeImage: "Đóng ảnh", imageViewer: "Ảnh sản phẩm", back: "Về danh sách công việc",
-      decisions: "Hai quyết định đứng sau báo cáo", details: "Đọc sâu", results: "Kết quả và giới hạn",
-      ownership: "Phần tôi phụ trách", sharedScope: "Phần phối hợp và giới hạn",
-      related: "Công việc liên quan", lesson: "Nhìn lại", stack: "Công nghệ",
-      source: "Nguồn và phương pháp", email: "Gửi email", linkedin: "LinkedIn",
-      top: "Lên đầu trang", location: "TP.HCM",
-    },
-    logistics: {
-      callouts: [
-        {
-          badge: "DỮ LIỆU VẬN HÀNH",
-          title: "Kinh nghiệm dữ liệu vận hành quy mô lớn",
-          body: "Qua công việc tại J&T, Shopee và GHN, tôi quen làm việc với dữ liệu đơn hàng và vận hành ở quy mô khoảng 300.000–500.000 đơn/ngày.",
-        },
-        {
-          badge: "PHẠM VI DIỄN GIẢI",
-          title: "Đặt quy mô vào đúng ngữ cảnh công việc",
-          body: "Quy mô dữ liệu trong các phạm vi công việc đã tham gia; không phải sản lượng cá nhân trực tiếp quản lý.",
-        },
-      ],
     },
     intro: {
       src: "/portfolio/video/intro-teaser.mp4",
@@ -65,91 +31,6 @@ export const content: SiteContent = {
       enter: "Vào portfolio",
       countdown: "Tự động vào sau {s} giây",
       replay: "Xem lại intro",
-    },
-    worksIntro: "Những sản phẩm và phân tích tôi đã thực hiện, từ tổng hợp doanh số đến theo dõi hiệu suất giao nhận.",
-    media: {
-      "pg-sales-operations": {
-        src: "/case-pg-dashboard.png", width: 1838, height: 907,
-        crop: { left: 200, top: 0, width: 1610, height: 850 },
-        alt: "Dashboard doanh số: bộ lọc, tiến độ target, xu hướng lũy kế và bảng kết quả theo vùng",
-        caption: "Theo dõi doanh số so với target và tìm vùng cần xem lại.",
-      },
-      "kas-shopee-performance": {
-        src: "/case-kas-shopee-matrix.png", width: 1800, height: 1000,
-        alt: "App GHN hiển thị chỉ số đúng giờ, cảnh báo và ma trận hiệu suất theo vùng",
-        caption: "Xem chỉ số đúng giờ và các hub cần can thiệp trên cùng một màn hình.",
-      },
-      target: { src: "/case-pg-target-preview.png", width: 1086, height: 611,
-        alt: "Lịch target theo ngày cùng bảng xem trước thay đổi", caption: "Điều chỉnh target ngày và xem tác động trước khi áp dụng." },
-      import: { src: "/case-pg-import-preview.png", width: 780, height: 595,
-        alt: "Hộp xem trước phạm vi ngày, cách xử lý trùng và chênh lệch trước khi thay dữ liệu", caption: "Xem phạm vi và chênh lệch dữ liệu trước khi xác nhận thay thế." },
-    },
-    visuals: {
-      carrier: {
-        src: "/portfolio/visuals/homepage/carrier-transfer-bay.webp", width: 1600, height: 900,
-        alt: "Băng tải và khu vực chuyển tải hàng hóa trong ánh đèn buổi tối",
-        caption: "Hình minh hoạ nhịp vận hành logistics · không phải ảnh của dự án hoặc đối tác cụ thể.",
-      },
-      method: {
-        src: "/portfolio/visuals/homepage/method-worktable.webp", width: 1600, height: 900,
-        alt: "Bàn làm việc với bản đồ tuyến, biểu mẫu, sổ tay và laptop",
-        caption: "Hình minh hoạ cho quá trình làm rõ bài toán và đối chiếu đầu ra · không tái hiện một dự án cụ thể.",
-      },
-      experience: {
-        src: "/portfolio/visuals/homepage/terminal-blue-hour.webp", width: 1600, height: 900,
-        alt: "Bến container trong ánh sáng xanh cuối ngày",
-        caption: "Hình minh hoạ bối cảnh ngành · không đại diện cho một công ty hoặc vị trí làm việc cụ thể.",
-      },
-    },
-    resultNote: "Pickup on-time của Viettel Post. Theo hồ sơ công việc tại Shopee, 2021–2025; kết quả phối hợp với đối tác. Hai mốc không đại diện cho toàn bộ diễn biến trong kỳ.",
-    process: [
-      { title: "Hiểu bài toán", body: "Trao đổi với người dùng để biết họ cần quyết định gì từ báo cáo." },
-      { title: "Chốt định nghĩa", body: "Làm rõ đơn vị tính, phạm vi dữ liệu và cách xử lý ngoại lệ." },
-      { title: "Xây và đối chiếu", body: "Dựng mô hình, báo cáo và kiểm những chỗ lệch với nguồn đang dùng." },
-      { title: "Đưa vào sử dụng", body: "Bàn giao đầu ra theo cách đội ngũ làm việc và sửa theo phản hồi." },
-    ],
-    about: [
-      "Tôi bắt đầu từ chăm sóc khách hàng xuất khẩu và vận hành giao nhận, rồi chuyển sang phân tích dữ liệu. Những công việc đó giúp tôi đặt câu hỏi về một con số trong bối cảnh thực tế: đơn đi qua đâu, ai dùng báo cáo và họ cần xử lý việc gì tiếp theo.",
-      "Tôi làm việc cùng người dùng nghiệp vụ và các đội phụ trách hạ tầng để đưa giải pháp vào sử dụng. AI hỗ trợ tôi viết code; phần chốt logic và kiểm chứng đầu ra vẫn do tôi chịu trách nhiệm.",
-    ],
-    experience: [
-      { company: "Giao Hàng Nhanh", period: "Từ 2025", role: "Key Account Solution / Data Analyst", body: "Chuẩn hoá báo cáo và xây công cụ phân tích cho các tài khoản chiến lược." },
-      { company: "Interdist", period: "Từ T5/2026", role: "Dữ liệu & sản phẩm · Bán thời gian, từ xa", body: "Xây hệ thống vận hành doanh số P&G song song với công việc tại GHN." },
-      { company: "Shopee", period: "2021–2025", role: "Logistics Management Specialist", body: "Phân tích hiệu suất và phối hợp cải tiến với các đối tác vận chuyển." },
-      { company: "J&T Express", period: "2020–2021", role: "Key Account Specialist", body: "Theo dõi vận hành luồng đơn Shopee và chuẩn hoá báo cáo nội bộ." },
-      { company: "A.P. Moller Maersk", period: "2019–2020", role: "Export Care Business Partner", body: "Phối hợp xử lý hàng xuất khẩu và duy trì master data khách hàng." },
-    ],
-    skills: [
-      { title: "Định nghĩa và kiểm tra dữ liệu", body: "SQL, mô hình dữ liệu, đối chiếu KPI và xử lý ngoại lệ.", links: [{ label: "Reporting KA", href: "/case/kas-reporting-automation" }, { label: "SLA", href: "/case/sla-attribution" }] },
-      { title: "Xây sản phẩm báo cáo", body: "Dashboard, business rule, phân quyền và luồng nhập dữ liệu.", links: [{ label: "P&G", href: "/case/pg-sales-operations" }, { label: "App điều hành GHN", href: "/case/kas-shopee-performance" }] },
-      { title: "Phân tích để phối hợp vận hành", body: "Theo dõi hiệu suất, xác định khâu cần xem lại và làm việc với đối tác.", links: [{ label: "Hiệu suất 3PL", href: "/case/shopee-3pl-performance" }] },
-    ],
-    contact: {
-      heading: "Trao đổi về công việc hoặc dự án",
-      body: "Bạn đang tuyển BI/Data Analyst hoặc cần xây dashboard, chuẩn hoá báo cáo cho đội ngũ? Hãy gửi tôi bối cảnh công việc và điều bạn muốn giải quyết.",
-      gameStatus: "NHIỆM VỤ SẴN SÀNG",
-      gameTitle: "ẢI VẬN HÀNH",
-      gameEntryKey: "[ ENTER ]",
-      gameCta: { label: "BẮT ĐẦU", href: "/game" },
-    },
-    pg: {
-      period: "Interdist · Từ T5/2026 · Bán thời gian, từ xa",
-      context: "Doanh số về từ nhiều file Excel, khiến việc tổng hợp và theo dõi target phải lặp lại qua từng kỳ. Tôi xây ứng dụng nội bộ để đưa dữ liệu, quy tắc tính và báo cáo vào cùng một quy trình.",
-      role: "Phụ trách nghiệp vụ, mô hình dữ liệu, ứng dụng và vận hành sản phẩm; sử dụng AI hỗ trợ lập trình.",
-      output: "Dashboard doanh số, quy trình nhập có kiểm tra, giá theo thời gian hiệu lực và target theo lịch cửa hàng.",
-      decisions: [
-        { id: "effective-price", title: "Giá của giao dịch, theo đúng thời kỳ", body: "Giá thay đổi theo kênh, cửa hàng và thời kỳ. Tôi lưu khoảng hiệu lực và thứ tự ưu tiên giá riêng của cửa hàng so với giá mặc định để áp dụng quy tắc khi tính doanh thu." },
-        { id: "daily-target", title: "Target đi theo lịch cửa hàng", body: "Tôi dùng trọng số theo thứ và ngoại lệ theo ngày, kèm preview trước khi áp dụng một lô điều chỉnh. Người dùng thấy tác động lên chỉ tiêu thay vì chia đều tháng theo một số ngày cố định." },
-      ],
-      details: [
-        { title: "Tách SKU và kiểm tra file", body: "Tiêu đề cột có dạng CATEGORY.SKU, nhưng SKU cũng có thể chứa dấu chấm. Chỉ tách ở dấu chấm đầu tiên và giữ phần còn lại. File vào staging để chuẩn hoá theo quy tắc, kiểm từng dòng và báo lỗi trước khi chuyển vào bảng giao dịch." },
-        { title: "Actual và target có nguồn riêng", body: "Bảng target chỉ lưu chỉ tiêu. Actual được tính từ bảng giao dịch khi đọc, giúp tránh duy trì thêm một bản sao số dẫn xuất phải đồng bộ sau mỗi lần import hoặc sửa lịch sử." },
-        { title: "Phân quyền và lịch sử thay đổi", body: "Đăng nhập Google và phân quyền admin / user / pending. Phân quyền được thực thi ở tầng dữ liệu; các thao tác thay đổi có nhật ký người thực hiện và thời điểm. Đây là mô tả cơ chế, không phải kết quả kiểm toán bảo mật." },
-      ],
-      result: { value: "40–60 giờ/tháng", label: "Thời gian tổng hợp được giải phóng · Ước tính",
-        method: "Ước tính từ thao tác tổng hợp Excel của 3–4 PIC, công thức lặp và việc tập trung dữ liệu giá, target, mapping cửa hàng. Chưa đo bằng time-tracking thực tế." },
-      snapshot: "Hồ sơ portfolio ghi nhận 85.563 giao dịch, 12.476 bản tổng hợp ngày, 569 dòng chỉ tiêu tháng, 41 cửa hàng, 176 SKU, 6 vùng, 2 kênh và 8 tài khoản từ Postgres/master data của Interdist. Chưa có ngày snapshot; đây là số quy mô đã ghi nhận, không phải số hiện tại hoặc tác động kinh doanh đã xác thực lại.",
-      lesson: "Ở giai đoạn đầu, tôi dựng dashboard trước khi chốt xong định nghĩa chỉ tiêu và phải làm lại phần tính toán khi nghiệp vụ được làm rõ. Từ đó tôi viết định nghĩa ra và cho người dùng xác nhận trước khi bắt đầu code. Tôi cũng cần đo thời gian quy trình cũ ngay từ đầu để có mốc đánh giá tác động.",
     },
   },
   /* Homepage mới (10/2026): bỏ video nền và object 3D; hero chỉ còn headline,
@@ -244,6 +125,7 @@ export const content: SiteContent = {
     unverified: "Chưa xác thực",
     unverifiedTitle: "Ước tính, chưa được đối chiếu bởi bên thứ ba",
     progress: "Tiến độ đọc",
+    lightbox: { open: "Phóng to ảnh", close: "Đóng ảnh", peek: "Ồ!" },
   },
 
   /* Trang 404: con trỏ là đèn pin, rọi trúng giữa trang thì lộ ra Null. */
@@ -261,7 +143,6 @@ export const content: SiteContent = {
 
   meta: {
     name: "Lương Thế Vinh",
-    roleLabel: "BI & Data Analyst",
     title: "Lương Thế Vinh — BI & Data Analyst",
     description:
       "Tôi chốt định nghĩa chỉ tiêu, dựng data model, rồi tự ship hệ thống sinh ra con số đó. Sáu năm vận hành logistics và thương mại điện tử: Shopee, GHN, J&T Express, Maersk.",
@@ -269,110 +150,6 @@ export const content: SiteContent = {
     url: "https://vinhluong-here.vercel.app", // URL Vercel đang chạy (Vinh chốt không mua domain riêng)
     locale: "vi_VN",
   },
-
-  /* Nav cũ có cả "Case study" (#featured) và "Dự án" (#projects) — người đọc không
-     biết hai cái đó khác gì nhau. Giờ chỉ còn một mục #cases, hierarchy nằm trong
-     chính danh sách case. */
-  nav: [
-    { label: "Việc đã làm", href: "#cases" },
-    { label: "Cách làm", href: "#pipeline" },
-    { label: "Về tôi", href: "#about" },
-    { label: "Kinh nghiệm", href: "#experience" },
-    { label: "Minigame", href: "/game" },
-  ],
-
-  hero: {
-    /* Bỏ "AI-ASSISTED BUILDER" khỏi eyebrow: AI là phương tiện, không phải danh tính,
-       và nó đã được nói ở process.aiNote. Thêm domain vì đó mới là thứ khiến bạn
-       khác biệt với một BI analyst chung chung. */
-    eyebrow: "Đang nhận dự án data product · làm từ xa · phạm vi rõ ràng",
-    headline: ["Define the metric. Automate the system. Solve the problem."],
-    subline:
-      "Tôi chốt định nghĩa chỉ tiêu, dựng data model, rồi tự ship hệ thống sinh ra con số và đứng sau con số đó khi có người hỏi lại.",
-    primaryCta: { label: "Xem 5 hệ thống đang chạy thật →", href: "#cases" },
-    secondaryCta: { label: "Đặt 20 phút trao đổi", href: "#contact" },
-
-  },
-
-  /* Trước đây hardcode trong LogoRail.tsx. Chưa có file logo nên render dạng chữ;
-     khi có ảnh thì đổi type thành { name, src } chứ đừng thêm mảng thứ hai. */
-  logos: ["Shopee", "GHN", "J&T Express", "Maersk", "Interdist"],
-
-  /* statBand cũ trộn 3 mốc thời gian mà không nói ra: 97.5% là Shopee 2021,
-     300k đơn/ngày là J&T 2020, đứng cạnh "4 hệ thống đã ship" (hiện tại).
-     Người đọc gộp hết thành một khối mơ hồ. `note` làm rõ từng số thuộc về đâu —
-     và nghịch lý là ghi rõ "2021–2025" lại làm con số đáng tin hơn, không kém hơn. */
-  statBand: [
-    { value: "6", suffix: "+", label: "năm vận hành & phân tích dữ liệu" },
-    {
-      value: "97.5",
-      suffix: "%",
-      label: "pickup on-time, từ 90.1%",
-      note: "Shopee × Viettel Post · 2021–2025 · đã xác nhận",
-    },
-    { value: "4", label: "hệ thống dữ liệu đang chạy production", note: "GHN · Interdist · hiện tại" },
-    { value: "300", suffix: "k", label: "đơn/ngày từng vận hành", note: "J&T Express × Shopee · 2020–2021" },
-  ],
-
-  intro: {
-    eyebrow: "Về tôi",
-    /* Heading DUY NHẤT của section "Về tôi". Trước đây About.tsx hardcode
-       "Tôi đến với dữ liệu từ phía vận hành" và bỏ qua field này, nên tồn tại hai
-       heading song song. Giữ câu của About vì nó nói thẳng xuất phát điểm vận hành
-       — đúng luận điểm — còn "đứng giữa nghiệp vụ và dữ liệu" thì trung tính hơn. */
-    heading: "Tôi đến với dữ liệu từ phía vận hành",
-    body: [
-      "Tôi bắt đầu từ vận hành, không phải từ kỹ thuật. Sáu năm ngồi trong logistics và thương mại điện tử dạy tôi một thứ mà không khoá học nào dạy được: biết khi nào một con số trông thì đúng nhưng thật ra sai, và sai ở khâu nào.",
-      "Công việc của tôi là dịch vấn đề vận hành thành định nghĩa dữ liệu rõ ràng — chỉ tiêu này tính trên grain nào, đơn nào được tính, ngoại lệ xử lý ra sao — rồi biến định nghĩa đó thành pipeline và báo cáo mà người dùng dám tin.",
-      /* Câu này là "bản đồ cho người đọc". Nó là thứ bản cũ thiếu: 4 case trước đây
-         là 4 dự án na ná nhau; giờ chúng được khai báo thẳng là 4 luận điểm khác nhau,
-         nên người đọc biết vì sao phải đọc cả bốn. */
-      "Năm case dưới đây chứng minh năm điều khác nhau: một sản phẩm tôi ship end-to-end một mình, một sản phẩm được team khác nhúng lại vào hệ thống của họ, một hệ thống tôi chuẩn hoá cho cả team, một rule engine tôi dựng ra từ tranh chấp giữa các bộ phận, và một con số kết quả đã được đối tác xác nhận.",
-    ],
-    boundary:
-      "Tôi không định vị mình là software engineer. Tôi là người xây hệ thống dữ liệu cho bài toán vận hành mình hiểu rõ.",
-
-    /* Hai danh sách này trước đây hardcode trong About.tsx (FIT / NOT_FIT). */
-    fit: [
-      "Chỉ tiêu đang bị mỗi bên hiểu một kiểu",
-      "Báo cáo còn dựng tay mỗi tuần",
-      "Cần một người vừa chốt logic vừa ship được",
-    ],
-    notFit: [
-      "Cần một data engineer dựng hạ tầng từ đầu",
-      "Bài toán thuần ML hoặc mô hình dự báo nặng",
-      "Chỉ cần người chạy query theo yêu cầu",
-    ],
-  },
-
-  /* Mọi chuỗi hiển thị đều phải ở đây, không nằm trong .tsx — xem QUY TẮC ở
-     types.ts. featuredEyebrow / otherCasesEyebrow / otherCasesHeading đã bỏ cùng
-     component FeaturedCase (thiết kế cũ, không còn được mount). */
-  sectionLabels: {
-    navCta: "Nhận brief dự án",
-    casesEyebrow: "Năm case · năm loại bằng chứng",
-    casesHeading: "Đưa con trỏ vào một dòng để xem hệ thống",
-    experienceEyebrow: "Kinh nghiệm",
-    experienceHeading: "Sáu năm trong vận hành thật",
-    ctaHeading: "Tôi biến dữ liệu phức tạp thành hành động rõ ràng",
-    /* Field mới, không có trong bản gốc gửi qua — bản gốc dùng intro.body[2] cho
-       chỗ này, nhưng body[2] mới mang nghĩa khác (dẫn nhập 4 case). Câu dưới đây
-       ghép lại từ boundary + tinh thần "chịu trách nhiệm khi số sai" lặp lại xuyên
-       suốt các decision, không phải claim mới. */
-    ctaBody:
-      "Tôi không chỉ viết được query nhanh. Tôi biết chỉ tiêu nào đúng, số nào sai ở đâu, và đứng sau con số đó khi có người hỏi lại.",
-  },
-
-  /* Trước đây toàn bộ nằm trong Testimonials.tsx. Ghi chú viết cho người đọc
-     trang, không phải ghi chú cho chính mình như trong file template. */
-  testimonials: {
-    eyebrow: "Người từng làm việc cùng",
-    heading: "Ba chỗ trống chờ trích dẫn thật",
-    note: "Để trống có chủ ý — trích dẫn bịa ra thì phản tác dụng. Chỗ này sẽ chỉ được điền khi có 2–3 câu thật từ quản lý cũ hoặc stakeholder từng làm việc cùng.",
-    slots: 3,
-  },
-
-  featuredSlug: "pg-sales-operations",
 
   cases: [
     /* ═══════════════════════════════════════════════════════════════════════
@@ -554,10 +331,6 @@ export const content: SiteContent = {
           icon: "shield-check",
         },
       ],
-
-      /* Trang chủ chỉ in 2 decision mạnh nhất; 3 cái còn lại nằm ở trang chi tiết.
-         Bản cũ in cả 5 (thực tế render 2-3 lần) ngay trang chủ. */
-      homepageDecisionCount: 2,
       flowHeading: "Từ file Excel rời rạc tới một nguồn sự thật",
       flow: {
         nodes: [
@@ -1249,182 +1022,6 @@ export const content: SiteContent = {
     },
   ],
 
-  /* Section `ai` đã bị XOÁ (3 card của nó mô tả lại chính case GHN reporting, và câu
-     về AI bị lặp 3 lần trên site cũ). Section `process` cũ — 6 bước kiểu "quan sát nỗi
-     đau vận hành / dựng bản thử / lặp cùng người dùng" — cũng bỏ: analyst nào cũng viết
-     được y hệt nên nó không chứng minh gì.
-
-     Thay bằng đường đi THẬT của một dashboard tại GHN, với ràng buộc ghi rõ ở mỗi mắt.
-     Luận điểm: Vinh ship được sản phẩm chạy thật mà KHÔNG sở hữu một mẩu hạ tầng nào —
-     không quyền ghi warehouse, không server, không DevOps. Thứ không fake được ở đây là
-     các RÀNG BUỘC; không ai bịa ra được chúng nếu chưa sống trong tổ chức đó. */
-  pipeline: {
-    eyebrow: "Cách tôi làm việc",
-    heading: "Đường đi của một dashboard, từ yêu cầu tới production",
-    intro:
-      "Tôi không sở hữu hạ tầng nào trong chuỗi này: không có quyền ghi vào lakehouse, không tự tạo được job định kỳ, không được cấp server. Mỗi mắt dưới đây là một đường hợp lệ tìm ra trong ràng buộc sẵn có — và chính các ràng buộc đó định hình kiến trúc, chứ không phải sở thích kỹ thuật của tôi.",
-    steps: [
-      {
-        label: "Chốt lại câu hỏi",
-        tool: "Trao đổi với stakeholder",
-        owner: "Tôi",
-        body: "Yêu cầu ban đầu gần như luôn là \"cho tôi cái dashboard\". Việc đầu tiên là quy nó về một câu hỏi trả lời được: đo trên grain nào, đơn nào được tính, ngưỡng nào thì gọi là bất thường. Chưa chốt xong phần này thì mọi thứ phía sau đều phải làm lại.",
-      },
-      {
-        label: "Tự viết query, tự kiểm output",
-        tool: "Trino · Iceberg lakehouse",
-        owner: "Tôi",
-        constraint: "Chỉ có quyền đọc lakehouse",
-        body: "Tôi không chờ ai viết query hộ. Viết xong thì chạy song song với nguồn số đang dùng và phải giải thích được từng chỗ lệch. Số chưa khớp thì không có bước tiếp theo — đây là chỗ tôi dừng nhiều lần nhất.",
-      },
-      {
-        label: "Nhờ team BI dựng job định kỳ",
-        tool: "Cronjob → Google Sheets",
-        owner: "Team BI",
-        constraint: "Quyền tạo job định kỳ thuộc team khác",
-        body: "Tôi không tự tạo được job, nên query phải viết sao cho team BI dựng được ngay và chạy ổn định mà không cần tôi giải thích lại, và phải xếp được vào lịch của họ. Thiết kế trong năng lực và thời gian của một team khác là ràng buộc thật, không phải chi tiết phụ.",
-      },
-      {
-        label: "Đồng bộ sang cơ sở dữ liệu ứng dụng",
-        tool: "Google Apps Script → Supabase",
-        owner: "Tôi",
-        constraint: "Kênh chia sẻ file trực tiếp bị chặn theo chính sách; đích đến đã được phê duyệt",
-        body: "Script chạy theo lịch, chuẩn hoá kiểu dữ liệu và chặn dòng lỗi ngay tại biên thay vì để số sai chảy vào ứng dụng. Đây là mắt tôi phải thiết kế cẩn thận nhất, vì nó là chỗ duy nhất dữ liệu đi qua ranh giới hệ thống.",
-      },
-      {
-        label: "Mô hình hoá lại cho ứng dụng",
-        tool: "PostgreSQL (Supabase) · RLS",
-        owner: "Tôi",
-        body: "Dữ liệu báo cáo và dữ liệu ứng dụng cần hai mô hình khác nhau. Ở đây tôi dựng lại schema theo cách ứng dụng đọc, và bật Row Level Security để phân quyền được thực thi ở tầng cơ sở dữ liệu chứ không chỉ ở giao diện.",
-      },
-      {
-        label: "Dựng ứng dụng",
-        tool: "React · TypeScript",
-        owner: "Tôi",
-        body: "Filter theo client, vùng và loại hub; panel tự đẩy các trường hợp cần can thiệp lên trước; nút xuất ảnh cho từng mục vì đích thật của báo cáo là group điều hành, không phải màn hình.",
-      },
-      {
-        label: "Deploy và vận hành",
-        tool: "Vercel · phân quyền theo vai trò",
-        owner: "Tôi",
-        body: "Lên production, cấp quyền theo vai trò, rồi sửa theo phản hồi thật. Sản phẩm nội bộ không có ngày ra mắt — chỉ có tuần thứ nhất, tuần thứ hai, và những gì người dùng phàn nàn ở tuần thứ ba.",
-      },
-    ],
-    /* Tự nhận điểm yếu kiến trúc. Kỹ sư dữ liệu nào đọc cũng thấy ngay, nên giấu đi thì
-       mất điểm thật; nói ra thì nó thành bằng chứng về khả năng phán đoán. */
-    tradeoff:
-      "Chuỗi này là đồ ghép, và tôi biết điều đó. Google Sheets ở giữa là điểm dễ vỡ, Apps Script không có retry và không tự báo khi job chết, mỗi mắt nối thêm là thêm một chỗ có thể lệch số. Tôi chọn nó vì đó là đường hợp lệ duy nhất trong quyền hạn mình có. Nếu được cấp quyền ghi vào warehouse, tôi đã bỏ hai mắt giữa và cho ứng dụng đọc thẳng từ một bảng được quản lý.",
-    aiNote:
-      "Tôi dùng AI-assisted coding để rút ngắn khoảng cách từ ý tưởng tới sản phẩm chạy được. Phần thuộc về tôi — và cũng là phần khó — là đóng khung vấn đề, chốt business rule, kiểm chứng đầu ra và chịu trách nhiệm khi số sai.",
-  },
-
-  skills: [
-    {
-      title: "Phân tích & truy vấn",
-      items: [
-        "SQL (Trino/Presto, StarRocks, PostgreSQL)",
-        "Python",
-        "Excel / Google Sheets nâng cao",
-        "Phân tích nguyên nhân gốc",
-      ],
-    },
-    {
-      title: "Mô hình hoá dữ liệu",
-      items: [
-        "Thiết kế fact / dimension",
-        "Định nghĩa grain và khoá",
-        "Dimension có hiệu lực theo thời gian",
-        "Chuẩn hoá định nghĩa KPI dùng chung",
-      ],
-    },
-    {
-      title: "BI & báo cáo",
-      items: ["Metabase", "Power BI", "Looker Studio", "Thiết kế dashboard cho cấp quản lý", "Báo cáo định kỳ tự động"],
-    },
-    {
-      title: "Chất lượng & đối chiếu dữ liệu",
-      items: [
-        "Validation ở biên (staging rồi promote)",
-        "Đối chiếu song song khi thay quy trình",
-        "Đối chiếu số tiền hai chiều",
-        "Entity resolution & kiểm coverage khoá",
-        "Test cho business rule",
-        "Audit trail, RLS & phân quyền",
-      ],
-    },
-    {
-      title: "Tự động hoá",
-      items: ["n8n", "Google Apps Script", "LLM agent workflow", "AI-assisted development"],
-    },
-    {
-      title: "Nghiệp vụ",
-      items: [
-        "Vận hành logistics & thương mại điện tử",
-        "Quản lý SLA và escalation",
-        "Dự báo sản lượng",
-        "Làm việc với stakeholder và đối tác",
-      ],
-    },
-  ],
-
-  experience: [
-    {
-      company: "Giao Hàng Nhanh (GHN)",
-      role: "Key Account Solution / Data Analyst",
-      period: "2025 – nay",
-      summary:
-        "Phụ trách dữ liệu, hiệu suất vận hành và đối chiếu tài chính cho các tài khoản chiến lược (Shopee Express, Shopee Bulky, TikTok Shop). Làm việc trực tiếp với điều hành vùng, team KA của khách hàng và bộ phận kiểm soát nội bộ.",
-      highlights: [
-        "Xây pipeline SQL trên Trino quy trách nhiệm từng đơn vi phạm SLA về đúng kho gây ra — bốn quy tắc do vận hành chốt, chạy vét cạn trên mọi đơn, kết quả tái lập được. Đầu ra được dùng tiếp cho khâu đối chiếu tài chính với bộ phận kiểm soát nội bộ.",
-        "Chuẩn hoá định nghĩa KPI cho toàn team — gồm cả định danh seller và điều kiện phân luồng đơn — và xây pipeline sinh báo cáo tự động từ dữ liệu thô.",
-        "Xây web app theo dõi sản lượng multi-KPI (actual vs forecast vs AOP, theo client và theo tỉnh), thay cho các file Excel/HTML rời rạc.",
-        "Chuyển data job của dashboard sang engine truy vấn mới theo từng lô, đối chiếu số cũ với số mới trước khi cắt nguồn.",
-        "Dựng báo cáo điều hành theo vùng/hub cho giám đốc vùng, phân phối tự động qua n8n và Google Apps Script.",
-        "Hỗ trợ các team khác (vận hành, chăm sóc khách hàng) dựng báo cáo và trực quan hoá backlog trên cùng nguồn dữ liệu chuẩn hoá.",
-      ],
-    },
-    {
-      company: "Interdist",
-      role: "Sở hữu dữ liệu & sản phẩm (bán thời gian, từ xa)",
-      period: "T5/2026 – nay",
-      summary:
-        "Làm song song với GHN, khoảng 18 giờ/tuần. Sở hữu toàn bộ phần dữ liệu và sản phẩm của hệ thống vận hành doanh số P&G.",
-      highlights: [
-        "Chuyển quy trình tổng hợp doanh số từ các file Excel rời rạc sang một cơ sở dữ liệu trung tâm có kiểm soát chất lượng.",
-        "Thiết kế lược đồ dữ liệu và business rule: giá theo khoảng hiệu lực, phân bổ chỉ tiêu theo lịch hoạt động cửa hàng.",
-        "Xây và vận hành sản phẩm một mình, từ frontend tới cơ sở dữ liệu và phân quyền.",
-      ],
-    },
-    {
-      company: "Shopee",
-      role: "Logistics Management Specialist",
-      period: "2021 – 2025",
-      summary: "Phân tích hiệu suất đối tác vận chuyển (Vietnam Post, Viettel Post, J&T).",
-      highlights: [
-        "Đưa pickup on-time của Viettel Post từ 90.1% lên 97.5% thông qua theo dõi dữ liệu chặt và phối hợp có cấu trúc với đối tác.",
-        "Thiết kế lại luồng trạng thái vận chuyển dựa trên phân tích dữ liệu, giảm 15–20% contact rate trên mỗi đơn.",
-        "Xây dashboard SQL + Google Sheets tự động cho cấp quản lý và đối tác.",
-      ],
-    },
-    {
-      company: "J&T Express",
-      role: "Key Account Specialist",
-      period: "2020 – 2021",
-      summary: "Vận hành luồng đơn khối lượng lớn cùng bộ phận logistics của Shopee (~300.000 đơn/ngày).",
-      highlights: [
-        "Dựng dashboard và báo cáo nội bộ chuẩn hoá chỉ số cho đội vận hành.",
-        "Dùng dữ liệu để theo dõi các sáng kiến và thiết kế giải pháp giao hàng.",
-      ],
-    },
-    {
-      company: "A.P. Moller Maersk",
-      role: "Export Care Business Partner",
-      period: "2019 – 2020",
-      summary: "Đối tác vận hành cho khách hàng xuất khẩu, phối hợp với đại lý nước ngoài và các bộ phận nội bộ.",
-      highlights: ["Duy trì độ chính xác master data khách hàng để tối ưu hệ thống nội bộ và trải nghiệm end-to-end."],
-    },
-  ],
-
   contact: {
     heading: "Bạn đang có một con số không ai dám bảo vệ?",
     /* Thêm một câu cho nửa client consulting — trước đây body chỉ nói với nhà tuyển dụng. */
@@ -1432,7 +1029,6 @@ export const content: SiteContent = {
     email: "luongthevinh996@gmail.com",
     linkedin: "https://www.linkedin.com/in/vinhluongg/",
     cvHref: "/cv.pdf",
-    availability: "Nhận dự án data product · cũng cân nhắc vị trí BI / Data Analyst",
   },
 
   /* ─────────────────────────────────────────────────────────────
@@ -1447,6 +1043,7 @@ export const content: SiteContent = {
       "Năm bản đồ là năm nơi mình từng làm việc. Khám phá đường đi, xử lý nhiệm vụ và hạ trùm mỗi bản đồ để nhận hai kỹ năng. Hết năm ải là xong sáu năm.",
     note:
       "Game này mình dựng bằng AI-assisted coding. Phần khó không nằm ở code — nó nằm ở chỗ quyết định cái gì đáng đưa vào và cái gì nên bỏ.",
+    backHome: "Về trang chủ",
     controlsHint:
       "← → di chuyển · ↑/Space nhảy · ↓/S xuống bệ · J chém · K bắn · L đỡ · B túi đồ · P tạm dừng",
     display: {
@@ -1478,7 +1075,6 @@ export const content: SiteContent = {
     clearHeading: "Hạ trùm ải {n}",
     bossAppear: "{boss} xuất hiện!",
     deathLine: "Ngã rồi. Đứng dậy đi.",
-    skillsLabel: "Túi kỹ năng",
     skillProgress: "Kỹ năng {n}/{total}",
     pickupTool: "Nhặt được {name}",
     pickupHeal: "Hồi một máu",

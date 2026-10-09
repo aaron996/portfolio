@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Nav } from "@/components/Nav";
-import { Footer } from "@/components/Footer";
 import { OpsGame } from "@/components/game/OpsGame";
 import { CurtainOpener } from "@/components/companions/CurtainOpener";
+import { SiteNav } from "@/components/home/SiteNav";
+import { HomeContact } from "@/components/home/HomeContact";
+import { PortfolioIcon } from "@/components/portfolio/PortfolioIcon";
+import { portfolioFontVariables } from "@/components/portfolio/PortfolioFonts";
 import { content } from "@/content/content.vi";
+import "@/components/home/home.css";
+import "./game.css";
 
 const { game } = content;
 
@@ -13,33 +17,31 @@ export const metadata: Metadata = {
   description: game.intro,
 };
 
+/* Nav và footer theo theme giấy như trang chủ; riêng khung game (OpsGame) nằm trong
+   một tấm nền tối `.gp-stage`, vì toàn bộ màu của game vẽ cho nền tối. */
 export default function GamePage() {
   return (
-    <>
+    <div id="top" className={`home gp ${portfolioFontVariables}`}>
       <CurtainOpener />
-      <Nav />
-      <main id="main" className="px-5 pb-24 pt-28 sm:px-8">
-        <div className="mx-auto max-w-4xl">
-          <p className="eyebrow text-lime">{game.eyebrow}</p>
-          <h1 className="display mt-3 text-4xl text-paper sm:text-6xl">{game.heading}</h1>
-          <p className="prose-lede mt-5 text-mute">{game.intro}</p>
-        </div>
+      <a href="#main" className="home-skip">{content.prototype.labels.skip}</a>
+      <SiteNav onHome={false} />
+      <main id="main" tabIndex={-1}>
+        <header className="gp-head">
+          <p className="gp-eyebrow">{game.eyebrow}</p>
+          <h1>{game.heading}</h1>
+          <p className="gp-intro">{game.intro}</p>
+        </header>
 
-        <div className="mt-10">
+        <div className="gp-stage">
           <OpsGame />
         </div>
 
-        <div className="mx-auto mt-10 max-w-4xl border-t border-ink-800 pt-6">
-          <p className="prose-lede text-sm text-mute-2">{game.note}</p>
-          <Link
-            href="/"
-            className="mt-4 inline-block text-sm text-lime underline-offset-4 hover:underline"
-          >
-            ← Về trang chủ
-          </Link>
+        <div className="gp-foot">
+          <p>{game.note}</p>
+          <Link href="/" className="gp-back"><PortfolioIcon name="back" />{game.backHome}</Link>
         </div>
       </main>
-      <Footer />
-    </>
+      <HomeContact replay={false} gameCard={false} />
+    </div>
   );
 }

@@ -12,7 +12,7 @@ import { closeCurtain, curtainAllowed } from "@/components/companions/gameCurtai
 const copy = content.home.contact;
 const { email, linkedin, cvHref } = content.contact;
 
-export function HomeContact({ replay = true }: { replay?: boolean }) {
+export function HomeContact({ replay = true, gameCard = true }: { replay?: boolean; gameCard?: boolean }) {
   const [copied, setCopied] = useState(false);
   const { enabled } = useCompanions();
   const router = useRouter();
@@ -44,10 +44,10 @@ export function HomeContact({ replay = true }: { replay?: boolean }) {
         <a href={cvHref}><PortfolioIcon name="pdf" />{copy.cv}</a>
       </div>
 
-      <Link href="/game" className="hc-game" onClick={enterGame}>
+      {gameCard && <Link href="/game" className="hc-game" onClick={enterGame}>
         <span>{copy.gameTitle}</span>
         <strong>{copy.gameCta}<PortfolioIcon name="forward" /></strong>
-      </Link>
+      </Link>}
 
       <div className="hc-bottom">
         {replay && <IntroReplayButton />}

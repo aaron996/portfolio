@@ -118,7 +118,7 @@ phát sáng; rê thẻ game → cả ba nhún.
 ## Đã dựng ở đợt 3
 
 - Trang `/case/[slug]` làm lại theo theme giấy: `components/case/CaseArticle.tsx` + `case.css`,
-  một template cho cả 5 case (đọc từ `CaseStudy`; `PgCase` và `prototype.pg` không còn dùng).
+  một template cho cả 5 case (đọc từ `CaseStudy`).
   Nhãn trong `content.casePage`. Nav dùng chung `SiteNav`; trang case bật thanh tiến độ đọc
   (`ReadProgress`, tính bằng `reading.ts` trên phần tử `[data-read]`).
 - `CompanionLayer origin="logo"`: vào thẳng trang case (ba ô đang ở nhà) → sau 1,2s nhảy ra
@@ -129,7 +129,13 @@ phát sáng; rê thẻ game → cả ba nhún.
   chạy vào Chấm và biến mất, Chấm phình 1,15 lần; qua đoạn đó Trùng tách ra kèm "?".
 - Màn **result**: `KeyResult.companion = "outlier"` (case 3PL). Lệch rời thanh đọc, lên đứng
   trên thẻ kết quả.
-- Chưa làm: Chấm thò đầu khi mở ảnh lớn (trang case mới không có lightbox).
+- **Phóng ảnh + Chấm thò đầu** (`components/case/CaseFigure.tsx`, CSS `.ca-zoom` / `.lb-*` cuối
+  `case.css`). Ảnh trong bài là nút bấm mở `<dialog>` modal (Esc, bấm nền hoặc nút đóng để tắt;
+  trình duyệt lo focus trap và trả focus). Mỗi lần mở: Chấm nhô lên từ sau mép trên khung ảnh,
+  góc phải — chỉ nhô khỏi mép, không đè lên ảnh — mắt nhìn theo con trỏ, bong bóng "Ồ!" hiện
+  ~1,7s rồi tan (`content.casePage.lightbox.peek`); Chấm ngồi yên phần còn lại. Không nhận chuột,
+  chỉ diễn khi bạn đồng hành đang bật; giảm chuyển động → Chấm đứng sẵn ở tư thế đã nhô, không
+  bong bóng; mobile (≤640px) không diễn.
 
 ## Đã dựng ở đợt 4
 
@@ -148,7 +154,7 @@ phát sáng; rê thẻ game → cả ba nhún.
 | 0 | Màn mở đầu ở hero, mắt nhìn theo con trỏ | Xong |
 | 1 | Lớp dùng chung, nhà ở logo, nút tắt, giảm chuyển động | Xong — đang gắn ở trang chủ |
 | 2 | Các màn trang chủ: Công việc, Đường đi, Ba câu hỏi, Liên hệ, về nhà | Xong |
-| 3 | Trang case theo theme mới + ba ô đi trên thanh đọc, khử trùng lặp, Lệch khoe số | Xong |
+| 3 | Trang case theo theme mới + ba ô đi trên thanh đọc, khử trùng lặp, Lệch khoe số, Chấm thò đầu khi phóng ảnh | Xong |
 | 4 | 404 với Null, Chấm kéo rèm vào game | Xong (pet trong game đã gỡ) |
 
 ## Lỗi đã sửa
