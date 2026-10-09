@@ -50,7 +50,7 @@ Nhà của chúng là logo 3×3 — logo có đúng 3 ô sáng. Cuối trang ch�
    xong vẫn khoá; cố cuộn khi chưa sắp xong thì tự "Sắp xếp ngay"; Tab ra khỏi hero thì mở
    khoá (focus về `#main` hay vào hộp intro thì không tính — đóng intro trả focus về
    `#main`, trước đây làm mở khoá ngay từ đầu); sắp xong mà màn chào kẹt quá 12 giây cũng
-   mở khoá.
+   mở khoá (chỉ đếm lúc tab đang hiện và intro đã đóng — màn chào dừng thì hạn chờ cũng dừng).
 5. **Liên hệ — trận đấu lồng sắt cuối trang** (`components/companions/fight.ts`, sân khấu
    `components/home/FightArena.tsx`). Footer là một club về đêm (nền `#12171f`, gần đen nhưng
    sáng hơn `--night` một nấc). Ba ô đậu lên thẻ "Chơi Ải Vận Hành"; khi sàn đấu `.hc-arena`
@@ -124,7 +124,8 @@ có rèm.
 - `BrandMark companions` — khi ba ô ra ngoài, ba ô sáng của logo thành ô trống viền nét đứt.
 - Footer có nút "Ẩn/Hiện bạn đồng hành". Tắt → về nhà, biểu đồ không còn ô lạc. Bật lại sau
   khi đã diễn → đặt thẳng vào tư thế cuối, không diễn lại.
-- Xáo lại biểu đồ → ba ô về nhà (logo sáng lại), sắp xong thì diễn lại từ đầu.
+- Xáo lại biểu đồ → ba ô về nhà (logo sáng lại), sắp xong thì diễn lại từ đầu. Lúc đó mà ba ô
+  đang đứng trên nav thì chúng bay về ô trong logo rồi mới tắt, không biến mất giữa chừng.
 - Lớp chung gắn ở từng trang (`HomePage`, `CaseArticle`) thay vì root layout: /game và các
   trang prototype không cần nhân vật. Store là module dùng chung nên trạng thái đi theo khi
   chuyển trang bằng `<Link>`.

@@ -98,7 +98,7 @@ export function HeroSort() {
        để màn chào chạy tiếp thay vì đứng im; sắp xong rồi thì trang giãn như dây thun và
        Lệch bảo "Suỵt!", để người xem biết là đang chờ chứ không phải trang đơ;
      - Tab ra khỏi hero → mở khoá, để ô đang focus không nằm ngoài màn hình;
-     - sắp xong mà màn chào kẹt quá WELCOME_TIMEOUT → mở khoá. */
+     - sắp xong mà màn chào kẹt quá WELCOME_TIMEOUT (chỉ tính lúc tab đang hiện) → mở khoá. */
   useEffect(() => {
     if (welcomed) {
       try { sessionStorage.setItem(WELCOME_SEEN, "1"); } catch {}
@@ -149,14 +149,21 @@ export function HeroSort() {
     window.addEventListener("touchmove", nudge, { passive: true });
     window.addEventListener("keydown", nudge);
     document.addEventListener("focusin", away);
-    const timer = done ? setTimeout(() => setWelcomed(true), WELCOME_TIMEOUT) : undefined;
+    // Chỉ đếm lúc người xem thật sự nhìn trang: tab ẩn hay intro đang mở thì màn chào
+    // cũng đang dừng, đếm tiếp sẽ mở khoá giữa chừng.
+    let left = WELCOME_TIMEOUT;
+    const timer = done ? setInterval(() => {
+      if (document.hidden || document.documentElement.dataset.introActive !== "0") return;
+      left -= 500;
+      if (left <= 0) setWelcomed(true);
+    }, 500) : undefined;
     return () => {
       window.removeEventListener("scroll", hold);
       window.removeEventListener("wheel", nudge);
       window.removeEventListener("touchmove", nudge);
       window.removeEventListener("keydown", nudge);
       document.removeEventListener("focusin", away);
-      clearTimeout(timer);
+      clearInterval(timer);
     };
   }, [welcomed, done]);
 
