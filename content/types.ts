@@ -139,14 +139,14 @@ export interface Media {
 }
 
 export interface CaseStudy {
-  /** Short editorial projection for the Phase 2 homepage. */
+  /** Mô tả ngắn và vai trò dùng ở danh sách case trên homepage. */
   homepage?: { title: string; summary: string; role: string; evidence: string; cta: string };
   slug: string;
   tier: CaseTier;
 
   /** Một trục duy nhất: phạm vi ảnh hưởng. VD "Hệ thống dùng chung · toàn team KA". */
   scopeLabel: string;
-  /** Case này chứng minh điều gì về tôi. Render dưới title, trên oneLiner. */
+  /** Phạm vi đóng góp hoặc sử dụng nổi bật, render dưới title. */
   proves: string;
 
   title: string;

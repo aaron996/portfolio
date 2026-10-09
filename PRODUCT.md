@@ -22,13 +22,13 @@ Portfolio tập trung vào công việc thực tế. Minigame là trải nghiệ
 
 Nội dung nối kinh nghiệm vận hành logistics/thương mại điện tử với việc tự chốt logic dữ liệu, dựng hệ thống và kiểm chứng đầu ra. Case mô tả cả quyết định, phần đóng góp và giới hạn, không chỉ liệt kê công cụ hoặc trình bày ảnh dashboard.
 
-Bằng chứng cụ thể gồm hệ thống doanh số P&G tại Interdist, app điều hành hiệu suất Shopee tại GHN, chuẩn hoá báo cáo Key Account, quy trách nhiệm đơn trễ và hiệu suất đối tác vận chuyển 3PL tại Shopee. Giữ rõ sự khác nhau giữa sản phẩm làm tại GHN phục vụ tài khoản Shopee và vai trò từng làm tại Shopee.
+Bằng chứng cụ thể gồm hệ thống quản lý doanh số Interdist, ứng dụng theo dõi vận hành KAS GHN và hiệu suất đối tác vận chuyển tại Shopee. KAS GHN là công cụ nội bộ được lãnh đạo sử dụng hằng ngày để xem chỉ số, theo xác nhận của chủ portfolio. Giữ rõ công việc tại GHN và vai trò từng làm tại Shopee.
 
 ## Operating Context
 
 - Website dùng được trong browser trên desktop và mobile; người đọc có thể xem nhanh ở homepage hoặc đọc sâu trong case.
 - CV PDF, email và LinkedIn là các tài liệu/kênh liên hệ hiện có. Liên hệ qua link và chức năng chép email; repo hiện không có form gửi yêu cầu, CMS hay luồng đăng nhập.
-- Nội dung được biên tập trong `content/content.vi.ts`, schema ở `content/types.ts`; component quyết định cách hiển thị.
+- Timeline, nhãn và nội dung chung ở `content/content.vi.ts`; ba case ở `content/cases.vi.ts`, được import vào cùng đối tượng content. Schema ở `content/types.ts`; component quyết định cách hiển thị.
 - Repo dùng Next.js App Router, TypeScript, React và Tailwind CSS. Route case sinh từ content, không lấy nội dung từ một backend CMS.
 - Intro lưu trạng thái đã xem trong session. Game lưu tiến độ và một số thiết lập trên browser; đây không phải dữ liệu tài khoản hay đồng bộ giữa thiết bị.
 
@@ -36,18 +36,18 @@ Bằng chứng cụ thể gồm hệ thống doanh số P&G tại Interdist, app
 
 ### Cấu trúc và nội dung hiện tại
 
-- `/`: intro có bỏ qua/xem lại; hero sắp ô dữ liệu; danh sách năm công việc có xem trước; timeline nghề nghiệp; các câu hỏi dẫn tới case; footer liên hệ, CV, minigame và điều khiển bạn đồng hành.
-- `/case/[slug]`: cả năm case dùng chung `components/case/CaseArticle.tsx`. Nội dung gồm phạm vi, vai trò, bằng chứng, quyết định, kết quả, phần sở hữu và giới hạn; chỉ render các phần có dữ liệu. Ảnh mở trong dialog để xem rõ hơn.
+- `/`: intro có bỏ qua/xem lại; hero sắp ô dữ liệu; danh sách ba case có mô tả ngắn, vai trò và xem trước; timeline năm nơi làm việc; các câu hỏi dẫn tới case; footer liên hệ, CV, minigame và điều khiển bạn đồng hành.
+- `/case/[slug]`: ba case dùng chung `components/case/CaseArticle.tsx`. Nội dung gồm phạm vi, vai trò, bằng chứng, quyết định, kết quả, phần sở hữu và giới hạn; chỉ render các phần có dữ liệu. Ảnh mở trong dialog để xem rõ hơn.
 - `/game`: minigame “Ải Vận Hành”, năm bản đồ gắn với năm nơi làm việc, có điều khiển bàn phím/cảm ứng, tạm dừng, túi đồ và lưu tiến độ local.
 - Route không tồn tại dùng trang 404 tương tác với lối quay về homepage/công việc.
 
-Năm URL case cần giữ:
+Ba URL case đang trình bày:
 
 - `/case/pg-sales-operations`
 - `/case/kas-shopee-performance`
-- `/case/kas-reporting-automation`
-- `/case/sla-attribution`
 - `/case/shopee-3pl-performance`
+
+Reporting KA và SLA đã được gỡ theo yêu cầu ngày 09/10/2026, kể cả link homepage và điều hướng case. Các URL này trả 404. Slug `kas-shopee-performance` giữ để liên kết đã chia sẻ vẫn mở được case KAS GHN, không dùng để xác định tên/phạm vi sản phẩm.
 
 Các anchor homepage hiện có là `#top`, `#main`, `#hero`, `#cases`, `#experience`, `#contact`. Các mốc `#pipeline`, `#about` và cấu trúc “bốn bước làm việc” của bản Phase 2 cũ không còn trong homepage hiện tại.
 
@@ -59,13 +59,13 @@ Game có quy tắc asset riêng trong [docs/game-assets.md](docs/game-assets.md)
 
 ## Brand Commitments
 
-Tên tác giả là Lương Thế Vinh. Ngôn ngữ nội dung chính là tiếng Việt; headline “MAKE SENSE OF DATA, MAKE THINGS WORK” hiện có bằng tiếng Anh. Giọng nội dung ngắn, cụ thể, thực tế và nói rõ phần Vinh chịu trách nhiệm.
+Tên tác giả là Lương Thế Vinh. Ngôn ngữ nội dung chính là tiếng Việt; headline “MAKE SENSE OF DATA, MAKE THINGS WORK” hiện có bằng tiếng Anh. Giọng nội dung ngắn, cụ thể, thực tế và nói rõ phần Vinh chịu trách nhiệm. Mô tả công việc và sản phẩm trực tiếp; không bắt buộc dùng ngôi thứ nhất hoặc lặp “Tôi” ở mỗi đoạn.
 
 Chấm, Trùng và Lệch là ba bạn đồng hành hiện có, với kịch bản trong [docs/companions.md](docs/companions.md). Người xem có thể tắt/bật; chúng không thay thế thông tin hoặc thao tác cần thiết để đọc case và liên hệ.
 
 ## Evidence on Hand
 
-- `content/content.vi.ts`: năm case, timeline, nhãn và nội dung game. Các field như `verified`, `method`, `ownership` và `isDemoData` thể hiện nguồn/phạm vi/giới hạn khi có.
+- `content/content.vi.ts` và `content/cases.vi.ts`: ba case, timeline, nhãn và nội dung game. Các field như `verified`, `method`, `ownership` và `isDemoData` thể hiện nguồn/phạm vi/giới hạn khi có.
 - `public/case-pg-*.png`: ảnh dashboard, import preview và target preview của hệ thống Interdist/P&G.
 - `public/case-kas-shopee-*.png` và `public/case-kas-monitor.png`: ảnh app điều hành và giám sát báo cáo tại GHN.
 - `public/portfolio/visuals/cases/sla/sla-event-trace.webp`: minh hoạ tuyến event cho case quy trách nhiệm đơn trễ.
@@ -74,7 +74,7 @@ Chấm, Trùng và Lệch là ba bạn đồng hành hiện có, với kịch b�
 
 ### Bằng chứng và cách diễn đạt
 
-- P&G là ứng dụng nội bộ của Interdist; app điều hành Shopee là sản phẩm trong công việc tại GHN.
+- Hệ thống doanh số là ứng dụng nội bộ của Interdist; KAS GHN là ứng dụng theo dõi vận hành được xây trong công việc tại GHN.
 - Giữ phạm vi tự làm/phối hợp và quyền quyết định của vận hành, Data Platform, BI, đối tác.
 - Ảnh ứng dụng dùng dữ liệu minh hoạ có nhãn sát ảnh. Screenshot chứng minh giao diện, không tự xác nhận số kinh doanh, bảo mật hay hành vi production.
 - Ước tính giữ phương pháp và nhãn. Số quy mô không được viết thành tác động; không tự bổ sung ngày đếm, số liệu, chân dung hoặc lời chứng thực.

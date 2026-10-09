@@ -43,6 +43,7 @@ function Preview({ index }: { index: number }) {
           ? <SlopeChart />
           : <p className="wi-frame-figure">{item.keyResult.value}</p>}
     </div>
+    {shot?.caption && <p className="wi-caption">{shot.caption}</p>}
     <p className="wi-result"><strong>{item.keyResult.value}</strong><span>{item.keyResult.label}</span></p>
   </div>;
 }
@@ -63,7 +64,8 @@ export function WorkIndex() {
             onPointerEnter={() => { setActive(index); tell(item.slug); }} onFocus={() => { setActive(index); tell(item.slug); }}>
             <span className="wi-index">{String(index + 1).padStart(2, "0")}</span>
             <span className="wi-title">{item.homepage?.title ?? item.title}</span>
-            <span className="wi-meta">{item.client} · {item.period}</span>
+            <span className="wi-meta">{item.homepage?.role ?? item.client} · {item.period}</span>
+            {item.homepage?.summary && <span className="wi-summary">{item.homepage.summary}</span>}
             <span className="wi-mobile-result">{item.keyResult.value}</span>
             <span className="wi-open" aria-hidden="true"><PortfolioIcon /></span>
           </Link>
