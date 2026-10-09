@@ -39,8 +39,12 @@ Nhà của chúng là logo 3×3 — logo có đúng 3 ô sáng. Cuối trang ch�
    theo con trỏ** khi người xem còn ở hero — Lệch quay nhanh, Trùng chậm nửa nhịp.
    **Trang khoá cuộn cho tới lúc này** (`data-welcome="pending"` → `"done"` trên
    `.hs-stage`, CSS `html:has(...)`): các section phía dưới chỉ kích hoạt được khi ba ô đã
-   ở ngoài, nên không để người xem cuộn tới đó trước. Xong thì hiện nút pill "cuộn xuống"
-   (`.hs-cue`) cho tới khi người xem tự cuộn. Tắt bạn đồng hành hoặc lỗi thì mở khoá ngay.
+   ở ngoài, nên không để người xem cuộn tới đó trước. Cố cuộn lúc màn chào đang diễn thì
+   hero giãn như dây thun và Lệch quay lại "Suỵt!" (tối đa mỗi 1,2s) — khoá thành một phần
+   của trò đùa thay vì trông như trang đơ. Xong thì hiện nút pill "cuộn xuống" (`.hs-cue`)
+   cho tới khi người xem tự cuộn; Lệch chạy tới, nhảy lên nút giậm ba cái (nút lún theo)
+   như bấm hộ rồi nhảy về sàn (`stomp` trong `heroBuddies.ts`; bỏ qua khi giảm chuyển
+   động hoặc đặt thẳng tư thế cuối). Tắt bạn đồng hành hoặc lỗi thì mở khoá ngay.
    Không nhốt người xem: tới bằng neo (`/#contact`), Back/Forward, hoặc đã xem màn chào
    trong phiên (`sessionStorage` `pf-welcome-seen`) thì không khoá — tải lại khi chưa xem
    xong vẫn khoá; cố cuộn khi chưa sắp xong thì tự "Sắp xếp ngay"; Tab ra khỏi hero thì mở

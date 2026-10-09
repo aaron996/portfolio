@@ -97,6 +97,7 @@ html:has(.hs-stage[data-welcome="pending"]) { overflow: hidden; scrollbar-gutter
 .hs-buddy[data-settled="true"] .hs-blink { animation: hs-blink 4.2s 1s infinite; }
 @keyframes hs-blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
 .hs-bubble { position: absolute; left: 0; top: 0; font-size: 22px; font-weight: 800; color: var(--accent); opacity: 0; }
+.hs-bubble-hush { font-size: 16px; white-space: nowrap; }
 .hs-meter { position: absolute; left: var(--gutter); right: var(--gutter); bottom: 24px; z-index: 1; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--muted); pointer-events: none; }
 .hs-meter output { display: inline-flex; align-items: center; gap: 10px; margin-left: auto; font-family: var(--hero-mono), monospace; font-size: 12px; }
 .hs-bar { width: 120px; height: 6px; border-radius: 999px; background: var(--line); overflow: hidden; }

@@ -51,6 +51,7 @@ export const content: SiteContent = {
       confused: "?",
       spotted: "!",
       scrollCue: "Còn nhiều chuyện phía dưới — cuộn xuống",
+      hush: "Suỵt!",
     },
     work: {
       heading: "Công việc tiêu biểu",

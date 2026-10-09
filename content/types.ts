@@ -458,6 +458,8 @@ export interface HomeContent {
     progress: string; completed: string; canvasLabel: string; confused: string; spotted: string;
     /** Lời nhắc hiện sau khi màn chào xong và trang được mở khoá cuộn. */
     scrollCue: string;
+    /** Bong bóng của Lệch khi người xem cố cuộn lúc màn chào đang diễn. */
+    hush: string;
   };
   work: {
     heading: string; count: string; hint: string;
