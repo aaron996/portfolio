@@ -89,8 +89,8 @@ export function HeroSort() {
 
   /* CSS đã chặn cuộn; còn phím tắt và cuộn khôi phục của trình duyệt thì vẫn có thể kéo
      trang đi — đưa về đầu. Nhưng không nhốt người xem:
-     - tới bằng neo (`/#contact`…), Back/Forward, tải lại, hoặc đã xem màn chào trong phiên
-       này → mở khoá ngay;
+     - tới bằng neo (`/#contact`…), Back/Forward, hoặc đã xem màn chào trong phiên này →
+       mở khoá ngay (tải lại khi chưa xem xong thì vẫn khoá);
      - cố cuộn (lăn chuột, vuốt, PageDown/Space/↓) khi chưa sắp xong → tự "Sắp xếp ngay"
        để màn chào chạy tiếp thay vì đứng im;
      - Tab ra khỏi hero → mở khoá, để ô đang focus không nằm ngoài màn hình;
@@ -103,7 +103,7 @@ export function HeroSort() {
     let seen = false;
     try { seen = sessionStorage.getItem(WELCOME_SEEN) === "1"; } catch {}
     const nav = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
-    if (seen || window.location.hash || nav?.type === "back_forward" || nav?.type === "reload") {
+    if (seen || window.location.hash || nav?.type === "back_forward") {
       setWelcomed(true);
       return;
     }
@@ -114,7 +114,14 @@ export function HeroSort() {
       if (e instanceof KeyboardEvent && !["PageDown", "ArrowDown", " ", "End"].includes(e.key)) return;
       if (!done) apiRef.current?.sortAll();
     };
-    const away = (e: FocusEvent) => { if (stage && e.target instanceof Node && !stage.contains(e.target)) setWelcomed(true); };
+    /* Chỉ tính khi focus thật sự rời hero. Đóng intro thì trình duyệt trả focus về
+       `#main` (tổ tiên của hero) — không phải người xem bỏ đi, đừng mở khoá. */
+    const away = (e: FocusEvent) => {
+      const t = e.target;
+      if (!stage || !(t instanceof Element) || stage.contains(t) || t.contains(stage)) return;
+      if (t.closest("dialog") || document.documentElement.dataset.introActive !== "0") return;
+      setWelcomed(true);
+    };
     hold();
     window.addEventListener("scroll", hold);
     window.addEventListener("wheel", nudge, { passive: true });

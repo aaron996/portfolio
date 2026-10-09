@@ -41,10 +41,12 @@ Nhà của chúng là logo 3×3 — logo có đúng 3 ô sáng. Cuối trang ch�
    `.hs-stage`, CSS `html:has(...)`): các section phía dưới chỉ kích hoạt được khi ba ô đã
    ở ngoài, nên không để người xem cuộn tới đó trước. Xong thì hiện nút pill "cuộn xuống"
    (`.hs-cue`) cho tới khi người xem tự cuộn. Tắt bạn đồng hành hoặc lỗi thì mở khoá ngay.
-   Không nhốt người xem: tới bằng neo (`/#contact`), Back/Forward, tải lại, hoặc đã xem
-   màn chào trong phiên (`sessionStorage` `pf-welcome-seen`) thì không khoá; cố cuộn khi
-   chưa sắp xong thì tự "Sắp xếp ngay"; Tab ra khỏi hero thì mở khoá; sắp xong mà màn chào
-   kẹt quá 12 giây cũng mở khoá.
+   Không nhốt người xem: tới bằng neo (`/#contact`), Back/Forward, hoặc đã xem màn chào
+   trong phiên (`sessionStorage` `pf-welcome-seen`) thì không khoá — tải lại khi chưa xem
+   xong vẫn khoá; cố cuộn khi chưa sắp xong thì tự "Sắp xếp ngay"; Tab ra khỏi hero thì mở
+   khoá (focus về `#main` hay vào hộp intro thì không tính — đóng intro trả focus về
+   `#main`, trước đây làm mở khoá ngay từ đầu); sắp xong mà màn chào kẹt quá 12 giây cũng
+   mở khoá.
 5. **Liên hệ — trận đấu lồng sắt cuối trang** (`components/companions/fight.ts`, sân khấu
    `components/home/FightArena.tsx`). Footer là một club về đêm (nền `#12171f`, gần đen nhưng
    sáng hơn `--night` một nấc). Ba ô đậu lên thẻ "Chơi Ải Vận Hành"; khi sàn đấu `.hc-arena`
