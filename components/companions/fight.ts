@@ -5,6 +5,11 @@
    thắng bốc ngẫu nhiên mỗi lần diễn. Trùng đứng trên nóc lồng chụp ảnh, hết trận xuống chụp
    bên thắng nâng cúp.
 
+   Đặt cược: lúc hai bên nhảy xuống, cảnh quay chậm gần như đứng hình và bàn cược hiện ra.
+   Bên người xem chọn luôn thua. Thua đủ hai lần thì trận sau Trùng cất máy ảnh, lấy sổ ra
+   tính, đưa một bảng phân tích và đề xuất bên ngược với lần cược gần nhất — bên được đề
+   xuất luôn thắng.
+
    Toàn bộ chạy theo toạ độ tài liệu trên lớp `.cmp-page`; sân khấu là FightArena.tsx.
    Thời gian là "giờ trong phim": `wait` đếm theo một đồng hồ ảo chạy chậm lại khi quay chậm,
    và mọi animation đang chạy (nhân vật, hiệu ứng, khán giả) đổi playbackRate theo. Riêng ống
@@ -20,7 +25,7 @@ const CONFETTI = ["#dcf25a", "#ffffff", "#f5c542", "#7fd6ff", "#ff8aa8"];
 
 type Face = 1 | -1;
 type Point = { x: number; y: number };
-type Weapon = "bat" | "pipe" | "pan" | "chair" | "gun" | "extinguisher" | "camera";
+type Weapon = "bat" | "pipe" | "pan" | "chair" | "gun" | "extinguisher" | "camera" | "pad";
 type Fighter = { i: number; x: number; y: number; k: number; wy: number; face: Face; hp: number; side: "a" | "b"; name: string; w: Weapon | null };
 /** Khung hình của ống kính: nhìn vào điểm (x, y), phóng `s` lần. */
 type Shot = Point & { s: number };
@@ -36,6 +41,16 @@ export type FightHost = {
   animate: (i: number, poses: Pose[], options: KeyframeAnimationOptions) => Animation;
 };
 
+type Side = "a" | "b";
+/* Lịch sử cược trong lượt xem — sống qua các lần "Xem đấu lại", tải lại trang thì xoá. */
+const bets: { pick: Side; won: boolean }[] = [];
+const BET_MS = 12000; // không chọn thì coi như "Xem thôi"
+const other = (s: Side): Side => (s === "a" ? "b" : "a");
+/** Thua đủ hai lần thì Trùng đề xuất bên ngược với lần cược gần nhất (và bên đó sẽ thắng). */
+function advice(): Side | null {
+  return bets.filter(b => !b.won).length >= 2 ? other(bets[bets.length - 1].pick) : null;
+}
+
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 const pick = <T,>(list: readonly T[]) => list[Math.floor(Math.random() * list.length)];
 const ease = (t: number) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
@@ -46,6 +61,7 @@ export function createFight(host: FightHost) {
   const cam = arena.querySelector<HTMLElement>(".hc-cam")!;
   const ac = new AbortController();
   const nodes = new Set<HTMLElement>();
+  const ui = new Set<HTMLElement>(); // bàn cược: DOM thật trong footer, không thuộc lớp nhân vật
   let finished = false;
 
   /* ---------- đồng hồ phim ---------- */
@@ -81,7 +97,10 @@ export function createFight(host: FightHost) {
     vBase = vnow(); rBase = performance.now(); rate = r;
     waiters.forEach(schedule);
     [...page.getAnimations({ subtree: true }), ...arena.getAnimations({ subtree: true })]
-      .forEach(a => { if (!lens.has(a)) a.updatePlaybackRate(r); });
+      // Đặt thẳng playbackRate (giữ nguyên currentTime), không dùng updatePlaybackRate: đổi tốc độ
+      // dồn dập (0,012 → 1 → 0,3) lúc animation còn chờ khung hình thì updatePlaybackRate tính
+      // startTime rơi xa vào tương lai — ô kẹt ở "chưa bắt đầu" và biến mất khỏi sàn.
+      .forEach(a => { if (!lens.has(a)) a.playbackRate = r; });
   }
 
   const docRect = (el: Element) => {
@@ -277,6 +296,8 @@ export function createFight(host: FightHost) {
   function clean() {
     nodes.forEach(n => n.remove());
     nodes.clear();
+    ui.forEach(n => n.remove());
+    ui.clear();
     lens.forEach(a => a.cancel());
     lens.clear();
     shot = null;
@@ -294,6 +315,81 @@ export function createFight(host: FightHost) {
     ac.abort();
     clean();
     footer.dataset.fight = finished ? "done" : "idle";
+  }
+
+  /* ---------- bàn cược ---------- */
+
+  const bt = text.bet;
+  const nameOf = (s: Side) => (s === "a" ? text.aName : text.bName);
+
+  /* Bàn cược nằm trong footer, chồng lên sàn đấu: lớp nhân vật không nhận chuột và bị ẩn
+     khỏi trình đọc màn hình, nên nút bấm phải ở ngoài lớp đó. */
+  function betBox() {
+    const box = document.createElement("div");
+    box.className = "hc-bet";
+    Object.assign(box.style, { left: `${arena.offsetLeft}px`, top: `${arena.offsetTop}px`, width: `${arena.offsetWidth}px`, height: `${arena.offsetHeight}px` });
+    arena.after(box);
+    ui.add(box);
+    return box;
+  }
+
+  function reportHtml(adv: Side) {
+    const r = bt.report;
+    const shown = bets.slice(-4), first = bets.length - shown.length;
+    const rows = shown.map((b, n) => `<tr><td>${first + n + 1}</td><td>${nameOf(b.pick)}</td><td data-won="${b.won}">${b.won ? r.win : r.lose}</td></tr>`).join("");
+    const hits = bets.filter(b => b.won).length;
+    return `<div class="hc-bet-report"><strong>${r.title}</strong>
+      <table><thead><tr><th>${r.round}</th><th>${r.pick}</th><th>${r.result}</th></tr></thead><tbody>${rows}</tbody></table>
+      <p>${r.rate.replace("{n}", String(hits)).replace("{total}", String(bets.length))}</p>
+      <p class="hc-bet-advice">${r.advice.replace("{name}", nameOf(adv))}</p>
+      <p class="hc-bet-conf">${r.confidence}</p></div>`;
+  }
+
+  /** Hỏi người xem cược bên nào. Trả về bên đã chọn, hoặc null khi "Xem thôi"/hết giờ. */
+  function askBet(adv: Side | null) {
+    const box = betBox();
+    const card = document.createElement("div");
+    card.className = "hc-bet-card";
+    if (adv) card.dataset.report = "true";
+    card.setAttribute("role", "group");
+    card.setAttribute("aria-label", bt.title);
+    const picks = (["a", "b"] as Side[]).map(s =>
+      `<button type="button" class="hc-bet-pick" data-side="${s}"${s === adv ? " data-advice" : ""}><i></i>${nameOf(s)}${s === adv ? `<b>${bt.report.tag}</b>` : ""}</button>`).join("");
+    card.innerHTML = `<p class="hc-bet-title" aria-live="polite">${bt.title}</p><p class="hc-bet-hint">${bt.hint}</p>
+      ${adv ? reportHtml(adv) : ""}<div class="hc-bet-picks">${picks}</div>
+      <div class="hc-bet-foot"><span class="hc-bet-timer" style="--t: ${BET_MS}ms"></span><button type="button" class="hc-bet-skip">${bt.skip}</button></div>`;
+    box.appendChild(card);
+    // Tờ giấy của Trùng (hay tấm vé cược) bung ra thành bàn cược.
+    if (!reduced) card.animate([{ transform: "scale(.3, .06) rotate(-6deg)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 420, easing: "cubic-bezier(.2,.8,.25,1.15)" });
+    return new Promise<{ pick: Side | null; chip: HTMLElement | null }>((resolve, reject) => {
+      let settled = false;
+      const finish = (pick: Side | null) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        ac.signal.removeEventListener("abort", abort);
+        const hadFocus = box.contains(document.activeElement);
+        if (!pick) { box.remove(); ui.delete(box); resolve({ pick, chip: null }); return; }
+        // Thu lại thành một nhãn nhỏ "Bạn cược …" ở đỉnh sàn đấu suốt trận.
+        box.innerHTML = "";
+        const chip = document.createElement("span");
+        chip.className = "hc-bet-chip";
+        chip.setAttribute("role", "status");
+        chip.dataset.side = pick;
+        chip.textContent = bt.chip.replace("{name}", nameOf(pick));
+        box.appendChild(chip);
+        // Nút vừa bấm biến mất — trả focus về thẻ game ngay cạnh thay vì rơi về <body>.
+        if (hadFocus) footer.querySelector<HTMLElement>(".hc-game")?.focus({ preventScroll: true });
+        resolve({ pick, chip });
+      };
+      const timer = window.setTimeout(() => finish(null), BET_MS);
+      const abort = () => { clearTimeout(timer); settled = true; reject(new Error("abort")); };
+      ac.signal.addEventListener("abort", abort, { once: true });
+      card.addEventListener("click", e => {
+        const btn = (e.target as Element).closest<HTMLButtonElement>("button");
+        if (btn) finish(btn.classList.contains("hc-bet-skip") ? null : (btn.dataset.side as Side));
+      });
+    });
   }
 
   /* ---------- kịch bản ---------- */
@@ -318,8 +414,7 @@ export function createFight(host: FightHost) {
       return { i, x: r.left + r.width / 2 + scrollX, y: r.bottom + scrollY, k: r.width / S, wy: 1, face, hp: 100, side, name, w: null };
     };
     const X = init(0, "a", text.aName, 1), T = init(1, "a", "", 1), Y = init(2, "b", text.bName, -1);
-    // W thắng, Z thua — bốc ngẫu nhiên mỗi lần diễn.
-    const W = Math.random() < 0.5 ? X : Y, Z = W === X ? Y : X;
+    const adv = advice();
     /** Hướng về phía đối thủ: Chấm luôn đứng bên trái, Lệch bên phải. */
     const d = (f: Fighter): Face => (f === X ? 1 : -1);
 
@@ -454,19 +549,74 @@ export function createFight(host: FightHost) {
       if (o.big) punch({ x: f.x, y: f.y - F * 0.6 });
     }
 
+    /** Trùng cất máy ảnh, lấy sổ ra tính: ký hiệu toán bay lên, biểu đồ mini nhảy loạn rồi
+        chốt — cột của bên vừa được cược sập xuống — "Ra rồi!", xé tờ giấy ném cho người xem. */
+    async function analyse(side: Side) {
+      arena.dataset.hud = "false"; // thanh máu đè lên chữ khi ống kính zoom vào nóc lồng
+      lensTo({ x: T.x, y: T.y - F * 0.6, s: 1.7 }, 500);
+      popText(bt.thinking, T.x, T.y - F * 1.5, "fx-shutter", 1100, 14);
+      equip(T, "pad", "none");
+      wield(T, [{ transform: "rotate(0deg)" }, { transform: "rotate(-10deg)" }, { transform: "rotate(7deg)" }, { transform: "rotate(0deg)" }], 260, { iterations: 6 });
+      bt.math.forEach((g, n) => later(160 + n * 200, () =>
+        popText(g, T.x + (n % 2 ? 1 : -1) * F * (0.45 + Math.random() * 0.7), T.y - F * 1.1, "fx-math", 1300, F * 1.5)));
+      const bars = node("fx-bars", '<i></i><i data-variant="green"></i>');
+      bars.style.height = `${F * 0.9}px`;
+      const bp = { x: T.x + T.face * F * 1.25, y: T.y - F * 0.75 };
+      play(bars, [{ transform: at(bp.x, bp.y, 0), opacity: 0 }, { transform: at(bp.x, bp.y, 1), opacity: 1 }], 240, { easing: "ease-out", keep: true });
+      const cols = [...bars.children] as HTMLElement[];
+      cols.forEach((col, k) => track(col.animate(
+        [0.3, 0.85, 0.45, 0.95, 0.25, 0.7, 0.5].map((v, n) => ({ transform: `scaleY(${(n + k) % 2 ? v : 1 - v * 0.6})` })),
+        { duration: ms(1500), fill: "forwards" })));
+      await wait(1500);
+      cols.forEach((col, k) => track(col.animate([{ transform: `scaleY(${(k ? "b" : "a") === side ? 1 : 0.08})` }],
+        { duration: ms(380), easing: "cubic-bezier(.2,.8,.25,1.4)", fill: "forwards" })));
+      await wait(420);
+      popText(bt.eureka, T.x, T.y - F * 1.6, "fx-text", 900, 18);
+      sparks(T.x, T.y - F * 0.9, "#dcf25a", 10, 30);
+      cheer(T, 0.6);
+      await wait(520);
+      lensTo(null, 420);
+      // Xé tờ giấy, ném ra giữa đỉnh sàn đấu — chỗ bàn cược sẽ bung ra.
+      const paper = node("fx-paper");
+      const to = { x: A.left + A.width / 2, y: A.top + 60 };
+      play(paper, arc({ x: T.x, y: T.y - F * 0.8 }, to, F * 2.2, 16).map((p, k, all) => {
+        const t = k / (all.length - 1);
+        return { transform: at(p.x, p.y, 1 + t * 2, 900 * t), opacity: t > 0.92 ? 0 : 1 };
+      }), 700);
+      play(bars, [{ opacity: 1 }, { opacity: 0 }], 300, { delay: 200 });
+      await wait(700);
+      equip(T, "camera", "none");
+      arena.dataset.hud = "true";
+    }
+
     /* ----- 0. Club bật đèn, khán giả ùa vào, hai bên nhảy xuống ----- */
     bodies.forEach(b => { b.dataset.spot = "true"; });
     Object.assign(arena.dataset, { lit: "true", hud: "true", crowd: "on" });
     footer.dataset.fight = "on";
     arena.style.setProperty("--hp-a", "1");
     arena.style.setProperty("--hp-b", "1");
-    hop(X, cx - half, floor, F * 2.4, 900, { k: F / S });
-    hop(Y, cx + half, floor, F * 2.4, 900, { k: F / S, delay: 140 });
     // Trùng leo lên nóc lồng làm phó nháy: cột giữa bên trái, nhưng không đứng che biển neon.
     const neon = docRect(arena.querySelector(".hc-neon")!);
     const perch = Math.max(cage.left + F * 0.5, Math.min(cage.left + cage.width / 3, neon.left - F * 0.7));
-    hop(T, perch, cage.top, F * 1.6, 900, { k: (F * 0.8) / S, delay: 260 });
-    await wait(1050);
+    if (adv) {
+      // Đã thua hai lần: Trùng lên nóc lồng trước, tính xong mới cho hai bên xuống sàn.
+      hop(T, perch, cage.top, F * 1.6, 900, { k: (F * 0.8) / S });
+      await wait(950);
+      squash(T);
+      await analyse(adv);
+    } else hop(T, perch, cage.top, F * 1.6, 900, { k: (F * 0.8) / S, delay: 260 });
+    hop(X, cx - half, floor, F * 2.4, 900, { k: F / S });
+    hop(Y, cx + half, floor, F * 2.4, 900, { k: F / S, delay: 40 });
+    // Sắp chạm sàn thì gần như đứng hình (đỉnh cú nhảy nằm ngoài khung zoom, giữa chừng thì
+    // đè lên bàn cược): mời người xem đặt cửa. Bàn cược ở nửa trên, hai bên lơ lửng bên dưới.
+    await wait(880);
+    slowmo({ x: cx, y: floor - F * 1.6 }, 0.012, 1.2, 500);
+    const { pick: choice, chip } = await askBet(adv);
+    slowmo(null);
+    // W thắng, Z thua. Bên người xem cược luôn thua — trừ khi theo đề xuất của Trùng.
+    const winner: Side = adv ?? (choice ? other(choice) : Math.random() < 0.5 ? "a" : "b");
+    const W = winner === "a" ? X : Y, Z = W === X ? Y : X;
+    await wait(170);
     squash(X); squash(Y);
     dust(X.x, floor); dust(Y.x, floor);
     roar("hype", 1000);
@@ -717,6 +867,16 @@ export function createFight(host: FightHost) {
     popText(win, cx, A.top + A.height * 0.32, "fx-banner", 1900, 12);
     await wait(1100);
     cheer(T);
+    if (choice) {
+      const won = choice === winner;
+      bets.push({ pick: choice, won });
+      popText(won ? bt.won : bt.lost, cx, A.top + A.height * 0.55, `fx-banner ${won ? "fx-bet-won" : "fx-bet-lost"}`, 2000, 10);
+      if (chip) {
+        chip.dataset.result = won ? "won" : "lost";
+        chip.textContent = `${bt.chip.replace("{name}", nameOf(choice))} · ${won ? bt.chipWon : bt.chipLost}`;
+      }
+      if (won) confetti(30);
+    }
   }
 
   async function run() {

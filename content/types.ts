@@ -458,6 +458,8 @@ export interface HomeContent {
     progress: string; completed: string; canvasLabel: string; confused: string; spotted: string;
     /** Lời nhắc hiện sau khi màn chào xong và trang được mở khoá cuộn. */
     scrollCue: string;
+    /** Bong bóng của Lệch khi người xem cố cuộn lúc màn chào đang diễn. */
+    hush: string;
   };
   work: {
     heading: string; count: string; hint: string;
@@ -486,6 +488,17 @@ export interface HomeContent {
     aName: string; bName: string; go: string; clang: string; smash: string; ping: string; bong: string;
     spray: string; ko: string; shutter: string; win: string; rematch: string;
     neon: string; bar: string; exit: string; cheers: string[];
+    /** Bàn cược lúc hai bên nhảy xuống sàn. `{name}` là tên bên được nhắc tới. `math` là các ký
+        hiệu Trùng lẩm bẩm khi tính; `report` là bảng phân tích Trùng đưa sau hai lần thua. */
+    bet: {
+      title: string; hint: string; skip: string; chip: string;
+      won: string; lost: string; chipWon: string; chipLost: string;
+      thinking: string; eureka: string; math: string[];
+      report: {
+        title: string; round: string; pick: string; result: string; win: string; lose: string;
+        rate: string; advice: string; confidence: string; tag: string;
+      };
+    };
   };
   /** Nút bật/tắt ba bạn đồng hành ở footer. */
   companions: { hide: string; show: string; tired: string };

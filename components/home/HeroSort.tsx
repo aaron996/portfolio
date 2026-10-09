@@ -5,7 +5,7 @@ import { content } from "@/content/content.vi";
 import { PortfolioIcon } from "@/components/portfolio/PortfolioIcon";
 import { companions, useCompanions } from "@/components/companions/store";
 import { INTRO_STATE_EVENT } from "@/components/portfolio/IntroVideo";
-import { createBuddies, measureDot, trackGaze, type ChartGeometry, type Kick, type Misfit } from "./heroBuddies";
+import { createBuddies, measureDot, popBubble, trackGaze, type ChartGeometry, type Kick, type Misfit } from "./heroBuddies";
 
 const hero = content.prototype.hero;
 const copy = content.home.sort;
@@ -28,6 +28,8 @@ const DEMO_PLAYS = 3;
    chào sau khi đã sắp xong — quá hạn thì mở khoá dù hoạt cảnh chưa chạy hết. */
 const WELCOME_SEEN = "pf-welcome-seen";
 const WELCOME_TIMEOUT = 12000;
+/* Cố cuộn lúc màn chào đang diễn: trang giãn như dây thun, Lệch quay lại "Suỵt!". */
+const HUSH_GAP = 1200;
 
 /* Ba ô "lạc" — xếp xong vẫn nằm sai chỗ, rồi bị đá văng ra thành nhân vật.
    Thứ tự khớp .hs-buddy: 0 Chấm (nghiêng trên cột 4), 1 Trùng (chồng lệch lên Chấm
@@ -75,6 +77,7 @@ export function HeroSort() {
   const settleRef = useRef<(() => void)[]>([]);
   const iRef = useRef<HTMLSpanElement>(null);
   const buddyRef = useRef<HTMLDivElement>(null);
+  const cueRef = useRef<HTMLAnchorElement>(null);
   const apiRef = useRef<Api | null>(null);
   const [progress, setProgress] = useState(0);
   const [done, setDone] = useState(false);
@@ -89,12 +92,13 @@ export function HeroSort() {
 
   /* CSS đã chặn cuộn; còn phím tắt và cuộn khôi phục của trình duyệt thì vẫn có thể kéo
      trang đi — đưa về đầu. Nhưng không nhốt người xem:
-     - tới bằng neo (`/#contact`…), Back/Forward, tải lại, hoặc đã xem màn chào trong phiên
-       này → mở khoá ngay;
+     - tới bằng neo (`/#contact`…), Back/Forward, hoặc đã xem màn chào trong phiên này →
+       mở khoá ngay (tải lại khi chưa xem xong thì vẫn khoá);
      - cố cuộn (lăn chuột, vuốt, PageDown/Space/↓) khi chưa sắp xong → tự "Sắp xếp ngay"
-       để màn chào chạy tiếp thay vì đứng im;
+       để màn chào chạy tiếp thay vì đứng im; sắp xong rồi thì trang giãn như dây thun và
+       Lệch bảo "Suỵt!", để người xem biết là đang chờ chứ không phải trang đơ;
      - Tab ra khỏi hero → mở khoá, để ô đang focus không nằm ngoài màn hình;
-     - sắp xong mà màn chào kẹt quá WELCOME_TIMEOUT → mở khoá. */
+     - sắp xong mà màn chào kẹt quá WELCOME_TIMEOUT (chỉ tính lúc tab đang hiện) → mở khoá. */
   useEffect(() => {
     if (welcomed) {
       try { sessionStorage.setItem(WELCOME_SEEN, "1"); } catch {}
@@ -103,32 +107,63 @@ export function HeroSort() {
     let seen = false;
     try { seen = sessionStorage.getItem(WELCOME_SEEN) === "1"; } catch {}
     const nav = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
-    if (seen || window.location.hash || nav?.type === "back_forward" || nav?.type === "reload") {
+    if (seen || window.location.hash || nav?.type === "back_forward") {
       setWelcomed(true);
       return;
     }
     const stage = stageRef.current;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let hushedAt = -HUSH_GAP;
+    const hush = () => {
+      const now = performance.now();
+      if (!stage || now - hushedAt < HUSH_GAP) return;
+      hushedAt = now;
+      if (!reduced) stage.animate([
+        { transform: "none" }, { transform: "translateY(-14px)", offset: 0.3 },
+        { transform: "translateY(4px)", offset: 0.7 }, { transform: "none" },
+      ], { duration: 560, easing: "ease-out" });
+      const lech = buddyRef.current?.querySelectorAll<HTMLElement>(".hs-buddy")[2];
+      const bubble = buddyRef.current?.querySelector<HTMLElement>(".hs-bubble-hush");
+      if (!lech || !bubble || getComputedStyle(lech).opacity === "0") return;
+      const r = lech.getBoundingClientRect(), s = stage.getBoundingClientRect();
+      popBubble(bubble, { x: r.left - s.left + r.width / 2 - bubble.offsetWidth / 2, y: r.bottom - s.top - r.height * 2.4 }, 1100);
+    };
     const hold = () => { if (window.scrollY > 0) window.scrollTo({ top: 0, behavior: "instant" }); };
     const nudge = (e: Event) => {
       if (document.documentElement.dataset.introActive !== "0") return;
       if (e instanceof KeyboardEvent && !["PageDown", "ArrowDown", " ", "End"].includes(e.key)) return;
       if (!done) apiRef.current?.sortAll();
+      else hush();
     };
-    const away = (e: FocusEvent) => { if (stage && e.target instanceof Node && !stage.contains(e.target)) setWelcomed(true); };
+    /* Chỉ tính khi focus thật sự rời hero. Đóng intro thì trình duyệt trả focus về
+       `#main` (tổ tiên của hero) — không phải người xem bỏ đi, đừng mở khoá. */
+    const away = (e: FocusEvent) => {
+      const t = e.target;
+      if (!stage || !(t instanceof Element) || stage.contains(t) || t.contains(stage)) return;
+      if (t.closest("dialog") || document.documentElement.dataset.introActive !== "0") return;
+      setWelcomed(true);
+    };
     hold();
     window.addEventListener("scroll", hold);
     window.addEventListener("wheel", nudge, { passive: true });
     window.addEventListener("touchmove", nudge, { passive: true });
     window.addEventListener("keydown", nudge);
     document.addEventListener("focusin", away);
-    const timer = done ? setTimeout(() => setWelcomed(true), WELCOME_TIMEOUT) : undefined;
+    // Chỉ đếm lúc người xem thật sự nhìn trang: tab ẩn hay intro đang mở thì màn chào
+    // cũng đang dừng, đếm tiếp sẽ mở khoá giữa chừng.
+    let left = WELCOME_TIMEOUT;
+    const timer = done ? setInterval(() => {
+      if (document.hidden || document.documentElement.dataset.introActive !== "0") return;
+      left -= 500;
+      if (left <= 0) setWelcomed(true);
+    }, 500) : undefined;
     return () => {
       window.removeEventListener("scroll", hold);
       window.removeEventListener("wheel", nudge);
       window.removeEventListener("touchmove", nudge);
       window.removeEventListener("keydown", nudge);
       document.removeEventListener("focusin", away);
-      clearTimeout(timer);
+      clearInterval(timer);
     };
   }, [welcomed, done]);
 
@@ -454,7 +489,8 @@ export function HeroSort() {
       if (ctrl.signal.aborted) return;
       companions.set({ place: "hero", heroReady: false });
       // Đã diễn một lần (vd. tắt rồi bật lại) thì đặt thẳng vào tư thế cuối.
-      if (reduced || playedRef.current) placeAll();
+      const replay = playedRef.current;
+      if (reduced || replay) placeAll();
       else await buddies.play(geo, measureDot(iEl, stage), api.misfits(), KICKS, api, ctrl.signal);
       if (ctrl.signal.aborted) return;
       playedRef.current = true;
@@ -462,6 +498,16 @@ export function HeroSort() {
       companions.registerHero(bridge);
       companions.set({ heroReady: true });
       setWelcomed(true);
+      if (reduced || replay) return;
+      // Trao lượt: Lệch chạy tới nút "cuộn xuống" vừa hiện và giậm như bấm hộ.
+      await buddies.stomp(geo, () => {
+        const el = cueRef.current;
+        if (!el) return null;
+        const r = el.getBoundingClientRect(), s = stage.getBoundingClientRect();
+        return { x: r.left - s.left + Math.min(r.width * 0.25, 48), y: r.top - s.top };
+      }, () => {
+        cueRef.current?.animate([{ transform: "none" }, { transform: "translateY(3px) scaleY(.88)", offset: 0.35 }, { transform: "none" }], { duration: 220, easing: "ease-out" });
+      }, ctrl.signal);
     })().catch(() => { if (!ctrl.signal.aborted) setWelcomed(true); }); // lỗi thì mở khoá, đừng nhốt người xem
 
     // Đổi kích thước sau khi đã yên vị thì đặt lại cho khớp chữ I và sàn mới.
@@ -502,6 +548,7 @@ export function HeroSort() {
           </div>)}
         <span className="hs-bubble hs-bubble-confused">{copy.confused}</span>
         <span className="hs-bubble hs-bubble-spotted">{copy.spotted}</span>
+        <span className="hs-bubble hs-bubble-hush">{copy.hush}</span>
       </div>
 
       <div className="hs-meter">
@@ -509,7 +556,7 @@ export function HeroSort() {
           ? <button type="button" className="hs-text-btn" onClick={() => apiRef.current?.reshuffle()}><PortfolioIcon name="shuffle" />{copy.reshuffle}</button>
           : <button type="button" className="hs-text-btn" onClick={() => apiRef.current?.sortAll()}><PortfolioIcon name="sort" />{copy.sortAll}</button>}
         {welcomed && cue
-          ? <a className="hs-cue" href={hero.primary.href}>
+          ? <a ref={cueRef} className="hs-cue" href={hero.primary.href}>
               <span>{copy.scrollCue}</span>
               <PortfolioIcon name="down" />
             </a>
