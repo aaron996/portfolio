@@ -46,8 +46,8 @@
    - `sectionLabels.featuredEyebrow` / `otherCasesEyebrow` / `otherCasesHeading`
                            → chỉ FeaturedCase (thiết kế cũ) đọc. Component đã xoá.
 
-   Phase 2: PortfolioHome reads CaseStudy.tier for hierarchy. featuredSlug remains
-   legacy data for compatibility and does not control the prototype.
+   Đợt dọn 10/2026: bỏ các field không còn component nào đọc (statBand, testimonials,
+   pipeline, sectionLabels, intro, hero, featuredSlug... và phần lớn `prototype`).
    ========================================================================== */
 
 export type Accent = "navy" | "blue" | "amber" | "lime";
@@ -173,14 +173,6 @@ export interface CaseStudy {
    */
   flowHeading?: string;
   media?: Media[];
-
-  /**
-   * Số decision hiển thị trên TRANG CHỦ cho case flagship (phần còn lại chỉ có ở
-   * trang chi tiết). Bản cũ in cả 5 decision + results ngay trang chủ, khiến case
-   * flagship dài gấp ~40 lần mỗi case khác — đó là nguồn gốc thật của việc trang
-   * bị đọc thành "nghiêng về một khách hàng".
-   */
-  homepageDecisionCount?: number;
 }
 
 /* ── Minigame ──────────────────────────────────────────────
@@ -367,7 +359,6 @@ export interface GameContent {
   /** Có {boss} */
   bossAppear: string;
   deathLine: string;
-  skillsLabel: string;
   skillProgress: string;
   /** Có {name} — hiện khi nhặt được đồ nghề */
   pickupTool: string;
@@ -518,7 +509,6 @@ export interface SiteContent {
   notFound: NotFoundContent;
   meta: {
     name: string;
-    roleLabel: string;
     title: string;
     description: string;
     ogImage: string;
@@ -526,107 +516,7 @@ export interface SiteContent {
     locale: string;
   };
 
-  nav: Cta[];
-
-  hero: {
-    eyebrow: string;
-    headline: string[];
-    subline: string;
-    primaryCta: Cta;
-    secondaryCta: Cta;
-  };
-
-  /** Hàng "Đã làm trong" dưới hero. Chưa có file logo nên render dạng chữ. */
-  logos: string[];
-
-  /**
-   * Các chuỗi trước đây HARDCODE trong component. Đưa vào content vì chúng là
-   * quyết định biên tập, không phải quyết định layout.
-   *
-   * QUY TẮC: mọi chuỗi hiển thị cho người đọc phải nằm ở file content, không
-   * nằm trong .tsx. Đợt rebuild theo template đã hardcode lại một loạt heading
-   * và danh sách vào component, khiến sửa content không lên trang — đó là lỗi
-   * cần tránh lặp lại.
-   */
-  sectionLabels: {
-    /** Nhãn nút CTA trên nav (và trong menu mobile). */
-    navCta: string;
-    casesEyebrow: string;
-    casesHeading: string;
-    experienceEyebrow: string;
-    experienceHeading: string;
-    ctaHeading: string;
-    /** Tuyên ngôn ngắn dưới ctaHeading, ở section nền lime. */
-    ctaBody: string;
-  };
-
-  /** Ba ô trích dẫn để trống có chủ ý — xem `note`. */
-  testimonials: {
-    eyebrow: string;
-    heading: string;
-    note: string;
-    /** Số ô trống render ra. */
-    slots: number;
-  };
-
-  statBand: {
-    value: string;
-    suffix?: string;
-    label: string;
-    /** Nhãn thời kỳ / nguồn. Bắt buộc khi số không thuộc công việc hiện tại. */
-    note?: string;
-  }[];
-
-  /** Section "Về tôi". `heading` là heading duy nhất của section này. */
-  intro: {
-    eyebrow: string;
-    heading: string;
-    body: string[];
-    /** Giới hạn tự nhận. Xuất hiện đúng 1 lần trên toàn site. */
-    boundary: string;
-    /** Khi nào nên gọi mình. */
-    fit: string[];
-    /** Khi nào KHÔNG nên — nói ra thì tăng độ tin, không giảm. */
-    notFit: string[];
-  };
-
-  featuredSlug: string;
   cases: CaseStudy[];
-
-  /**
-   * Đường đi thật của một dashboard, thay cho `process` chung chung ở bản cũ.
-   * Hai field quyết định giá trị của section này:
-   *  - `owner`      → mắt nào do người khác nắm, tức Vinh phải thiết kế trong
-   *                   năng lực và lịch của một team khác.
-   *  - `constraint` → ràng buộc tổ chức tạo ra mắt đó. Đây là thứ KHÔNG fake được;
-   *                   không ai bịa ra được nếu chưa sống trong tổ chức đó.
-   */
-  pipeline: {
-    eyebrow: string;
-    heading: string;
-    intro: string;
-    steps: {
-      label: string;
-      tool: string;
-      owner: string;
-      constraint?: string;
-      body: string;
-    }[];
-    /** Tự nhận điểm yếu kiến trúc. Giấu thì mất điểm với kỹ sư dữ liệu; nói ra thì thành bằng chứng phán đoán. */
-    tradeoff: string;
-    /** Chỗ DUY NHẤT nói về AI-assisted. Đừng lặp lại ở hero/intro/case. */
-    aiNote: string;
-  };
-
-  skills: { title: string; items: string[] }[];
-
-  experience: {
-    company: string;
-    role: string;
-    period: string;
-    summary: string;
-    highlights: string[];
-  }[];
 
   contact: {
     heading: string;
@@ -634,61 +524,20 @@ export interface SiteContent {
     email: string;
     linkedin: string;
     cvHref: string;
-    availability: string;
   };
 
   game: GameContent;
 }
 
-export interface PrototypeMedia {
-  src: string;
-  alt: string;
-  caption: string;
-  width: number;
-  height: number;
-  /** Layout crop keeps the existing screenshot intact, including in the viewer. */
-  crop?: { left: number; top: number; width: number; height: number };
-}
-
-export interface PrototypeVisual {
-  src: string;
-  alt: string;
-  caption: string;
-  width: number;
-  height: number;
-}
-
 export interface PortfolioPrototype {
-  nav: Cta[];
   hero: {
-    domain: string; heading: string; body: string; primary: Cta; secondary: Cta;
+    heading: string; primary: Cta;
     headlineLines: [string, string, string, string];
-    objects: { container: Cta; keyboard: Cta; description: string };
   };
-  labels: {
-    cv: string; navCv: string; navGame: string; navIntro: string; navWork: string; more: string;
-    skip: string; navigation: string; works: string; otherWorks: string;
-    process: string; about: string; experience: string; skills: string;
-    demo: string; enlarge: string; closeImage: string; imageViewer: string;
-    back: string; decisions: string; details: string; results: string; ownership: string;
-    sharedScope: string; related: string; lesson: string; stack: string; source: string;
-    email: string; linkedin: string; top: string; location: string;
-  };
-  logistics: {
-    callouts: { badge: string; title: string; body: string }[];
-  };
+  labels: { skip: string; navigation: string };
   /** Video intro phủ toàn màn hình khi mở trang chủ (một lần mỗi phiên). `countdown` chứa {s} = số giây còn lại. */
   intro: {
     src: string; label: string; skip: string; soundOn: string; soundOff: string;
     play: string; enter: string; countdown: string; replay: string;
   };
-  worksIntro: string;
-  media: Record<string, PrototypeMedia>;
-  visuals: Record<"carrier" | "method" | "experience", PrototypeVisual>;
-  resultNote: string;
-  process: { title: string; body: string }[];
-  about: string[];
-  experience: { company: string; period: string; role: string; body: string }[];
-  skills: { title: string; body: string; links: Cta[] }[];
-  contact: { heading: string; body: string; gameStatus: string; gameTitle: string; gameEntryKey: string; gameCta: Cta };
 }
