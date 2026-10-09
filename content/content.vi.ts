@@ -1428,6 +1428,7 @@ export const content: SiteContent = {
       "Năm bản đồ là năm nơi mình từng làm việc. Khám phá đường đi, xử lý nhiệm vụ và hạ trùm mỗi bản đồ để nhận hai kỹ năng. Hết năm ải là xong sáu năm.",
     note:
       "Game này mình dựng bằng AI-assisted coding. Phần khó không nằm ở code — nó nằm ở chỗ quyết định cái gì đáng đưa vào và cái gì nên bỏ.",
+    backHome: "Về trang chủ",
     controlsHint:
       "← → di chuyển · ↑/Space nhảy · ↓/S xuống bệ · J chém · K bắn · L đỡ · B túi đồ · P tạm dừng",
     display: {

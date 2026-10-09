@@ -335,7 +335,7 @@ export interface GameContent {
   intro: string;
   /** Ghi chú thành thật về việc đây là bản nháp */
   note: string;
-  controlsHint: string;
+  controlsHint: string; backHome: string;
   display: {
     expand: string; collapse: string; touchLabel: string;
     touchAuto: string; touchOn: string; touchOff: string;

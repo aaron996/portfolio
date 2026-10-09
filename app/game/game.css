@@ -1,0 +1,14 @@
+/* Trang /game theo theme giấy (biến màu lấy từ `.home` trong components/home/home.css).
+   Khung game tối nằm trong `.gp-stage`; không đụng vào styles của OpsGame. */
+.gp main { outline: none; }
+.gp-head { box-sizing: border-box; width: min(960px, calc(100% - 2 * var(--gutter))); margin: 0 auto; padding: clamp(40px, 7vw, 88px) clamp(10px, 2vw, 20px) 0; }
+.gp-eyebrow { margin: 0 0 12px; font-family: var(--hero-mono), monospace; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.gp-head h1 { margin: 0; font-size: clamp(36px, 5.6vw, 76px); font-weight: 700; letter-spacing: -.045em; line-height: 1.02; text-wrap: balance; }
+.gp-intro { margin: 20px 0 0; max-width: 62ch; font-size: 17px; line-height: 1.65; color: var(--muted); }
+
+.gp-stage { box-sizing: border-box; width: min(960px, calc(100% - 2 * var(--gutter))); margin: clamp(28px, 4vw, 44px) auto 0; padding: clamp(10px, 2vw, 20px); border-radius: var(--r-card); background: var(--night); color: var(--night-text); box-shadow: 0 1px 0 var(--line), 0 18px 40px -24px rgb(22 22 20 / .5); }
+
+.gp-foot { box-sizing: border-box; width: min(960px, calc(100% - 2 * var(--gutter))); margin: 0 auto; padding: 32px clamp(10px, 2vw, 20px) clamp(56px, 8vw, 96px); }
+.gp-foot p { margin: 0; max-width: 62ch; font-size: 15px; line-height: 1.65; color: var(--muted); }
+.gp-back { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; font-size: 14px; color: var(--accent); }
+.gp-back:hover { text-decoration: underline; text-underline-offset: 4px; }
