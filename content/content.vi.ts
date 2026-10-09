@@ -132,25 +132,6 @@ export const content: SiteContent = {
       gameEntryKey: "[ ENTER ]",
       gameCta: { label: "BẮT ĐẦU", href: "/game" },
     },
-    pg: {
-      period: "Interdist · Từ T5/2026 · Bán thời gian, từ xa",
-      context: "Doanh số về từ nhiều file Excel, khiến việc tổng hợp và theo dõi target phải lặp lại qua từng kỳ. Tôi xây ứng dụng nội bộ để đưa dữ liệu, quy tắc tính và báo cáo vào cùng một quy trình.",
-      role: "Phụ trách nghiệp vụ, mô hình dữ liệu, ứng dụng và vận hành sản phẩm; sử dụng AI hỗ trợ lập trình.",
-      output: "Dashboard doanh số, quy trình nhập có kiểm tra, giá theo thời gian hiệu lực và target theo lịch cửa hàng.",
-      decisions: [
-        { id: "effective-price", title: "Giá của giao dịch, theo đúng thời kỳ", body: "Giá thay đổi theo kênh, cửa hàng và thời kỳ. Tôi lưu khoảng hiệu lực và thứ tự ưu tiên giá riêng của cửa hàng so với giá mặc định để áp dụng quy tắc khi tính doanh thu." },
-        { id: "daily-target", title: "Target đi theo lịch cửa hàng", body: "Tôi dùng trọng số theo thứ và ngoại lệ theo ngày, kèm preview trước khi áp dụng một lô điều chỉnh. Người dùng thấy tác động lên chỉ tiêu thay vì chia đều tháng theo một số ngày cố định." },
-      ],
-      details: [
-        { title: "Tách SKU và kiểm tra file", body: "Tiêu đề cột có dạng CATEGORY.SKU, nhưng SKU cũng có thể chứa dấu chấm. Chỉ tách ở dấu chấm đầu tiên và giữ phần còn lại. File vào staging để chuẩn hoá theo quy tắc, kiểm từng dòng và báo lỗi trước khi chuyển vào bảng giao dịch." },
-        { title: "Actual và target có nguồn riêng", body: "Bảng target chỉ lưu chỉ tiêu. Actual được tính từ bảng giao dịch khi đọc, giúp tránh duy trì thêm một bản sao số dẫn xuất phải đồng bộ sau mỗi lần import hoặc sửa lịch sử." },
-        { title: "Phân quyền và lịch sử thay đổi", body: "Đăng nhập Google và phân quyền admin / user / pending. Phân quyền được thực thi ở tầng dữ liệu; các thao tác thay đổi có nhật ký người thực hiện và thời điểm. Đây là mô tả cơ chế, không phải kết quả kiểm toán bảo mật." },
-      ],
-      result: { value: "40–60 giờ/tháng", label: "Thời gian tổng hợp được giải phóng · Ước tính",
-        method: "Ước tính từ thao tác tổng hợp Excel của 3–4 PIC, công thức lặp và việc tập trung dữ liệu giá, target, mapping cửa hàng. Chưa đo bằng time-tracking thực tế." },
-      snapshot: "Hồ sơ portfolio ghi nhận 85.563 giao dịch, 12.476 bản tổng hợp ngày, 569 dòng chỉ tiêu tháng, 41 cửa hàng, 176 SKU, 6 vùng, 2 kênh và 8 tài khoản từ Postgres/master data của Interdist. Chưa có ngày snapshot; đây là số quy mô đã ghi nhận, không phải số hiện tại hoặc tác động kinh doanh đã xác thực lại.",
-      lesson: "Ở giai đoạn đầu, tôi dựng dashboard trước khi chốt xong định nghĩa chỉ tiêu và phải làm lại phần tính toán khi nghiệp vụ được làm rõ. Từ đó tôi viết định nghĩa ra và cho người dùng xác nhận trước khi bắt đầu code. Tôi cũng cần đo thời gian quy trình cũ ngay từ đầu để có mốc đánh giá tác động.",
-    },
   },
   /* Homepage mới (10/2026): bỏ video nền và object 3D; hero chỉ còn headline,
      người xem tự rê chuột để "make sense of data". Mỗi section giữ ít chữ —

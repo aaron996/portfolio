@@ -691,11 +691,4 @@ export interface PortfolioPrototype {
   experience: { company: string; period: string; role: string; body: string }[];
   skills: { title: string; body: string; links: Cta[] }[];
   contact: { heading: string; body: string; gameStatus: string; gameTitle: string; gameEntryKey: string; gameCta: Cta };
-  pg: {
-    period: string; context: string; role: string; output: string;
-    decisions: { id: string; title: string; body: string }[];
-    details: { title: string; body: string }[];
-    result: { value: string; label: string; method: string };
-    snapshot: string; lesson: string;
-  };
 }
