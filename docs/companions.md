@@ -63,8 +63,20 @@ Nhà của chúng là logo 3×3 — logo có đúng 3 ô sáng. Cuối trang ch�
    thắng. Rời footer giữa chừng hoặc đổi kích thước cửa sổ thì huỷ, diễn lại từ đầu khi
    quay lại; diễn xong thì chỉ còn nút "Xem đấu lại". Giảm chuyển động: chạy tức thì tới
    cảnh cuối, không zoom, không quay chậm.
+   - **Đặt cược**: hai bên vừa sắp chạm sàn thì cảnh gần như đứng hình (tốc độ 0,012) và bàn
+     cược hiện ra (DOM thật chèn cạnh `.hc-arena` trong footer — lớp nhân vật `aria-hidden` và
+     không nhận chuột nên nút không thể nằm trong đó). Chọn Chấm / Lệch, hoặc "Xem thôi"; 12
+     giây không chọn thì coi như xem thôi. Bên người xem chọn **luôn thua**. Thua đủ hai lần
+     thì trận sau Trùng lên nóc lồng trước, cất máy ảnh lấy sổ ra tính (ký hiệu toán bay lên,
+     biểu đồ mini nhảy loạn rồi cột bên vừa cược sập xuống, "Ra rồi!"), xé tờ giấy ném ra —
+     tờ giấy bung thành bàn cược kèm "Báo cáo của Trùng": bảng các lần cược, tỉ lệ trúng, đề
+     xuất bên **ngược với lần cược gần nhất**. Bên được đề xuất luôn thắng (kể cả khi người
+     xem không theo). Lịch sử cược sống qua các lần "Xem đấu lại", tải lại trang thì xoá.
+     Hết trận hiện "Trúng cược!"/"Thua cược!" và nhãn "Bạn cược … · trúng/thua".
    - **Quay chậm**: `wait` đếm theo đồng hồ ảo; `slowmo()` đổi tốc độ đồng hồ và
-     `playbackRate` của mọi animation trong `.cmp-page` và `.hc-arena` (kể cả khán giả).
+     `playbackRate` của mọi animation trong `.cmp-page` và `.hc-arena` (kể cả khán giả). Đặt
+     thẳng `playbackRate`, không dùng `updatePlaybackRate`: đổi tốc độ dồn dập lúc animation
+     còn chờ khung hình thì `updatePlaybackRate` đẩy `startTime` xa vào tương lai và ô biến mất.
    - **Zoom**: cùng một phép biến đổi áp lên `.cmp-page` (kèm `clip-path` cắt đúng khung
      sàn đấu) và `.hc-cam`; HUD, viền đen điện ảnh, vạch tốc độ nằm ngoài `.hc-cam` nên
      đứng yên. `.home` có `overflow: clip` để lớp phóng to không làm trang tràn.
