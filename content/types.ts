@@ -449,6 +449,8 @@ export interface HomeContent {
   sort: {
     hint: string; hintTouch: string; sortAll: string; reshuffle: string;
     progress: string; canvasLabel: string; confused: string; spotted: string;
+    /** Lời nhắc hiện sau khi màn chào xong và trang được mở khoá cuộn. */
+    scrollCue: string;
   };
   work: {
     heading: string; count: string; hint: string;
@@ -468,8 +470,16 @@ export interface HomeContent {
     questions: { q: string; slug: string }[];
     footnote: string; aside: string; asideCta: string;
   };
-  contact: { heading: string; copy: string; copied: string; linkedin: string; cv: string; gameTitle: string; gameCta: string };
+  contact: { heading: string; copy: string; copied: string; linkedin: string; linkedinCta: string; cv: string; cvCta: string; gameTitle: string; gameCta: string };
   footer: { replay: string; top: string };
+  /** Cảnh đấu lồng sắt ở footer: Chấm đấu Lệch bằng đồ khán giả ném vào, Trùng chụp ảnh —
+      xem components/companions/fight.ts. `win` có `{name}` là tên bên thắng; `neon`/`bar`/`exit`
+      là biển đèn trong club; `cheers` là tiếng hò của khán giả, bốc ngẫu nhiên. */
+  fight: {
+    aName: string; bName: string; go: string; clang: string; smash: string; ping: string; bong: string;
+    spray: string; ko: string; shutter: string; win: string; rematch: string;
+    neon: string; bar: string; exit: string; cheers: string[];
+  };
   /** Nút bật/tắt ba bạn đồng hành ở footer. */
   companions: { hide: string; show: string; tired: string };
 }

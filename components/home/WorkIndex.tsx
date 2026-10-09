@@ -53,7 +53,7 @@ export function WorkIndex() {
   return <section id="cases" className="wi" aria-labelledby="wi-title" data-companion="work">
     <header className="home-section-head">
       <h2 id="wi-title">{copy.heading}</h2>
-      <p>{String(content.cases.length).padStart(2, "0")} {copy.count} · <span className="wi-hint">{copy.hint}</span></p>
+      <p>{String(content.cases.length).padStart(2, "0")} {copy.count}<span className="wi-hint"> · {copy.hint}</span></p>
     </header>
 
     <div className="wi-layout">
