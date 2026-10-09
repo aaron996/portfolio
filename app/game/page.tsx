@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { OpsGame } from "@/components/game/OpsGame";
+import { CurtainOpener } from "@/components/companions/CurtainOpener";
 import { content } from "@/content/content.vi";
 
 const { game } = content;
@@ -15,6 +16,7 @@ export const metadata: Metadata = {
 export default function GamePage() {
   return (
     <>
+      <CurtainOpener />
       <Nav />
       <main id="main" className="px-5 pb-24 pt-28 sm:px-8">
         <div className="mx-auto max-w-4xl">

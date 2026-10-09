@@ -235,7 +235,10 @@ export function CompanionLayer({ nav, origin = "hero" }: { nav: string; origin?:
       if (!st.enabled) return "off";
       if (homing) return "home";
       if (st.place === "home") return origin === "logo" && !emerged && emergeReady ? base() : "off";
-      if (st.place === "hero" && hero) return st.heroReady && ratios.hero < LEAVE_BELOW ? "dock" : "hero";
+      // Hero đang diễn màn mở đầu bằng bộ ba ô riêng; chưa đăng ký thì lớp này nằm yên,
+      // nếu không sẽ có bộ ba thứ hai nhảy ra từ logo ngay lúc đó.
+      if (st.place === "hero" && !hero) return "off";
+      if (st.place === "hero") return st.heroReady && ratios.hero < LEAVE_BELOW ? "dock" : "hero";
       if (hero && ratios.hero > RETURN_ABOVE) return "hero";
       if (ratios.night > 0.45) return "night";
       if (questions === "pending") return "questions";

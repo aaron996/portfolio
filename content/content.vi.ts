@@ -1514,6 +1514,7 @@ export const content: SiteContent = {
       closeLabel: "Đóng túi đồ",
     },
     pauseHint: "P tạm dừng · B túi đồ",
+    curtain: { line: "Mời vào!" },
     cutscene: {
       nextLabel: "Tiếp", beginLabel: "Vào bãi", skipLabel: "Bỏ qua",
       replayLabel: "Xem lại đoạn truyện ải này", counterLabel: "{current}/{total}",
