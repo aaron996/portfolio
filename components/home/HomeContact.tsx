@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { content } from "@/content/content.vi";
 import { PortfolioIcon } from "@/components/portfolio/PortfolioIcon";
 import { IntroReplayButton } from "@/components/portfolio/IntroReplayButton";
 import { companions, useCompanions } from "@/components/companions/store";
+import { closeCurtain, curtainAllowed } from "@/components/companions/gameCurtain";
 
 const copy = content.home.contact;
 const { email, linkedin, cvHref } = content.contact;
@@ -13,6 +15,15 @@ const { email, linkedin, cvHref } = content.contact;
 export function HomeContact({ replay = true }: { replay?: boolean }) {
   const [copied, setCopied] = useState(false);
   const { enabled } = useCompanions();
+  const router = useRouter();
+
+  /* Chấm kéo rèm khép lại rồi mới sang /game; trang game kéo rèm mở. Giảm chuyển động,
+     tắt bạn đồng hành hay bấm kèm phím (mở tab mới…) thì đi thẳng như link thường. */
+  const enterGame = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || !curtainAllowed()) return;
+    e.preventDefault();
+    closeCurtain(e.currentTarget.getBoundingClientRect()).catch(() => {}).then(() => router.push("/game"));
+  };
   useEffect(() => {
     if (!copied) return;
     const timer = setTimeout(() => setCopied(false), 1800);
@@ -33,7 +44,7 @@ export function HomeContact({ replay = true }: { replay?: boolean }) {
         <a href={cvHref}><PortfolioIcon name="pdf" />{copy.cv}</a>
       </div>
 
-      <Link href="/game" className="hc-game">
+      <Link href="/game" className="hc-game" onClick={enterGame}>
         <span>{copy.gameTitle}</span>
         <strong>{copy.gameCta}<PortfolioIcon name="forward" /></strong>
       </Link>

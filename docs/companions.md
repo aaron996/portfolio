@@ -62,8 +62,14 @@ Ba ô cầm đèn pin đi tìm, "?". Rọi vào giữa trang thì lộ ra Null �
 
 ### Game Ải Vận Hành
 
-Pet đi theo nhân vật hoặc NPC dẫn đường ải 1. Phải theo luật bốn việc ở
-`docs/game-assets.md` mục 12 (vẽ bằng code nên không cần gen ảnh, nhưng vẫn phải ghi).
+Chấm **không** vào game làm pet hay đồng đội — game chỉ có một lần Chấm làm người giới
+thiệu: **kéo rèm**. Bấm thẻ game ở footer trang chủ → Chấm (ô đang ngồi trên thẻ) nhảy ra
+mép phải, nắm rèm kéo khép lại giữa màn hình, đứng thẳng chờ rồi mới chuyển sang `/game`.
+Trang game: rèm đang kín, Chấm nói "Mời vào!", nhún hai lần, rồi kéo rèm mở ra để lộ màn
+game và chạy khuất. Bấm kèm phím (tab mới…), tắt bạn đồng hành hay giảm chuyển động thì đi
+thẳng như link thường. Code: `components/companions/gameCurtain.ts`; rèm là DOM thuần gắn
+vào `<body>` nên sống sót qua cú chuyển trang. Các lối khác vào `/game` (nav, câu hỏi) không
+có rèm.
 
 ## Kiến trúc
 
@@ -131,10 +137,9 @@ phát sáng; rê thẻ game → cả ba nhún.
   (`--lx/--ly`). Ba ô đứng dưới đáy, mắt dạ quang nhìn theo đèn, "?". Đèn rọi trúng tâm
   Null (dưới 90px) → bóng tối tan, lộ "Trang này là NULL.", ba ô nhảy "!". Nút "Bật đèn"
   cho bàn phím/cảm ứng; giảm chuyển động thì sáng sẵn.
-- **Game**: ba ô làm pet (`updatePets`/`drawPets` trong `components/game/engine.ts`) — Chấm
-  bám sau lưng, Trùng chậm nửa nhịp, Lệch chạy lên trước. Đọc cùng khoá localStorage
-  `companions` nên tắt ở footer trang chủ thì game cũng tắt. Vẽ bằng code; ảnh thật theo
-  `docs/game-assets.md` mục 14, cờ `ASSETS.companionArt` (đang tắt).
+- **Game**: ban đầu có làm ba ô pet đi theo nhân vật trong engine; đã **gỡ** (người làm
+  không cần Chấm vào game). Thay bằng màn kéo rèm ở mục "Game Ải Vận Hành" phía trên, nên
+  không còn ảnh pet cần gen.
 
 ## Lộ trình
 
@@ -144,4 +149,12 @@ phát sáng; rê thẻ game → cả ba nhún.
 | 1 | Lớp dùng chung, nhà ở logo, nút tắt, giảm chuyển động | Xong — đang gắn ở trang chủ |
 | 2 | Các màn trang chủ: Công việc, Đường đi, Ba câu hỏi, Liên hệ, về nhà | Xong |
 | 3 | Trang case theo theme mới + ba ô đi trên thanh đọc, khử trùng lặp, Lệch khoe số | Xong |
-| 4 | 404 với Null, pet trong game | Xong — ảnh pet chưa gen (cờ `companionArt` tắt) |
+| 4 | 404 với Null, Chấm kéo rèm vào game | Xong (pet trong game đã gỡ) |
+
+## Lỗi đã sửa
+
+- Hero từng có **sáu** ô: lúc `HeroSort` diễn màn đá văng (đã `place: "hero"` nhưng chưa
+  `registerHero`), `CompanionLayer.desired()` rơi xuống màn nền "dock" nên bộ ba thứ hai nhảy
+  ra từ logo, đứng trên nav rồi nhảy xuống nhập vào bộ ba ở sàn. Giờ `place === "hero"` mà
+  chưa có hero thì lớp chung trả `"off"`, nằm yên đến khi hero diễn xong.
+

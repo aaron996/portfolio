@@ -163,3 +163,70 @@ body {
 @media (min-width: 1280px) {
   .control-shell { padding-inline: 2.75rem; }
 }
+
+/* Sân khấu Chấm kéo rèm khi vào game — dựng bằng DOM thuần ở components/companions/gameCurtain.ts
+   để sống sót qua cú chuyển trang. Phong cách hoạt hình: viền đậm, tô hai tông + một nét sáng. */
+.gc {
+  --gc-ink: #2a0a08; --gc-red-1: #dd473c; --gc-red-2: #c2342b; --gc-red-3: #9a241f; --gc-gold: #f2c14e; --gc-gold-d: #b9852a;
+  position: fixed; inset: 0; z-index: 9999; overflow: hidden; pointer-events: auto;
+}
+.gc-floor {
+  position: absolute; left: 0; right: 0; bottom: 0; height: var(--gc-floor); z-index: 0;
+  border-top: 5px solid var(--gc-ink); transform: translateY(101%);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / .16), transparent 30%),
+    repeating-linear-gradient(90deg, transparent 0 118px, rgb(42 10 8 / .5) 118px 121px),
+    #8a5a34;
+}
+.gc-drape { position: absolute; top: 0; bottom: calc(var(--gc-floor) * .55); width: 52%; z-index: 1; }
+.gc-left { left: 0; transform: translateX(-101%); }
+.gc-right { right: 0; transform: translateX(101%); }
+/* Tấm vải: nếp là các dải đứng tô cứng (không chuyển mềm) nên co lại bằng scaleX thì nếp dồn
+   lại như rèm gấp. Mép dưới là hàng vòm, mép trong có dải vàng. */
+.gc-cloth {
+  position: absolute; inset: 0; transform: scaleX(.15);
+  background:
+    linear-gradient(180deg, rgb(0 0 0 / .4), transparent 26%, transparent 80%, rgb(0 0 0 / .22)),
+    repeating-linear-gradient(90deg, var(--gc-red-1) 0 22px, var(--gc-red-2) 22px 52px, var(--gc-red-3) 52px 76px, var(--gc-red-2) 76px 96px);
+  border-left: 4px solid var(--gc-ink); border-right: 4px solid var(--gc-ink);
+}
+.gc-left .gc-cloth { transform-origin: 0 50%; box-shadow: inset -9px 0 0 var(--gc-gold); }
+.gc-right .gc-cloth { transform-origin: 100% 50%; box-shadow: inset 9px 0 0 var(--gc-gold); }
+.gc-cloth::after {
+  content: ""; position: absolute; left: -4px; right: -4px; top: calc(100% - 1px); height: 34px;
+  background: radial-gradient(circle at 50% 0, var(--gc-red-2) 0 23px, var(--gc-ink) 23px 27px, transparent 27.5px) 0 0 / 54px 34px repeat-x;
+}
+/* Diềm vòm trên đỉnh: dải đỏ có hàng thừng vàng và tua. */
+.gc-valance {
+  position: absolute; left: 0; right: 0; top: 0; height: var(--gc-top); z-index: 2; transform: translateY(-110%);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / .2), transparent 35%, rgb(0 0 0 / .25)),
+    repeating-linear-gradient(90deg, var(--gc-red-1) 0 40px, var(--gc-red-3) 40px 80px);
+  border-bottom: 5px solid var(--gc-ink);
+}
+.gc-valance::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 22px;
+  background: radial-gradient(circle at 50% 0, var(--gc-red-2) 0 17px, var(--gc-ink) 17px 20.5px, transparent 21px) 0 -1px / 40px 22px repeat-x;
+}
+.gc-trim {
+  position: absolute; left: 0; right: 0; bottom: 14%; height: 9px; background: var(--gc-gold);
+  border-block: 3px solid var(--gc-gold-d); box-shadow: 0 0 0 2px var(--gc-ink);
+}
+.gc-chip { position: absolute; left: 0; top: 0; z-index: 3; width: var(--gc-chip); height: var(--gc-chip); transform-origin: 50% 100%; }
+.gc-chip-body {
+  position: relative; width: 100%; height: 100%; background: #161614; border-radius: 15%;
+  box-shadow: 0 0 0 2px #f3f1ea, 0 4px 0 2px rgb(0 0 0 / .25);
+}
+.gc-eyes { position: absolute; left: 20%; right: 20%; top: 26%; display: flex; justify-content: space-between; }
+.gc-eyes i { width: 24%; aspect-ratio: 5 / 6; border-radius: 50%; background: #f3f1ea; }
+/* Bong bóng thoại kiểu truyện tranh. */
+.gc-bubble {
+  position: absolute; z-index: 4; opacity: 0; transform: translate(-50%, 0); white-space: nowrap;
+  padding: 7px 16px 8px; border: 3px solid #161614; border-radius: 16px; background: #fbfaf6; color: #161614;
+  font: 800 22px/1.1 system-ui, sans-serif; box-shadow: 0 4px 0 #161614;
+}
+.gc-bubble::after {
+  content: ""; position: absolute; left: 50%; top: 100%; width: 12px; height: 12px; margin: -7px 0 0 -6px;
+  background: #fbfaf6; border: solid #161614; border-width: 0 3px 3px 0; transform: rotate(45deg);
+}
+.gc-piece { position: absolute; z-index: 5; border: 2px solid #161614; pointer-events: none; }

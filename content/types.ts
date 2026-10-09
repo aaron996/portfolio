@@ -436,6 +436,8 @@ export interface GameContent {
   };
   /** Gợi ý phím tạm dừng, hiện ở góc màn chơi */
   pauseHint: string;
+  /** Màn Chấm kéo rèm khi bấm thẻ game ở trang chủ (components/companions/gameCurtain.ts). */
+  curtain: { line: string };
   cutscene: {
     nextLabel: string;
     beginLabel: string;
