@@ -74,8 +74,31 @@ export function HeroSort() {
   const [progress, setProgress] = useState(0);
   const [done, setDone] = useState(false);
   const [touch, setTouch] = useState(false);
+  /* Màn chào (sắp ô → đá văng → Chấm làm dấu chấm chữ I) diễn xong chưa. Trước đó trang
+     bị khoá cuộn (home.css, `data-welcome`), để các section phía dưới không chạy khi
+     ba bạn đồng hành còn đang bận ở hero. */
+  const [welcomed, setWelcomed] = useState(false);
+  const [cue, setCue] = useState(true);
   const { enabled } = useCompanions();
   const playedRef = useRef(false);
+
+  /* CSS đã chặn cuộn; còn neo `#...`, phím tắt và cuộn khôi phục của trình duyệt thì
+     vẫn có thể kéo trang đi — đưa về đầu. */
+  useEffect(() => {
+    if (welcomed) return;
+    const hold = () => { if (window.scrollY > 0) window.scrollTo(0, 0); };
+    hold();
+    window.addEventListener("scroll", hold);
+    return () => window.removeEventListener("scroll", hold);
+  }, [welcomed]);
+
+  /* Lời nhắc cuộn xuống tắt hẳn khi người xem đã tự cuộn. */
+  useEffect(() => {
+    if (!welcomed) return;
+    const off = () => { if (window.scrollY > 80) setCue(false); };
+    window.addEventListener("scroll", off, { passive: true });
+    return () => window.removeEventListener("scroll", off);
+  }, [welcomed]);
 
   useEffect(() => {
     const stage = stageRef.current!;
@@ -316,6 +339,8 @@ export function HeroSort() {
     if (!done || !enabled) {
       buddies.reset();
       api.hideMisfits(!enabled);
+      // Tắt bạn đồng hành thì không còn màn chào nào để chờ.
+      if (!enabled) setWelcomed(true);
       if (!done) { playedRef.current = false; companions.set({ place: "home", heroReady: false }); }
       return;
     }
@@ -350,7 +375,8 @@ export function HeroSort() {
       stopGaze = trackGaze(gazes, geo.size, stage);
       companions.registerHero(bridge);
       companions.set({ heroReady: true });
-    })().catch(() => {});
+      setWelcomed(true);
+    })().catch(() => { if (!ctrl.signal.aborted) setWelcomed(true); }); // lỗi thì mở khoá, đừng nhốt người xem
 
     // Đổi kích thước sau khi đã yên vị thì đặt lại cho khớp chữ I và sàn mới.
     const ro = new ResizeObserver(() => { if (parts.bodies[0].dataset.settled) placeAll(); });
@@ -362,7 +388,7 @@ export function HeroSort() {
   const iAt = c.indexOf("I");
 
   return (
-    <section id="hero" ref={stageRef} className="hs-stage" data-done={done}>
+    <section id="hero" ref={stageRef} className="hs-stage" data-done={done} data-welcome={welcomed ? "done" : "pending"}>
       <canvas ref={canvasRef} role="img" aria-label={copy.canvasLabel} />
       <div ref={ghostRef} className="hs-ghost" data-show="false" aria-hidden="true">
         <svg viewBox="0 0 24 24"><path d="M4 2.5 19.5 12l-7 1.6-3.4 6.9z" /></svg>
@@ -396,10 +422,15 @@ export function HeroSort() {
         {done
           ? <button type="button" className="hs-text-btn" onClick={() => apiRef.current?.reshuffle()}><PortfolioIcon name="shuffle" />{copy.reshuffle}</button>
           : <button type="button" className="hs-text-btn" onClick={() => apiRef.current?.sortAll()}><PortfolioIcon name="sort" />{copy.sortAll}</button>}
-        <output>
-          <span className="hs-bar" aria-hidden="true"><span style={{ width: `${progress}%` }} /></span>
-          <b>{progress}%</b> {copy.progress}
-        </output>
+        {welcomed && cue
+          ? <a className="hs-cue" href={hero.primary.href}>
+              <span>{copy.scrollCue}</span>
+              <PortfolioIcon name="down" />
+            </a>
+          : <output>
+              <span className="hs-bar" aria-hidden="true"><span style={{ width: `${progress}%` }} /></span>
+              <b>{progress}%</b> {copy.progress}
+            </output>}
       </div>
     </section>
   );

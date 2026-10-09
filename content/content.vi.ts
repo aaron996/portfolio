@@ -48,6 +48,7 @@ export const content: SiteContent = {
       /* Bong bóng của mấy ô "lạc" sau khi sắp xong — xem components/home/heroBuddies.ts. */
       confused: "?",
       spotted: "!",
+      scrollCue: "Còn nhiều chuyện phía dưới — cuộn xuống",
     },
     work: {
       heading: "Công việc tiêu biểu",
@@ -93,11 +94,14 @@ export const content: SiteContent = {
       copy: "Chép email",
       copied: "Đã chép",
       linkedin: "LinkedIn",
+      linkedinCta: "Nhắn tin",
       cv: "CV (PDF)",
+      cvCta: "Tải về",
       gameTitle: "Hoặc vào ải trước đã",
       gameCta: "Chơi Ải Vận Hành",
     },
     footer: { replay: "Xem lại intro", top: "Lên đầu trang" },
+    fight: { aName: "Chấm", bName: "Lệch", go: "Đấu!", clang: "Keng!", ko: "K.O.", shutter: "Tách!", win: "Chấm vô địch!", rematch: "Xem đấu lại" },
     companions: { hide: "Ẩn bạn đồng hành", show: "Hiện bạn đồng hành", tired: "…" },
   },
 

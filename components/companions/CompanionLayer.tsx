@@ -16,6 +16,7 @@ import { content } from "@/content/content.vi";
 import { arc, toFrame, trackGaze, type Pose } from "@/components/home/heroBuddies";
 import { readProgress } from "@/components/home/reading";
 import { companions, useCompanions, type Spot } from "./store";
+import { createFight } from "./fight";
 
 const LEAVE_BELOW = 0.3; // hero còn hiện dưới mức này → rời hero
 const RETURN_ABOVE = 0.5; // hero hiện quá mức này → về hero
@@ -60,7 +61,7 @@ export function CompanionLayer({ nav, origin = "hero" }: { nav: string; origin?:
     const floor = navEl.querySelector<HTMLElement>(".site-progress");
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const anims: Animation[][] = bodies.map(() => []);
-    const ratios: Record<string, number> = { hero: 1, work: 0, path: 0, questions: 0, night: 0, dedupe: 0, result: 0 };
+    const ratios: Record<string, number> = { hero: 1, work: 0, path: 0, questions: 0, night: 0, arena: 0, dedupe: 0, result: 0 };
 
     let scene = "off";
     let busy = false;
@@ -77,6 +78,9 @@ export function CompanionLayer({ nav, origin = "hero" }: { nav: string; origin?:
     let emergeReady = origin !== "logo";
     let followMode = "read";
     const following = new Set([0, 1, 2]);
+    let fight: ReturnType<typeof createFight> | null = null;
+    let fighting = false;
+    let fightDone = false;
 
     const size = () => companions.hero()?.size ?? 16;
     const ms = (n: number) => (reduced ? 1 : n);
@@ -312,7 +316,29 @@ export function CompanionLayer({ nav, origin = "hero" }: { nav: string; origin?:
     }
     let followCtl: ReturnType<typeof startFollow> | null = null;
 
+    /* Cảnh đấu ở footer (fight.ts): bắt đầu khi ba ô đã đậu lên thẻ game và sàn đấu hiện đủ
+       trên màn hình; rời khỏi footer giữa chừng thì huỷ và sẽ diễn lại từ đầu khi quay lại. */
+    function stopFight() {
+      fight?.stop();
+      fight = null;
+      fighting = false;
+    }
+    function maybeFight() {
+      const arena = document.querySelector<HTMLElement>(".hc-arena");
+      const footer = document.querySelector<HTMLElement>(".hc");
+      if (!arena || !footer || fighting || fightDone || busy || !alive || scene !== "night" || ratios.arena < 0.85) return;
+      fighting = true;
+      const mine = createFight({ bodies, page: layers.page, arena, footer, size: size(), reduced, animate });
+      fight = mine;
+      mine.run().then(completed => {
+        if (fight !== mine) return;
+        fighting = false;
+        if (completed) fightDone = true;
+      });
+    }
+
     async function enter(key: string, prev: string) {
+      if (key !== "night") stopFight();
       const hero = companions.hero();
       if (followCtl && !FOLLOW.includes(key)) { followCtl(); followCtl = null; following.add(2); }
 
@@ -473,11 +499,12 @@ export function CompanionLayer({ nav, origin = "hero" }: { nav: string; origin?:
       } finally {
         busy = false;
       }
+      maybeFight();
     }
 
     /* Nhún tại chỗ — phản ứng nhỏ, chỉ khi đang rảnh. */
     function bounce(indexes: number[], times = 1) {
-      if (busy) return;
+      if (busy || fighting) return;
       indexes.forEach(async (i, n) => {
         const at = current(i);
         if (!at) return;
@@ -495,6 +522,7 @@ export function CompanionLayer({ nav, origin = "hero" }: { nav: string; origin?:
         if (key) ratios[key] = e.intersectionRatio;
       });
       direct();
+      maybeFight();
     }, { threshold: [0, 0.1, 0.15, 0.25, LEAVE_BELOW, 0.4, 0.45, RETURN_ABOVE, 0.75, 1] });
     document.querySelectorAll<HTMLElement>("[data-companion]").forEach(el => io.observe(el));
     let observedHero: HTMLElement | null = null;
@@ -518,6 +546,13 @@ export function CompanionLayer({ nav, origin = "hero" }: { nav: string; origin?:
       "companion:path-stop": e => { pathStop = (e as CustomEvent<number>).detail; if (pathRide) direct(); },
       "companion:questions": () => { questions = "pending"; direct(); },
       "companion:copied": () => { if (scene === "night") bounce([1], 2); },
+      "companion:rematch": () => {
+        if (scene !== "night") return;
+        stopFight();
+        fightDone = false;
+        scene = "stale:night"; // đưa ba ô về lại thẻ game rồi đấu lại
+        direct();
+      },
     };
     Object.entries(on).forEach(([name, fn]) => window.addEventListener(name, fn));
 
@@ -535,7 +570,7 @@ export function CompanionLayer({ nav, origin = "hero" }: { nav: string; origin?:
     const onResize = () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
-        if (scene !== "off" && scene !== "hero" && !busy && !followCtl) { scene = `stale:${scene}`; direct(); }
+        if (scene !== "off" && scene !== "hero" && !busy && !followCtl) { stopFight(); scene = `stale:${scene}`; direct(); }
       }, 150);
     };
     window.addEventListener("resize", onResize);
@@ -570,6 +605,7 @@ export function CompanionLayer({ nav, origin = "hero" }: { nav: string; origin?:
       clearTimeout(emergeTimer);
       followCtl?.();
       stopGaze?.();
+      stopFight();
       hideAll();
     };
   }, [nav, enabled, origin]);
@@ -580,6 +616,7 @@ export function CompanionLayer({ nav, origin = "hero" }: { nav: string; origin?:
       {["ink", "ink", "green"].map((variant, i) =>
         <div key={i} className="hs-buddy" data-variant={variant}>
           <span className="hs-eyes"><span className="hs-gaze"><span className="hs-blink"><i /><i /></span></span></span>
+          <span className="hs-sword" /><span className="hs-gun" /><span className="hs-cam" />
         </div>)}
     </div>
     <div className="cmp-page">

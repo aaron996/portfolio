@@ -37,6 +37,18 @@ Nhà của chúng là logo 3×3 — logo có đúng 3 ô sáng. Cuối trang ch�
    Chấm thấy chữ I ("!"), nhảy lên làm dấu chấm → "THİNGS". Trùng chạy theo vài bước
    rồi khựng lại. Trùng và Lệch nhảy cổ vũ rồi đứng lại dưới sàn. Sau đó cả ba **nhìn
    theo con trỏ** khi người xem còn ở hero — Lệch quay nhanh, Trùng chậm nửa nhịp.
+   **Trang khoá cuộn cho tới lúc này** (`data-welcome="pending"` → `"done"` trên
+   `.hs-stage`, CSS `html:has(...)`): các section phía dưới chỉ kích hoạt được khi ba ô đã
+   ở ngoài, nên không để người xem cuộn tới đó trước. Xong thì hiện nút pill "cuộn xuống"
+   (`.hs-cue`) cho tới khi người xem tự cuộn. Tắt bạn đồng hành hoặc lỗi thì mở khoá ngay.
+5. **Liên hệ — trận đấu cuối trang** (`components/companions/fight.ts`). Ba ô đậu lên thẻ
+   "Chơi Ải Vận Hành"; khi sàn đấu `.hc-arena` hiện đủ, Chấm (kiếm) và Lệch (súng) nhảy
+   xuống sàn được rọi đèn, đấu khoảng 20 giây (thanh máu, né đạn, gạt đạn bật ngược, cận
+   chiến), Chấm kết liễu bằng cú nhảy xoay. Lệch nằm bẹp mắt chữ X, sao xoay quanh đầu;
+   Chấm nâng cúp, Trùng giơ máy ảnh chụp (3 lần loé), pháo giấy, ảnh lấy liền. Kịch bản cố
+   định — Chấm luôn thắng. Rời footer giữa chừng thì huỷ, diễn lại từ đầu khi quay lại;
+   diễn xong rồi thì không tự diễn lại, chỉ có nút "Xem đấu lại". Giảm chuyển động: chạy
+   tức thì tới cảnh cuối. Nền footer đã nâng sáng thành xanh đêm `#222f45` (chỉ trong `.hc`).
 2. **Cuộn sang Công việc — lên đường.** Chấm rời chữ I, cả ba trèo lên mép dưới nav dính
    và đi theo — chỗ đỗ mặc định cả trang.
 3. **Công việc tiêu biểu — ngó màn hình.** Rê vào case → Chấm ngồi trên mép khung xem

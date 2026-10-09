@@ -449,6 +449,8 @@ export interface HomeContent {
   sort: {
     hint: string; hintTouch: string; sortAll: string; reshuffle: string;
     progress: string; canvasLabel: string; confused: string; spotted: string;
+    /** Lời nhắc hiện sau khi màn chào xong và trang được mở khoá cuộn. */
+    scrollCue: string;
   };
   work: {
     heading: string; count: string; hint: string;
@@ -468,8 +470,10 @@ export interface HomeContent {
     questions: { q: string; slug: string }[];
     footnote: string; aside: string; asideCta: string;
   };
-  contact: { heading: string; copy: string; copied: string; linkedin: string; cv: string; gameTitle: string; gameCta: string };
+  contact: { heading: string; copy: string; copied: string; linkedin: string; linkedinCta: string; cv: string; cvCta: string; gameTitle: string; gameCta: string };
   footer: { replay: string; top: string };
+  /** Cảnh đấu ở footer: Chấm (kiếm) đấu Lệch (súng), Trùng chụp ảnh — xem components/companions/fight.ts. */
+  fight: { aName: string; bName: string; go: string; clang: string; ko: string; shutter: string; win: string; rematch: string };
   /** Nút bật/tắt ba bạn đồng hành ở footer. */
   companions: { hide: string; show: string; tired: string };
 }
