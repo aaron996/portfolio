@@ -146,7 +146,7 @@ phát sáng; rê thẻ game → cả ba nhún.
 ## Đã dựng ở đợt 3
 
 - Trang `/case/[slug]` làm lại theo theme giấy: `components/case/CaseArticle.tsx` + `case.css`,
-  một template cho cả 5 case (đọc từ `CaseStudy`).
+  một template chung cho các case (đọc từ `CaseStudy`).
   Nhãn trong `content.casePage`. Nav dùng chung `SiteNav`; trang case bật thanh tiến độ đọc
   (`ReadProgress`, tính bằng `reading.ts` trên phần tử `[data-read]`).
 - `CompanionLayer origin="logo"`: vào thẳng trang case (ba ô đang ở nhà) → sau 1,2s nhảy ra

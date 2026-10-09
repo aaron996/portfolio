@@ -5,7 +5,7 @@ study, `/game` là minigame "Ải Vận Hành".
 
 ## Chữ hiển thị nằm ở `content/`, không nằm trong component
 
-Mọi chuỗi người đọc thấy đều ở `content/content.vi.ts`, kiểu ở `content/types.ts`.
+Chuỗi người đọc thấy ở `content/content.vi.ts` và `content/cases.vi.ts`, kiểu ở `content/types.ts`.
 Component chỉ quyết định layout. Thêm chữ mới thì thêm field vào `types.ts` trước rồi
 điền ở `content.vi.ts` — đừng hardcode vào JSX, kể cả một nhãn `aria-label`.
 

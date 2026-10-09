@@ -38,6 +38,7 @@ function evaluate(file, globals = {}) {
     require: (name) => {
       if (name === './chapterMission') return evaluate('components/game/chapterMission.ts');
       if (name === './audioManifest') return evaluate('components/game/audioManifest.ts');
+      if (name === './cases.vi') return evaluate('content/cases.vi.ts');
       throw new Error(`Unexpected engine dependency: ${name}`);
     },
     Image: class { complete = false; naturalWidth = 0; },
