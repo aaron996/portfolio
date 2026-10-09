@@ -410,7 +410,7 @@ export function OpsGame() {
             width={800}
             height={420}
             className={styles.canvas}
-            aria-label={`Màn chơi ${map.name}`}
+            aria-label={game.display.canvasLabel.replace("{name}", map.name)}
           />
 
           {/* Thẻ giải nghĩa vật phẩm vừa nhặt */}
@@ -580,7 +580,7 @@ export function OpsGame() {
             <div className="flex items-baseline justify-between gap-3">
               <h2 className="display text-xl text-paper sm:text-2xl">{bag.heading}</h2>
               <p className="text-[11px] tracking-wide text-mute-3">
-                Ải {mapIndex + 1} · {map.name}
+                {game.display.mapLabel.replace("{n}", String(mapIndex + 1)).replace("{name}", map.name)}
               </p>
             </div>
 
@@ -663,7 +663,7 @@ export function OpsGame() {
             <div className="flex items-baseline justify-between gap-3">
               <h2 className="display text-xl text-paper sm:text-2xl">{pause.heading}</h2>
               <p className="text-[11px] tracking-wide text-mute-3">
-                Ải {mapIndex + 1} · {map.name}
+                {game.display.mapLabel.replace("{n}", String(mapIndex + 1)).replace("{name}", map.name)}
               </p>
             </div>
 
@@ -686,7 +686,7 @@ export function OpsGame() {
                 ) : null}
                 <p className="mt-2 border-t border-ink-800 pt-2 text-[11px] leading-snug text-mute">
                   <span className="font-semibold text-mute-2">{pause.tipHeading}: </span>
-                  {showTouch ? map.tip.replaceAll("bấm L", "bấm ĐỠ").replaceAll("giữ L", "giữ ĐỠ").replaceAll("bấm K", "bấm BẮN") : map.tip}
+                  {showTouch ? map.tipTouch : map.tip}
                 </p>
                 {map.mobs.some((mob) => mob.kind === "rider" || mob.kind === "charger") && (
                   <p className="mt-2 text-[11px] leading-snug text-mute">{game.rushHint}</p>

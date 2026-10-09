@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { content } from "@/content/content.vi";
 import { PortfolioIcon } from "@/components/portfolio/PortfolioIcon";
 import { companions, useCompanions } from "@/components/companions/store";
+import { INTRO_STATE_EVENT } from "@/components/portfolio/IntroVideo";
 import { createBuddies, measureDot, trackGaze, type ChartGeometry, type Kick, type Misfit } from "./heroBuddies";
 
 const hero = content.prototype.hero;
@@ -109,6 +110,7 @@ export function HeroSort() {
     const stage = stageRef.current;
     const hold = () => { if (window.scrollY > 0) window.scrollTo({ top: 0, behavior: "instant" }); };
     const nudge = (e: Event) => {
+      if (document.documentElement.dataset.introActive !== "0") return;
       if (e instanceof KeyboardEvent && !["PageDown", "ArrowDown", " ", "End"].includes(e.key)) return;
       if (!done) apiRef.current?.sortAll();
     };
@@ -150,6 +152,8 @@ export function HeroSort() {
     let cells: Cell[] = [];
     let pointer: { x: number; y: number } | null = null;
     let raf = 0;
+    let inView = false;
+    let pausedAt: number | null = performance.now();
     let finished = false;
     let lastReported = -1;
     let userActive = false;
@@ -243,6 +247,8 @@ export function HeroSort() {
 
     let last = performance.now();
     function frame(now: number) {
+      raf = 0;
+      if (!canRun()) return;
       const dt = Math.min(48, now - last) / 16.67;
       last = now;
       ctx.clearRect(0, 0, w, h);
@@ -296,14 +302,45 @@ export function HeroSort() {
 
       report();
       raf = moving ? requestAnimationFrame(frame) : 0;
+      stage.dataset.animation = moving ? "running" : "settled";
       if (!moving && finished) settleRef.current.splice(0).forEach(resolve => resolve());
     }
 
     function start() {
-      if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); }
+      if (canRun() && !raf) { last = performance.now(); raf = requestAnimationFrame(frame); }
+    }
+
+    function canRun() {
+      return inView && !document.hidden && document.documentElement.dataset.introActive === "0";
+    }
+
+    /* Đóng băng cả demo và các mốc animation trong thời gian trang bị che/khuất. */
+    function syncActivity() {
+      const now = performance.now();
+      if (!canRun()) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+        pausedAt ??= now;
+        pointer = null;
+        ghost.dataset.show = "false";
+        stage.dataset.animation = "paused";
+        return;
+      }
+      if (pausedAt !== null) {
+        const elapsed = now - pausedAt;
+        cells.forEach(c => {
+          if (c.sortedAt) c.sortedAt += elapsed;
+          if (c.nudge) c.nudge.start += elapsed;
+        });
+        if (demoStart) demoStart += elapsed;
+        demoNext += elapsed;
+        pausedAt = null;
+      }
+      start();
     }
 
     function move(e: PointerEvent) {
+      if (!canRun()) return;
       const r = stage.getBoundingClientRect();
       pointer = { x: e.clientX - r.left, y: e.clientY - r.top };
       userActive = true;
@@ -316,7 +353,14 @@ export function HeroSort() {
       finished = true;
       setDone(true);
     }
-    start();
+    const io = new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting;
+      syncActivity();
+    });
+    io.observe(stage);
+    document.addEventListener("visibilitychange", syncActivity);
+    window.addEventListener(INTRO_STATE_EVENT, syncActivity);
+    syncActivity();
 
     const ro = new ResizeObserver(() => { layout(); start(); });
     ro.observe(stage);
@@ -332,7 +376,8 @@ export function HeroSort() {
     apiRef.current = {
       sortAll, reshuffle,
       whenSettled: () => new Promise<void>(resolve => {
-        if (finished && !raf) resolve(); else settleRef.current.push(resolve);
+        if (finished && cells.every(c => c.x === c.tx && c.y === c.ty && !c.nudge)) resolve();
+        else settleRef.current.push(resolve);
       }),
       misfits: () => cells.filter(c => c.misfit !== undefined)
         .sort((p, q) => p.misfit! - q.misfit!)
@@ -352,6 +397,9 @@ export function HeroSort() {
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
+      io.disconnect();
+      document.removeEventListener("visibilitychange", syncActivity);
+      window.removeEventListener(INTRO_STATE_EVENT, syncActivity);
       stage.removeEventListener("pointermove", move);
       stage.removeEventListener("pointerdown", move);
       stage.removeEventListener("pointerleave", leave);
@@ -465,10 +513,11 @@ export function HeroSort() {
               <span>{copy.scrollCue}</span>
               <PortfolioIcon name="down" />
             </a>
-          : <output>
+          : <output aria-live="off">
               <span className="hs-bar" aria-hidden="true"><span style={{ width: `${progress}%` }} /></span>
               <b>{progress}%</b> {copy.progress}
             </output>}
+        <span className="sr-only" role="status" aria-atomic="true">{done ? copy.completed : ""}</span>
       </div>
     </section>
   );

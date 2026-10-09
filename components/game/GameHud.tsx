@@ -35,9 +35,10 @@ export function GameHud({ instanceRef, touch }: {
     ? map.mission.locked
     : status.bossAlive && (map.bossKind === "volley" || map.bossKind === "parcel" || map.bossKind === "cast")
     ? (touch ? labels.volleyTouch : game.volleyHint)
-    : status.traversal ? `${status.traversal.floor} · ${status.traversal.completed}/${status.traversal.total} chặng`
+    : status.traversal ? labels.traversalProgress.replace("{floor}", status.traversal.floor)
+        .replace("{n}", String(status.traversal.completed)).replace("{total}", String(status.traversal.total))
     : labels.remaining.replace("{n}", String(status.mobsLeft)).replace("{total}", String(status.mobsTotal));
-  const message = touch ? status.message.replace("J", labels.attack) : status.message;
+  const message = touch && status.message === game.noAmmo ? game.noAmmoTouch : status.message;
   return (
     <div className={styles.hud}>
       <div className={styles.hudStats}>
@@ -63,7 +64,7 @@ export function GameHud({ instanceRef, touch }: {
       </div>
       {status.traversal && !status.bossAlive ? <div className={styles.missionHud}>
         <p><strong>{status.traversal.next} {status.traversal.direction}</strong> · {status.traversal.hint}</p>
-        {status.traversal.checkpoint ? <span className={styles.checkpoint}>Chặng đã lưu: {status.traversal.checkpoint}</span> : null}
+        {status.traversal.checkpoint ? <span className={styles.checkpoint}>{labels.traversalCheckpoint.replace("{name}", status.traversal.checkpoint)}</span> : null}
         {status.traversal.nearby ? <button type="button" onClick={() => {
           instanceRef.current?.press("interact"); instanceRef.current?.release("interact");
         }}>{status.traversal.nearby}{touch ? "" : " (E)"}</button> : null}

@@ -44,6 +44,7 @@ export const content: SiteContent = {
       sortAll: "Sắp xếp ngay",
       reshuffle: "Xáo lại",
       progress: "đã sắp xếp",
+      completed: "Đã sắp xếp xong biểu đồ.",
       canvasLabel: "Các ô dữ liệu lộn xộn, rê chuột qua để chúng xếp thành biểu đồ cột",
       /* Bong bóng của mấy ô "lạc" sau khi sắp xong — xem components/home/heroBuddies.ts. */
       confused: "?",
@@ -372,6 +373,7 @@ export const content: SiteContent = {
           kind: "image",
           brief: "Ảnh dashboard chính, đã thay toàn bộ số bằng dữ liệu demo. Che tên cửa hàng và tên người dùng thật.",
           src: "/case-pg-dashboard.png",
+          width: 1838, height: 907,
           alt: "Màn hình dashboard KPI với biểu đồ xu hướng và bảng chi tiết theo vùng",
           isDemoData: true,
         },
@@ -381,6 +383,7 @@ export const content: SiteContent = {
           brief:
             "Màn hình xem trước khi import/replace — hệ thống hiện rõ số dòng sẽ thay, giữ nguyên, thêm mới trước khi người dùng xác nhận.",
           src: "/case-pg-import-preview.png",
+          width: 780, height: 595,
           alt: "Modal xem trước batch replace: so sánh dữ liệu hiện có và sau khi import, kèm lựa chọn cách xử lý dòng trùng",
           isDemoData: true,
         },
@@ -389,6 +392,7 @@ export const content: SiteContent = {
           kind: "image",
           brief: "Màn hình chỉnh target theo từng ngày trong lịch, thấy rõ số trước/sau và tác động dồn về target cả tháng.",
           src: "/case-pg-target-preview.png",
+          width: 1086, height: 611,
           alt: "Lịch chỉnh target theo ngày với bảng so sánh số trước và sau điều chỉnh",
           isDemoData: true,
         },
@@ -572,6 +576,7 @@ export const content: SiteContent = {
           brief:
             "Màn hình chính: 4 thẻ chỉ số D-1 so với target, dải chip 'cần can thiệp', rồi ma trận ontime theo Miền/Vùng với thang màu theo mức đạt target.",
           src: "/case-kas-shopee-matrix.png",
+          width: 1800, height: 1000,
           alt: "Màn hình tổng quan: bốn thẻ chỉ số ontime kèm ngưỡng target, dải cảnh báo hub cần can thiệp, và bảng ma trận tỷ lệ đúng giờ theo miền và vùng",
           isDemoData: true,
           wide: true,
@@ -582,6 +587,7 @@ export const content: SiteContent = {
             "Cùng bảng đó mở xuống cấp hub trong vùng đang yếu nhất — cấp có người chịu trách nhiệm. Nút 'Copy Ảnh' nằm ngay cạnh tiêu đề bảng.",
           kind: "image",
           src: "/case-kas-shopee-hub-drill.png",
+          width: 1800, height: 960,
           alt: "Bảng ma trận mở rộng một vùng xuống từng hub, kèm nút copy bảng thành ảnh cạnh tiêu đề",
           isDemoData: true,
           wide: true,
@@ -592,6 +598,7 @@ export const content: SiteContent = {
           brief:
             "Tab Insight: tự nêu chỉ số nào đổi và hub nào đáng chú ý, kèm câu rào đón rằng đây là tương quan theo thời gian chứ chưa phải nhân quả.",
           src: "/case-kas-shopee-insight.png",
+          width: 1800, height: 940,
           alt: "Tab Insight liệt kê chỉ số biến động và xếp hạng hub đáng chú ý, kèm ghi chú đây là tương quan chứ chưa phải quan hệ nhân quả",
           isDemoData: true,
         },
@@ -601,6 +608,7 @@ export const content: SiteContent = {
           brief:
             "Trang quản trị: ai đã từng truy cập, bao nhiêu lượt, ai đang online — phần trả lời được câu 'ai đã xem bản nào, lúc nào'.",
           src: "/case-kas-shopee-access-log.png",
+          width: 1800, height: 1090,
           alt: "Trang quản trị hiển thị danh sách người đã truy cập kèm số lượt, số người đang online và biểu đồ lượt truy cập bảy ngày",
           isDemoData: true,
         },
@@ -769,6 +777,7 @@ export const content: SiteContent = {
           brief:
             "Dashboard giám sát Vol/Forecast/Capacity theo tỉnh, cập nhật theo ngày — một cách dùng khác của cùng SQL model chuẩn hoá. Đã thay hết số thật bằng dữ liệu demo và che tên đăng nhập.",
           src: "/case-kas-monitor.png",
+          width: 1616, height: 902,
           alt: "Dashboard theo dõi sản lượng, dự báo và năng lực theo tỉnh, cập nhật theo ngày",
           isDemoData: true,
         },
@@ -934,6 +943,7 @@ export const content: SiteContent = {
           kind: "image",
           brief: "Tuyến truy vết bưu kiện qua ba khu vực kho và lộ trình chịu trách nhiệm được xác định theo thứ tự ưu tiên",
           src: "/portfolio/visuals/cases/sla/sla-event-trace.webp",
+          width: 1376, height: 768,
           alt: "Minh hoạ hệ thống: Tuyến truy vết bưu kiện qua ba khu vực kho vận và lộ trình chịu trách nhiệm được xác định theo thứ tự ưu tiên",
           isDemoData: false,
           wide: true,
@@ -1061,6 +1071,10 @@ export const content: SiteContent = {
       hp: "Máu", guard: "Đỡ", ammo: "Đạn", noGun: "Chưa có súng",
       remaining: "Còn {n}/{total} quái", remainingTarget: "Còn {name} {direction}", toolTime: "Đồ nghề: {n}s",
       volleyTouch: "ĐỠ đúng lúc đạn chạm để phản đạn",
+      traversalProgress: "{floor} · {n}/{total} chặng",
+      traversalCheckpoint: "Chặng đã lưu: {name}",
+      canvasLabel: "Màn chơi {name}",
+      mapLabel: "Ải {n} · {name}",
       left: "Sang trái", right: "Sang phải", jump: "Nhảy", block: "Đỡ", shoot: "Bắn", attack: "Chém",
     },
     dropLabel: "Nhảy xuống bệ thấp",
@@ -1094,6 +1108,7 @@ export const content: SiteContent = {
       gun: "Vũ khí tầm xa · phím K",
     },
     noAmmo: "Hết đạn — J để chém",
+    noAmmoTouch: "Hết đạn — bấm CHÉM",
     parryLine: "Đỡ chuẩn!",
     reflectLine: "Phản đạn! Trúng trùm sẽ trừ máu",
     volleyHint: "L đúng lúc đạn chạm → phản đạn gây sát thương",
@@ -1200,6 +1215,7 @@ export const content: SiteContent = {
         objective:
           "Dọn hết chứng từ lệch dọc cầu cảng, rồi hạ Trùm Sai Mã Container ở cuối bãi.",
         tip: "Container nén thân trước khi dậm: nhảy khi chân chạm sàn để vượt sóng. Trong vòng xanh hồi sức, áp sát đối chiếu mã hoặc chém. Quái bay cần nhảy chém mới tới.",
+        tipTouch: "Container nén thân trước khi dậm: nhảy khi chân chạm sàn để vượt sóng. Trong vòng xanh hồi sức, áp sát đối chiếu mã hoặc chém. Quái bay cần nhảy chém mới tới.",
         skills: ["Master data", "Đối chiếu chứng từ"],
         palette: {
           sky: "#A9DCF0", far: "#7BB9D4", mid: "#4E8FAE",
@@ -1261,6 +1277,7 @@ export const content: SiteContent = {
         objective:
           "Bật điện, đi cầu nâng nối nhánh A và B trên hai tầng, rồi quay về cổng ra để xử lý lõi máy. Không cần dọn hết quái.",
         tip: "Cầu nâng dừng ở mỗi đầu để bạn bước lên. Nhảy để rời cầu; bấm xuống để xuyên bệ. Mỗi công tắc lưu chặng. Quay mặt về đạn và đỡ đúng lúc để phản đạn vào lõi máy.",
+        tipTouch: "Cầu nâng dừng ở mỗi đầu để bạn bước lên. Nhảy để rời cầu; bấm xuống để xuyên bệ. Mỗi công tắc lưu chặng. Quay mặt về đạn và đỡ đúng lúc để phản đạn vào lõi máy.",
         skills: ["Vận hành quy mô lớn", "Chuẩn hoá chỉ số"],
         palette: {
           sky: "#FFDFAF", far: "#F0BE7E", mid: "#CF8B45",
@@ -1315,6 +1332,7 @@ export const content: SiteContent = {
         objective:
           "Dọn hết đơn trễ, hub báo đỏ và hai rider giao gấp, rồi hạ Trùm 90,1% ở cuối sàn.",
         tip: "Rider báo hướng bằng mũi tên đỏ trước khi lao. Nhảy qua hoặc quay mặt đỡ cú tông; vòng xanh dưới chân là lúc nó đang nghỉ, áp sát chém được.",
+        tipTouch: "Rider báo hướng bằng mũi tên đỏ trước khi lao. Nhảy qua hoặc quay mặt đỡ cú tông; vòng xanh dưới chân là lúc nó đang nghỉ, áp sát chém được.",
         skills: ["Quản trị đối tác", "KPI on-time"],
         palette: {
           sky: "#FFCDB4", far: "#FBA981", mid: "#EE7A4D",
@@ -1384,6 +1402,7 @@ export const content: SiteContent = {
         objective:
           "Dọn hết query lỗi và join nhân dòng giữa rừng gai, rồi hạ Đơn Vô Chủ.",
         tip: "Đạn bay ngang tầm ngực. Nhảy sớm một nhịp thì đạn lọt dưới chân — hoặc đứng yên quay mặt về phía nó, bấm L đúng lúc để bật đạn ngược lại.",
+        tipTouch: "Đạn bay ngang tầm ngực. Nhảy sớm một nhịp thì đạn lọt dưới chân — hoặc đứng yên quay mặt về phía nó, bấm ĐỠ đúng lúc để bật đạn ngược lại.",
         skills: ["SQL / Trino", "Quy trách nhiệm"],
         palette: {
           sky: "#C8CCF2", far: "#9BA2DE", mid: "#6C74BE",
@@ -1445,6 +1464,7 @@ export const content: SiteContent = {
         objective:
           "Đủ bốn loại quái, đủ ba loại bẫy. Dọn sạch xưởng rồi hạ CATEGORY.SKU.",
         tip: "Chém ba nhát liền nhau thì nhát thứ ba mạnh gấp đôi. Giữ nhịp, đừng bấm loạn — và để dành đạn súng cho trùm cuối.",
+        tipTouch: "Chém ba nhát liền nhau thì nhát thứ ba mạnh gấp đôi. Giữ nhịp, đừng bấm loạn — và để dành đạn súng cho trùm cuối.",
         skills: ["Data modeling", "Ship sản phẩm"],
         palette: {
           sky: "#C6EBD9", far: "#93D6B8", mid: "#5FB18E",

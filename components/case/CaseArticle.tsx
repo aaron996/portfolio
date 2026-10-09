@@ -19,7 +19,7 @@ function Unverified({ verified, title }: { verified: boolean; title?: string }) 
 
 function Figure({ media, priority = false }: { media: Media; priority?: boolean }) {
   const caption = media.caption ?? (media.isDemoData ? L.demoData : null);
-  return <CaseFigure src={media.src} alt={media.alt} caption={caption} wide={media.wide} priority={priority} />;
+  return <CaseFigure src={media.src} alt={media.alt} width={media.width} height={media.height} caption={caption} wide={media.wide} priority={priority} />;
 }
 
 /* Một mục của bài: nhãn dính cột trái, nội dung cột phải. */
@@ -38,7 +38,6 @@ export function CaseArticle({ caseStudy: c }: { caseStudy: CaseStudy }) {
   const title = (item: CaseStudy) => item.homepage?.title ?? item.title;
 
   return <div id="top" className={`home ca ${portfolioFontVariables}`}>
-    <a href="#main" className="home-skip">{content.prototype.labels.skip}</a>
     <SiteNav onHome={false} progress />
 
     <main id="main" tabIndex={-1}>

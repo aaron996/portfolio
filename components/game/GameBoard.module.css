@@ -47,7 +47,7 @@
 .content button, .content a {
   min-height: 44px;
   color: #28333c;
-  border-radius: 7px;
+  border-radius: var(--r-control, 8px);
   transition: background-color 160ms, transform 160ms;
 }
 .content button:global(.bg-lime), .content a:global(.bg-lime) {

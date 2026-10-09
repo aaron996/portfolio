@@ -23,7 +23,6 @@ export default function GamePage() {
   return (
     <div id="top" className={`home gp ${portfolioFontVariables}`}>
       <CurtainOpener />
-      <a href="#main" className="home-skip">{content.prototype.labels.skip}</a>
       <SiteNav onHome={false} />
       <main id="main" tabIndex={-1}>
         <header className="gp-head">

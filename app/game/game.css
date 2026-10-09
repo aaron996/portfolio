@@ -10,5 +10,5 @@
 
 .gp-foot { box-sizing: border-box; width: min(960px, calc(100% - 2 * var(--gutter))); margin: 0 auto; padding: 32px clamp(10px, 2vw, 20px) clamp(56px, 8vw, 96px); }
 .gp-foot p { margin: 0; max-width: 62ch; font-size: 15px; line-height: 1.65; color: var(--muted); }
-.gp-back { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; font-size: 14px; color: var(--accent); }
+.gp-back { min-height: 44px; display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; font-size: 14px; color: var(--accent); }
 .gp-back:hover { text-decoration: underline; text-underline-offset: 4px; }

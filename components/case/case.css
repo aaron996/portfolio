@@ -10,7 +10,7 @@
 
 /* ---------- Đầu bài ---------- */
 .ca-head { max-width: 1100px; padding: clamp(40px, 7vw, 88px) 0 clamp(32px, 5vw, 56px); }
-.ca-back { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); }
+.ca-back { min-height: 44px; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); }
 .ca-back:hover { color: var(--accent); }
 .ca-scope { margin: 32px 0 12px; font-family: var(--hero-mono), monospace; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
 .ca-head h1 { margin: 0; max-width: 20ch; font-size: clamp(36px, 5.6vw, 76px); font-weight: 700; letter-spacing: -.045em; line-height: 1.02; text-wrap: balance; }
@@ -59,7 +59,7 @@
 .ca-features p { margin: 0; font-size: 14.5px; line-height: 1.6; color: var(--muted); }
 
 .ca-flow { display: flex; flex-wrap: wrap; gap: 10px; margin: 0; padding: 0; list-style: none; counter-reset: flow; }
-.ca-flow li { position: relative; display: flex; flex-direction: column; gap: 4px; flex: 1 1 180px; padding: 16px 18px 16px 18px; border: 1px solid var(--text); border-radius: var(--r-control); background: var(--surface); counter-increment: flow; }
+.ca-flow li { position: relative; display: flex; flex-direction: column; gap: 4px; flex: 1 1 180px; padding: 16px 18px 16px 18px; border: 1px solid var(--text); border-radius: var(--r-card); background: var(--surface); counter-increment: flow; }
 .ca-flow li::before { content: counter(flow, decimal-leading-zero); font-family: var(--hero-mono), monospace; font-size: 11px; color: var(--muted); }
 .ca-flow strong { font-size: 15px; line-height: 1.35; }
 .ca-flow span { font-size: 13.5px; line-height: 1.5; color: var(--muted); }

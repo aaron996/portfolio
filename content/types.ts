@@ -123,6 +123,9 @@ export interface Media {
   /** Ghi chú cho chính mình khi chụp ảnh. Không render. */
   brief: string;
   src: string;
+  /** Kích thước ảnh gốc để giữ chỗ trước khi ảnh tải xong. */
+  width: number;
+  height: number;
   alt: string;
   isDemoData: boolean;
   /**
@@ -291,6 +294,7 @@ export interface GameMap {
   objective: string;
   /** Mẹo riêng của ải, hiện ở bảng tạm dừng dưới mục tiêu */
   tip: string;
+  tipTouch: string;
   /** Hai kỹ năng rơi ra khi hạ trùm */
   skills: [string, string];
   palette: {
@@ -333,6 +337,8 @@ export interface GameContent {
     touchAuto: string; touchOn: string; touchOff: string;
     hp: string; guard: string; ammo: string; noGun: string;
     remaining: string; remainingTarget: string; toolTime: string; volleyTouch: string;
+    traversalProgress: string; traversalCheckpoint: string;
+    canvasLabel: string; mapLabel: string;
     left: string; right: string; jump: string; block: string; shoot: string; attack: string;
   };
   dropLabel: string;
@@ -369,6 +375,7 @@ export interface GameContent {
   pickupKindLabel: { heal: string; tool: string; gun: string };
   /** Bấm K mà hết đạn */
   noAmmo: string;
+  noAmmoTouch: string;
   /** Đỡ trúng nhịp — chặn đòn mà không tốn thể lực */
   parryLine: string;
   /** Phản đạn trúng nhịp với đạn của trùm */
@@ -448,7 +455,7 @@ export interface HomeContent {
   nav: { work: string; contact: string; game: string; cv: string; cvLabel: string };
   sort: {
     hint: string; hintTouch: string; sortAll: string; reshuffle: string;
-    progress: string; canvasLabel: string; confused: string; spotted: string;
+    progress: string; completed: string; canvasLabel: string; confused: string; spotted: string;
     /** Lời nhắc hiện sau khi màn chào xong và trang được mở khoá cuộn. */
     scrollCue: string;
   };
