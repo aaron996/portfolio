@@ -36,7 +36,7 @@
 .nf-bar { position: absolute; left: 0; right: 0; bottom: 24px; z-index: 4; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 12px 24px; padding: 0 var(--gutter); font-size: 14px; color: var(--night-muted); }
 .nf-bar a { display: inline-flex; align-items: center; gap: 8px; color: var(--night-text); }
 .nf-bar a:hover { color: var(--mark); }
-.nf-bar button { padding: 6px 12px; border: 1px solid var(--night-line); border-radius: var(--r-control); background: transparent; color: var(--night-text); font: inherit; cursor: pointer; }
+.nf-bar button { min-height: 44px; padding: 6px 12px; border: 1px solid var(--night-line); border-radius: var(--r-control); background: transparent; color: var(--night-text); font: inherit; cursor: pointer; }
 .nf-bar button:hover { border-color: var(--night-muted); }
 .nf :is(a, button):focus-visible { outline: 2px solid var(--mark); outline-offset: 3px; }
 

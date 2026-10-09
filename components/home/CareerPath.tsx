@@ -49,6 +49,7 @@ const labelFits = (s: (typeof segments)[number]) => s.x0 + label(s.item).length 
 
 export function CareerPath() {
   const [active, setActive] = useState(copy.items.indexOf(main[main.length - 1]));
+  const [announcement, setAnnouncement] = useState("");
   const [inView, setInView] = useState(false);
   /* Ba bạn đồng hành đang ở ngoài → đường chờ Chấm nhảy tới đầu rồi mới vẽ. */
   const [lead, setLead] = useState(false);
@@ -73,8 +74,13 @@ export function CareerPath() {
 
   /* Bấm (không phải rê) vào một chặng thì Chấm nhảy tới chặng đó. */
   const choose = (index: number) => {
-    setActive(index);
+    focusStop(index);
     window.dispatchEvent(new CustomEvent("companion:path-stop", { detail: index }));
+  };
+  const focusStop = (index: number) => {
+    setActive(index);
+    const item = copy.items[index];
+    setAnnouncement(`${item.start} – ${item.end ?? copy.now}. ${item.company}. ${item.role}. ${item.note}`);
   };
   const onKey = (index: number) => (event: KeyboardEvent) => {
     if (event.key === "Enter" || event.key === " ") { event.preventDefault(); choose(index); }
@@ -116,7 +122,7 @@ export function CareerPath() {
           return <g key={s.item.company} className="cp-stop" data-active={on} tabIndex={0} role="button" aria-pressed={on}
             aria-label={`${s.item.company}, ${s.item.start} – ${s.item.end ?? copy.now}`}
             style={{ transitionDelay: `${300 + index * 140}ms` }}
-            onPointerEnter={() => setActive(index)} onFocus={() => setActive(index)} onClick={() => choose(index)} onKeyDown={onKey(index)}>
+            onPointerEnter={() => setActive(index)} onFocus={() => focusStop(index)} onClick={() => choose(index)} onKeyDown={onKey(index)}>
             <line x1={s.x0} x2={s.x1} y1={s.y} y2={s.y} className="cp-hit" />
             <line x1={s.x0} x2={s.x1} y1={s.y} y2={s.y} className="cp-seg" />
             <circle cx={s.x0} cy={s.y} r={on ? 9 : 6} className="cp-dot" />
@@ -126,11 +132,12 @@ export function CareerPath() {
       </svg>
     </div>
 
-    <div className="cp-detail" aria-live="polite">
+    <div className="cp-detail">
       <p className="cp-when">{current.start} – {current.end ?? copy.now}</p>
       <h3>{current.company}</h3>
       <p className="cp-role">{current.role}</p>
       <p className="cp-note">{current.note}</p>
     </div>
+    <span className="sr-only" role="status" aria-atomic="true">{announcement}</span>
   </section>;
 }

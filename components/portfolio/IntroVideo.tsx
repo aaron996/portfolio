@@ -8,6 +8,7 @@ import "./intro.css";
 const SEEN_KEY = "pf-intro-seen";
 const AUTO_ENTER_SECONDS = 5;
 export const INTRO_REPLAY_EVENT = "pf-intro-replay";
+export const INTRO_STATE_EVENT = "pf-intro-state";
 
 type Phase = "playing" | "blocked" | "ended" | "closing" | "gone";
 
@@ -39,6 +40,14 @@ export function IntroVideo() {
   }, []);
 
   const active = phase !== "gone";
+  useEffect(() => {
+    document.documentElement.dataset.introActive = active ? "1" : "0";
+    window.dispatchEvent(new CustomEvent(INTRO_STATE_EVENT));
+    return () => {
+      document.documentElement.dataset.introActive = "0";
+      window.dispatchEvent(new CustomEvent(INTRO_STATE_EVENT));
+    };
+  }, [active]);
   useEffect(() => {
     if (!active) return;
     const dialog = dialogRef.current;
@@ -119,7 +128,7 @@ export function IntroVideo() {
             className="pf-intro-video"
             src={intro.src}
             playsInline
-            preload="auto"
+            preload="metadata"
             onVolumeChange={(e) => setMuted(e.currentTarget.muted)}
             onEnded={() => setPhase("ended")}
             onError={close}

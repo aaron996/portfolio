@@ -7,12 +7,12 @@ import { useCompanions } from "@/components/companions/store";
 
 const L = content.casePage;
 
-type Props = { src: string; alt: string; caption: string | null; wide?: boolean; priority?: boolean };
+type Props = { src: string; alt: string; width: number; height: number; caption: string | null; wide?: boolean; priority?: boolean };
 
 /* Ảnh trong bài. Bấm để phóng to trong một <dialog> modal (trình duyệt lo focus trap, Esc,
    trả focus). Lúc phóng, Chấm thò đầu từ sau góc phải khung ảnh (docs/companions.md, trang
    case): nằm ngoài ảnh, không nhận chuột, tắt theo nút "Ẩn bạn đồng hành". */
-export function CaseFigure({ src, alt, caption, wide = false, priority = false }: Props) {
+export function CaseFigure({ src, alt, width, height, caption, wide = false, priority = false }: Props) {
   const dialog = useRef<HTMLDialogElement>(null);
   const eyes = useRef<HTMLSpanElement>(null);
   const [open, setOpen] = useState(false);
@@ -39,7 +39,7 @@ export function CaseFigure({ src, alt, caption, wide = false, priority = false }
   return <figure className="ca-figure" data-wide={wide ? "true" : undefined}>
     <button type="button" className="ca-zoom" onClick={show} aria-haspopup="dialog" aria-label={`${L.lightbox.open}: ${alt}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt={alt} loading={priority ? "eager" : "lazy"} />
+      <img src={src} alt={alt} width={width} height={height} loading={priority ? "eager" : "lazy"} />
     </button>
     {caption && <figcaption>{caption}</figcaption>}
 
@@ -52,7 +52,7 @@ export function CaseFigure({ src, alt, caption, wide = false, priority = false }
         </span>}
         <div className="lb-frame">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={src} alt={alt} />
+          <img src={src} alt={alt} width={width} height={height} />
           <button type="button" className="lb-close" onClick={hide} aria-label={L.lightbox.close}><PortfolioIcon name="close" /></button>
         </div>
         {caption && <p className="lb-caption">{caption}</p>}

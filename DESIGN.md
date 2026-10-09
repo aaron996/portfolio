@@ -1,170 +1,109 @@
 ---
-name: "Portfolio Lương Thế Vinh — Phase 2 prototype"
-description: "Source-derived visual system for the homepage and P&G case review candidate; pending user visual approval."
+name: "Portfolio Lương Thế Vinh — theme giấy"
+description: "Hệ thống hiện tại của homepage, case và vỏ trang game, trích từ code."
 colors:
-  ground: "#132119"
-  text: "#f2f5ec"
-  secondary: "#c2cdbb"
-  line: "#4b5d4d"
-  dark: "#0b1510"
-  soft: "#1d3024"
-  elevated: "#17271d"
-  accent: "#d4f236"
-  dark-secondary: "#c1cbbc"
-  dark-body: "#d5dccc"
+  ground: "#f3f1ea"
+  surface: "#fbfaf6"
+  text: "#161614"
+  secondary: "#6b6960"
+  line: "#d9d5c8"
+  accent: "#1f5a3d"
+  accent-hover: "#174a31"
+  mark: "#dcf25a"
+  night: "#0b0f14"
+  night-text: "#eef0ee"
+  night-muted: "#9aa3a8"
+  night-line: "#263040"
 typography:
   display:
-    fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "clamp(2.35rem, 4.9vw, 4.5rem)"
-    fontWeight: 600
-    lineHeight: 1.09
-    letterSpacing: "-0.035em"
+    fontFamily: "Archivo Black, sans-serif"
+    fontSize: "clamp(44px, 6vw, 96px)"
+    fontWeight: 400
+    lineHeight: 1.02
+    letterSpacing: "-0.02em"
   headline:
-    fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "clamp(1.65rem, 2.7vw, 2.35rem)"
-    fontWeight: 600
-    lineHeight: 1.22
-    letterSpacing: "-0.025em"
-  title:
-    fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1.25rem"
-    fontWeight: 600
-    lineHeight: 1.35
-    letterSpacing: "-0.015em"
+    fontFamily: "Space Grotesk, system-ui, sans-serif"
+    fontSize: "clamp(28px, 3.4vw, 44px)"
+    fontWeight: 700
+    letterSpacing: "-0.03em"
   body:
-    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "16px"
-    lineHeight: 1.65
-  action:
-    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "14px"
-    fontWeight: 600
+    fontFamily: "Space Grotesk, system-ui, sans-serif"
+  metadata:
+    fontFamily: "IBM Plex Mono, monospace"
 rounded:
-  button: "6px"
-  image: "10px"
-  dialog: "12px"
+  control: "8px"
+  card: "12px"
+  tag: "999px"
 spacing:
-  small: "12px"
-  medium: "16px"
-  group: "24px"
-  column: "36px"
-  section-mobile: "48px"
-  section: "72px"
+  gutter: "clamp(16px, 4vw, 48px)"
 components:
-  button-primary:
-    backgroundColor: "{colors.accent}"
-    textColor: "{colors.dark}"
-    typography: "{typography.action}"
-    rounded: "{rounded.button}"
-    padding: "12px 18px"
-  button-outline:
-    textColor: "{colors.text}"
-    typography: "{typography.action}"
-    rounded: "{rounded.button}"
-    padding: "12px 18px"
-  image-dialog:
-    backgroundColor: "{colors.ground}"
-    textColor: "{colors.text}"
-    rounded: "{rounded.dialog}"
-    padding: "20px"
-    width: "min(96vw, 1700px)"
+  navigation-cv:
+    backgroundColor: "{colors.text}"
+    textColor: "{colors.ground}"
+    rounded: "{rounded.control}"
+    padding: "8px 14px"
+  case-image:
+    backgroundColor: "{colors.surface}"
+    rounded: "{rounded.card}"
 ---
 
 # Design System: Portfolio Lương Thế Vinh
 
 ## Overview
 
-**Creative North Star: "A concise portfolio of operational work"**
+Portfolio hiện tại là một trang giấy ấm, chữ đen và màu nhấn xanh rêu. Hero biến các ô dữ liệu lộn xộn thành biểu đồ, danh sách công việc mở ảnh xem trước, dòng thời gian giải thích đường đi từ vận hành tới dữ liệu và sản phẩm. Ba bạn đồng hành là một phần của ngôn ngữ tương tác hiện có.
 
-This records the built Phase 2 prototype, not an approved final brand palette. It applies only to the homepage and the P&G case inside the `portfolio-v2` surface. The user must review the visual candidate before Phase 3 expands the system. Four other case templates and the game retain their existing design. Token values here describe current code; they do not authorize extension to those surfaces.
+Tài liệu mô tả code hiện tại, thay cho bản ghi Phase 2 màu xanh tối. Phạm vi gồm homepage, toàn bộ case và phần nav/nội dung/footer của `/game`. Canvas, bảng hướng dẫn và HUD của minigame giữ hệ màu riêng; trang 404 dùng biến màu đêm.
 
-The prototype uses a continuous deep-green operational environment, with darker and softer green layers for hierarchy. Product screenshots are its intentionally bright visual material: the evidence the SensorBot and cursor light appear to inspect. Archivo headings give work a clear hierarchy; Inter supports Vietnamese narrative and practical navigation. Lime identifies important actions, focus and moving light without becoming a default background.
-
-**Key Characteristics:**
-
-- Real product imagery with nearby captions and demonstration-data labels.
-- Open reading layouts, sentence-case headings, and contextual metadata after titles.
-- Dark operational surfaces with quiet tonal shifts around grouped material.
-- Visible links, native disclosure controls, and a native image dialog.
-
-Sources: [prototype stylesheet](app/portfolio.css), [components](components/portfolio), [font setup](app/layout.tsx), and [direction contract](docs/portfolio-phase2-direction.md). This is a source extraction; runtime verification and visual approval are reported separately. The companion `.impeccable/design.json` contains component previews and synthetic tonal ramps for its preview panel; those ramps are not implemented palette tokens or approved alternatives.
+Nguồn: [home.css](components/home/home.css), [case.css](components/case/case.css), [game.css](app/game/game.css), [fonts](components/portfolio/PortfolioFonts.ts), [intro.css](components/portfolio/intro.css) và [globals.css](app/globals.css). Kiểm tra local và trạng thái production được báo riêng, không suy ra từ tài liệu này.
 
 ## Colors
 
-### Primary
+Nền `--bg` là giấy `#f3f1ea`; `--surface` sáng hơn cho vùng ảnh và khối nội dung. Chữ chính `--text` là `#161614`, chữ phụ `--muted` là `#6b6960`, đường chia `--line` là `#d9d5c8`.
 
-**Restrained lime** (`accent`) marks the main hero action, the CV navigation link, the contact email, text selection, focus, and moving light. **Deep green** (`dark`) grounds navigation, image-view controls and the lowest layer of the portfolio surface.
-
-### Neutral
-
-**Ground** (`ground`) supports long reading as a deep green surface. **Soft green** (`soft`) groups process and result material; **elevated green** supports image dialogs. **Pale green** (`text`) carries primary text; **muted green** (`secondary`) carries supporting narrative. **Green-gray** (`line`) divides rows and outlines controls.
-
-**The Surface Scope Rule.** Apply these tokens within the prototype wrapper. The global game and legacy case palette is a separate incumbent system.
+Xanh rêu `--accent` dùng cho link, trạng thái đang chọn và focus; lime `--mark` dùng để tô headline và nhấn chi tiết. Footer, trang 404 và nền bao game dùng nhóm `--night`, `--night-text`, `--night-muted`, `--night-line`. Các biến dark/lime trong globals phục vụ game, không thay thế nhóm màu của `.home`.
 
 ## Typography
 
-Archivo is the display family and Inter is the body family, loaded through the existing Next font setup with Vietnamese support. The exact reusable hierarchy is in the frontmatter. Headings balance their line wrapping and use moderately tight tracking; body paragraphs are capped at 72 characters.
+Archivo Black là chữ poster ở hero; Space Grotesk là chữ nội dung, heading và điều hướng; IBM Plex Mono dành cho metadata, năm và bộ đếm. Các font được khai qua `next/font` trong `PortfolioFonts.ts`. Archivo/Inter ở layout vẫn phục vụ typography của game và các utility toàn cục.
 
-Featured project titles use a fluid size between 1.4rem and 1.8rem. Supporting narrative is generally 14px; role metadata and figure captions are 12px. The 11px demonstration label is supplementary to the main caption and must not carry unique essential explanation. Results use Archivo with tabular numerals and a fluid 2rem–3rem scale. The P&G heading uses 2.45rem on mobile.
-
-**The Title Before Metadata Rule.** Introduce each project by its title, then its role or period. Context labels must not compete as decorative headings.
+Hero dùng `clamp(44px, 6vw, 96px)`, line-height 1.02; ở màn nhỏ headline vẫn dùng cùng công thức, vị trí copy chuyển lên 6% từ breakpoint 640px. Heading section dùng `clamp(28px, 3.4vw, 44px)`. Kích thước chữ case và game là quy tắc riêng tại từng surface, không lấy cỡ chữ hero làm mặc định.
 
 ## Layout
 
-The shared shell is capped at 1280px with 56px side gutters. At 1050px and below, gutters become 32px; at 760px and below, they become 20px. Repeated sections use the desktop and mobile section spacing recorded above. Paragraph line length stays bounded even inside wide columns.
+Gutter chung là `clamp(16px, 4vw, 48px)`. Nav sticky ở đầu trang, z-index 50. Hero có canvas ở nền, headline và hành động ở trên. Danh sách công việc là các hàng có đường chia; ở màn nhỏ, bằng chứng kết quả nằm trong hàng thay vì cần hover để đọc.
 
-Desktop uses unequal heading/body columns and two equal featured-project columns. On mobile the main narratives and featured projects become single columns. The four-step process becomes two columns. Navigation wraps visibly instead of becoming a modal menu. Links used for primary navigation and actions have generous vertical hit areas; main actions have a minimum height of 44px.
+Dòng thời gian cho phép cuộn ngang ở màn nhỏ. Case có heading, thông tin vai trò, ảnh bằng chứng rồi các mục nội dung; breakpoint của từng surface quyết định cách gom cột. Vỏ trang game rộng tối đa 960px và giữ một nền tối bao OpsGame.
 
-The exact homepage sequence and P&G evidence placement remain surface decisions in the [Phase 2 direction contract](docs/portfolio-phase2-direction.md), not requirements for every future page.
+Các vùng chạm được sửa trong đợt này (link quay lại case/game và nút 404) cao tối thiểu 44px. Giữ một skip link ở root layout, trỏ tới `#main`, hiện ở lớp 200 khi focus.
 
 ## Elevation & Depth
 
-The prototype is flat. It uses deep-green tone shifts, whitespace, and one-pixel dividers rather than drop shadows. The image viewer enters an elevated dark native-dialog layer over a dark translucent backdrop. Grain is disabled while the prototype wrapper is present; the fixed cursor light stays active on fine-pointer devices and follows the cursor across the surface as an intentional part of the portfolio world. The fixed SensorBot 3D stays in the lower-right corner on desktop and turns its lens toward the cursor; it has no pointer events and fades when the cursor comes near it so it does not obstruct reading. Screenshots stay bright, giving the light an object to reveal.
+Giấy, khoảng trắng và đường chia tạo hierarchy chính. Ảnh có bóng mềm; CTA hero hiện có bóng lệch lime. Nav dùng nền giấy trong suốt nhẹ và backdrop blur. Dialog ảnh và video intro dùng modal native, nằm trên nội dung trang.
 
-There are no new entrance, hover-translation, or scroll animations in the prototype stylesheet. Disclosure icons rotate directly with the native open state. The sidecar records this behavior without inventing a duration scale.
+Footer hiện có sân đấu của các bạn đồng hành, với override riêng `--night: #12171f`, `--night-line: #2b3546`, `--night-muted: #a2abb6` trong `.hc`; hiệu ứng sân đấu giữ nguyên khi sửa UX/UI.
+
+CursorLight toàn cục đã bỏ để tránh listener không mang lại hiệu ứng rõ trên nền giấy. Không thêm lại ánh sáng con trỏ của theme xanh tối. Hiệu ứng đèn pin của trang 404 là tương tác riêng của trang đó.
 
 ## Shapes
 
-Narrative sections and result strips retain square geometry. Gentle rounding is reserved for controls, image boundaries, and the dialog using the frontmatter roles. Screenshots preserve their proportions; cropping comes from content metadata and is applied consistently in the page and viewer. Captions remain outside the image boundary.
+Thang bo góc: `--r-control: 8px` cho nút/select; `--r-card: 12px` cho card, ảnh và khối flow; 999px dành cho tag. Hình tròn, mắt/nhân vật và thanh progress nhỏ là hình học riêng của tương tác, không phải token card/control. Nút âm lượng intro giữ hình tròn. Lời nhắc cuộn `.hs-cue` dùng bo góc control 8px.
+
+Ảnh case khai width/height theo file gốc trong `content/`, hiển thị width 100% và height auto. Giữ đúng tỷ lệ để ảnh lazy không đẩy nội dung khi tải xong.
 
 ## Components
 
-### Buttons and links
+Nav và link dùng focus outline rõ theo nền. Skip link chung hiện phía trên nav khi focus. Intro lần đầu vẫn tự phát, dùng `preload="metadata"`; session seen, bỏ qua, Escape và replay giữ hành vi hiện có. Autoplay có thể tải dữ liệu video để phát bất kể mức preload.
 
-Primary actions use lime with deep green text. The outline button uses a fine neutral border; both use the shared button shape and padding. Links underline on hover. Keyboard focus uses a two-pixel green outline offset by five pixels on light surfaces and a lime outline on dark navigation, hero, and contact surfaces. This includes the contact region explicitly.
+HeroSort chỉ chạy canvas/demo khi intro đã đóng, hero giao viewport và tab đang hiển thị; tạm dừng giữ các mốc thời gian để tiếp tục đúng nhịp. Số phần trăm vẫn hiển thị nhưng không là live announcement; vùng status riêng chỉ báo hoàn thành. Reduced motion cho biểu đồ ở trạng thái đã sắp.
 
-Icons use the shared inline SVG component: 18px size, a 20-unit view box, 1.5-unit stroke, rounded caps and joins, and inherited color. Decorative icons are hidden from assistive technology; visible text provides the action name.
-
-### Navigation
-
-The name and role sit opposite visible navigation links. The CV link has a separating rule and lime text. On mobile, the name and link group stack; links remain available and wrap. The prototype has no hamburger overlay or sticky navigation behavior.
-
-### Project evidence
-
-Featured entries are open image-and-copy compositions, without an outer card shell. The image is a button with an always-visible enlargement label. The project title and separate text link lead to the case; the image button opens its viewer. Captions and demo labels sit immediately below the evidence.
-
-The native dialog supports Escape, a visible close button, click on its surrounding dialog area, scrollable image detail, and return focus to the trigger on close. Opening locks body scrolling; closing and unmounting restore the previous overflow value. It retains the content-defined crop and provides a 1000px minimum image canvas within an independently scrollable region.
-
-### Results and narrative
-
-Result strips use soft green rather than floating KPI cards. Supporting case links use divided text rows. Sources, contribution boundaries, results, and methods stay in the default reading flow.
-
-Technical narrative uses native `details` and `summary` elements with top borders. The plus icon rotates 45 degrees while open; the browser supplies native disclosure interaction. Related cases use full-width divided link rows.
+CareerPath vẫn xem trước khi rê chuột; vùng status riêng chỉ cập nhật khi focus hoặc kích hoạt một chặng. Ảnh case mở dialog bằng nút có nhãn từ content. Game lấy nhãn màn chơi, tiến độ traversal và mẹo touch từ content, không thay phím bằng cách sửa chuỗi chung trong component.
 
 ## Do's and Don'ts
 
-### Do:
-
-- **Do** treat these values as the current Phase 2 review candidate until the user approves the visual direction.
-- **Do** retain contextual captions, demonstration-data labels, and source/ownership explanations beside the material they qualify.
-- **Do** keep title, supporting context, and action distinct in the reading order.
-- **Do** preserve clear focus on both light and dark surfaces and text labels alongside icons.
-- **Do** use the existing content module for visible copy and accessibility labels.
-
-### Don'ts:
-
-- **Don't** apply the prototype palette globally or expand it to the remaining cases or game before the next phase is approved.
-- **Don't** replace actual evidence with invented portraits, testimonials, screenshots, or result data.
-- **Don't** make essential evidence or case access depend on hover.
-- **Don't** hide result methods, ownership boundaries, or source notes inside optional technical disclosures.
-- **Don't** promote surface-specific composition or incidental small text sizes into universal rules for future pages.
+- Giữ chữ hiển thị và nhãn trợ năng trong `content/content.vi.ts`, có kiểu ở `content/types.ts`.
+- Giữ caption, nhãn dữ liệu minh hoạ và giới hạn bằng chứng ngay cạnh nội dung liên quan.
+- Kiểm tra keyboard, desktop và màn 375px trên production build local.
+- Dùng token bo góc theo vai trò; bảo toàn hệ màu và hình ảnh game hiện có.
+- Không mô tả theme xanh tối/robot 3D/CursorLight cũ như giao diện hiện tại.
+- Không suy ra khả năng dùng screen reader, thiết bị thật hoặc production chỉ từ kiểm tra DOM/local.
