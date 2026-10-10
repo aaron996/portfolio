@@ -129,6 +129,13 @@ html:has(.hs-stage[data-welcome="pending"]) { overflow: hidden; scrollbar-gutter
 .wi-index { grid-row: span 2; padding-top: 6px; font-family: var(--hero-mono), monospace; font-size: 12px; color: var(--muted); }
 .wi-title { font-size: clamp(20px, 2vw, 26px); font-weight: 600; letter-spacing: -.02em; line-height: 1.2; transition: color 150ms; }
 .wi-meta { grid-column: 2; font-size: 13px; color: var(--muted); }
+/* Nhãn "AI": con dấu nhỏ nghiêng nhẹ, cùng ngôn ngữ viền đậm + nền vàng chanh với .hs-cue. Giữ nguyên màu khi dòng được chọn. */
+.pf-badge { display: inline-flex; align-items: center; gap: 4px; margin-left: 10px; padding: 2px 8px 2px 6px; vertical-align: .18em; border: 1.5px solid var(--text); border-radius: 6px; background: var(--mark); color: var(--text); font-family: var(--hero-mono), monospace; font-size: 12px; font-weight: 700; letter-spacing: .04em; line-height: 1.4; transform: rotate(-3deg); transition: transform 200ms cubic-bezier(.2,.7,.2,1); }
+.pf-badge::before { content: "✦"; font-size: 11px; line-height: 1; }
+.wi-row[data-active="true"] .pf-badge { transform: rotate(0deg) scale(1.06); }
+.wi-row[data-active="true"] .pf-badge::before { animation: pf-badge-twinkle 1.6s ease-in-out infinite; }
+@keyframes pf-badge-twinkle { 0%, 100% { transform: scale(1) rotate(0); } 50% { transform: scale(1.35) rotate(25deg); } }
+@media (prefers-reduced-motion: reduce) { .pf-badge, .wi-row[data-active="true"] .pf-badge { transition: none; } .wi-row[data-active="true"] .pf-badge::before { animation: none; } }
 .wi-summary { grid-column: 2; max-width: 56ch; font-size: 14px; line-height: 1.55; color: var(--text); }
 .wi-mobile-result { display: none; }
 .wi-open { grid-column: 3; grid-row: 1; align-self: center; opacity: 0; transform: translateX(-6px); transition: opacity 150ms, transform 150ms; }

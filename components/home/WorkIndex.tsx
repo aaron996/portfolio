@@ -63,7 +63,7 @@ export function WorkIndex() {
           <Link href={`/case/${item.slug}`} className="wi-row" data-active={active === index}
             onPointerEnter={() => { setActive(index); tell(item.slug); }} onFocus={() => { setActive(index); tell(item.slug); }}>
             <span className="wi-index">{String(index + 1).padStart(2, "0")}</span>
-            <span className="wi-title">{item.homepage?.title ?? item.title}</span>
+            <span className="wi-title">{item.homepage?.title ?? item.title}{item.homepage?.badge && <span className="pf-badge" role="img" aria-label={item.homepage.badge.aria}>{item.homepage.badge.label}</span>}</span>
             <span className="wi-meta">{item.homepage?.role ?? item.client} · {item.period}</span>
             {item.homepage?.summary && <span className="wi-summary">{item.homepage.summary}</span>}
             <span className="wi-mobile-result">{item.keyResult.value}</span>
