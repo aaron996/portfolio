@@ -1,0 +1,28 @@
+/* Nút nhạc nền trên nav */
+.mt-btn { display: inline-grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 1.5px solid currentColor; border-radius: 999px; background: transparent; color: inherit; cursor: pointer; transition: transform 140ms cubic-bezier(.2,.7,.2,1), background-color 150ms, color 150ms; }
+.mt-btn:hover { transform: translateY(-1px); background: rgb(22 22 20 / .06); }
+.mt-btn:active { transform: scale(.94); }
+.mt-btn:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.mt-btn svg { overflow: visible; }
+
+.mt-body { transform-origin: 8px 12px; transition: transform 320ms cubic-bezier(.3,1.6,.5,1); }
+.mt-wave, .mt-x { stroke-dasharray: 1; transition: stroke-dashoffset 340ms cubic-bezier(.65,0,.35,1), opacity 220ms; }
+.mt-wave-2 { transition-delay: 60ms; }
+
+/* Bật: sóng hiện, ✕ ẩn. Tắt: sóng rút, ✕ vẽ ra (nét hai trễ một nhịp). */
+.mt-btn[data-on="true"] .mt-wave { stroke-dashoffset: 0; opacity: 1; }
+.mt-btn[data-on="true"] .mt-x { stroke-dashoffset: 1; opacity: 0; }
+.mt-btn[data-on="false"] .mt-wave { stroke-dashoffset: -1; opacity: 0; }
+.mt-btn[data-on="false"] .mt-x { stroke-dashoffset: 0; opacity: 1; }
+.mt-btn[data-on="false"] .mt-x-2 { transition-delay: 120ms; }
+.mt-btn[data-on="false"] .mt-body { transform: scale(.88); }
+
+/* Đang phát: sóng nhấp nhẹ như loa đang rung. */
+.mt-btn[data-playing="true"] .mt-wave-1 { animation: mt-pulse 980ms ease-in-out infinite; }
+.mt-btn[data-playing="true"] .mt-wave-2 { animation: mt-pulse 980ms 240ms ease-in-out infinite; }
+@keyframes mt-pulse { 50% { opacity: .35; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .mt-body, .mt-wave, .mt-x { transition: none; }
+  .mt-btn[data-playing="true"] .mt-wave-1, .mt-btn[data-playing="true"] .mt-wave-2 { animation: none; }
+}

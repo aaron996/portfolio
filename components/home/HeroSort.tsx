@@ -1,5 +1,6 @@
 "use client";
 
+import { HeroMV } from "./HeroMV";
 import { useEffect, useRef, useState } from "react";
 import { content } from "@/content/content.vi";
 import { PortfolioIcon } from "@/components/portfolio/PortfolioIcon";
@@ -86,6 +87,9 @@ export function HeroSort() {
      bị khoá cuộn (home.css, `data-welcome`), để các section phía dưới không chạy khi
      ba bạn đồng hành còn đang bận ở hero. */
   const [welcomed, setWelcomed] = useState(false);
+  // Khung MV chỉ hiện khi Trùng đã bật màn hình (hoặc ngay khi sắp xong nếu không có bạn đồng hành).
+  const [mvShown, setMvShown] = useState(false);
+  const mvShownRef = useRef(false);
   const [cue, setCue] = useState(true);
   const { enabled } = useCompanions();
   const playedRef = useRef(false);
@@ -463,6 +467,8 @@ export function HeroSort() {
       // Tắt bạn đồng hành thì không còn màn chào nào để chờ.
       if (!enabled) setWelcomed(true);
       if (!done) { playedRef.current = false; companions.set({ place: "home", heroReady: false }); }
+      // Không có bạn đồng hành thì không ai bật màn hình: hiện MV ngay khi sắp xong.
+      mvShownRef.current = done; setMvShown(done);
       return;
     }
 
@@ -477,11 +483,19 @@ export function HeroSort() {
       }),
       show: (visible: boolean) => { root.dataset.hidden = visible ? "false" : "true"; },
     };
+    const perch = () => {
+      const card = stage.querySelector<HTMLElement>(".hmv-card");
+      if (!card) return null;
+      const r = card.getBoundingClientRect(), s = stage.getBoundingClientRect();
+      return { x: r.left - s.left + Math.min(56, r.width * 0.16), y: r.top - s.top };
+    };
     const placeAll = () => {
       const g = geoRef.current;
       if (!g) return;
       api.hideMisfits(true);
-      createBuddies(parts, g.size).place(g, measureDot(iEl, stage));
+      // Animation cũ (fill: forwards) đè lên style mới: huỷ trước khi đặt lại.
+      parts.bodies.forEach(b => b.getAnimations().forEach(x => x.cancel()));
+      createBuddies(parts, g.size).place(g, measureDot(iEl, stage), mvShownRef.current ? perch() : null);
     };
     (async () => {
       await document.fonts.ready;
@@ -490,7 +504,7 @@ export function HeroSort() {
       companions.set({ place: "hero", heroReady: false });
       // Đã diễn một lần (vd. tắt rồi bật lại) thì đặt thẳng vào tư thế cuối.
       const replay = playedRef.current;
-      if (reduced || replay) placeAll();
+      if (reduced || replay) { mvShownRef.current = true; setMvShown(true); placeAll(); }
       else await buddies.play(geo, measureDot(iEl, stage), api.misfits(), KICKS, api, ctrl.signal);
       if (ctrl.signal.aborted) return;
       playedRef.current = true;
@@ -508,7 +522,9 @@ export function HeroSort() {
       }, () => {
         cueRef.current?.animate([{ transform: "none" }, { transform: "translateY(3px) scaleY(.88)", offset: 0.35 }, { transform: "none" }], { duration: 220, easing: "ease-out" });
       }, ctrl.signal);
-    })().catch(() => { if (!ctrl.signal.aborted) setWelcomed(true); }); // lỗi thì mở khoá, đừng nhốt người xem
+      // Trùng nhảy lên góc trống và bật màn hình MV.
+      await buddies.project(geo, perch, () => { mvShownRef.current = true; setMvShown(true); }, ctrl.signal);
+    })().catch(() => { if (!ctrl.signal.aborted) { setWelcomed(true); mvShownRef.current = true; setMvShown(true); } }); // lỗi thì mở khoá, đừng nhốt người xem
 
     // Đổi kích thước sau khi đã yên vị thì đặt lại cho khớp chữ I và sàn mới.
     const ro = new ResizeObserver(() => { if (parts.bodies[0].dataset.settled) placeAll(); });
@@ -540,6 +556,8 @@ export function HeroSort() {
           </a>
         </div>
       </div>
+
+      <HeroMV done={done} shown={mvShown} />
 
       <div ref={buddyRef} className="hs-buddies" aria-hidden="true">
         {["ink", "ink", "green"].map((variant, i) =>
