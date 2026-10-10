@@ -44,7 +44,7 @@ export function CaseArticle({ caseStudy: c }: { caseStudy: CaseStudy }) {
       <article data-read>
         <header className="ca-head">
           <Link href="/#cases" className="ca-back"><PortfolioIcon name="back" />{L.back}</Link>
-          <p className="ca-scope">{c.scopeLabel}</p>
+          <p className="ca-scope">{c.scopeLabel}{c.homepage?.badge && <span className="pf-badge" role="img" aria-label={c.homepage.badge.aria}>{c.homepage.badge.label}</span>}</p>
           <h1>{c.title}</h1>
           <p className="ca-proves">{c.proves}</p>
           <p className="ca-one">{c.oneLiner}</p>

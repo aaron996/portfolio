@@ -140,7 +140,11 @@ export interface Media {
 
 export interface CaseStudy {
   /** Mô tả ngắn và vai trò dùng ở danh sách case trên homepage. */
-  homepage?: { title: string; summary: string; role: string; evidence: string; cta: string };
+  homepage?: {
+    title: string; summary: string; role: string; evidence: string; cta: string;
+    /** Nhãn nhỏ cạnh tên case ở danh sách trang chủ (vd "AI"). aria đọc cho trình đọc màn hình. */
+    badge?: { label: string; aria: string };
+  };
   slug: string;
   tier: CaseTier;
 
