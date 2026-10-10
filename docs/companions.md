@@ -39,12 +39,18 @@ Nhà của chúng là logo 3×3 — logo có đúng 3 ô sáng. Cuối trang ch�
    theo con trỏ** khi người xem còn ở hero — Lệch quay nhanh, Trùng chậm nửa nhịp.
    **Trang khoá cuộn cho tới lúc này** (`data-welcome="pending"` → `"done"` trên
    `.hs-stage`, CSS `html:has(...)`): các section phía dưới chỉ kích hoạt được khi ba ô đã
-   ở ngoài, nên không để người xem cuộn tới đó trước. Xong thì hiện nút pill "cuộn xuống"
-   (`.hs-cue`) cho tới khi người xem tự cuộn. Tắt bạn đồng hành hoặc lỗi thì mở khoá ngay.
-   Không nhốt người xem: tới bằng neo (`/#contact`), Back/Forward, tải lại, hoặc đã xem
-   màn chào trong phiên (`sessionStorage` `pf-welcome-seen`) thì không khoá; cố cuộn khi
-   chưa sắp xong thì tự "Sắp xếp ngay"; Tab ra khỏi hero thì mở khoá; sắp xong mà màn chào
-   kẹt quá 12 giây cũng mở khoá.
+   ở ngoài, nên không để người xem cuộn tới đó trước. Cố cuộn lúc màn chào đang diễn thì
+   hero giãn như dây thun và Lệch quay lại "Suỵt!" (tối đa mỗi 1,2s) — khoá thành một phần
+   của trò đùa thay vì trông như trang đơ. Xong thì hiện nút pill "cuộn xuống" (`.hs-cue`)
+   cho tới khi người xem tự cuộn; Lệch chạy tới, nhảy lên nút giậm ba cái (nút lún theo)
+   như bấm hộ rồi nhảy về sàn (`stomp` trong `heroBuddies.ts`; bỏ qua khi giảm chuyển
+   động hoặc đặt thẳng tư thế cuối). Tắt bạn đồng hành hoặc lỗi thì mở khoá ngay.
+   Không nhốt người xem: tới bằng neo (`/#contact`), Back/Forward, hoặc đã xem màn chào
+   trong phiên (`sessionStorage` `pf-welcome-seen`) thì không khoá — tải lại khi chưa xem
+   xong vẫn khoá; cố cuộn khi chưa sắp xong thì tự "Sắp xếp ngay"; Tab ra khỏi hero thì mở
+   khoá (focus về `#main` hay vào hộp intro thì không tính — đóng intro trả focus về
+   `#main`, trước đây làm mở khoá ngay từ đầu); sắp xong mà màn chào kẹt quá 12 giây cũng
+   mở khoá (chỉ đếm lúc tab đang hiện và intro đã đóng — màn chào dừng thì hạn chờ cũng dừng).
 5. **Liên hệ — trận đấu lồng sắt cuối trang** (`components/companions/fight.ts`, sân khấu
    `components/home/FightArena.tsx`). Footer là một club về đêm (nền `#12171f`, gần đen nhưng
    sáng hơn `--night` một nấc). Ba ô đậu lên thẻ "Chơi Ải Vận Hành"; khi sàn đấu `.hc-arena`
@@ -57,8 +63,20 @@ Nhà của chúng là logo 3×3 — logo có đúng 3 ô sáng. Cuối trang ch�
    thắng. Rời footer giữa chừng hoặc đổi kích thước cửa sổ thì huỷ, diễn lại từ đầu khi
    quay lại; diễn xong thì chỉ còn nút "Xem đấu lại". Giảm chuyển động: chạy tức thì tới
    cảnh cuối, không zoom, không quay chậm.
+   - **Đặt cược**: hai bên vừa sắp chạm sàn thì cảnh gần như đứng hình (tốc độ 0,012) và bàn
+     cược hiện ra (DOM thật chèn cạnh `.hc-arena` trong footer — lớp nhân vật `aria-hidden` và
+     không nhận chuột nên nút không thể nằm trong đó). Chọn Chấm / Lệch, hoặc "Xem thôi"; 12
+     giây không chọn thì coi như xem thôi. Bên người xem chọn **luôn thua**. Thua đủ hai lần
+     thì trận sau Trùng lên nóc lồng trước, cất máy ảnh lấy sổ ra tính (ký hiệu toán bay lên,
+     biểu đồ mini nhảy loạn rồi cột bên vừa cược sập xuống, "Ra rồi!"), xé tờ giấy ném ra —
+     tờ giấy bung thành bàn cược kèm "Báo cáo của Trùng": bảng các lần cược, tỉ lệ trúng, đề
+     xuất bên **ngược với lần cược gần nhất**. Bên được đề xuất luôn thắng (kể cả khi người
+     xem không theo). Lịch sử cược sống qua các lần "Xem đấu lại", tải lại trang thì xoá.
+     Hết trận hiện "Trúng cược!"/"Thua cược!" và nhãn "Bạn cược … · trúng/thua".
    - **Quay chậm**: `wait` đếm theo đồng hồ ảo; `slowmo()` đổi tốc độ đồng hồ và
-     `playbackRate` của mọi animation trong `.cmp-page` và `.hc-arena` (kể cả khán giả).
+     `playbackRate` của mọi animation trong `.cmp-page` và `.hc-arena` (kể cả khán giả). Đặt
+     thẳng `playbackRate`, không dùng `updatePlaybackRate`: đổi tốc độ dồn dập lúc animation
+     còn chờ khung hình thì `updatePlaybackRate` đẩy `startTime` xa vào tương lai và ô biến mất.
    - **Zoom**: cùng một phép biến đổi áp lên `.cmp-page` (kèm `clip-path` cắt đúng khung
      sàn đấu) và `.hc-cam`; HUD, viền đen điện ảnh, vạch tốc độ nằm ngoài `.hc-cam` nên
      đứng yên. `.home` có `overflow: clip` để lớp phóng to không làm trang tràn.
@@ -118,7 +136,8 @@ có rèm.
 - `BrandMark companions` — khi ba ô ra ngoài, ba ô sáng của logo thành ô trống viền nét đứt.
 - Footer có nút "Ẩn/Hiện bạn đồng hành". Tắt → về nhà, biểu đồ không còn ô lạc. Bật lại sau
   khi đã diễn → đặt thẳng vào tư thế cuối, không diễn lại.
-- Xáo lại biểu đồ → ba ô về nhà (logo sáng lại), sắp xong thì diễn lại từ đầu.
+- Xáo lại biểu đồ → ba ô về nhà (logo sáng lại), sắp xong thì diễn lại từ đầu. Lúc đó mà ba ô
+  đang đứng trên nav thì chúng bay về ô trong logo rồi mới tắt, không biến mất giữa chừng.
 - Lớp chung gắn ở từng trang (`HomePage`, `CaseArticle`) thay vì root layout: /game và các
   trang prototype không cần nhân vật. Store là module dùng chung nên trạng thái đi theo khi
   chuyển trang bằng `<Link>`.

@@ -343,6 +343,11 @@ export function CompanionLayer({ nav, origin = "hero" }: { nav: string; origin?:
       if (followCtl && !FOLLOW.includes(key)) { followCtl(); followCtl = null; following.add(2); }
 
       if (key === "off") {
+        // Đang ở ngoài mà bị gọi về (vd. xáo lại biểu đồ) thì bay về logo rồi mới tắt,
+        // đừng biến mất giữa chừng. Đang nằm trong hero thì lớp này không có gì để bay.
+        const l = logoSpots();
+        if (l && prev !== "hero") await Promise.all(bodies.map((_, i) =>
+          current(i) ? moveTo(i, l[i], "fixed", { delay: [0, 120, 240][i], duration: 800 }) : undefined));
         stopGaze?.(); stopGaze = null;
         setNight(false);
         hideAll();

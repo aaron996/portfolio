@@ -40,6 +40,16 @@ const wait = (ms: number, signal: AbortSignal) => new Promise<void>((resolve, re
   signal.addEventListener("abort", () => { clearTimeout(id); reject(signal.reason); }, { once: true });
 });
 
+/** Bong bóng thoại bật lên ở `at` (góc trên-trái, toạ độ khung chứa) rồi tắt. */
+export function popBubble(el: HTMLElement, at: Point, duration: number) {
+  return el.animate([
+    { transform: `translate(${at.x}px, ${at.y}px) scale(0)`, opacity: 0 },
+    { transform: `translate(${at.x}px, ${at.y - 8}px) scale(1.15)`, opacity: 1, offset: 0.15 },
+    { transform: `translate(${at.x}px, ${at.y - 10}px) scale(1)`, opacity: 1, offset: 0.85 },
+    { transform: `translate(${at.x}px, ${at.y - 10}px) scale(0.6)`, opacity: 0 },
+  ], { duration, easing: "ease-out", fill: "forwards" });
+}
+
 /** Vị trí và bề ngang nét chữ "I" — đo bằng metric thật của font. */
 export function measureDot(iEl: HTMLElement, stage: HTMLElement) {
   const s = stage.getBoundingClientRect();
@@ -110,13 +120,45 @@ export function createBuddies(parts: BuddyParts, size: number) {
   }
 
   function pop(el: HTMLElement, at: Point, duration: number) {
-    const a = el.animate([
-      { transform: `translate(${at.x}px, ${at.y}px) scale(0)`, opacity: 0 },
-      { transform: `translate(${at.x}px, ${at.y - 8}px) scale(1.15)`, opacity: 1, offset: 0.15 },
-      { transform: `translate(${at.x}px, ${at.y - 10}px) scale(1)`, opacity: 1, offset: 0.85 },
-      { transform: `translate(${at.x}px, ${at.y - 10}px) scale(0.6)`, opacity: 0 },
-    ], { duration, easing: "ease-out", fill: "forwards" });
-    anims.push(a);
+    anims.push(popBubble(el, at, duration));
+  }
+
+  /** Vài bước nhảy trên sàn rồi một cú nhảy lớn tới `to`. */
+  function trip(from: Point, to: Point, hops: number, jump: number): Pose[] {
+    const launch = { x: from.x + (to.x - from.x) * 0.7, y: from.y };
+    const path: Pose[] = [];
+    let at = from;
+    for (let i = 1; i <= hops; i++) {
+      const next = { x: from.x + (launch.x - from.x) * (i / hops), y: from.y };
+      path.push(...arc(at, next, size * 1.2, 8).slice(path.length ? 1 : 0));
+      at = next;
+    }
+    const leap = arc(at, to, jump, 18);
+    return path.concat(path.length ? leap.slice(1) : leap);
+  }
+
+  /* Mở khoá cuộn xong: Lệch chạy tới nút "cuộn xuống", nhảy lên giậm hai cái như bấm hộ
+     người xem, rồi nhảy về chỗ. `target` đo lúc xuất phát; null thì thôi. */
+  async function stomp(geo: ChartGeometry, target: () => Point | null, press: () => void, signal: AbortSignal) {
+    const el = parts.bodies[2], eye = parts.eyes[2];
+    const home = floorSpots(geo, size)[2];
+    await wait(900, signal); // để nút trượt vào xong
+    const to = target();
+    if (!to) return;
+    const hops = geo.narrow ? 1 : 3;
+    look(eye, ["translateX(0)", `translateX(${to.x > home.x ? 30 : -30}%)`], 200);
+    await move(el, trip(home, to, hops, Math.max(size * 3, 50)), hops * 200 + 520);
+    for (let n = 0; n < 2; n++) {
+      press();
+      await move(el, [{ ...to, sx: 1.3, sy: 0.65 }, { ...to }], 140, "ease-out");
+      await move(el, arc(to, to, size * 0.9, 8), 260);
+    }
+    press();
+    await move(el, [{ ...to, sx: 1.3, sy: 0.65 }, { ...to }], 140, "ease-out");
+    look(eye, ["translateX(0)"], 200);
+    await wait(250, signal);
+    await move(el, arc(to, home, size * 3, 22), 720);
+    await move(el, [{ ...home, sx: 1.25, sy: 0.75 }, { ...home }], 160, "ease-out");
   }
 
   async function play(geo: ChartGeometry, dot: ReturnType<typeof measureDot>, misfits: Misfit[], kicks: Kick[], hand: Stagehand, signal: AbortSignal) {
@@ -225,7 +267,7 @@ export function createBuddies(parts: BuddyParts, size: number) {
     [...parts.bodies, ...parts.eyes].forEach(el => { el.removeAttribute("style"); delete el.dataset.settled; });
   }
 
-  return { play, place, reset };
+  return { play, stomp, place, reset };
 }
 
 /** Mắt nhìn theo con trỏ. Mỗi ô một tốc độ: Lệch quay nhanh, Trùng chậm nửa nhịp. */
