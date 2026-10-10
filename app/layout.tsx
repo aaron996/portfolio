@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Archivo, Inter } from "next/font/google";
 import { content } from "@/content/content.vi";
+import { BackgroundMusic } from "@/components/music/BackgroundMusic";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -51,6 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {content.prototype.labels.skip}
         </a>
         {children}
+        <BackgroundMusic />
       </body>
     </html>
   );

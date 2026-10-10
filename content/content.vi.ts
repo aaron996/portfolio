@@ -129,6 +129,22 @@ export const content: SiteContent = {
       },
     },
     companions: { hide: "Ẩn bạn đồng hành", show: "Hiện bạn đồng hành", tired: "…" },
+    /* Bài "How Long" làm bằng Suno, MV dựng bằng code (dự án how-long-mv). */
+    music: {
+      src: "/portfolio/how-long.mp3",
+      on: "Bật nhạc nền",
+      off: "Tắt nhạc nền",
+      mv: {
+        src: "/portfolio/video/how-long-mv.mp4",
+        poster: "/portfolio/video/how-long-mv-poster.jpg",
+        title: "How Long",
+        meta: "MV · Suno × Claude",
+        duration: "3:37",
+        play: "Xem MV How Long",
+        close: "Đóng video",
+        label: "MV How Long",
+      },
+    },
   },
 
   /* Các trang case dùng chung một template theo theme giấy. */

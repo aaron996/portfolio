@@ -3,6 +3,7 @@ import { content } from "@/content/content.vi";
 import { PortfolioIcon } from "@/components/portfolio/PortfolioIcon";
 import { BrandMark } from "@/components/ui/BrandMark";
 import { ReadProgress } from "./ReadProgress";
+import { MusicToggle } from "@/components/music/MusicToggle";
 
 /* Nav dùng chung cho trang chủ và trang case. Trang case bật `progress` để có thanh
    tiến độ đọc ở mép dưới — cũng là "sàn" cho bạn đồng hành đi trên đó. */
@@ -14,6 +15,7 @@ export function SiteNav({ onHome = true, progress = false }: { onHome?: boolean;
       <Link href={onHome ? "#cases" : "/#cases"} className="home-nav-text">{home.nav.work}</Link>
       <a href="#contact" className="home-nav-text">{home.nav.contact}</a>
       <Link href="/game" className="home-nav-game"><PortfolioIcon name="play" />{home.nav.game}</Link>
+      <MusicToggle />
       <a href={contact.cvHref} className="home-cv" aria-label={home.nav.cvLabel}>{home.nav.cv}<PortfolioIcon name="pdf" /></a>
     </nav>
     {progress && <ReadProgress />}

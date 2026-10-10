@@ -161,6 +161,27 @@ export function createBuddies(parts: BuddyParts, size: number) {
     await move(el, [{ ...home, sx: 1.25, sy: 0.75 }, { ...home }], 160, "ease-out");
   }
 
+  /* Sau màn chào: Trùng — thợ chụp ảnh của nhóm — thấy góc trống trên biểu đồ, nhảy lên
+     đậu trên mép khung MV, giậm một cái là màn hình bật lên (reveal). `target` là chỗ đứng
+     trên mép trên của khung, đo lúc xuất phát; null thì bật màn hình luôn. */
+  async function project(geo: ChartGeometry, target: () => Point | null, reveal: () => void, signal: AbortSignal) {
+    const el = parts.bodies[1], eye = parts.eyes[1];
+    const home = floorSpots(geo, size)[1];
+    await wait(450, signal);
+    const to = target();
+    if (!to) { reveal(); return; }
+    look(eye, ["translate(0, 0)", "translate(30%, -30%)"], 220);
+    pop(parts.spotted, { x: home.x - 2, y: home.y - size * 2.2 }, 700);
+    await move(el, [{ ...home }, { ...home, y: home.y - size * 0.6 }, { ...home }], 260, "ease-out");
+    await wait(160, signal);
+    const hops = geo.narrow ? 1 : 2;
+    await move(el, trip(home, to, hops, Math.max(size * 4, 90)), hops * 220 + 720);
+    await move(el, [{ ...to, sx: 1.35, sy: 0.6 }, { ...to }], 160, "ease-out");
+    reveal();
+    look(eye, ["translate(30%, -30%)", "translate(15%, 35%)", "translate(0, 0)"], 900);
+    el.dataset.settled = "true";
+  }
+
   async function play(geo: ChartGeometry, dot: ReturnType<typeof measureDot>, misfits: Misfit[], kicks: Kick[], hand: Stagehand, signal: AbortSignal) {
     const { bodies, eyes, confused, spotted } = parts;
     const spots = floorSpots(geo, size);
@@ -251,12 +272,12 @@ export function createBuddies(parts: BuddyParts, size: number) {
   }
 
   /** Đặt thẳng vào tư thế cuối (đổi kích thước, hoặc giảm chuyển động). */
-  function place(geo: ChartGeometry, dot: ReturnType<typeof measureDot>) {
+  function place(geo: ChartGeometry, dot: ReturnType<typeof measureDot>, projector?: Point | null) {
     reset();
     const k = dot.stem / size;
     const spots = floorSpots(geo, size);
     parts.bodies.forEach((el, i) => {
-      Object.assign(el.style, frame(i === 0 ? { x: dot.x, y: dot.y, sx: k, sy: k } : spots[i]));
+      Object.assign(el.style, frame(i === 0 ? { x: dot.x, y: dot.y, sx: k, sy: k } : i === 1 && projector ? projector : spots[i]));
       el.dataset.settled = "true";
     });
     parts.eyes.forEach(eye => { eye.style.opacity = "1"; });
@@ -267,7 +288,7 @@ export function createBuddies(parts: BuddyParts, size: number) {
     [...parts.bodies, ...parts.eyes].forEach(el => { el.removeAttribute("style"); delete el.dataset.settled; });
   }
 
-  return { play, stomp, place, reset };
+  return { play, stomp, project, place, reset };
 }
 
 /** Mắt nhìn theo con trỏ. Mỗi ô một tốc độ: Lệch quay nhanh, Trùng chậm nửa nhịp. */
