@@ -10,6 +10,7 @@ export const caseStudies: CaseStudy[] = [
       role: "Interdist · Dữ liệu & sản phẩm · Bán thời gian",
       evidence: "Nhập liệu, theo dõi kết quả và quản trị dữ liệu",
       cta: "Xem case Interdist",
+      badge: { label: "AI", aria: "Có dùng AI để hỗ trợ viết code" },
     },
     motion: {
       aria: "Phim hoạt hình ngắn: sếp đau đầu giữa một núi file Excel rời rạc. Vinh dựng hệ thống kiểm tra file, gom dữ liệu thành biểu đồ theo vùng, chỉnh chỉ tiêu và tua lại được lịch sử nhập. Sáng hôm sau sếp mở app là thấy vùng nào đạt chỉ tiêu.",
@@ -136,6 +137,7 @@ export const caseStudies: CaseStudy[] = [
       role: "Giao Hàng Nhanh · Dữ liệu & ứng dụng",
       evidence: "Dùng hằng ngày; báo cáo tự động tới nhóm lãnh đạo",
       cta: "Xem case Ops Pulse",
+      badge: { label: "AI", aria: "Có dùng AI để hỗ trợ viết code" },
     },
     motion: {
       aria: "Phim hoạt hình ngắn: con số toàn quốc trông ổn nhưng che một hub đang dồn đơn trễ; mỗi sáng có người chụp, cắt, dán bảng; mỗi người cầm một con số. Vinh gom về một dashboard dùng chung, đi từ toàn quốc xuống miền, vùng, hub; mỗi sáng hệ thống tự chụp chính dashboard gửi vào nhóm lãnh đạo kèm nhận xét.",

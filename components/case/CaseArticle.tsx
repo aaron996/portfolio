@@ -4,6 +4,7 @@ import { content } from "@/content/content.vi";
 import { portfolioFontVariables } from "@/components/portfolio/PortfolioFonts";
 import { PortfolioIcon } from "@/components/portfolio/PortfolioIcon";
 import { SiteNav } from "@/components/home/SiteNav";
+import { AiBadge } from "@/components/home/AiBadge";
 import { CaseFigure } from "./CaseFigure";
 import { CaseFilm } from "./CaseFilm";
 import { hasFilm } from "./films";
@@ -49,7 +50,7 @@ export function CaseArticle({ caseStudy: c }: { caseStudy: CaseStudy }) {
       <article data-read>
         <header className="ca-head">
           <Link href="/#cases" className="ca-back"><PortfolioIcon name="back" />{L.back}</Link>
-          <p className="ca-scope">{c.scopeLabel}{c.homepage?.badge && <span className="pf-badge" role="img" aria-label={c.homepage.badge.aria}>{c.homepage.badge.label}</span>}</p>
+          <p className="ca-scope">{c.scopeLabel}{c.homepage?.badge && <AiBadge id={`${c.slug}:case`} label={c.homepage.badge.label} aria={c.homepage.badge.aria} />}</p>
           <h1>{c.title}</h1>
           <p className="ca-proves">{c.proves}</p>
           <p className="ca-one">{c.oneLiner}</p>

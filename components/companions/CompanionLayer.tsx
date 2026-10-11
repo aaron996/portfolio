@@ -81,6 +81,7 @@ export function CompanionLayer({ nav, origin = "hero" }: { nav: string; origin?:
     let fight: ReturnType<typeof createFight> | null = null;
     let fighting = false;
     let fightDone = false;
+    const badgeQueue: HTMLElement[] = []; // nhãn AI chờ ba ô nhảy tới gắn (AiBadge)
 
     const size = () => companions.hero()?.size ?? 16;
     const ms = (n: number) => (reduced ? 1 : n);
@@ -238,12 +239,15 @@ export function CompanionLayer({ nav, origin = "hero" }: { nav: string; origin?:
       const hero = companions.hero();
       if (!st.enabled) return "off";
       if (homing) return "home";
+      // Hero chưa diễn (người xem cuộn qua): ba ô vẫn nhảy ra khỏi logo để gắn nhãn AI.
+      if (st.place === "home" && origin !== "logo" && badgeQueue.length) return "badge";
       if (st.place === "home") return origin === "logo" && !emerged && emergeReady ? base() : "off";
       // Hero đang diễn màn mở đầu bằng bộ ba ô riêng; chưa đăng ký thì lớp này nằm yên,
       // nếu không sẽ có bộ ba thứ hai nhảy ra từ logo ngay lúc đó.
       if (st.place === "hero" && !hero) return "off";
       if (st.place === "hero") return st.heroReady && ratios.hero < LEAVE_BELOW ? "dock" : "hero";
       if (hero && ratios.hero > RETURN_ABOVE) return "hero";
+      if (badgeQueue.length) return "badge";
       if (ratios.night > 0.45) return "night";
       if (questions === "pending") return "questions";
       if (pathRide && ratios.path > 0.25) return pathRide === "pending" ? "path:ride" : `path:${pathStop ?? "active"}`;
@@ -442,6 +446,8 @@ export function CompanionLayer({ nav, origin = "hero" }: { nav: string; origin?:
           moveTo(1, g.trung, "page", { delay: 120 }),
           moveTo(2, g.lech, "page", { delay: 60 }),
         ]);
+      } else if (key === "badge") {
+        await runBadges();
       } else if (key === "questions") {
         await runQuestions();
       } else if (key === "night") {
@@ -454,6 +460,26 @@ export function CompanionLayer({ nav, origin = "hero" }: { nav: string; origin?:
         stopGaze?.(); stopGaze = null;
         hideAll();
         companions.set({ place: "home" });
+      }
+    }
+
+    const revealBadge = (node: HTMLElement, quiet = false) => node.dispatchEvent(new CustomEvent("badge:reveal", { detail: { quiet } }));
+
+    /* Ba ô nhảy tới đứng trên chỗ nhãn AI, thả nhãn xuống rồi nhún mừng. Nhãn đã lướt
+       khỏi màn hình thì hiện luôn, không diễn. */
+    async function runBadges() {
+      const s = size();
+      while (badgeQueue.length && alive) {
+        const node = badgeQueue.shift()!;
+        const r = node.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > window.innerHeight) { revealBadge(node, true); continue; }
+        const cx = r.left + r.width / 2;
+        const spots: Spot[] = [0, 1, -1].map(k => ({ x: cx + k * s * 1.3, y: r.top - s * 0.9, size: s }));
+        await Promise.all(bodies.map((_, i) => moveTo(i, spots[i], "page", { delay: STAGGER[i], height: s * 2.5 })));
+        revealBadge(node);
+        await wait(420);
+        await Promise.all(bodies.map((_, i) => moveTo(i, spots[i], "page", { delay: STAGGER[i] / 2, height: s * 1.4, duration: 320 })));
+        await wait(500);
       }
     }
 
@@ -541,6 +567,15 @@ export function CompanionLayer({ nav, origin = "hero" }: { nav: string; origin?:
     };
 
     const on: Record<string, (e: Event) => void> = {
+      /* Nhãn AI lọt vào màn hình. Nhận việc (preventDefault) thì ba ô lo hiện nhãn; không
+         nhận thì AiBadge tự thả. */
+      "companion:badge": e => {
+        const st = companions.get();
+        if (!st.enabled || reduced || (st.place === "home" && origin === "logo" && emerged)) return;
+        e.preventDefault();
+        badgeQueue.push((e as CustomEvent<{ node: HTMLElement }>).detail.node);
+        direct();
+      },
       "companion:work": e => {
         const slug = (e as CustomEvent<string | null>).detail;
         clearTimeout(leaveTimer);
@@ -599,6 +634,7 @@ export function CompanionLayer({ nav, origin = "hero" }: { nav: string; origin?:
 
     return () => {
       alive = false;
+      badgeQueue.splice(0).forEach(n => revealBadge(n, true));
       unsubscribe();
       io.disconnect();
       Object.entries(on).forEach(([name, fn]) => window.removeEventListener(name, fn));
