@@ -138,6 +138,16 @@ export interface Media {
   caption?: string;
 }
 
+/** Chữ xuất hiện trong đoạn motion graphic đầu trang case. Kịch bản: docs/case-motion.md */
+export interface CaseMotion {
+  /** Mô tả nội dung phim cho trình đọc màn hình. */
+  aria: string;
+  /** Nhãn nút phát. */
+  play: string;
+  /** Chữ trong phim, đặt tên theo vai trò trong cảnh (file1, ask...). */
+  lines: Record<string, string>;
+}
+
 export interface CaseStudy {
   /** Mô tả ngắn và vai trò dùng ở danh sách case trên homepage. */
   homepage?: {
@@ -147,6 +157,8 @@ export interface CaseStudy {
   };
   slug: string;
   tier: CaseTier;
+  /** Đoạn motion graphic giới thiệu vấn đề, nếu case đã có. */
+  motion?: CaseMotion;
 
   /** Một trục duy nhất: phạm vi ảnh hưởng. VD "Hệ thống dùng chung · toàn team KA". */
   scopeLabel: string;

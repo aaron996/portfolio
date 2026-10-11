@@ -28,3 +28,10 @@ output/audio-audition/
 
 # Đầu ra render của teaser (MP4 master, WAV) — tạo lại bằng teaser/render.mjs
 teaser/export/
+
+# Bản xem trước phim case (Remotion) — tạo lại bằng lệnh trong remotion/index.ts
+.preview/
+
+# Nguồn âm thanh tải về cho phim case (Adobe Audition SFX, Kenney, Freesound) và nhạc nền Suno.
+# Giấy phép Adobe cấm phát tán file lẻ — site chỉ dùng bản trộn cả phim ở public/motion/<phim>-sfx.mp3
+output/motion-audio/

@@ -1,0 +1,1781 @@
+{
+  "license": "Kenney và Freesound: CC0-1.0 (kiểm trên trang nguồn 2026-10-11; Freesound dùng bản preview HQ). Adobe Audition SFX: Adobe Audition Content Terms of Use (LICENSE.pdf trong gói) — được dùng, sửa, phát hành trong sản phẩm, cấm phát tán file lẻ; vì vậy trên site chỉ phát bản trộn của cả phim.",
+  "sources": [
+    {
+      "id": "kenney_interface-sounds",
+      "author": "Kenney",
+      "title": "Interface Sounds",
+      "page": "https://kenney.nl/assets/interface-sounds",
+      "url": "https://kenney.nl/media/pages/assets/interface-sounds/fa43c1dd4d-1677589452/kenney_interface-sounds.zip",
+      "file": "kenney_interface-sounds.zip",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "kenney_rpg-audio",
+      "author": "Kenney",
+      "title": "RPG Audio",
+      "page": "https://kenney.nl/assets/rpg-audio",
+      "url": "https://kenney.nl/media/pages/assets/rpg-audio/8e99002d76-1677590336/kenney_rpg-audio.zip",
+      "file": "kenney_rpg-audio.zip",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "kenney_casino-audio",
+      "author": "Kenney",
+      "title": "Casino Audio",
+      "page": "https://kenney.nl/assets/casino-audio",
+      "url": "https://kenney.nl/media/pages/assets/casino-audio/2472606a04-1721639069/kenney_casino-audio.zip",
+      "file": "kenney_casino-audio.zip",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "kenney_impact-sounds",
+      "author": "Kenney",
+      "title": "Impact Sounds",
+      "page": "https://kenney.nl/assets/impact-sounds",
+      "url": "https://kenney.nl/media/pages/assets/impact-sounds/87b4ddecda-1677589768/kenney_impact-sounds.zip",
+      "file": "kenney_impact-sounds.zip",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "fs-boing",
+      "author": "magnuswaker",
+      "title": "Boing 2",
+      "page": "https://freesound.org/people/magnuswaker/sounds/540790/",
+      "url": "https://cdn.freesound.org/previews/540/540790_11537497-hq.mp3",
+      "file": "540790_11537497-hq.mp3",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "fs-phone",
+      "author": "meisterleise",
+      "title": "Telephone Ring (old German W48)",
+      "page": "https://freesound.org/people/meisterleise/sounds/332073/",
+      "url": "https://cdn.freesound.org/previews/332/332073_5832939-hq.mp3",
+      "file": "332073_5832939-hq.mp3",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "fs-swish",
+      "author": "qubodup",
+      "title": "Whoosh",
+      "page": "https://freesound.org/people/qubodup/sounds/60013/",
+      "url": "https://cdn.freesound.org/previews/60/60013_71257-hq.mp3",
+      "file": "60013_71257-hq.mp3",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "fs-riser",
+      "author": "AudioPapkin",
+      "title": "Riser Hit sfx 031",
+      "page": "https://freesound.org/people/AudioPapkin/sounds/511874/",
+      "url": "https://cdn.freesound.org/previews/511/511874_8698658-hq.mp3",
+      "file": "511874_8698658-hq.mp3",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "fs-stopwatch",
+      "author": "DavidJGurney",
+      "title": "Ticking Stopwatch (dry)",
+      "page": "https://freesound.org/people/DavidJGurney/sounds/275802/",
+      "url": "https://cdn.freesound.org/previews/275/275802_2129403-hq.mp3",
+      "file": "275802_2129403-hq.mp3",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "fs-steam",
+      "author": "wubitog",
+      "title": "Steam/hiss",
+      "page": "https://freesound.org/people/wubitog/sounds/234782/",
+      "url": "https://cdn.freesound.org/previews/234/234782_3501487-hq.mp3",
+      "file": "234782_3501487-hq.mp3",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "fs-dizzy",
+      "author": "martian",
+      "title": "classic dizzy take slide whistle",
+      "page": "https://freesound.org/people/martian/sounds/403002/",
+      "url": "https://cdn.freesound.org/previews/403/403002_84709-hq.mp3",
+      "file": "403002_84709-hq.mp3",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "fs-scratch",
+      "author": "simkiott",
+      "title": "record_scratch.wav",
+      "page": "https://freesound.org/people/simkiott/sounds/43404/",
+      "url": "https://cdn.freesound.org/previews/43/43404_465423-hq.mp3",
+      "file": "43404_465423-hq.mp3",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "fs-ting",
+      "author": "robni7",
+      "title": "News Ting",
+      "page": "https://freesound.org/people/robni7/sounds/174027/",
+      "url": "https://cdn.freesound.org/previews/174/174027_3242494-hq.mp3",
+      "file": "174027_3242494-hq.mp3",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "fs-rewind",
+      "author": "plasterbrain",
+      "title": "Fast Forward",
+      "page": "https://freesound.org/people/plasterbrain/sounds/402451/",
+      "url": "https://cdn.freesound.org/previews/402/402451_4284968-hq.mp3",
+      "file": "402451_4284968-hq.mp3",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "fs-donk",
+      "author": "BaDoink",
+      "title": "BaDoink.wav",
+      "page": "https://freesound.org/people/BaDoink/sounds/565800/",
+      "url": "https://cdn.freesound.org/previews/565/565800_2019171-hq.mp3",
+      "file": "565800_2019171-hq.mp3",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "fs-buzzer",
+      "author": "KevinVG207",
+      "title": "Wrong Buzzer",
+      "page": "https://freesound.org/people/KevinVG207/sounds/331912/",
+      "url": "https://cdn.freesound.org/previews/331/331912_3248244-hq.mp3",
+      "file": "331912_3248244-hq.mp3",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "fs-gulp",
+      "author": "Breviceps",
+      "title": "Cartoon - Gulp!",
+      "page": "https://freesound.org/people/Breviceps/sounds/450624/",
+      "url": "https://cdn.freesound.org/previews/450/450624_9159316-hq.mp3",
+      "file": "450624_9159316-hq.mp3",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "fs-paper-fall",
+      "author": "AngriestBrad",
+      "title": "Paper Falling.wav",
+      "page": "https://freesound.org/people/AngriestBrad/sounds/486325/",
+      "url": "https://cdn.freesound.org/previews/486/486325_10441056-hq.mp3",
+      "file": "486325_10441056-hq.mp3",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "fs-success",
+      "author": "Rob_Marion",
+      "title": "GASP_Chimes_Success_4",
+      "page": "https://freesound.org/people/Rob_Marion/sounds/541985/",
+      "url": "https://cdn.freesound.org/previews/541/541985_6856600-hq.mp3",
+      "file": "541985_6856600-hq.mp3",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "fs-door-creak",
+      "author": "JarredGibb",
+      "title": "Door - Creak.wav",
+      "page": "https://freesound.org/people/JarredGibb/sounds/219499/",
+      "url": "https://cdn.freesound.org/previews/219/219499_4056007-hq.mp3",
+      "file": "219499_4056007-hq.mp3",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "adobe-cartoon",
+      "author": "Adobe",
+      "title": "Adobe Audition SFX — Cartoon",
+      "page": "https://www.adobe.com/products/audition/offers/AdobeAuditionDLCSFX.html",
+      "url": "https://download.adobe.com/pub/adobe/audition/offers/adobeauditiondlcsfx/cartoon.zip",
+      "file": "cartoon.zip",
+      "bytes": 84912597,
+      "license": "Adobe Audition Content Terms of Use"
+    },
+    {
+      "id": "adobe-foley",
+      "author": "Adobe",
+      "title": "Adobe Audition SFX — Foley",
+      "page": "https://www.adobe.com/products/audition/offers/AdobeAuditionDLCSFX.html",
+      "url": "https://download.adobe.com/pub/adobe/audition/offers/adobeauditiondlcsfx/foley.zip",
+      "file": "foley.zip",
+      "bytes": 124420018,
+      "license": "Adobe Audition Content Terms of Use"
+    },
+    {
+      "id": "adobe-multimedia",
+      "author": "Adobe",
+      "title": "Adobe Audition SFX — Multimedia",
+      "page": "https://www.adobe.com/products/audition/offers/AdobeAuditionDLCSFX.html",
+      "url": "https://download.adobe.com/pub/adobe/audition/offers/adobeauditiondlcsfx/multimedia.zip",
+      "file": "multimedia.zip",
+      "license": "Adobe Audition Content Terms of Use"
+    },
+    {
+      "id": "adobe-technology",
+      "author": "Adobe",
+      "title": "Adobe Audition SFX — Technology",
+      "page": "https://www.adobe.com/products/audition/offers/AdobeAuditionDLCSFX.html",
+      "url": "https://download.adobe.com/pub/adobe/audition/offers/adobeauditiondlcsfx/technology.zip",
+      "file": "technology.zip",
+      "license": "Adobe Audition Content Terms of Use"
+    },
+    {
+      "id": "adobe-human-elements",
+      "author": "Adobe",
+      "title": "Adobe Audition SFX — Human Elements",
+      "page": "https://www.adobe.com/products/audition/offers/AdobeAuditionDLCSFX.html",
+      "url": "https://download.adobe.com/pub/adobe/audition/offers/adobeauditiondlcsfx/human_elements.zip",
+      "file": "human_elements.zip",
+      "license": "Adobe Audition Content Terms of Use"
+    },
+    {
+      "id": "adobe-production-elements",
+      "author": "Adobe",
+      "title": "Adobe Audition SFX — Production Elements",
+      "page": "https://www.adobe.com/products/audition/offers/AdobeAuditionDLCSFX.html",
+      "url": "https://download.adobe.com/pub/adobe/audition/offers/adobeauditiondlcsfx/production_elements.zip",
+      "file": "production_elements.zip",
+      "license": "Adobe Audition Content Terms of Use"
+    }
+  ],
+  "films": {
+    "interdist": {
+      "out": "public/motion/interdist-sfx.mp3",
+      "label": "Interdist",
+      "style": "vui"
+    },
+    "opspulse": {
+      "out": "public/motion/opspulse-sfx.mp3",
+      "label": "GHN Ops Pulse",
+      "style": "vui"
+    },
+    "cod": {
+      "out": "public/motion/cod-sfx.mp3",
+      "label": "Rà soát COD",
+      "style": "vui"
+    },
+    "warehouse": {
+      "out": "public/motion/warehouse-sfx.mp3",
+      "label": "Tìm kho",
+      "style": "vui"
+    },
+    "shopee": {
+      "out": "public/motion/shopee-sfx.mp3",
+      "label": "Shopee 3PL",
+      "style": "vui"
+    }
+  },
+  "slots": [
+    {
+      "id": "tick",
+      "label": "Đồng hồ tích tắc",
+      "where": "Đồng hồ hạn báo cáo trên tường, càng lúc càng dồn dập",
+      "names": {
+        "tick": 0
+      },
+      "chosen": 2,
+      "candidates": [
+        {
+          "label": "Mộc gõ (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Wood Click 01.wav"
+        },
+        {
+          "label": "Gõ vành trống (Cartoon)",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Drum Snare Tap 02.wav",
+          "dur": 0.25
+        },
+        {
+          "label": "Đang dùng · đồng hồ bấm giờ (Freesound)",
+          "source": "fs-stopwatch",
+          "file": "275802_2129403-hq.mp3",
+          "dur": 0.12,
+          "fade": 0.02
+        }
+      ],
+      "windows": {
+        "interdist": [
+          200,
+          296
+        ]
+      }
+    },
+    {
+      "id": "slap",
+      "label": "Tờ file đập xuống bàn",
+      "where": "Tờ file đầu tiên rơi xuống bàn; file trùng rơi xuống sàn ở xưởng",
+      "names": {
+        "slap": 0
+      },
+      "chosen": 2,
+      "candidates": [
+        {
+          "label": "Danh bạ đặt xuống bàn 1 (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Telephone Book Set Down 01.wav",
+          "start": 0.2,
+          "dur": 0.55
+        },
+        {
+          "label": "Danh bạ đặt xuống bàn 2 (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Telephone Book Set Down 02.wav"
+        },
+        {
+          "label": "Đang dùng · sách đặt xuống (Kenney)",
+          "source": "kenney_rpg-audio",
+          "file": "bookPlace1.ogg"
+        }
+      ],
+      "windows": {
+        "interdist": [
+          0,
+          40
+        ]
+      }
+    },
+    {
+      "id": "pop",
+      "label": "Tiếng bụp nảy ra",
+      "where": "File bật ra khỏi chồng, bong bóng thoại, ô logo… (mỗi lần cao dần một chút)",
+      "names": {
+        "pop-0": 0,
+        "pop-1": 1,
+        "pop-2": 2,
+        "pop-3": 3,
+        "pop-4": 4,
+        "pop-5": 5,
+        "pop-6": 6,
+        "pop-7": 7
+      },
+      "chosen": 2,
+      "candidates": [
+        {
+          "label": "Bật miệng (Cartoon)",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Weird Noise Short Mouth Popping 02.wav"
+        },
+        {
+          "label": "Chép môi (Cartoon)",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Weird Noise Short Lip Smack 01.wav"
+        },
+        {
+          "label": "Bóc gói nhựa (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Plastic Package Pop Open 01.wav",
+          "start": 0.75,
+          "dur": 0.4
+        },
+        {
+          "label": "Bật lên (Multimedia)",
+          "source": "adobe-multimedia",
+          "file": "Multimedia Internet CD-Rom Flash Pop Up 05.wav"
+        },
+        {
+          "label": "Bật lên điện tử (Multimedia)",
+          "source": "adobe-multimedia",
+          "file": "Multimedia Internet CD-Rom Flash Pop Up Electronic 13.wav"
+        }
+      ],
+      "windows": {
+        "interdist": [
+          24,
+          130
+        ]
+      },
+      "picks": {
+        "vui": 3,
+        "gon": 4
+      }
+    },
+    {
+      "id": "paper",
+      "label": "Giấy sột soạt",
+      "where": "File bay ra quanh đầu sếp, rơi vào phễu, tờ giấy phủ khung",
+      "names": {
+        "paper": 0
+      },
+      "chosen": 1,
+      "candidates": [
+        {
+          "label": "Giũ giấy (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Paper Shake Short 01.wav",
+          "start": 0.05,
+          "dur": 0.6
+        },
+        {
+          "label": "Giấy sột soạt (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Paper Rustle Short 01.wav",
+          "dur": 0.6
+        },
+        {
+          "label": "Mở tờ giấy nhanh (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Paper Unfold Fast 01.wav"
+        }
+      ],
+      "windows": {
+        "interdist": [
+          24,
+          90
+        ]
+      }
+    },
+    {
+      "id": "ring",
+      "label": "Chuông điện thoại",
+      "where": "Điện thoại bàn reo ba hồi",
+      "names": {
+        "ring": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Đang dùng · điện thoại cổ W48 (Freesound)",
+          "source": "fs-phone",
+          "file": "332073_5832939-hq.mp3",
+          "dur": 0.45,
+          "fade": 0.06
+        },
+        {
+          "label": "Chuông tay kim loại (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Bell Metal Handbell Short Ring 01.wav",
+          "dur": 0.45,
+          "fade": 0.08
+        },
+        {
+          "label": "Chùm chuông nhỏ (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Bell Small Metal Bells 02.wav",
+          "start": 1.7,
+          "dur": 0.45,
+          "fade": 0.08
+        }
+      ],
+      "windows": {
+        "interdist": [
+          105,
+          175
+        ]
+      }
+    },
+    {
+      "id": "whoosh",
+      "label": "Tiếng vút",
+      "where": "Hai tờ file lao vào nhau, phễu rơi xuống, tờ giấy phủ khung, camera dí vào app",
+      "names": {
+        "whoosh": 0
+      },
+      "chosen": 1,
+      "candidates": [
+        {
+          "label": "Que tre quất (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Stick Bamboo Stick Skinny Whipping 01.wav"
+        },
+        {
+          "label": "Thanh gỗ quất mạnh (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Wood Two By Four Whipping 01.wav"
+        },
+        {
+          "label": "Roi tre ngắn (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Whips Bamboo Stick Whips Single 02.wav"
+        },
+        {
+          "label": "Vút hoạt hình (Multimedia)",
+          "source": "adobe-multimedia",
+          "file": "Multimedia Internet CD-Rom Flash Wipe Cartoon 06.wav"
+        },
+        {
+          "label": "Vút chuyển cảnh (Production)",
+          "source": "adobe-production-elements",
+          "file": "Production Element Title Transition Whoosh Short 08.wav",
+          "dur": 1.2,
+          "fade": 0.3
+        }
+      ],
+      "windows": {
+        "interdist": [
+          160,
+          225
+        ]
+      },
+      "picks": {
+        "vui": 3,
+        "gon": 4
+      }
+    },
+    {
+      "id": "impact",
+      "label": "Hai tờ file đâm nhau",
+      "where": "Cú đâm giữa 92% và 87%",
+      "names": {
+        "impact": 0
+      },
+      "chosen": 1,
+      "candidates": [
+        {
+          "label": "Chảo đập boong (Cartoon)",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Frying Pan Cartoon  Pan Hit 02.wav"
+        },
+        {
+          "label": "Chũm chọe (Cartoon)",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Drum Cymbal Crash 02.wav",
+          "dur": 1.5,
+          "fade": 0.8
+        },
+        {
+          "label": "Đang dùng · tiếng đoong (Freesound)",
+          "source": "fs-donk",
+          "file": "565800_2019171-hq.mp3"
+        }
+      ],
+      "windows": {
+        "interdist": [
+          190,
+          235
+        ]
+      }
+    },
+    {
+      "id": "hiss",
+      "label": "Bốc khói",
+      "where": "Sếp tức đỏ mặt, đầu bốc khói",
+      "names": {
+        "hiss": 0
+      },
+      "chosen": 2,
+      "candidates": [
+        {
+          "label": "Bóng bay xì hơi ngắn (Cartoon)",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Balloon Release Air Short 01.wav"
+        },
+        {
+          "label": "Bóng bay xì hơi nhanh (Cartoon)",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Balloon Releasing Air Quickly 03.wav"
+        },
+        {
+          "label": "Bóng bay rít (Cartoon)",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Balloon Release Air Squeal 01.wav",
+          "start": 0.6,
+          "dur": 1.3,
+          "fade": 0.3
+        }
+      ],
+      "windows": {
+        "interdist": [
+          228,
+          275
+        ]
+      }
+    },
+    {
+      "id": "wobble",
+      "label": "Chóng mặt",
+      "where": "Mắt sếp xoáy vòng",
+      "names": {
+        "wobble": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Tấm tôn rung (Cartoon)",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Metal Sheet Cartoon  Wobble 01.wav"
+        },
+        {
+          "label": "Sáo uốn éo (Cartoon)",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Flute Fluctuate 02.wav",
+          "dur": 1.2,
+          "fade": 0.3
+        },
+        {
+          "label": "Chim hót quanh đầu (Cartoon)",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Weird Noise Short Bird Whistling .wav"
+        }
+      ],
+      "windows": {
+        "interdist": [
+          240,
+          290
+        ]
+      }
+    },
+    {
+      "id": "whoosh-long",
+      "label": "Dồn lên trước khi đứng hình",
+      "where": "Mọi thứ quay nhanh dần, chạm đỉnh đúng lúc đứng hình",
+      "names": {
+        "whoosh-long": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Trống tom dồn (Cartoon)",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Drum Roll Tom 04.wav",
+          "dur": 2.45,
+          "lead": 2.2,
+          "notrim": true,
+          "fade": 0.15
+        },
+        {
+          "label": "Còi xoay rú lên (Cartoon)",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Whistle Motor Whistle Long 01.wav",
+          "dur": 1.3,
+          "lead": 0.65,
+          "notrim": true,
+          "fade": 0.2
+        },
+        {
+          "label": "Trống snare rền (Cartoon)",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Drum Roll Snare 01.wav",
+          "start": 0.1,
+          "dur": 1.1,
+          "lead": 1.1,
+          "notrim": true,
+          "fade": 0.05
+        },
+        {
+          "label": "Dâng lên (Production)",
+          "source": "adobe-production-elements",
+          "file": "Production Element Title Transition Ascend 07.wav",
+          "dur": 2.0,
+          "lead": 1.8,
+          "notrim": true,
+          "fade": 0.1
+        }
+      ],
+      "windows": {
+        "interdist": [
+          220,
+          300
+        ]
+      },
+      "picks": {
+        "vui": 0,
+        "gon": 3
+      }
+    },
+    {
+      "id": "stop",
+      "label": "Đứng hình",
+      "where": "Khựng lại một nhịp trước khi cửa mở",
+      "names": {
+        "stop": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Đang dùng · đĩa nhạc khựng (Freesound)",
+          "source": "fs-scratch",
+          "file": "43404_465423-hq.mp3"
+        },
+        {
+          "label": "Phanh trượt (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Tire Skid On Cement 01.wav",
+          "dur": 0.9,
+          "fade": 0.25
+        },
+        {
+          "label": "Cầu trượt kêu két (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Slide Squeaky Slide 01.wav",
+          "start": 0.35,
+          "dur": 0.45
+        }
+      ],
+      "windows": {
+        "interdist": [
+          270,
+          305
+        ]
+      }
+    },
+    {
+      "id": "latch",
+      "label": "Tay nắm cửa lạch cạch",
+      "where": "Ngay trước khi cửa mở",
+      "names": {
+        "latch": 0
+      },
+      "chosen": 1,
+      "candidates": [
+        {
+          "label": "Then cửa kim loại (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Metal Latch Lock Rattle 01.wav",
+          "start": 1.0,
+          "dur": 0.45
+        },
+        {
+          "label": "Khoá rương bật (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Trunk Latch Opening 01.wav",
+          "start": 0.8,
+          "dur": 0.4
+        },
+        {
+          "label": "Đang dùng · then kim loại (Kenney)",
+          "source": "kenney_rpg-audio",
+          "file": "metalLatch.ogg"
+        },
+        {
+          "label": "Công tắc đèn (Technology)",
+          "source": "adobe-technology",
+          "file": "Technology Electronic Light 150 Watt Fresnel Light Switch Turning On 01.wav"
+        }
+      ],
+      "windows": {
+        "interdist": [
+          282,
+          315
+        ]
+      },
+      "picks": {
+        "vui": 1,
+        "gon": 3
+      }
+    },
+    {
+      "id": "creak",
+      "label": "Cửa kẽo kẹt",
+      "where": "Cửa mở cho Vinh bước vào (và ghế sếp ngả ra sáng hôm sau)",
+      "names": {
+        "creak": 0
+      },
+      "chosen": 2,
+      "candidates": [
+        {
+          "label": "Bản lề kim loại (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Metal Creak 01.wav"
+        },
+        {
+          "label": "Gỗ kẽo kẹt (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Wood Creak 03.wav",
+          "dur": 0.9,
+          "fade": 0.2
+        },
+        {
+          "label": "Đang dùng · cửa kẽo kẹt (Freesound)",
+          "source": "fs-door-creak",
+          "file": "219499_4056007-hq.mp3"
+        }
+      ],
+      "windows": {
+        "interdist": [
+          288,
+          330
+        ]
+      }
+    },
+    {
+      "id": "step",
+      "label": "Bước chân",
+      "where": "Vinh bước vào phòng",
+      "names": {
+        "step": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Đang dùng · bước chân sàn gỗ (Kenney)",
+          "source": "kenney_impact-sounds",
+          "file": "footstep_wood_001.ogg"
+        },
+        {
+          "label": "Vỗ tay nhẹ (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Hand Pat Single 01.wav"
+        },
+        {
+          "label": "Gõ vành trống (Cartoon)",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Drum Snare Tap 01.wav",
+          "dur": 0.2
+        }
+      ],
+      "windows": {
+        "interdist": [
+          305,
+          345
+        ]
+      }
+    },
+    {
+      "id": "ting",
+      "label": "Tròng kính loé sáng",
+      "where": "Mỗi lần Vinh đẩy kính nghĩ ra cách",
+      "names": {
+        "ting": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Chuông gõ (Cartoon)",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Bell Hit 01.wav",
+          "dur": 1.2,
+          "fade": 0.6
+        },
+        {
+          "label": "Đồng xu keng (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Coins Single Coins Cling 27.wav"
+        },
+        {
+          "label": "Lục lạc nhỏ (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Bell Tiny Bells Rattle 04.wav",
+          "start": 0.05,
+          "dur": 0.5,
+          "fade": 0.2
+        },
+        {
+          "label": "Lấp lánh pha lê (Production)",
+          "source": "adobe-production-elements",
+          "file": "Production Element Title Transition Crystal Glow 03.wav",
+          "dur": 1.2,
+          "lead": 0.2,
+          "fade": 0.5
+        }
+      ],
+      "windows": {
+        "interdist": [
+          336,
+          365
+        ]
+      },
+      "picks": {
+        "vui": 0,
+        "gon": 3
+      }
+    },
+    {
+      "id": "blip",
+      "label": "Biểu tượng hiện ra",
+      "where": "Ba thứ sếp cần biết hiện lên; chấm lịch sử nhập (cao dần)",
+      "names": {
+        "blip-0": 0,
+        "blip-1": 2,
+        "blip-2": 4,
+        "blip-3": 5,
+        "blip-4": 7,
+        "blip-5": 9
+      },
+      "chosen": 2,
+      "candidates": [
+        {
+          "label": "Giọt nước (Cartoon)",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Weird Noise Short Water Drip.wav"
+        },
+        {
+          "label": "Đồng xu chạm nhẹ (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Coins Single Coins Cling 09.wav",
+          "dur": 0.2
+        },
+        {
+          "label": "Đồ chơi kêu chít (Cartoon)",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Toy Squeak 01.wav"
+        },
+        {
+          "label": "Bíp trầm (Multimedia)",
+          "source": "adobe-multimedia",
+          "file": "Multimedia Internet CD-Rom Flash Beep Low Pitch 22.wav",
+          "dur": 0.3
+        }
+      ],
+      "windows": {
+        "interdist": [
+          440,
+          480
+        ]
+      },
+      "picks": {
+        "vui": 2,
+        "gon": 3
+      }
+    },
+    {
+      "id": "thud",
+      "label": "Rơi phịch",
+      "where": "Phễu đáp xuống, Lệch rơi, Lệch đáp đất",
+      "names": {
+        "thud": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Nắm đấm gõ bàn gỗ rỗng (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Table Fist Hits Hollow Wood Table 08.wav"
+        },
+        {
+          "label": "Khối gỗ đặt xuống (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Wood Block Set On Concrete 01.wav"
+        },
+        {
+          "label": "Thùng gỗ đặt xuống (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Crate Set Down On Boardwalk 01.wav"
+        },
+        {
+          "label": "Thump (Production)",
+          "source": "adobe-production-elements",
+          "file": "Production Element Title Transition Thump 01.wav"
+        }
+      ],
+      "windows": {
+        "interdist": [
+          535,
+          560
+        ]
+      },
+      "picks": {
+        "vui": 0,
+        "gon": 3
+      }
+    },
+    {
+      "id": "gulp",
+      "label": "Phễu nuốt file",
+      "where": "Mỗi file đạt rơi vào phễu",
+      "names": {
+        "gulp": 0
+      },
+      "chosen": 2,
+      "candidates": [
+        {
+          "label": "Đang dùng · tiếng ực (Freesound)",
+          "source": "fs-gulp",
+          "file": "450624_9159316-hq.mp3"
+        },
+        {
+          "label": "Bùn hút bõm (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Mud Suction 01.wav"
+        },
+        {
+          "label": "Giác hút bật ra (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Window Cleaner Suction Cup Removed 18.wav"
+        },
+        {
+          "label": "Blurp (Production)",
+          "source": "adobe-production-elements",
+          "file": "Production Element Title Transition Blurp 01.wav"
+        }
+      ],
+      "windows": {
+        "interdist": [
+          560,
+          640
+        ]
+      },
+      "picks": {
+        "vui": 2,
+        "gon": 3
+      }
+    },
+    {
+      "id": "buzz",
+      "label": "File trùng bị loại",
+      "where": "Phễu nhả file trùng ra",
+      "names": {
+        "buzz": 0
+      },
+      "chosen": 1,
+      "candidates": [
+        {
+          "label": "Kèn bóp (Cartoon)",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Horn Small Hand Horn Honking 07.wav"
+        },
+        {
+          "label": "Kèn trombone trầm (Cartoon)",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Trombone Deep Note 01.wav"
+        },
+        {
+          "label": "Kèn đồ chơi (Cartoon)",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Toy Noisemaker Honk 01.wav",
+          "dur": 0.6,
+          "fade": 0.15
+        },
+        {
+          "label": "Bíp sai (Multimedia)",
+          "source": "adobe-multimedia",
+          "file": "Multimedia Internet CD-Rom Flash Beep Low Pitch 23.wav",
+          "lead": 0.2
+        }
+      ],
+      "windows": {
+        "interdist": [
+          575,
+          625
+        ]
+      },
+      "picks": {
+        "vui": 1,
+        "gon": 3
+      }
+    },
+    {
+      "id": "block",
+      "label": "Ô rơi vào cột",
+      "where": "Từng ô xếp thành cột, ô logo khớp vào (mỗi vùng một cao độ)",
+      "names": {
+        "block-0": 0,
+        "block-1": 2,
+        "block-2": 4,
+        "block-3": 6
+      },
+      "chosen": 2,
+      "candidates": [
+        {
+          "label": "Mộc gõ (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Wood Click 01.wav"
+        },
+        {
+          "label": "Khối gỗ đặt xuống (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Wood Block Set On Concrete 01.wav"
+        },
+        {
+          "label": "Đang dùng · gỗ gõ nhẹ (Kenney)",
+          "source": "kenney_impact-sounds",
+          "file": "impactWood_light_000.ogg"
+        },
+        {
+          "label": "Click cơ (Multimedia)",
+          "source": "adobe-multimedia",
+          "file": "Multimedia Internet CD-Rom Flash Click Mechanical 16.wav"
+        }
+      ],
+      "windows": {
+        "interdist": [
+          600,
+          690
+        ]
+      },
+      "picks": {
+        "vui": 2,
+        "gon": 3
+      }
+    },
+    {
+      "id": "ding",
+      "label": "Đạt chỉ tiêu",
+      "where": "Đường chỉ tiêu hiện ra; sáng hôm sau cả bốn vùng đạt",
+      "names": {
+        "ding": 0
+      },
+      "chosen": 2,
+      "candidates": [
+        {
+          "label": "Chuông tay kim loại (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Bell Metal Handbell Short Ring 01.wav",
+          "dur": 1.2,
+          "fade": 0.5
+        },
+        {
+          "label": "Lục lạc một tiếng (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Bells Jingle Sleigh Bells Single 01.wav"
+        },
+        {
+          "label": "Chuông tay đồng (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Bell Brass Handbell Ring 01.wav",
+          "dur": 1.2,
+          "fade": 0.5
+        },
+        {
+          "label": "Ding (Multimedia)",
+          "source": "adobe-multimedia",
+          "file": "Multimedia Internet CD-Rom Flash Ding 02.wav"
+        },
+        {
+          "label": "Chuông gõ (Production)",
+          "source": "adobe-production-elements",
+          "file": "Production Element Title Transition Bell Hit 17.wav"
+        }
+      ],
+      "windows": {
+        "interdist": [
+          672,
+          700
+        ]
+      },
+      "picks": {
+        "vui": 3,
+        "gon": 4
+      }
+    },
+    {
+      "id": "ratchet",
+      "label": "Thanh trượt",
+      "where": "Kéo thanh Giá, rồi thanh Chỉ tiêu",
+      "names": {
+        "ratchet": {
+          "st": 0,
+          "dur": 0.5
+        },
+        "ratchet-long": {
+          "st": 0,
+          "dur": 0.9
+        }
+      },
+      "chosen": 2,
+      "candidates": [
+        {
+          "label": "Lục lạc quay chậm (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Toy Noisemaker Crank Slow 01.wav"
+        },
+        {
+          "label": "Lục lạc quay (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Toy Noisemaker Crank 01.wav",
+          "dur": 1.0
+        },
+        {
+          "label": "Tay quay cầu kéo (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Drawbridge Crank 01.wav",
+          "dur": 1.0
+        }
+      ],
+      "windows": {
+        "interdist": [
+          688,
+          760
+        ]
+      }
+    },
+    {
+      "id": "boing",
+      "label": "Lò xo boing",
+      "where": "File trùng bật ra, Lệch vọt lên thành cột, Lệch nhảy ra (bản trầm khi Lệch co lại)",
+      "names": {
+        "boing-up": 0,
+        "boing-down": -5
+      },
+      "chosen": 2,
+      "candidates": [
+        {
+          "label": "Lò xo (Cartoon)",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Spring Cartoon  Spring 03.wav"
+        },
+        {
+          "label": "Lò xo bật dây (Cartoon)",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Spring Twang 10.wav",
+          "dur": 1.2,
+          "fade": 0.4
+        },
+        {
+          "label": "Đang dùng · đàn môi (Freesound)",
+          "source": "fs-boing",
+          "file": "540790_11537497-hq.mp3"
+        },
+        {
+          "label": "Vút nhanh (Multimedia)",
+          "source": "adobe-multimedia",
+          "file": "Multimedia Internet CD-Rom Flash Whoosh Short 25.wav"
+        }
+      ],
+      "windows": {
+        "interdist": [
+          770,
+          835
+        ]
+      },
+      "picks": {
+        "vui": 2,
+        "gon": 3
+      }
+    },
+    {
+      "id": "rewind",
+      "label": "Tua lịch sử",
+      "where": "Tua lùi một bước để gỡ Lệch ra",
+      "names": {
+        "rewind": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Đang dùng · tua băng hoạt hình (Freesound)",
+          "source": "fs-rewind",
+          "file": "402451_4284968-hq.mp3",
+          "start": 0.3,
+          "dur": 0.6,
+          "fade": 0.12,
+          "notrim": true
+        },
+        {
+          "label": "Bánh xe quay nhanh (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Wheel Spin Quickly 01.wav",
+          "dur": 0.8,
+          "fade": 0.3
+        },
+        {
+          "label": "Trombone trượt (Cartoon)",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Trombone Slide 01.wav",
+          "dur": 1.2,
+          "fade": 0.3
+        },
+        {
+          "label": "Tua băng (Production)",
+          "source": "adobe-production-elements",
+          "file": "Production Element Title Transition Tape Rewind Effect 01.wav",
+          "dur": 0.8,
+          "fade": 0.15
+        }
+      ],
+      "windows": {
+        "interdist": [
+          800,
+          835
+        ]
+      },
+      "picks": {
+        "vui": 0,
+        "gon": 3
+      }
+    },
+    {
+      "id": "whoosh-soft",
+      "label": "Vút nhẹ",
+      "where": "Vinh hiện ra ở xưởng, Lệch rơi, camera lùi ra buổi sáng, ba bạn đồng hành bay về logo",
+      "names": {
+        "whoosh-soft": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Vạt áo khoác phẩy (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Cloth Flap Jacket 03.wav",
+          "start": 1.75,
+          "dur": 0.5
+        },
+        {
+          "label": "Tay quệt quần (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Nylon Pants Hand Brushing 01.wav",
+          "start": 0.85,
+          "dur": 0.35
+        },
+        {
+          "label": "Vải phẩy ngắn (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Cloth Hit And Short Rustle Cloth 05.wav",
+          "start": 0.05,
+          "dur": 0.35
+        },
+        {
+          "label": "Vút ngắn (Multimedia)",
+          "source": "adobe-multimedia",
+          "file": "Multimedia Internet CD-Rom Flash Whoosh Short 17.wav"
+        },
+        {
+          "label": "Vút gió nhẹ (Production)",
+          "source": "adobe-production-elements",
+          "file": "Production Element Title Transition Whoosh Short 10.wav",
+          "dur": 0.9,
+          "fade": 0.3
+        }
+      ],
+      "windows": {
+        "interdist": [
+          868,
+          935
+        ]
+      },
+      "picks": {
+        "vui": 3,
+        "gon": 4
+      }
+    },
+    {
+      "id": "chime",
+      "label": "Kết phim",
+      "where": "Ba bạn đồng hành về đúng ba ô sáng của logo",
+      "names": {
+        "chime": 0
+      },
+      "chosen": 2,
+      "candidates": [
+        {
+          "label": "Chuông lắc (Cartoon)",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Bell Jingle 03.wav",
+          "dur": 2.2,
+          "fade": 0.6
+        },
+        {
+          "label": "Lục lạc tuần lộc (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Bells Jingle Sleigh Bells Short 01.wav",
+          "dur": 1.5,
+          "fade": 0.4
+        },
+        {
+          "label": "Đang dùng · chuông thành công (Freesound)",
+          "source": "fs-success",
+          "file": "541985_6856600-hq.mp3"
+        },
+        {
+          "label": "Logo (Production)",
+          "source": "adobe-production-elements",
+          "file": "Production Element Title Transition Logo 01.wav",
+          "fade": 0.4
+        }
+      ],
+      "windows": {
+        "interdist": [
+          1080,
+          1150
+        ]
+      },
+      "picks": {
+        "vui": 2,
+        "gon": 3
+      }
+    },
+    {
+      "id": "shutter",
+      "label": "Chụp màn hình",
+      "where": "Ops Pulse: chụp từng bảng lúc 7:00, Trùng chụp chính dashboard 9 lần",
+      "names": {
+        "shutter": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Khoá rương bật (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Trunk Latch Opening 01.wav",
+          "start": 0.8,
+          "dur": 0.4
+        },
+        {
+          "label": "Lẫy súng đồ chơi (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Toy Gun Cock Single Click 01.wav"
+        },
+        {
+          "label": "Khoá hộp nhựa (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Case Lock Plastic 01.wav"
+        }
+      ],
+      "windows": {
+        "opspulse": [
+          250,
+          392
+        ]
+      }
+    },
+    {
+      "id": "cash",
+      "label": "Tiền vào túi",
+      "where": "COD: người mua trả tiền, tiền bay vào túi shipper",
+      "names": {
+        "cash": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Tiền giấy sột soạt (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Money Bill Movement In Hand 01.wav",
+          "start": 0.25,
+          "dur": 0.6
+        },
+        {
+          "label": "Xu lẻ trong tay (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Coin Jingle In Hand Short 01.wav",
+          "start": 0.3,
+          "dur": 0.4
+        },
+        {
+          "label": "Đếm tiền một tờ (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Money Bills Counting In Hand 01.wav",
+          "start": 0.15,
+          "dur": 0.3
+        }
+      ],
+      "windows": {
+        "cod": [
+          56,
+          100
+        ]
+      }
+    },
+    {
+      "id": "flip",
+      "label": "Lật trang",
+      "where": "COD: lật sổ của hệ thống, lật trang sang cảnh manh mối",
+      "names": {
+        "flip": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Lật sách (Kenney)",
+          "source": "kenney_rpg-audio",
+          "file": "bookFlip2.ogg"
+        },
+        {
+          "label": "Lật sách nhanh (Kenney)",
+          "source": "kenney_rpg-audio",
+          "file": "bookFlip3.ogg"
+        },
+        {
+          "label": "Mở tờ giấy nhanh (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Paper Unfold Fast 01.wav"
+        }
+      ],
+      "windows": {
+        "cod": [
+          110,
+          150
+        ]
+      }
+    },
+    {
+      "id": "stamp",
+      "label": "Đóng dấu",
+      "where": "COD: dấu \"Đáng kiểm tra · chưa phải kết luận\", dấu \"Đã xử lý\"",
+      "names": {
+        "stamp": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Nắm đấm gõ bàn gỗ (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Table Fist Hits Wood Table 01.wav"
+        },
+        {
+          "label": "Búa nhựa đồ chơi (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Toy Hammer Nail Plastic 01.wav",
+          "start": 0.5,
+          "dur": 0.2
+        },
+        {
+          "label": "Danh bạ đặt xuống (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Telephone Book Set Down 02.wav"
+        }
+      ],
+      "windows": {
+        "cod": [
+          612,
+          650
+        ]
+      }
+    },
+    {
+      "id": "rip",
+      "label": "Cắt / xé",
+      "where": "Tìm kho: cắt dòng thời gian tại lúc đơn kết thúc",
+      "names": {
+        "rip": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Xé vải ngắn (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Cloth Ripping Short 07.wav"
+        },
+        {
+          "label": "Xé áo len (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Sweater Rip 01.wav"
+        },
+        {
+          "label": "Xé vải dài (Foley)",
+          "source": "adobe-foley",
+          "file": "Foley Cloth Rip 03.wav",
+          "start": 1.6,
+          "dur": 0.6,
+          "fade": 0.12
+        }
+      ],
+      "windows": {
+        "warehouse": [
+          455,
+          505
+        ]
+      }
+    },
+    {
+      "id": "cheer",
+      "label": "Cả team reo lên",
+      "where": "Đội GHN / team Shopee ăn mừng",
+      "names": {
+        "cheer": 0
+      },
+      "windows": {},
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Đám đông Hooray",
+          "source": "adobe-human-elements",
+          "file": "Human Crowd Hooray 04.wav",
+          "fade": 0.4
+        },
+        {
+          "label": "Đám đông Yeah",
+          "source": "adobe-human-elements",
+          "file": "Human Crowd Yeah 03.wav",
+          "fade": 0.4
+        }
+      ],
+      "picks": {
+        "vui": 0,
+        "gon": 1
+      }
+    },
+    {
+      "id": "yawn",
+      "label": "Ngáp mệt",
+      "where": "Team Shopee làm tới tối",
+      "names": {
+        "yawn": 0
+      },
+      "windows": {},
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Ngáp mệt",
+          "source": "adobe-human-elements",
+          "file": "Human Male Yawn Tired Yawn 01.wav",
+          "dur": 2.4,
+          "fade": 0.6
+        }
+      ],
+      "picks": {
+        "vui": 0,
+        "gon": 0
+      }
+    },
+    {
+      "id": "relief",
+      "label": "Thở phào",
+      "where": "Chồng việc tụt xuống",
+      "names": {
+        "relief": 0
+      },
+      "windows": {},
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Thở phào",
+          "source": "adobe-human-elements",
+          "file": "Human Male Sighs Of Relief 01.wav",
+          "lead": 0.8,
+          "fade": 0.3
+        }
+      ],
+      "picks": {
+        "vui": 0,
+        "gon": 0
+      }
+    },
+    {
+      "id": "machine",
+      "label": "Máy chạy",
+      "where": "Cỗ máy AI / AUTO khởi động",
+      "names": {
+        "machine": 0
+      },
+      "windows": {},
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Lạch cạch đồ chơi",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Toy Noisemaker Rattle 01.wav",
+          "dur": 1.5,
+          "fade": 0.5
+        },
+        {
+          "label": "Mô-tơ chạy",
+          "source": "adobe-technology",
+          "file": "Technology Electronic Servo Motor Pulsing 08.wav",
+          "dur": 2.5,
+          "fade": 0.6
+        }
+      ],
+      "picks": {
+        "vui": 0,
+        "gon": 1
+      }
+    },
+    {
+      "id": "spotlight",
+      "label": "Bật đèn rọi",
+      "where": "Đèn rọi đúng kho",
+      "names": {
+        "spotlight": 0
+      },
+      "windows": {},
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Công tắc đèn lớn",
+          "source": "adobe-technology",
+          "file": "Technology Electronic Light 150 Watt Fresnel Light Switch Turning On 01.wav"
+        }
+      ],
+      "picks": {
+        "vui": 0,
+        "gon": 0
+      }
+    },
+    {
+      "id": "plane",
+      "label": "Máy bay giấy",
+      "where": "Báo cáo tự gửi đi",
+      "names": {
+        "plane": 0
+      },
+      "windows": {},
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Vút giấy",
+          "source": "adobe-multimedia",
+          "file": "Multimedia Internet CD-Rom Flash Whoosh Short 15.wav"
+        }
+      ],
+      "picks": {
+        "vui": 0,
+        "gon": 0
+      }
+    },
+    {
+      "id": "scan",
+      "label": "AI chấm điểm",
+      "where": "Đơn ra khỏi máy AI, gắn nhãn",
+      "names": {
+        "scan-0": 0,
+        "scan-1": 2,
+        "scan-2": 4
+      },
+      "windows": {},
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Bíp hoạt hình",
+          "source": "adobe-multimedia",
+          "file": "Multimedia Internet CD-Rom Flash Animation Cartoon 22.wav"
+        },
+        {
+          "label": "Đọc số (Production)",
+          "source": "adobe-production-elements",
+          "file": "Production Element Title Transition Digital Readout 06.wav",
+          "dur": 0.6,
+          "fade": 0.2
+        }
+      ],
+      "picks": {
+        "vui": 0,
+        "gon": 1
+      }
+    },
+    {
+      "id": "tagline",
+      "label": "Câu chốt",
+      "where": "Câu kết quả trước logo",
+      "names": {
+        "tagline": 0
+      },
+      "windows": {},
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Nhạc hiệu ngắn (Multimedia)",
+          "source": "adobe-multimedia",
+          "file": "Multimedia Internet CD-Rom Flash Animation Musical 04.wav"
+        },
+        {
+          "label": "Chuông kết quả (Production)",
+          "source": "adobe-production-elements",
+          "file": "Production Element Title Transition Bell Hit 19.wav",
+          "dur": 1.6,
+          "fade": 0.6
+        }
+      ],
+      "picks": {
+        "vui": 0,
+        "gon": 1
+      }
+    },
+    {
+      "id": "typing",
+      "label": "Gõ phím",
+      "where": "Làm báo cáo bằng tay",
+      "names": {
+        "typing": 0
+      },
+      "windows": {},
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Gõ phím nhanh",
+          "source": "adobe-technology",
+          "file": "Technology Electronic Keyboard Computer Keyboard Typing Fast 01.wav"
+        }
+      ],
+      "picks": {
+        "vui": 0,
+        "gon": 0
+      }
+    }
+  ],
+  "notes": "slots: mỗi chỗ cần tiếng. names = tên dùng trong bảng tiếng của phim → cao độ (nửa cung) hoặc {st, dur}. windows = đoạn phim (khung) để nghe thử, theo từng phim. chosen = chỉ số ứng viên đã chọn — Vinh chọn bằng tai ở trang nghe thử. lead = giây từ đầu tiếng tới đỉnh.",
+  "styles": {
+    "vui": "Hoạt hình vui",
+    "gon": "Hiện đại gọn"
+  }
+}

@@ -9,11 +9,14 @@
     "test:game": "node --test scripts/test-game.cjs scripts/test-game-traversal.cjs"
   },
   "dependencies": {
+    "@remotion/player": "4.0.534",
     "next": "^15.1.6",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "remotion": "4.0.534"
   },
   "devDependencies": {
+    "@remotion/cli": "4.0.534",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^22.10.0",
     "@types/react": "^19.0.0",
