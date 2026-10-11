@@ -5,6 +5,8 @@ import { portfolioFontVariables } from "@/components/portfolio/PortfolioFonts";
 import { PortfolioIcon } from "@/components/portfolio/PortfolioIcon";
 import { SiteNav } from "@/components/home/SiteNav";
 import { CaseFigure } from "./CaseFigure";
+import { CaseFilm } from "./CaseFilm";
+import { hasFilm } from "./films";
 import { HomeContact } from "@/components/home/HomeContact";
 import { CompanionLayer } from "@/components/companions/CompanionLayer";
 import "@/components/home/home.css";
@@ -34,7 +36,10 @@ export function CaseArticle({ caseStudy: c }: { caseStudy: CaseStudy }) {
   const index = content.cases.findIndex(item => item.slug === c.slug);
   const next = content.cases[(index + 1) % content.cases.length];
   const others = content.cases.filter(item => item.slug !== c.slug && item.slug !== next.slug);
-  const [hero, ...gallery] = c.media ?? [];
+  // Case có phim thì phim đứng đầu trang, ảnh chụp màn hình xuống mục ảnh.
+  const film = c.motion && hasFilm(c.slug) ? c.motion : null;
+  const [hero, ...rest] = film ? [undefined, ...(c.media ?? [])] : c.media ?? [];
+  const gallery = rest.filter((m): m is Media => !!m);
   const title = (item: CaseStudy) => item.homepage?.title ?? item.title;
 
   return <div id="top" className={`home ca ${portfolioFontVariables}`}>
@@ -62,6 +67,7 @@ export function CaseArticle({ caseStudy: c }: { caseStudy: CaseStudy }) {
           </div>
         </header>
 
+        {film && <div className="ca-hero"><CaseFilm slug={c.slug} motion={film} /></div>}
         {hero && <div className="ca-hero"><Figure media={hero} priority /></div>}
 
         {c.context.length > 0 && <Part title={L.context} id="context">

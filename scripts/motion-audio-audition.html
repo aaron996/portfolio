@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="vi">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nghe thử tiếng · phim case</title>
+<style>
+:root{--paper:#F3F1EA;--card:#FBFAF6;--ink:#1D1D1B;--muted:#5d5b55;--line:#d9d3c4;--moss:#1F5A3D;--lime:#C8F560}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:1240px;margin:auto;padding:24px 16px 64px;display:grid;grid-template-columns:minmax(0,520px) minmax(0,1fr);gap:28px;align-items:start}
+h1{font-size:26px;line-height:1.2;margin:0 0 6px}
+h3{font-size:15px;margin:8px 0 0;color:var(--muted);font-weight:600}
+p{margin:0 0 12px;color:var(--muted)}
+.stage{position:sticky;top:16px;display:grid;gap:12px}
+video{width:100%;aspect-ratio:16/9;background:#000;border-radius:10px;display:block}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{font:inherit;min-height:40px;padding:8px 14px;border-radius:8px;border:1.5px solid var(--ink);background:var(--card);color:var(--ink);cursor:pointer}
+button.primary{background:var(--moss);border-color:var(--moss);color:#fff}
+button:hover{background:#ece8dc}button.primary:hover{background:#174631}
+button[aria-pressed="true"]{background:var(--ink);color:#fff}
+button:disabled{opacity:.4;cursor:not-allowed}
+button:focus-visible,input:focus-visible{outline:3px solid var(--moss);outline-offset:2px}
+#status{min-height:24px;font-weight:600;color:var(--moss)}
+label.vol{display:flex;gap:8px;align-items:center;color:var(--muted)}
+input[type=range]{accent-color:var(--moss)}
+.count{font-weight:600}
+.slots{display:grid;gap:14px}
+.slot{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:14px 16px}
+.slot[data-touched="true"]{border-color:var(--moss)}
+.slot h2{font-size:17px;margin:0;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.slot h2 small{font-weight:500;color:var(--muted);font-size:13px}
+.slot .where{font-size:13px;margin:2px 0 10px}
+.cand{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:6px 0;border-top:1px solid #ece7da}
+.cand label{display:flex;gap:10px;align-items:center;cursor:pointer;min-height:40px}
+.cand input{width:18px;height:18px;accent-color:var(--moss)}
+.cand button{min-height:36px;padding:6px 10px;font-size:14px}
+.cand.playing{background:#eef5d9}
+.tag{font-size:12px;padding:1px 7px;border-radius:999px;background:#ece8dc;color:var(--muted)}
+.tag.new{background:var(--lime);color:var(--ink)}
+textarea{width:100%;min-height:150px;font:13px/1.45 ui-monospace,Consolas,monospace;border:1.5px solid var(--line);border-radius:8px;padding:10px;background:var(--card)}
+@media (max-width:900px){main{grid-template-columns:1fr}.stage{position:static}.cand{grid-template-columns:auto minmax(0,1fr)}}
+</style>
+<main>
+  <section class="stage" aria-label="Phim và điều khiển">
+    <div>
+      <h1>Nghe thử tiếng · phim case</h1>
+      <p>Chọn phim, rồi mỗi chỗ cần tiếng có 2–3 ứng viên. <b>Trong cảnh</b> phát đúng đoạn phim kèm tiếng đó; <b>Cả phim</b> phát cả phim với các lựa chọn hiện tại. Một tiếng (vd "bụp") dùng chung cho mọi phim.</p>
+    </div>
+    <div class="row" id="films" role="group" aria-label="Phim"></div>
+    <video id="film" muted playsinline preload="auto"></video>
+    <div class="row">
+      <button class="primary" id="playFilm">▶ Cả phim với lựa chọn</button>
+      <button id="stop">■ Dừng</button>
+      <label class="vol">Âm lượng <input id="volume" type="range" min="0" max="1.5" step="0.05" value="1"></label>
+    </div>
+    <div id="status" role="status">Bấm một nút bất kỳ để bắt đầu.</div>
+    <p class="count" id="count"></p>
+    <div>
+      <div class="row" style="margin-bottom:8px"><button id="copy">Copy lựa chọn</button><button id="reset">Chọn lại từ đầu</button></div>
+      <textarea id="summary" readonly aria-label="Tóm tắt lựa chọn"></textarea>
+    </div>
+  </section>
+  <section class="slots" id="slots" aria-label="Các chỗ cần tiếng"></section>
+</main>
+<script type="module">
+const $ = id => document.getElementById(id);
+window.audition = { scheduled: 0 };
+const STORE = 'motion-audition-interdist';
+const FILM_STORE = 'motion-audition-film';
+const manifest = await fetch('/manifest.json').then(r => r.json());
+const { films, slots } = manifest;
+const slotOfName = {};
+for (const slot of slots) for (const [name, v] of Object.entries(slot.names)) slotOfName[name] = { slot, ...(typeof v === 'number' ? { st: v } : v) };
+const chosen = Object.fromEntries(slots.map(s => [s.id, s.chosen ?? 0]));
+
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem(STORE) || '{}'); } catch {}
+const choice = id => saved[id]?.index ?? chosen[id];
+function persist() { try { localStorage.setItem(STORE, JSON.stringify(saved)); } catch {} render(); }
+
+let film = films[0].id, cueData = { fps: 30, master: 1.4, frames: 0, cues: [] };
+try { const f = localStorage.getItem(FILM_STORE); if (films.some(x => x.id === f)) film = f; } catch {}
+
+let ctx, master;
+const buffers = new Map(), voices = new Set();
+let stopTimer, playingRow, token = 0;
+function audio() {
+  if (!ctx) { ctx = new AudioContext(); master = ctx.createGain(); master.connect(ctx.destination); }
+  master.gain.value = Number($('volume').value);
+  return ctx;
+}
+async function buffer(url) {
+  if (!buffers.has(url)) buffers.set(url, fetch('/' + url).then(r => r.arrayBuffer()).then(b => audio().decodeAudioData(b)));
+  return buffers.get(url);
+}
+function voice(buf, when, { st = 0, dur, gain = 1 } = {}) {
+  const src = ctx.createBufferSource(), g = ctx.createGain();
+  src.buffer = buf; src.playbackRate.value = 2 ** (st / 12); g.gain.value = gain;
+  src.connect(g).connect(master);
+  src.start(Math.max(when, ctx.currentTime), 0, dur);
+  voices.add(src); src.onended = () => voices.delete(src);
+}
+function stop() {
+  token++;
+  for (const v of voices) { try { v.stop(); } catch {} }
+  voices.clear(); clearTimeout(stopTimer);
+  $('film').pause();
+  playingRow?.classList.remove('playing'); playingRow = null;
+}
+const status = text => { $('status').textContent = text; };
+const clock = f => { const s = f / cueData.fps; return `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`; };
+const once = (el, event) => new Promise(done => el.addEventListener(event, done, { once: true }));
+
+/* Phát đoạn phim [from, to] (khung) tắt tiếng gốc, và xếp các tiếng `list` khớp theo hình. */
+async function playScene(from, to, list) {
+  stop(); audio(); await ctx.resume();
+  const mine = ++token;
+  const loaded = await Promise.all(list.map(item => buffer(item.clip)));
+  const video = $('film');
+  if (video.readyState < 1) await once(video, 'loadedmetadata');
+  if (Math.abs(video.currentTime - from / cueData.fps) > 0.01) {
+    const seeked = once(video, 'seeked');
+    video.currentTime = from / cueData.fps;
+    await seeked;
+  }
+  if (mine !== token) return false;
+  await video.play();
+  const base = ctx.currentTime - video.currentTime;
+  list.forEach((item, i) => {
+    const when = base + item.at / cueData.fps - item.lead;
+    if (when + 0.05 >= ctx.currentTime) voice(loaded[i], when, item);
+  });
+  window.audition.scheduled = voices.size;
+  stopTimer = setTimeout(() => { video.pause(); }, ((to - from) / cueData.fps) * 1000 + 600);
+  return true;
+}
+
+function cuesFor(slot, index, from = 0, to = Infinity) {
+  const cand = slot.candidates[index];
+  return cueData.cues.filter(c => slotOfName[c.name]?.slot === slot && c.at >= from && c.at <= to).map(c => {
+    const v = slotOfName[c.name];
+    return { at: c.at, clip: cand.clip, lead: cand.lead, st: v.st, dur: v.dur, gain: Math.min(1, (c.volume ?? 0.7) * cueData.master) };
+  });
+}
+
+async function solo(slot, index, row) {
+  stop(); audio(); await ctx.resume();
+  voice(await buffer(slot.candidates[index].clip), ctx.currentTime);
+  playingRow = row; row.classList.add('playing');
+  status(`Nghe riêng · ${slot.label} · ${slot.candidates[index].label}`);
+}
+async function inScene(slot, index, row) {
+  const [from, to] = slot.windows[film];
+  status('Đang tải…');
+  if (!await playScene(from, to, cuesFor(slot, index, from, to))) return;
+  playingRow = row; row?.classList.add('playing');
+  status(`Trong cảnh ${clock(from)}–${clock(to)} · ${slot.label} · ${slot.candidates[index].label}`);
+}
+async function playFilm() {
+  const list = slots.flatMap(slot => cuesFor(slot, choice(slot.id)));
+  status('Đang tải…');
+  if (await playScene(0, cueData.frames, list)) status(`Cả phim ${films.find(f => f.id === film).label} với các lựa chọn hiện tại`);
+}
+
+function pick(slot, index) { saved[slot.id] = { index, label: slot.candidates[index].label }; persist(); }
+
+function render() {
+  const touched = slots.filter(s => saved[s.id]).length;
+  $('count').textContent = `Đã chọn ${touched}/${slots.length} chỗ` + (touched < slots.length ? ' · chỗ chưa chọn dùng tiếng đang chốt' : ' · xong hết');
+  $('summary').value = slots.map(s => `${s.label}: ${s.candidates[choice(s.id)].label}${saved[s.id] ? '' : ' (đang chốt)'}`).join('\n')
+    + '\n\n' + JSON.stringify(Object.fromEntries(slots.map(s => [s.id, saved[s.id]?.index ?? null])));
+  for (const el of document.querySelectorAll('.slot')) el.dataset.touched = String(Boolean(saved[el.dataset.id]));
+}
+
+function slotCard(slot) {
+  const card = document.createElement('article');
+  card.className = 'slot'; card.dataset.id = slot.id;
+  const win = slot.windows[film];
+  const isNew = Object.keys(slot.windows).every(k => k !== 'interdist');
+  card.innerHTML = `<h2>${slot.label} ${win ? `<small>${clock(win[0])}–${clock(win[1])}</small>` : ''} ${isNew ? '<span class="tag new">tiếng mới</span>' : ''}</h2><p class="where">${slot.where}</p>`;
+  slot.candidates.forEach((cand, index) => {
+    const row = document.createElement('div');
+    row.className = 'cand';
+    const id = `${slot.id}-${index}`;
+    const current = cand.label.startsWith('Đang dùng');
+    row.innerHTML = `<input type="radio" name="${slot.id}" id="${id}" ${choice(slot.id) === index ? 'checked' : ''}>
+      <label for="${id}">${cand.label.replace('Đang dùng · ', '')}${current ? ' <span class="tag">trước đây</span>' : ''}</label>
+      <button type="button" data-act="solo">Nghe riêng</button><button type="button" data-act="scene" ${win ? '' : 'disabled title="Chỗ này không có trong phim đang chọn"'}>▶ Trong cảnh</button>`;
+    row.querySelector('input').addEventListener('change', () => pick(slot, index));
+    row.querySelector('[data-act=solo]').addEventListener('click', () => solo(slot, index, row));
+    if (win) row.querySelector('[data-act=scene]').addEventListener('click', () => inScene(slot, index, row));
+    card.append(row);
+  });
+  return card;
+}
+
+async function loadFilm(id) {
+  stop();
+  film = id;
+  try { localStorage.setItem(FILM_STORE, id); } catch {}
+  for (const b of document.querySelectorAll('#films button')) b.setAttribute('aria-pressed', String(b.dataset.film === id));
+  $('film').src = `/film/${id}.mp4`;
+  cueData = await fetch(`/cues/${id}.json`).then(r => r.json());
+  const list = $('slots');
+  list.innerHTML = '';
+  const here = slots.filter(s => s.windows[film]), rest = slots.filter(s => !s.windows[film]);
+  if (here.length) { const h = document.createElement('h3'); h.textContent = 'Có đoạn nghe thử trong phim này'; list.append(h); }
+  here.forEach(s => list.append(slotCard(s)));
+  if (rest.length) { const h = document.createElement('h3'); h.textContent = 'Các tiếng khác (nghe trong "Cả phim" hoặc chọn phim tương ứng)'; list.append(h); }
+  rest.forEach(s => list.append(slotCard(s)));
+  render();
+  status(`Đã mở phim ${films.find(f => f.id === id).label}.`);
+}
+
+for (const f of films) {
+  const b = document.createElement('button');
+  b.type = 'button'; b.dataset.film = f.id; b.textContent = f.label;
+  b.addEventListener('click', () => loadFilm(f.id));
+  $('films').append(b);
+}
+$('playFilm').addEventListener('click', playFilm);
+$('stop').addEventListener('click', () => { stop(); status('Đã dừng.'); });
+$('volume').addEventListener('input', () => { if (master) master.gain.value = Number($('volume').value); });
+$('copy').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText($('summary').value); status('Đã copy lựa chọn.'); }
+  catch { $('summary').select(); status('Chọn sẵn đoạn tóm tắt — bấm Ctrl+C để copy.'); }
+});
+$('reset').addEventListener('click', () => { saved = {}; persist(); loadFilm(film); });
+await loadFilm(film);
+
+/* Cho Claude đọc lựa chọn từ trang (Browser pane). */
+Object.assign(window.audition, { selection: () => Object.fromEntries(slots.map(s => [s.id, saved[s.id] ? { index: choice(s.id), label: s.candidates[choice(s.id)].label } : null])) });
+</script>
+</html>
