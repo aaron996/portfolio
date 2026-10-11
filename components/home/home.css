@@ -145,8 +145,16 @@ html:has(.hs-stage[data-welcome="pending"]) { overflow: hidden; scrollbar-gutter
   86% { transform: translateY(0) rotate(-3deg) scale(1.04, .94); }
   100% { transform: translateY(0) rotate(-3deg) scale(1); }
 }
+.pf-badge[data-state="pop"] { animation: pf-badge-pop 460ms cubic-bezier(.3,.7,.4,1); transform-origin: 50% 50%; }
+@keyframes pf-badge-pop {
+  0% { opacity: 1; transform: scale(.3, .3) rotate(-14deg); }
+  55% { opacity: 1; transform: scale(1.2, 1.12) rotate(1deg); }
+  100% { opacity: 1; transform: scale(1) rotate(-3deg); }
+}
+/* Ô lime rơi xuống đầu ba bạn đồng hành rồi hoá thành nhãn AI (CompanionLayer). */
+.cmp-cube { position: absolute; left: 0; top: 0; box-sizing: border-box; width: var(--buddy, 18px); height: var(--buddy, 18px); background: var(--mark); border: 1.5px solid var(--text); border-radius: 2px; transform-origin: 50% 100%; opacity: 0; }
 @keyframes pf-badge-twinkle { 0%, 100% { transform: scale(1) rotate(0); } 50% { transform: scale(1.35) rotate(25deg); } }
-@media (prefers-reduced-motion: reduce) { .pf-badge[data-state="idle"] { opacity: 1; } .pf-badge[data-state="drop"] { animation: none; } .pf-badge,.wi-row[data-active="true"] .pf-badge { transition: none; } .wi-row[data-active="true"] .pf-badge::before { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .pf-badge[data-state="idle"] { opacity: 1; } .pf-badge[data-state="drop"], .pf-badge[data-state="pop"] { animation: none; } .pf-badge,.wi-row[data-active="true"] .pf-badge { transition: none; } .wi-row[data-active="true"] .pf-badge::before { animation: none; } }
 .wi-summary { grid-column: 2; max-width: 56ch; font-size: 14px; line-height: 1.55; color: var(--text); }
 .wi-mobile-result { display: none; }
 .wi-open { grid-column: 3; grid-row: 1; align-self: center; opacity: 0; transform: translateX(-6px); transition: opacity 150ms, transform 150ms; }
