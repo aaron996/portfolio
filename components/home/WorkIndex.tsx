@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { content } from "@/content/content.vi";
 import { PortfolioIcon } from "@/components/portfolio/PortfolioIcon";
+import { FILM_IDS } from "@/components/case/films";
 import { AiBadge } from "./AiBadge";
 
 const copy = content.home.work;
@@ -35,10 +36,13 @@ function SlopeChart() {
 
 function Preview({ index }: { index: number }) {
   const item = content.cases[index];
-  const shot = item.media?.[0];
+  const film = FILM_IDS[item.slug];
+  const shot = film ? undefined : item.media?.[0];
   return <div className="wi-preview-inner" key={item.slug}>
     <div className="wi-frame">
-      {shot
+      {film
+        ? <Image className="wi-poster" src={`/motion/${film}-poster.jpg`} alt="" fill sizes="(max-width: 1100px) 50vw, 600px" />
+        : shot
         ? <Image src={shot.src} alt={shot.alt} fill sizes="(max-width: 1100px) 50vw, 600px" />
         : item.slug === copy.chart.slug
           ? <SlopeChart />
