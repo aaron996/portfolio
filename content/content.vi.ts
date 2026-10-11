@@ -128,7 +128,7 @@ export const content: SiteContent = {
         },
       },
     },
-    companions: { hide: "Ẩn bạn đồng hành", show: "Hiện bạn đồng hành", tired: "…" },
+    companions: { hide: "Ẩn bạn đồng hành", show: "Hiện bạn đồng hành", tired: "…", alarm: "!" },
     /* Bài "How Long" làm bằng Suno, MV dựng bằng code (dự án how-long-mv). */
     music: {
       src: "/portfolio/how-long.mp3",

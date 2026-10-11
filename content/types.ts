@@ -517,7 +517,7 @@ export interface HomeContent {
     };
   };
   /** Nút bật/tắt ba bạn đồng hành ở footer. */
-  companions: { hide: string; show: string; tired: string };
+  companions: { hide: string; show: string; tired: string; alarm: string };
   /** Nhạc nền "How Long" (nút trên nav) và MV ở hero. MV chỉ lộ ra sau khi sắp xong biểu đồ:
       Trùng nhảy lên góc trống và bật màn hình — xem heroBuddies.ts, hàm project. */
   music: {

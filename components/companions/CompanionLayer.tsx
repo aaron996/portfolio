@@ -135,6 +135,7 @@ export function CompanionLayer({ nav, origin = "hero" }: { nav: string; origin?:
         layers.fixed.appendChild(b);
         b.removeAttribute("style");
         delete b.dataset.settled;
+        delete b.dataset.ko;
       });
       eyes.forEach(e => e.removeAttribute("style"));
     }
@@ -463,23 +464,103 @@ export function CompanionLayer({ nav, origin = "hero" }: { nav: string; origin?:
       }
     }
 
-    const revealBadge = (node: HTMLElement, quiet = false) => node.dispatchEvent(new CustomEvent("badge:reveal", { detail: { quiet } }));
+    const revealBadge = (node: HTMLElement, mode: "pop" | "quiet" = "pop") =>
+      node.dispatchEvent(new CustomEvent("badge:reveal", { detail: { mode } }));
+    const cubes = [...root.querySelectorAll<HTMLElement>(".cmp-cube")];
+    const alarm = root.querySelector<HTMLElement>(".cmp-bubble-alarm")!;
+    const clearCubes = () => cubes.forEach(c => c.getAnimations().forEach(a => a.cancel()));
 
-    /* Ba ô nhảy tới đứng trên chỗ nhãn AI, thả nhãn xuống rồi nhún mừng. Nhãn đã lướt
-       khỏi màn hình thì hiện luôn, không diễn. */
+    /* Màn gắn nhãn AI. Mỗi nhãn đang hiện trên màn hình có một bạn đứng đúng chỗ của nó
+       (từ trên xuống: Chấm, Trùng, Lệch). Ô lime rơi xuống đầu từng bạn; bạn dưới cùng
+       thấy hai bạn kia dính đòn nên chạy kịp, ô của nó rơi hụt xuống đất rồi nảy lên chỗ nhãn.
+       Ba ô hiện chữ AI (nhãn thật bật ra), rồi cả ba nhảy về chỗ cũ (đạo diễn lo phần này).
+       Nhãn đã lướt khỏi màn hình thì hiện luôn, không diễn. */
     async function runBadges() {
       const s = size();
+      // Đủ chỗ cho bạn đứng dưới nhãn (chân thấp hơn nhãn 1,5 ô) mà vẫn trong màn hình.
+      const onScreen = (n: HTMLElement) => { const r = n.getBoundingClientRect(); return r.top >= 0 && r.bottom + s * 1.5 <= window.innerHeight; };
       while (badgeQueue.length && alive) {
-        const node = badgeQueue.shift()!;
-        const r = node.getBoundingClientRect();
-        if (r.bottom < 0 || r.top > window.innerHeight) { revealBadge(node, true); continue; }
-        const cx = r.left + r.width / 2;
-        const spots: Spot[] = [0, 1, -1].map(k => ({ x: cx + k * s * 1.3, y: r.top - s * 0.9, size: s }));
-        await Promise.all(bodies.map((_, i) => moveTo(i, spots[i], "page", { delay: STAGGER[i], height: s * 2.5 })));
-        revealBadge(node);
-        await wait(420);
-        await Promise.all(bodies.map((_, i) => moveTo(i, spots[i], "page", { delay: STAGGER[i] / 2, height: s * 1.4, duration: 320 })));
-        await wait(500);
+        await wait(300); // chờ các nhãn anh em cùng vào màn hình để diễn một lượt
+        // Nhãn đã báo mà giờ lướt khỏi màn hình thì hiện luôn; nhãn chưa tới lượt thì để yên.
+        const queued = badgeQueue.splice(0).filter(n => n.dataset.state === "idle");
+        queued.filter(n => !onScreen(n)).forEach(n => revealBadge(n, "quiet"));
+        const scanned = [...document.querySelectorAll<HTMLElement>(".pf-badge[data-state='idle']")].filter(onScreen);
+        const nodes = [...new Set([...queued.filter(onScreen), ...scanned])].sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);
+        badgeQueue.push(...nodes.splice(3));
+        if (!nodes.length) continue;
+
+        /* Toạ độ viewport: x giữa nhãn; slot = đáy ô lime khi nằm đúng chỗ nhãn; ground = đáy
+           ô lime khi rơi xuống đất (chân bạn đứng ở đó, đầu bạn ngang chỗ nhãn). */
+        const slots = nodes.map(n => { const r = n.getBoundingClientRect(); return { x: r.left + r.width / 2, slot: r.top + r.height / 2 + s / 2 }; });
+        const feet = slots.map(p => ({ x: p.x, y: p.slot + s, size: s }));
+        const stand: Spot[] = [0, 1, 2].map(i => feet[i] ?? { x: feet[0].x + (i === 1 ? -1 : 1) * s * 2.4, y: feet[0].y, size: s });
+        const dodger = nodes.length > 1 ? nodes.length - 1 : -1;
+
+        await Promise.all(bodies.map((_, i) => moveTo(i, stand[i], "page", { delay: STAGGER[i], height: s * 2.5 })));
+        await wait(250);
+
+        const cube = (x: number, bottom: number, sx = 1, sy = 1, o = 1, extra: Partial<Keyframe> = {}): Keyframe => {
+          const p = shift({ x, y: bottom, size: s }, "page");
+          return { transform: `translate(${p.x - s / 2}px, ${p.y - s}px) scale(${sx}, ${sy})`, opacity: o, ...extra };
+        };
+        const FALL = 150, ACCEL = "cubic-bezier(.5,0,.9,.6)", HIT_GAP = 450, IMPACT = 405;
+        const hits = nodes.map((_, k) => k).filter(k => k !== dodger);
+        const lastImpact = (hits.length - 1) * HIT_GAP + IMPACT;
+        const cubeStart = lastImpact + 520; // ô thứ ba rơi trễ để bạn dưới cùng kịp nhận ra
+        const sitUp = (dodger >= 0 ? cubeStart + 900 : lastImpact) + 1100; // nằm xây xẩm một lúc mới ngồi dậy
+        const at = (n: number, fn: () => void) => wait(n).then(() => { if (alive) fn(); });
+        const sway: Record<number, Animation> = {};
+        const running: Promise<unknown>[] = [];
+
+        nodes.forEach((_, k) => {
+          const { x, slot } = slots[k];
+          const base = shift(stand[k], "page");
+          if (k !== dodger) {
+            const delay = k * HIT_GAP;
+            running.push(done(cubes[k].animate([
+              cube(x, slot - FALL, 1, 1, 0, { offset: 0 }),
+              cube(x, slot - FALL, 1, 1, 1, { offset: 0.1, easing: ACCEL }),
+              cube(x, slot, 1, 1, 1, { offset: 0.78 }),
+              cube(x, slot, 1.25, 0.7, 1, { offset: 0.88 }),
+              cube(x, slot, 1, 1, 1, { offset: 1 }),
+            ], { duration: ms(520), delay: ms(delay), fill: "forwards" })));
+            // Dính ô vào đầu: bẹp xuống, mắt thành dấu X, lảo đảo xây xẩm.
+            at(delay + IMPACT, () => {
+              bodies[k].dataset.ko = "true";
+              animate(k, [{ ...base, sx: 1.2, sy: 0.65 }, { ...base, sx: 1, sy: 1, r: -9 }], { duration: ms(220) });
+              wait(220).then(() => { if (alive) sway[k] = animate(k, [{ ...base, r: -8 }, { ...base, r: 8 }], { duration: ms(560), iterations: Infinity, direction: "alternate", easing: "ease-in-out" }); });
+            });
+            at(sitUp + k * 160, () => {
+              sway[k]?.cancel();
+              delete bodies[k].dataset.ko;
+              animate(k, [{ ...base, sx: 1.15, sy: 0.8 }, { ...base, sx: 0.88, sy: 1.22 }, { ...base, sx: 1, sy: 1 }], { duration: ms(420) });
+            });
+          } else {
+            const ground = slot + s, apex = slot + s * 0.2;
+            running.push(done(cubes[k].animate([
+              cube(x, slot - FALL, 1, 1, 0, { offset: 0 }),
+              cube(x, slot - FALL, 1, 1, 1, { offset: 0.06, easing: ACCEL }),
+              cube(x, ground, 1, 1, 1, { offset: 0.56 }),
+              cube(x, ground, 1.25, 0.7, 1, { offset: 0.62 }),
+              cube(x, apex - s * 0.8, 1, 1.05, 1, { offset: 0.76, easing: ACCEL }),
+              cube(x, slot, 1, 1, 1, { offset: 0.9 }),
+              cube(x, slot, 1, 1, 1, { offset: 1 }),
+            ], { duration: ms(900), delay: ms(cubeStart), fill: "forwards" })));
+            // Thấy hai bạn dính đòn: giật mình, hiện dấu "!", rồi nhìn lên thấy ô thứ ba và chạy vọt ra.
+            at(lastImpact + 120, () => {
+              animate(k, [{ ...base, sx: 0.85, sy: 1.3 }, { ...base, sx: 1, sy: 1 }], { duration: ms(240) });
+              pop(alarm, { ...stand[k], y: stand[k].y - s * 1.1 }, 900);
+            });
+            const dx = (stand[k].x > window.innerWidth / 2 ? -1 : 1) * s * 3;
+            running.push(wait(cubeStart + 100).then(() => alive ? moveTo(k, { ...stand[k], x: stand[k].x + dx }, "page", { duration: 160, height: s * 0.6 }) : undefined));
+          }
+        });
+        await Promise.all(running);
+        await wait(Math.max(0, sitUp + hits.length * 160 + 450 - (dodger >= 0 ? cubeStart + 900 : lastImpact + 520)));
+
+        nodes.forEach(n => revealBadge(n, "pop"));
+        clearCubes();
+        await wait(700);
       }
     }
 
@@ -634,7 +715,8 @@ export function CompanionLayer({ nav, origin = "hero" }: { nav: string; origin?:
 
     return () => {
       alive = false;
-      badgeQueue.splice(0).forEach(n => revealBadge(n, true));
+      badgeQueue.splice(0).forEach(n => revealBadge(n, "quiet"));
+      clearCubes();
       unsubscribe();
       io.disconnect();
       Object.entries(on).forEach(([name, fn]) => window.removeEventListener(name, fn));
@@ -662,6 +744,8 @@ export function CompanionLayer({ nav, origin = "hero" }: { nav: string; origin?:
     </div>
     <div className="cmp-page">
       <span className="cmp-bubble">{content.home.companions.tired}</span>
+      <span className="cmp-bubble cmp-bubble-alarm">{content.home.companions.alarm}</span>
+      <i className="cmp-cube" /><i className="cmp-cube" /><i className="cmp-cube" />
     </div>
   </div>;
 }
