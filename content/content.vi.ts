@@ -172,6 +172,7 @@ export const content: SiteContent = {
     unverifiedTitle: "Chưa đo hoặc đối chiếu để xác nhận mức thay đổi thực tế",
     progress: "Tiến độ đọc",
     lightbox: { open: "Phóng to ảnh", close: "Đóng ảnh", peek: "Ồ!" },
+    film: { kicker: "Phim ngắn", expand: "Phóng to phim", minimize: "Thu nhỏ phim" },
   },
 
   /* Trang 404: con trỏ là đèn pin, rọi trúng giữa trang thì lộ ra Null. */

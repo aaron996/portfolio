@@ -544,6 +544,8 @@ export interface CasePageContent {
   progress: string;
   /** Phóng ảnh: nút mở, nút đóng, bong bóng của Chấm lúc thò đầu (tối đa hai từ). */
   lightbox: { open: string; close: string; peek: string };
+  /** Phim đầu trang: nằm thu nhỏ cạnh tiêu đề, bấm mới phóng to. */
+  film: { kicker: string; expand: string; minimize: string };
 }
 
 /** Trang 404: ba bạn đồng hành cầm đèn đi tìm, lộ ra Null. docs/companions.md */
