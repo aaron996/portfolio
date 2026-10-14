@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 import { content } from "@/content/content.vi";
-import { music, serverMusic } from "./music";
+import { music, musicLabel, serverMusic, toggleMusic } from "./music";
 import "./music.css";
 
 /* Nút bật/tắt nhạc nền. Biểu tượng biến hình: khi bật, hai vạch sóng nhấp theo nhạc;
@@ -10,10 +10,12 @@ import "./music.css";
 export function MusicToggle() {
   const s = useSyncExternalStore(music.subscribe, music.get, serverMusic);
   const t = content.home.music;
-  const label = s.enabled ? t.off : t.on;
+  const label = musicLabel(s, t);
+  const soundOn = s.enabled && s.status !== "error" && s.status !== "blocked" &&
+    (s.status !== "idle" || s.holds.length > 0);
   return (
-    <button type="button" className="mt-btn" data-on={s.enabled} data-playing={s.playing}
-      aria-pressed={s.enabled} aria-label={label} title={label} onClick={() => music.setEnabled(!s.enabled)}>
+    <button type="button" className="mt-btn" data-on={soundOn} data-playing={s.playing}
+      aria-pressed={soundOn} aria-label={label} title={label} onClick={toggleMusic}>
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
         strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
         <path className="mt-body" d="M4 9.5h3.2L11.5 6v12l-4.3-3.5H4z" fill="currentColor" />
