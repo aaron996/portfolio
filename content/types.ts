@@ -518,10 +518,13 @@ export interface HomeContent {
   };
   /** Nút bật/tắt ba bạn đồng hành ở footer. */
   companions: { hide: string; show: string; tired: string; alarm: string };
-  /** Nhạc nền "How Long" (nút trên nav) và MV ở hero. MV chỉ lộ ra sau khi sắp xong biểu đồ:
+  /** Radio dùng playlist nội bộ và MV ở hero. MV chỉ lộ ra sau khi sắp xong biểu đồ:
       Trùng nhảy lên góc trống và bật màn hình — xem heroBuddies.ts, hàm project. */
   music: {
-    src: string; on: string; off: string;
+    tracks: { id: string; title: string; src: string }[];
+    on: string; off: string; label: string; artist: string;
+    playing: string; paused: string; loading: string; blocked: string; error: string; held: string;
+    retry: string; previous: string; next: string; move: string; minimize: string; expand: string;
     mv: { src: string; poster: string; title: string; meta: string; duration: string; play: string; close: string; label: string };
   };
 }

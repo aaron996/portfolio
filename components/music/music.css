@@ -1,11 +1,11 @@
 /* Nút nhạc nền trên nav */
-.mt-btn { display: inline-grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 1.5px solid currentColor; border-radius: 999px; background: transparent; color: inherit; cursor: pointer; transition: transform 140ms cubic-bezier(.2,.7,.2,1), background-color 150ms, color 150ms; }
+.mt-btn { display: inline-grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1.5px solid currentColor; border-radius: 999px; background: transparent; color: inherit; cursor: pointer; transition: transform 140ms cubic-bezier(.2,.7,.2,1), background-color 150ms, color 150ms; }
 .mt-btn:hover { transform: translateY(-1px); background: rgb(22 22 20 / .06); }
 .mt-btn:active { transform: scale(.94); }
 .mt-btn:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
 .mt-btn svg { overflow: visible; }
 
-.mt-body { transform-origin: 8px 12px; transition: transform 320ms cubic-bezier(.3,1.6,.5,1); }
+.mt-body { transform-origin: 8px 12px; transition: transform 320ms cubic-bezier(.22,1,.36,1); }
 .mt-wave, .mt-x { stroke-dasharray: 1; transition: stroke-dashoffset 340ms cubic-bezier(.65,0,.35,1), opacity 220ms; }
 .mt-wave-2 { transition-delay: 60ms; }
 
@@ -26,3 +26,36 @@
   .mt-body, .mt-wave, .mt-x { transition: none; }
   .mt-btn[data-playing="true"] .mt-wave-1, .mt-btn[data-playing="true"] .mt-wave-2 { animation: none; }
 }
+
+/* Radio nổi: giấy, mực và màu rêu của portfolio. Tự giữ font/màu vì nằm ở root layout. */
+.pf-radio { --radio-paper: #fbfaf6; --radio-ink: #161614; --radio-muted: #6b6960; --radio-line: #d9d5c8; --radio-accent: #1f5a3d; position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 56; width: 320px; max-width: calc(100vw - 24px); border: 1px solid var(--radio-line); border-radius: var(--r-card); color: var(--radio-ink); background: var(--radio-paper); font-family: var(--font-inter), system-ui, sans-serif; overflow: hidden; }
+.pf-radio[hidden] { display: none; }
+.pf-radio-main { display: flex; align-items: center; gap: 4px; padding: 10px; }
+.pf-radio-drag { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; min-height: 52px; cursor: grab; touch-action: none; user-select: none; border-radius: var(--r-control); }
+.pf-radio[data-dragging="true"] .pf-radio-drag { cursor: grabbing; }
+.pf-radio-disc { position: relative; display: grid; place-items: center; flex: 0 0 44px; width: 44px; height: 44px; border-radius: 50%; background: var(--radio-ink); border: 5px double var(--radio-muted); animation: pf-radio-spin 9s linear infinite; animation-play-state: paused; }
+.pf-radio-disc::after { content: ""; position: absolute; inset: 4px; border: 1px solid var(--radio-muted); border-radius: 50%; }
+.pf-radio-disc > span { position: relative; width: 17px; height: 17px; border-radius: 50%; background: var(--radio-accent); }
+.pf-radio-disc > span::before { content: ""; position: absolute; width: 4px; height: 4px; border-radius: 50%; background: var(--radio-paper); left: 6px; top: 6px; }
+.pf-radio-disc > span::after { content: ""; position: absolute; width: 3px; height: 5px; background: var(--radio-paper); left: 4px; top: 2px; }
+.pf-radio[data-playing="true"] .pf-radio-disc { animation-play-state: running; }
+.pf-radio-copy { display: grid; gap: 3px; min-width: 0; }
+.pf-radio-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 650; line-height: 1.35; }
+.pf-radio-status { display: flex; align-items: center; gap: 5px; color: var(--radio-muted); font-size: 11px; line-height: 1.4; }
+.pf-radio-status i { width: 5px; height: 5px; flex: 0 0 5px; border-radius: 50%; background: var(--radio-accent); }
+.pf-radio-time { font-size: 10px; line-height: 1.3; font-variant-numeric: tabular-nums; color: var(--radio-muted); }
+.pf-radio-control { display: grid; place-items: center; flex: 0 0 44px; width: 44px; height: 44px; padding: 0; border: 0; border-radius: var(--r-control); background: transparent; color: var(--radio-muted); cursor: pointer; transition: background-color 150ms, color 150ms; }
+.pf-radio-control:hover { background: var(--radio-line); color: var(--radio-ink); }
+.pf-radio-sound { color: var(--radio-accent); }
+.pf-radio :focus-visible { outline: 2px solid var(--radio-accent); outline-offset: -2px; }
+.pf-radio-progress { display: block; height: 3px; background: var(--radio-line); }
+.pf-radio-progress > span { display: block; height: 100%; background: var(--radio-accent); transform: scaleX(var(--pf-radio-progress, 0)); transform-origin: left; }
+.pf-radio[data-collapsed="true"] { width: 164px; }
+.pf-radio ::selection { background: var(--radio-accent); color: var(--radio-paper); }
+@keyframes pf-radio-spin { to { transform: rotate(360deg); } }
+@media (max-width: 400px) { .pf-radio { right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); } }
+@media (prefers-reduced-motion: reduce) { .pf-radio-disc { animation: none; } .pf-radio-control { transition: none; } }
+
+.pf-radio[data-multiple="true"] { width: 408px; }
+.pf-radio[data-multiple="true"][data-collapsed="true"] { width: 164px; }
+.pf-radio[data-hero="true"] { bottom: max(112px, calc(env(safe-area-inset-bottom) + 112px)); }

@@ -1,12 +1,18 @@
-/* Trạng thái nhạc nền dùng chung: nút trên nav đọc/ghi `enabled`, các phần khác (intro,
-   MV, trang game) xin "giữ im" bằng hold(). BackgroundMusic là nơi duy nhất điều khiển audio. */
+/* Một nguồn trạng thái cho nav, widget và audio ở root layout. Các video xin nhường
+   tiếng qua hold(); chỉ BackgroundMusic điều khiển phần phát. */
+export type MusicStatus = "idle" | "loading" | "playing" | "blocked" | "error";
+type State = {
+  enabled: boolean; playing: boolean; holds: string[]; status: MusicStatus;
+  trackIndex: number; request: number; elapsed: number; duration: number;
+};
 
-type State = { enabled: boolean; playing: boolean; holds: string[] };
-
-let state: State = { enabled: true, playing: false, holds: [] };
+const SERVER: State = {
+  enabled: true, playing: false, holds: [], status: "idle",
+  trackIndex: 0, request: 0, elapsed: 0, duration: 0,
+};
+let state = SERVER;
 const subs = new Set<() => void>();
-const emit = () => subs.forEach((f) => f());
-
+const emit = () => subs.forEach((fn) => fn());
 export const PREF_KEY = "pf-music";
 
 export const music = {
@@ -16,23 +22,44 @@ export const music = {
     return () => { subs.delete(fn); };
   },
   setEnabled(enabled: boolean) {
-    state = { ...state, enabled };
-    try { localStorage.setItem(PREF_KEY, enabled ? "1" : "0"); } catch {}
+    state = { ...state, enabled, request: state.request + 1 };
+    try { localStorage.setItem(PREF_KEY, enabled ? "1" : "0"); } catch { /* Optional storage. */ }
     emit();
   },
-  setPlaying(playing: boolean) {
-    if (state.playing === playing) return;
-    state = { ...state, playing };
+  setStatus(status: MusicStatus) {
+    const playing = status === "playing";
+    if (state.status === status && state.playing === playing) return;
+    state = { ...state, status, playing };
     emit();
   },
-  /** Giữ nhạc im khi có lý do (intro, MV, trang game); bỏ giữ thì nhạc chạy lại nếu đang bật. */
+  setTime(elapsed: number, duration: number) {
+    elapsed = Math.floor(elapsed);
+    duration = Number.isFinite(duration) ? Math.floor(duration) : 0;
+    if (elapsed === state.elapsed && duration === state.duration) return;
+    state = { ...state, elapsed, duration };
+    emit();
+  },
+  step(delta: number, count: number) {
+    if (count < 1) return;
+    state = { ...state, trackIndex: (state.trackIndex + delta + count) % count,
+      elapsed: 0, duration: 0, request: state.request + 1 };
+    emit();
+  },
   hold(reason: string, on: boolean) {
-    const has = state.holds.includes(reason);
-    if (on === has) return;
-    state = { ...state, holds: on ? [...state.holds, reason] : state.holds.filter((r) => r !== reason) };
+    if (on === state.holds.includes(reason)) return;
+    state = { ...state, holds: on ? [...state.holds, reason] : state.holds.filter(r => r !== reason) };
     emit();
   },
 };
 
-const SERVER: State = { enabled: true, playing: false, holds: [] };
 export const serverMusic = () => SERVER;
+
+export function musicLabel(s: State, t: { on: string; off: string; retry: string }) {
+  if (s.status === "error" || s.status === "blocked") return t.retry;
+  return s.enabled && (s.status !== "idle" || s.holds.length > 0) ? t.off : t.on;
+}
+
+export function toggleMusic() {
+  music.setEnabled(!state.enabled || state.status === "blocked" || state.status === "error" ||
+    (state.status === "idle" && state.holds.length === 0));
+}
