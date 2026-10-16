@@ -236,6 +236,14 @@
       "url": "https://download.adobe.com/pub/adobe/audition/offers/adobeauditiondlcsfx/production_elements.zip",
       "file": "production_elements.zip",
       "license": "Adobe Audition Content Terms of Use"
+    },
+    {
+      "id": "mixkit-cartoon",
+      "author": "Mixkit",
+      "title": "Free Cartoon Sound Effects (136 tiếng, tải 2026-10-16)",
+      "page": "https://mixkit.co/free-sound-effects/cartoon/",
+      "download": "https://assets.mixkit.co/active_storage/sfx/<id>/<id>.wav — tên file trong kho: \"<id> <tên>.wav\"",
+      "license": "Mixkit Sound Effects Free License (https://mixkit.co/license/#sfxFree) — dùng thương mại, không cần ghi nguồn"
     }
   ],
   "films": {
@@ -263,6 +271,17 @@
       "out": "public/motion/shopee-sfx.mp3",
       "label": "Shopee 3PL",
       "style": "vui"
+    },
+    "intro": {
+      "out": "public/portfolio/intro-sfx.mp3",
+      "label": "Intro trang chủ",
+      "style": "mixkit",
+      "music": false,
+      "soften": {
+        "hz": 3000,
+        "db": -6,
+        "lowpass": 9000
+      }
     }
   },
   "slots": [
@@ -1770,6 +1789,646 @@
       "picks": {
         "vui": 0,
         "gon": 0
+      }
+    },
+    {
+      "id": "i-pop",
+      "label": "Bụp nhẹ (intro)",
+      "where": "Ô hiện ra, chip AI, chữ bật lên — cao dần",
+      "names": {
+        "i-pop-0": 0,
+        "i-pop-2": 2,
+        "i-pop-3": 3,
+        "i-pop-4": 4,
+        "i-pop-5": 5
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Cartoon Weird Noise Short Mouth Popping 02",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Weird Noise Short Mouth Popping 02.wav"
+        },
+        {
+          "label": "Mixkit · Cartoon bubble pop",
+          "source": "mixkit-cartoon",
+          "file": "731 Cartoon bubble pop.wav"
+        }
+      ],
+      "windows": {},
+      "picks": {
+        "mem": 0,
+        "mixkit": 1
+      }
+    },
+    {
+      "id": "i-startle",
+      "label": "Giật mình (intro)",
+      "where": "Chấm thấy mình bị quay",
+      "names": {
+        "i-startle": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Foley Spring Thick Spring 02",
+          "source": "adobe-foley",
+          "file": "Foley Spring Thick Spring 02.wav"
+        },
+        {
+          "label": "Mixkit · Cartoon spring sound",
+          "source": "mixkit-cartoon",
+          "file": "736 Cartoon spring sound.wav",
+          "dur": 0.7,
+          "fade": 0.2
+        }
+      ],
+      "windows": {},
+      "picks": {
+        "mem": 0,
+        "mixkit": 1
+      }
+    },
+    {
+      "id": "i-land",
+      "label": "Đáp đất (intro)",
+      "where": "Nhảy xuống sàn",
+      "names": {
+        "i-land": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Foley Table Fist Hits Hollow Wood Table 08",
+          "source": "adobe-foley",
+          "file": "Foley Table Fist Hits Hollow Wood Table 08.wav"
+        },
+        {
+          "label": "Mixkit · Soft quick punch",
+          "source": "mixkit-cartoon",
+          "file": "2151 Soft quick punch.wav"
+        }
+      ],
+      "windows": {},
+      "picks": {
+        "mem": 0,
+        "mixkit": 1
+      }
+    },
+    {
+      "id": "i-boing",
+      "label": "Boing (intro)",
+      "where": "Nảy quá đà, bật vọt, búng khối",
+      "names": {
+        "i-boing": 0,
+        "i-boing-up": 3,
+        "i-boing-down": -3
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Cartoon Spring Twang 10",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Spring Twang 10.wav",
+          "dur": 0.9,
+          "fade": 0.3
+        },
+        {
+          "label": "Mixkit · Boing hit sound",
+          "source": "mixkit-cartoon",
+          "file": "2894 Boing hit sound.wav",
+          "dur": 0.9,
+          "fade": 0.3
+        }
+      ],
+      "windows": {},
+      "picks": {
+        "mem": 0,
+        "mixkit": 1
+      }
+    },
+    {
+      "id": "i-whoosh",
+      "label": "Vút (intro)",
+      "where": "Lộn nhào, sút thùng, vọt khỏi khung",
+      "names": {
+        "i-whoosh": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Foley Wood Two By Four Whipping 01",
+          "source": "adobe-foley",
+          "file": "Foley Wood Two By Four Whipping 01.wav"
+        },
+        {
+          "label": "Mixkit · Quick rope throw",
+          "source": "mixkit-cartoon",
+          "file": "730 Quick rope throw.mp3",
+          "dur": 0.8,
+          "fade": 0.2
+        }
+      ],
+      "windows": {},
+      "picks": {
+        "mem": 0,
+        "mixkit": 1
+      }
+    },
+    {
+      "id": "i-whoosh-soft",
+      "label": "Vút nhẹ (intro)",
+      "where": "Logo bay vào nav",
+      "names": {
+        "i-whoosh-soft": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Foley Stick Plastic Stick Whipping 01",
+          "source": "adobe-foley",
+          "file": "Foley Stick Plastic Stick Whipping 01.wav"
+        },
+        {
+          "label": "Mixkit · Cartoon air blow",
+          "source": "mixkit-cartoon",
+          "file": "2656 Cartoon air blow.wav",
+          "dur": 0.6,
+          "fade": 0.2
+        }
+      ],
+      "windows": {},
+      "picks": {
+        "mem": 0,
+        "mixkit": 1
+      }
+    },
+    {
+      "id": "i-rattle",
+      "label": "Mưa pixel (intro)",
+      "where": "Pixel đổ xuống lạch cạch",
+      "names": {
+        "i-rattle": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Foley Wood Rattle Short 02",
+          "source": "adobe-foley",
+          "file": "Foley Wood Rattle Short 02.wav",
+          "dur": 1.0,
+          "fade": 0.3
+        },
+        {
+          "label": "Mixkit · Silly pop cluster",
+          "source": "mixkit-cartoon",
+          "file": "2359 Silly pop cluster.wav",
+          "dur": 1.0,
+          "fade": 0.3
+        }
+      ],
+      "windows": {},
+      "picks": {
+        "mem": 0,
+        "mixkit": 1
+      }
+    },
+    {
+      "id": "i-block",
+      "label": "Ô về chỗ (intro)",
+      "where": "Pixel về cột, khối Trùng đá vào",
+      "names": {
+        "i-block-0": 0,
+        "i-block-1": 2,
+        "i-block-2": 4
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Foley Table Drop Into Place Plastic 01",
+          "source": "adobe-foley",
+          "file": "Foley Table Drop Into Place Plastic 01.wav",
+          "dur": 0.4,
+          "fade": 0.1
+        },
+        {
+          "label": "Mixkit · Hard pop click",
+          "source": "mixkit-cartoon",
+          "file": "2364 Hard pop click.wav",
+          "dur": 0.3,
+          "fade": 0.1
+        }
+      ],
+      "windows": {},
+      "picks": {
+        "mem": 0,
+        "mixkit": 1
+      }
+    },
+    {
+      "id": "i-stack",
+      "label": "Cột tự nhân đôi (intro)",
+      "where": "Cột cao dần dưới chân Trùng",
+      "names": {
+        "i-stack": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Foley Wood Table Drawer Sliding Open 01",
+          "source": "adobe-foley",
+          "file": "Foley Wood Table Drawer Sliding Open 01.wav",
+          "dur": 0.6,
+          "fade": 0.15
+        },
+        {
+          "label": "Mixkit · Spinning whistle toy",
+          "source": "mixkit-cartoon",
+          "file": "2647 Spinning whistle toy.wav",
+          "dur": 0.6,
+          "fade": 0.15
+        }
+      ],
+      "windows": {},
+      "picks": {
+        "mem": 0,
+        "mixkit": 1
+      }
+    },
+    {
+      "id": "i-kick",
+      "label": "Cú đá (intro)",
+      "where": "Chấm đá phần trùng, Lệch sút thùng",
+      "names": {
+        "i-kick": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Foley Table Fist Hits Wood Table 01",
+          "source": "adobe-foley",
+          "file": "Foley Table Fist Hits Wood Table 01.wav"
+        },
+        {
+          "label": "Mixkit · Cartoon punch",
+          "source": "mixkit-cartoon",
+          "file": "2149 Cartoon punch.wav"
+        }
+      ],
+      "windows": {},
+      "picks": {
+        "mem": 0,
+        "mixkit": 1
+      }
+    },
+    {
+      "id": "i-outlier",
+      "label": "Ngoại lai (intro)",
+      "where": "Lệch bị khoanh đỏ",
+      "names": {
+        "i-outlier": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Cartoon Trombone Slide 01",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Trombone Slide 01.wav",
+          "dur": 1.2,
+          "fade": 0.4
+        },
+        {
+          "label": "Mixkit · Trombone disappoint",
+          "source": "mixkit-cartoon",
+          "file": "744 Trombone disappoint.wav",
+          "dur": 1.3,
+          "fade": 0.4
+        }
+      ],
+      "windows": {},
+      "picks": {
+        "mem": 0,
+        "mixkit": 1
+      }
+    },
+    {
+      "id": "i-dizzy",
+      "label": "Choáng (intro)",
+      "where": "Trùng rơi xuống sàn, choáng",
+      "names": {
+        "i-dizzy": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Cartoon Metal Sheet Cartoon  Wobble 01",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Metal Sheet Cartoon  Wobble 01.wav"
+        },
+        {
+          "label": "Mixkit · Cartoon dazzle hit and birds",
+          "source": "mixkit-cartoon",
+          "file": "746 Cartoon dazzle hit and birds.wav",
+          "dur": 1.3,
+          "fade": 0.4
+        }
+      ],
+      "windows": {},
+      "picks": {
+        "mem": 0,
+        "mixkit": 1
+      }
+    },
+    {
+      "id": "i-success",
+      "label": "Đạt (intro)",
+      "where": "97.5%, sửa xong khối sai",
+      "names": {
+        "i-success": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Multimedia Internet CD-Rom Flash Animation Musical 08",
+          "source": "adobe-multimedia",
+          "file": "Multimedia Internet CD-Rom Flash Animation Musical 08.wav"
+        },
+        {
+          "label": "Mixkit · Cartoon positive sound",
+          "source": "mixkit-cartoon",
+          "file": "2255 Cartoon positive sound.wav",
+          "dur": 1.2,
+          "fade": 0.4
+        }
+      ],
+      "windows": {},
+      "picks": {
+        "mem": 0,
+        "mixkit": 1
+      }
+    },
+    {
+      "id": "i-fold",
+      "label": "Gập lại (intro)",
+      "where": "Biểu đồ gập thành màn hình, màn hình thành thùng",
+      "names": {
+        "i-fold": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Foley Movement Wood Slide On Wood Short 01",
+          "source": "adobe-foley",
+          "file": "Foley Movement Wood Slide On Wood Short 01.wav",
+          "dur": 0.8,
+          "fade": 0.2
+        },
+        {
+          "label": "Mixkit · Funny video game slide",
+          "source": "mixkit-cartoon",
+          "file": "2888 Funny video game slide.wav",
+          "dur": 0.8,
+          "fade": 0.2
+        }
+      ],
+      "windows": {},
+      "picks": {
+        "mem": 0,
+        "mixkit": 1
+      }
+    },
+    {
+      "id": "i-hammer",
+      "label": "Búa (intro)",
+      "where": "Lệch nện búa quá tay",
+      "names": {
+        "i-hammer": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Cartoon Frying Pan Cartoon  Pan Hit 02",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Frying Pan Cartoon  Pan Hit 02.wav",
+          "dur": 0.7,
+          "fade": 0.3
+        },
+        {
+          "label": "Mixkit · Metallic boing hit",
+          "source": "mixkit-cartoon",
+          "file": "2895 Metallic boing hit.wav",
+          "dur": 0.7,
+          "fade": 0.3
+        }
+      ],
+      "windows": {},
+      "picks": {
+        "mem": 0,
+        "mixkit": 1
+      }
+    },
+    {
+      "id": "i-magic",
+      "label": "AI lấp đầy (intro)",
+      "where": "Húc chip, ô tuôn ra",
+      "names": {
+        "i-magic": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Multimedia Internet CD-Rom Flash Animation Musical 15",
+          "source": "adobe-multimedia",
+          "file": "Multimedia Internet CD-Rom Flash Animation Musical 15.wav",
+          "dur": 1.2,
+          "fade": 0.4
+        },
+        {
+          "label": "Mixkit · Kids cartoon close bells",
+          "source": "mixkit-cartoon",
+          "file": "2256 Kids cartoon close bells.wav",
+          "dur": 1.4,
+          "fade": 0.4
+        }
+      ],
+      "windows": {},
+      "picks": {
+        "mem": 0,
+        "mixkit": 1
+      }
+    },
+    {
+      "id": "i-error",
+      "label": "Bắt lỗi (intro)",
+      "where": "Kính lúp thấy khối sai",
+      "names": {
+        "i-error": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Cartoon Bottle Blow Bottle 01",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Bottle Blow Bottle 01.wav",
+          "dur": 0.6,
+          "fade": 0.2
+        },
+        {
+          "label": "Mixkit · Cartoon clown fun nose sound",
+          "source": "mixkit-cartoon",
+          "file": "528 Cartoon clown fun nose sound.wav"
+        }
+      ],
+      "windows": {},
+      "picks": {
+        "mem": 0,
+        "mixkit": 1
+      }
+    },
+    {
+      "id": "i-stamp",
+      "label": "Đóng dấu (intro)",
+      "where": "Trùng đáp lên nóc thùng",
+      "names": {
+        "i-stamp": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Foley Table Fist Hits Wood Table 06",
+          "source": "adobe-foley",
+          "file": "Foley Table Fist Hits Wood Table 06.wav"
+        },
+        {
+          "label": "Mixkit · Cartoon punch",
+          "source": "mixkit-cartoon",
+          "file": "2149 Cartoon punch.wav"
+        }
+      ],
+      "windows": {},
+      "picks": {
+        "mem": 0,
+        "mixkit": 1
+      }
+    },
+    {
+      "id": "i-fall",
+      "label": "Còi rơi (intro)",
+      "where": "Lệch rơi về ô — tiếng kết thúc đúng lúc chạm",
+      "names": {
+        "i-fall": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Cartoon Trombone Slide 01",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Trombone Slide 01.wav",
+          "dur": 0.9,
+          "fade": 0.1,
+          "lead": 0.9
+        },
+        {
+          "label": "Mixkit · Cartoon falling whistle",
+          "source": "mixkit-cartoon",
+          "file": "395 Cartoon falling whistle.wav",
+          "start": 1.2,
+          "dur": 1.0,
+          "fade": 0.1,
+          "lead": 1.0,
+          "notrim": true
+        }
+      ],
+      "windows": {},
+      "picks": {
+        "mem": 0,
+        "mixkit": 1
+      }
+    },
+    {
+      "id": "i-impact",
+      "label": "Rơi uỵch (intro)",
+      "where": "Lệch đáp, cả lưới rung",
+      "names": {
+        "i-impact": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Cartoon Drum Bass 01",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Drum Bass 01.wav",
+          "dur": 0.8,
+          "fade": 0.4
+        },
+        {
+          "label": "Mixkit · Cartoon blow impact",
+          "source": "mixkit-cartoon",
+          "file": "2654 Cartoon blow impact.wav",
+          "dur": 1.0,
+          "fade": 0.4
+        }
+      ],
+      "windows": {},
+      "picks": {
+        "mem": 0,
+        "mixkit": 1
+      }
+    },
+    {
+      "id": "i-tick",
+      "label": "Tích tắc (intro)",
+      "where": "Đường chéo logo quay như kim đồng hồ",
+      "names": {
+        "i-tick": -5
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Cartoon Weird Noise Short Mouth Popping 02",
+          "source": "adobe-cartoon",
+          "file": "Cartoon Weird Noise Short Mouth Popping 02.wav"
+        },
+        {
+          "label": "Mixkit · Hard pop click",
+          "source": "mixkit-cartoon",
+          "file": "2364 Hard pop click.wav",
+          "dur": 0.1,
+          "fade": 0.03
+        }
+      ],
+      "windows": {},
+      "picks": {
+        "mem": 0,
+        "mixkit": 1
+      }
+    },
+    {
+      "id": "i-chime",
+      "label": "Kết (intro)",
+      "where": "Logo đáp khít logo nav",
+      "names": {
+        "i-chime": 0
+      },
+      "chosen": 0,
+      "candidates": [
+        {
+          "label": "Multimedia Internet CD-Rom Flash Animation Musical 14",
+          "source": "adobe-multimedia",
+          "file": "Multimedia Internet CD-Rom Flash Animation Musical 14.wav"
+        },
+        {
+          "label": "Mixkit · Cartoon door melodic bell",
+          "source": "mixkit-cartoon",
+          "file": "110 Cartoon door melodic bell.wav",
+          "dur": 1.6,
+          "fade": 0.6
+        }
+      ],
+      "windows": {},
+      "picks": {
+        "mem": 0,
+        "mixkit": 1
       }
     }
   ],

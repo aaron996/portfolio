@@ -15,13 +15,12 @@ import { useEffect, useRef } from "react";
 import { content } from "@/content/content.vi";
 import { arc, toFrame, trackGaze, type Pose } from "@/components/home/heroBuddies";
 import { readProgress } from "@/components/home/reading";
-import { companions, useCompanions, type Spot } from "./store";
+import { companions, LOGO_CELLS, useCompanions, type Spot } from "./store";
 import { createFight } from "./fight";
 
 const LEAVE_BELOW = 0.3; // hero còn hiện dưới mức này → rời hero
 const RETURN_ABOVE = 0.5; // hero hiện quá mức này → về hero
 const STAGGER = [0, 140, 70]; // Chấm đi trước, Lệch theo ngay, Trùng chậm nửa nhịp
-const LOGO_CELLS = [4, 6, 2]; // ô trong logo 3×3 của Chấm, Trùng, Lệch
 /* Khớp với CSS `.cp-chart[data-lead]`: đường nghề chờ Chấm nhảy tới đầu đường rồi
    mới vẽ, và Chấm chạy cùng easing/thời lượng với nét vẽ. */
 export const RIDE_LEAD = 600;

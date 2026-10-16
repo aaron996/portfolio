@@ -74,6 +74,9 @@ html:has(.hs-stage[data-welcome="pending"]) { overflow: hidden; scrollbar-gutter
 /* Mấy ô "lạc" sau khi sắp xong — vị trí do heroBuddies.ts điều khiển. */
 .hs-buddies { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
 .hs-buddies[data-hidden="true"] { visibility: hidden; }
+/* Chấm và Lệch nhảy từ logo trên nav xuống: bỏ khung cắt và cho lớp nhân vật nằm trên nav. */
+.hs-stage[data-drop="true"] { overflow: visible; }
+.hs-stage[data-drop="true"] .hs-buddies { z-index: 60; }
 /* Bạn đồng hành ngoài hero (components/companions): một lớp cố định (nav, logo) và
    một lớp theo toạ độ tài liệu (bám nội dung, cuộn theo trang). */
 .cmp-fixed { position: fixed; inset: 0; z-index: 55; pointer-events: none; }

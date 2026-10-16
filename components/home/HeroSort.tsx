@@ -4,9 +4,9 @@ import { HeroMV } from "./HeroMV";
 import { useEffect, useRef, useState } from "react";
 import { content } from "@/content/content.vi";
 import { PortfolioIcon } from "@/components/portfolio/PortfolioIcon";
-import { companions, useCompanions } from "@/components/companions/store";
-import { INTRO_STATE_EVENT } from "@/components/portfolio/IntroVideo";
-import { createBuddies, measureDot, popBubble, trackGaze, type ChartGeometry, type Kick, type Misfit } from "./heroBuddies";
+import { companions, LOGO_CELLS, useCompanions } from "@/components/companions/store";
+import { INTRO_STATE_EVENT } from "@/components/portfolio/Intro";
+import { createBuddies, measureDot, popBubble, trackGaze, type ChartGeometry, type Kick, type Misfit, type Pose } from "./heroBuddies";
 
 const hero = content.prototype.hero;
 const copy = content.home.sort;
@@ -32,16 +32,15 @@ const WELCOME_TIMEOUT = 12000;
 /* Cố cuộn lúc màn chào đang diễn: trang giãn như dây thun, Lệch quay lại "Suỵt!". */
 const HUSH_GAP = 1200;
 
-/* Ba ô "lạc" — xếp xong vẫn nằm sai chỗ, rồi bị đá văng ra thành nhân vật.
-   Thứ tự khớp .hs-buddy: 0 Chấm (nghiêng trên cột 4), 1 Trùng (chồng lệch lên Chấm
-   như một bản sao), 2 Lệch (ô xanh lạc trên cột đen). dx, dy tính theo bước lưới. */
+/* Ô "lạc" — xếp xong vẫn nằm trong biểu đồ, rồi bị đá văng ra thành nhân vật. Chỉ còn
+   Trùng (buddy 1, khớp thứ tự .hs-buddy): là bản sao nên nằm thẳng hàng như một ô thừa
+   trên đỉnh cột 4, không ai nhận ra. Chấm và Lệch thì nhảy từ logo trên nav xuống.
+   dx, dy tính theo bước lưới. */
 const MISFITS = [
-  { bar: 4, dx: 0.5, dy: 0, tilt: 12, green: false },
-  { bar: 4, dx: 0.85, dy: -0.3, tilt: -6, green: false },
-  { bar: 6, dx: 0.4, dy: 0, tilt: -10, green: true },
+  { buddy: 1, bar: 4, dx: 1, dy: 0, tilt: 0, green: false },
 ];
 /* Ô đỉnh của cột bên phải lấy đà rồi thúc vào ô lạc. */
-const KICKS: Kick[] = [{ bar: 5, victims: [0, 1] }, { bar: 7, victims: [2] }];
+const KICKS: Kick[] = [{ bar: 5, victims: [1] }];
 
 const COLORS = { loose: "rgba(22,22,20,0.22)", sorted: "#161614", highlight: "#1f5a3d", brush: "rgba(31,90,61,0.35)" };
 
@@ -59,6 +58,8 @@ type Api = {
   misfits: () => Misfit[];
   hideMisfits: (hide: boolean) => void;
   kick: (bar: number, victims: number[]) => Promise<void>;
+  leaveHome: () => void;
+  unclip: (on: boolean) => void;
 };
 
 /* Cú đá: lấy đà lùi 45% (150ms) → thúc tới (90ms, chạm ô lạc ở cuối nhịp này) → về chỗ. */
@@ -68,6 +69,17 @@ function nudgeAt(n: NonNullable<Cell["nudge"]>, now: number) {
   if (t >= 490) return null;
   const k = t < 150 ? -0.45 * (t / 150) : t < KICK_IMPACT ? -0.45 + 1.45 * ((t - 150) / 90) : 1 - (t - KICK_IMPACT) / 250;
   return { x: n.vx * k, y: n.vy * k };
+}
+
+/** Chỗ của Chấm (0) và Lệch (2) trong logo trên nav, quy về toạ độ sân khấu hero. */
+function logoPoses(stage: HTMLElement, size: number): (Pose | null)[] {
+  const rects = document.querySelectorAll(".home-brand svg rect");
+  if (rects.length < 9) return [null, null, null];
+  const s = stage.getBoundingClientRect();
+  return LOGO_CELLS.map(c => {
+    const r = rects[c].getBoundingClientRect();
+    return { x: r.left - s.left + r.width / 2, y: r.bottom - s.top, sx: r.width / size, sy: r.width / size };
+  });
 }
 
 export function HeroSort() {
@@ -93,6 +105,8 @@ export function HeroSort() {
   const [cue, setCue] = useState(true);
   const { enabled } = useCompanions();
   const playedRef = useRef(false);
+  // Rời trang chủ thì logo ở trang khác không còn ô trống của Trùng.
+  useEffect(() => () => companions.set({ absent: [] }), []);
 
   /* CSS đã chặn cuộn; còn phím tắt và cuộn khôi phục của trình duyệt thì vẫn có thể kéo
      trang đi — đưa về đầu. Nhưng không nhốt người xem:
@@ -240,7 +254,7 @@ export function HeroSort() {
           }
         }
       });
-      MISFITS.forEach((m, misfit) => targets.push({
+      MISFITS.forEach(({ buddy: misfit, ...m }) => targets.push({
         tx: region.left + (m.bar * (BAR_COLS + 1) + m.dx) * pitch,
         ty: region.base - (BAR_HEIGHTS[m.bar] + 1 + m.dy) * pitch,
         bar: m.green ? HIGHLIGHT_BAR : m.bar, misfit, tilt: m.tilt,
@@ -420,8 +434,10 @@ export function HeroSort() {
       }),
       misfits: () => cells.filter(c => c.misfit !== undefined)
         .sort((p, q) => p.misfit! - q.misfit!)
-        .map(c => ({ x: c.tx + size / 2, y: c.ty + size, r: c.tilt ?? 0, cell: size })),
+        .map(c => ({ buddy: c.misfit!, x: c.tx + size / 2, y: c.ty + size, r: c.tilt ?? 0, cell: size })),
       hideMisfits: hide => { cells.forEach(c => { if (c.misfit !== undefined) c.hidden = hide; }); start(); },
+      leaveHome: () => companions.set({ place: "hero", absent: [] }),
+      unclip: on => { stage.dataset.drop = on ? "true" : "false"; },
       kick: (bar, victims) => {
         const now = performance.now();
         const tops = topCells(bar);
@@ -466,7 +482,8 @@ export function HeroSort() {
       api.hideMisfits(!enabled);
       // Tắt bạn đồng hành thì không còn màn chào nào để chờ.
       if (!enabled) setWelcomed(true);
-      if (!done) { playedRef.current = false; companions.set({ place: "home", heroReady: false }); }
+      // Trùng lẻn khỏi logo vào biểu đồ từ trước; ô của nó trên nav trống cho tới màn chào.
+      if (!done) { playedRef.current = false; companions.set({ place: "home", heroReady: false, absent: enabled ? [1] : [] }); }
       // Không có bạn đồng hành thì không ai bật màn hình: hiện MV ngay khi sắp xong.
       mvShownRef.current = done; setMvShown(done);
       return;
@@ -501,11 +518,11 @@ export function HeroSort() {
       await document.fonts.ready;
       await api.whenSettled();
       if (ctrl.signal.aborted) return;
-      companions.set({ place: "hero", heroReady: false });
+      companions.set({ heroReady: false });
       // Đã diễn một lần (vd. tắt rồi bật lại) thì đặt thẳng vào tư thế cuối.
       const replay = playedRef.current;
-      if (reduced || replay) { mvShownRef.current = true; setMvShown(true); placeAll(); }
-      else await buddies.play(geo, measureDot(iEl, stage), api.misfits(), KICKS, api, ctrl.signal);
+      if (reduced || replay) { companions.set({ place: "hero", absent: [] }); mvShownRef.current = true; setMvShown(true); placeAll(); }
+      else await buddies.play(geo, measureDot(iEl, stage), logoPoses(stage, geo.size), api.misfits(), KICKS, api, ctrl.signal);
       if (ctrl.signal.aborted) return;
       playedRef.current = true;
       stopGaze = trackGaze(gazes, geo.size, stage);
@@ -529,7 +546,7 @@ export function HeroSort() {
     // Đổi kích thước sau khi đã yên vị thì đặt lại cho khớp chữ I và sàn mới.
     const ro = new ResizeObserver(() => { if (parts.bodies[0].dataset.settled) placeAll(); });
     ro.observe(stage);
-    return () => { ctrl.abort(); ro.disconnect(); stopGaze(); buddies.reset(); companions.registerHero(null); };
+    return () => { ctrl.abort(); ro.disconnect(); stopGaze(); buddies.reset(); stage.dataset.drop = "false"; companions.registerHero(null); };
   }, [done, enabled]);
 
   const [a, b, c, d] = hero.headlineLines;

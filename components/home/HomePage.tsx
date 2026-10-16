@@ -1,5 +1,5 @@
 import { portfolioFontVariables } from "@/components/portfolio/PortfolioFonts";
-import { IntroVideo } from "@/components/portfolio/IntroVideo";
+import { Intro } from "@/components/portfolio/Intro";
 import { SiteNav } from "./SiteNav";
 import { HeroSort } from "./HeroSort";
 import { WorkIndex } from "./WorkIndex";
@@ -11,7 +11,7 @@ import "./home.css";
 
 export function HomePage() {
   return <div id="top" className={`home ${portfolioFontVariables}`}>
-    <IntroVideo />
+    <Intro />
     <SiteNav />
 
     <main id="main" tabIndex={-1}>
