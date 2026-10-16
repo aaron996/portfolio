@@ -1,7 +1,7 @@
 "use client";
 
 import { content } from "@/content/content.vi";
-import { INTRO_REPLAY_EVENT } from "./IntroVideo";
+import { INTRO_REPLAY_EVENT } from "./Intro";
 import { PortfolioIcon } from "./PortfolioIcon";
 import "./intro.css";
 

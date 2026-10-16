@@ -12,6 +12,8 @@ const FILMS = {
   cod: { module: './components/motion/cod/CodFilm', cues: 'COD_CUES', frames: 'COD_FILM_FRAMES' },
   warehouse: { module: './components/motion/warehouse/WarehouseFilm', cues: 'WAREHOUSE_CUES', frames: 'WAREHOUSE_FILM_FRAMES' },
   shopee: { module: './components/motion/shopee/ShopeeFilm', cues: 'SHOPEE_CUES', frames: 'SHOPEE_FILM_FRAMES' },
+  // Intro trang chủ: mốc đã quy sẵn ra khung 30fps theo giờ thật (components/portfolio/introClock).
+  intro: { module: './components/portfolio/introSfx', cues: 'INTRO_CUES', frames: 'INTRO_FRAMES' },
 };
 
 function filmCues(name) {

@@ -4,12 +4,17 @@
    - enabled: người xem có muốn thấy chúng không — nhớ bằng localStorage.
    - place: ba ô đang ở đâu. "home" = trong logo, "hero" = trên sân khấu hero,
      "dock" = đứng trên mép dưới nav, đi theo người xem.
-   - heroReady: màn mở đầu ở hero đã diễn xong, ba ô sẵn sàng rời đi. */
+   - heroReady: màn mở đầu ở hero đã diễn xong, ba ô sẵn sàng rời đi.
+   - absent: ô vắng khỏi logo dù cả nhóm đang "home" — trang chủ: Trùng đã lẻn vào
+     biểu đồ hero từ trước, nên ô của nó trống. */
 
 import { useSyncExternalStore } from "react";
 
 export type Place = "home" | "hero" | "dock";
-export type CompanionState = { enabled: boolean; place: Place; heroReady: boolean };
+export type CompanionState = { enabled: boolean; place: Place; heroReady: boolean; absent: number[] };
+
+/** Ô trong logo 3×3 của Chấm, Trùng, Lệch (thứ tự 0, 1, 2). */
+export const LOGO_CELLS = [4, 6, 2];
 
 /** Điểm giữa-đáy của một ô theo toạ độ viewport, kèm cạnh ô đang hiển thị. */
 export type Spot = { x: number; y: number; size: number };
@@ -23,7 +28,7 @@ export type HeroBridge = {
 };
 
 const KEY = "companions";
-const SERVER: CompanionState = { enabled: true, place: "home", heroReady: false };
+const SERVER: CompanionState = { enabled: true, place: "home", heroReady: false, absent: [] };
 
 function readEnabled() {
   try { return localStorage.getItem(KEY) !== "off"; } catch { return true; }

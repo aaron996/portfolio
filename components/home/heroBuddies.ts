@@ -1,7 +1,8 @@
 /* Hoạt cảnh sau khi sắp xong (kịch bản đầy đủ: docs/companions.md).
-   Biểu đồ xếp xong vẫn còn 3 ô nằm sai chỗ — Chấm, Trùng, Lệch. Ô đỉnh của cột
-   bên cạnh đá văng chúng xuống sàn; chúng đứng dậy, ngó nghiêng hoang mang, rồi
-   Chấm chạy lên làm dấu chấm cho chữ "I" trong THINGS. Trùng và Lệch ở lại sàn.
+   Chấm và Lệch nhảy từ logo trên nav xuống sàn, đếm quân thấy thiếu một. Trùng nằm
+   lẫn trong biểu đồ như một ô thừa — hé mắt thì bị phát hiện, ô đỉnh cột bên cạnh đá
+   nó văng xuống sàn. Rồi Chấm chạy lên làm dấu chấm cho chữ "I" trong THINGS. Trùng
+   và Lệch ở lại sàn.
 
    Toạ độ mọi keyframe là điểm giữa-đáy của ô (transform-origin: 50% 100%), tính
    theo khung `.hs-stage`. Thứ tự ô: 0 Chấm, 1 Trùng, 2 Lệch. */
@@ -12,14 +13,18 @@ export type ChartGeometry = {
   narrow: boolean;
 };
 
-/** Ô lạc lúc còn nằm trên biểu đồ: điểm giữa-đáy, góc nghiêng, cạnh ô trên canvas. */
-export type Misfit = { x: number; y: number; r: number; cell: number };
+/** Ô lạc lúc còn nằm trên biểu đồ: bạn nào, điểm giữa-đáy, góc nghiêng, cạnh ô trên canvas. */
+export type Misfit = { buddy: number; x: number; y: number; r: number; cell: number };
 
 /** Những việc canvas làm hộ: giấu ô lạc khi DOM thế chỗ, và cho ô đỉnh cột "đá". */
 export type Stagehand = {
   hideMisfits: (hide: boolean) => void;
   /** Trả về đúng lúc chân chạm ô bị đá. */
   kick: (bar: number, victims: number[]) => Promise<void>;
+  /** Hai ô vừa rời logo: nav đổi chỗ của chúng thành ô trống. */
+  leaveHome: () => void;
+  /** Bỏ khung cắt của sân khấu trong lúc hai ô bay từ nav xuống. */
+  unclip: (on: boolean) => void;
 };
 
 export type Kick = { bar: number; victims: number[] };
@@ -182,49 +187,82 @@ export function createBuddies(parts: BuddyParts, size: number) {
     el.dataset.settled = "true";
   }
 
-  async function play(geo: ChartGeometry, dot: ReturnType<typeof measureDot>, misfits: Misfit[], kicks: Kick[], hand: Stagehand, signal: AbortSignal) {
+  /** `logo`: chỗ của Chấm (0) và Lệch (2) trong logo trên nav, đã quy về toạ độ sân khấu
+   *  (sx/sy = cỡ ô logo so với cỡ nhân vật); null thì rơi từ mép trên xuống. */
+  async function play(geo: ChartGeometry, dot: ReturnType<typeof measureDot>, logo: (Pose | null)[], misfits: Misfit[], kicks: Kick[], hand: Stagehand, signal: AbortSignal) {
     const { bodies, eyes, confused, spotted } = parts;
     const spots = floorSpots(geo, size);
-    const start: Pose[] = misfits.map(m => ({ x: m.x, y: m.y, r: m.r, sx: m.cell / size, sy: m.cell / size }));
+    const start: Pose[] = [];
+    misfits.forEach(m => { start[m.buddy] = { x: m.x, y: m.y, r: m.r, sx: m.cell / size, sy: m.cell / size }; });
+    const hiding = misfits.map(m => m.buddy);
+    const jumpers = [0, 1, 2].filter(i => !hiding.includes(i));
 
-    // 0. DOM thế chỗ ba ô lạc trên canvas; chúng hé mắt, ngó sang bên phải nghe ngóng.
-    await Promise.all(bodies.map((el, i) => move(el, [start[i], start[i]], 1)));
+    // 0. DOM thế chỗ ô lạc trên canvas — Trùng nhắm mắt, nằm lẫn như mọi ô khác.
+    await Promise.all(hiding.map(i => move(bodies[i], [start[i], start[i]], 1)));
     hand.hideMisfits(true);
-    await wait(350, signal);
-    eyes.forEach(eye => fade(eye, 1, 150));
-    await Promise.all(eyes.map(eye => look(eye, ["translateX(0)", "translateX(30%)"], 240)));
-    await wait(380, signal);
 
-    // 1. Từng cú đá: ô bị đá nhắm mắt, lộn vòng bay xuống sàn, đáp bẹp dí.
-    const landed: Promise<void>[] = [];
+    // 1. Chấm rồi Lệch nhảy ra khỏi logo, lớn dần từ cỡ ô logo lên cỡ nhân vật.
+    const exits = jumpers.map(i => logo[i] ?? { x: spots[i].x, y: -size, sx: 1, sy: 1 });
+    hand.unclip(true);
+    await Promise.all(jumpers.map((i, n) => move(bodies[i], [exits[n], exits[n]], 1)));
+    jumpers.forEach(i => fade(eyes[i], 1, 1));
+    await wait(200, signal);
+    hand.leaveHome();
+    await Promise.all(jumpers.map(async (i, n) => {
+      await wait(n * 260, signal);
+      const p = spots[i];
+      if (i !== 2) {
+        await move(bodies[i], tumble(exits[n], p, size * 1.6, 0), 760);
+        await move(bodies[i], [{ ...p, sx: 1.4, sy: 0.6 }, { ...p }], 180, "ease-out");
+        return;
+      }
+      // Lệch: lộn một vòng, đáp quá đà ra xa rồi mới nhảy lùi về chỗ.
+      const over = { x: Math.max(size * 0.7, p.x - size * 1.6), y: p.y };
+      await move(bodies[i], tumble(exits[n], over, size * 2.5, -360), 820);
+      await move(bodies[i], [{ ...over, sx: 1.45, sy: 0.55 }, { ...over }], 150, "ease-out");
+      await move(bodies[i], arc(over, p, size * 0.9, 10), 300);
+      await move(bodies[i], [{ ...p, sx: 1.25, sy: 0.75 }, { ...p }], 140, "ease-out");
+    }));
+    hand.unclip(false);
+    await wait(200, signal);
+
+    // 2. Đếm quân: Chấm nhìn Lệch, ngước lên logo — thiếu một. Cả hai ngó nghiêng.
+    await look(eyes[0], ["translate(0, 0)", "translate(-30%, 0)"], 200);
+    await wait(180, signal);
+    await look(eyes[0], ["translate(-30%, 0)", "translate(-30%, -35%)"], 220);
+    pop(confused, { x: spots[0].x - 4, y: spots[0].y - size * 2.2 }, 1100);
+    await wait(200, signal);
+    await Promise.all(jumpers.map((i, n) => Promise.all([
+      look(eyes[i], ["translate(0, 0)", "translateX(-28%)", "translateX(-28%)", "translateX(28%)", "translateX(28%)", "translateX(0)"], 900 + n * 120),
+      move(bodies[i], [{ ...spots[i] }, { ...spots[i], r: -7 }, { ...spots[i], r: 7 }, { ...spots[i], r: -4 }, { ...spots[i] }], 900 + n * 120, "ease-in-out"),
+    ])));
+
+    // 3. Trùng hé mắt trong biểu đồ, liếc xuống hai bạn. Lệch thấy trước — "!".
+    hiding.forEach(i => { fade(eyes[i], 1, 160); look(eyes[i], ["translate(0, 0)", "translate(-30%, 25%)"], 260); });
+    await wait(350, signal);
+    pop(spotted, { x: spots[2].x - 2, y: spots[2].y - size * 2.2 }, 700);
+    jumpers.forEach(i => look(eyes[i], ["translate(0, 0)", "translate(30%, -30%)"], 160));
+    await move(bodies[2], [{ ...spots[2] }, { ...spots[2], y: spots[2].y - size * 0.8 }, { ...spots[2] }], 280, "ease-out");
+    await wait(300, signal);
+
+    // 4. Ô đỉnh cột bên cạnh đá Trùng văng xuống sàn; đáp bẹp dí rồi đứng dậy.
     for (const kick of kicks) {
       await hand.kick(kick.bar, kick.victims);
-      landed.push(...kick.victims.map(async (v, n) => {
-        await wait(n * 70, signal);
+      await Promise.all(kick.victims.map(async v => {
         fade(eyes[v], 0, 60);
-        const far = v === 2;
-        await move(bodies[v], tumble(start[v], spots[v], size * (far ? 4.5 : 3), far ? -540 : -360), far ? 820 : 660);
+        await move(bodies[v], tumble(start[v], spots[v], size * 3, -360), 700);
         await move(bodies[v], [{ ...spots[v], sx: 0.9, sy: 1.15 }, { ...spots[v], sx: 1.45, sy: 0.5 }], 90, "ease-out");
       }));
-      await wait(420, signal);
     }
-    await Promise.all(landed);
-    await wait(500, signal);
-
-    // 2. Đứng dậy, mở mắt.
-    await Promise.all(bodies.map((el, i) => move(el, [
+    jumpers.forEach(i => look(eyes[i], ["translate(30%, -30%)", "translate(0, 0)"], 200));
+    await wait(300, signal);
+    await Promise.all(hiding.map(i => move(bodies[i], [
       { ...spots[i], sx: 1.45, sy: 0.5 }, { ...spots[i], sx: 0.9, sy: 1.15 }, { ...spots[i] },
     ], 320, "ease-out")));
-    eyes.forEach(eye => { look(eye, ["translateX(0)"], 1); fade(eye, 1, 160); });
+    hiding.forEach(i => { look(eyes[i], ["translate(0, 0)"], 1); fade(eyes[i], 1, 160); });
+    await wait(300, signal);
 
-    // 3. Ngó nghiêng hoang mang.
-    pop(confused, { x: spots[0].x - 4, y: spots[0].y - size * 2.2 }, 1300);
-    await Promise.all([
-      ...eyes.map((eye, i) => look(eye, ["translateX(0)", "translateX(-28%)", "translateX(-28%)", "translateX(28%)", "translateX(28%)", "translateX(0)"], 1300 + i * 120)),
-      ...bodies.map((el, i) => move(el, [{ ...spots[i] }, { ...spots[i], r: -7 }, { ...spots[i], r: 7 }, { ...spots[i], r: -4 }, { ...spots[i] }], 1300 + i * 120, "ease-in-out")),
-    ]);
-
-    // 4. Chấm nhìn thấy chữ I.
+    // 5. Chấm nhìn thấy chữ I.
     const leader = bodies[0];
     const goal = { x: dot.x, y: dot.y };
     look(eyes[0], ["translate(0, 0)", "translate(-30%, -30%)"], 200);
@@ -232,7 +270,7 @@ export function createBuddies(parts: BuddyParts, size: number) {
     await move(leader, [{ ...spots[0] }, { ...spots[0], y: spots[0].y - size * 0.6 }, { ...spots[0] }], 260, "ease-out");
     await wait(200, signal);
 
-    // 5. Chạy: vài bước nhảy trên sàn rồi một cú nhảy lớn lên đỉnh chữ I.
+    // 6. Chạy: vài bước nhảy trên sàn rồi một cú nhảy lớn lên đỉnh chữ I.
     const hops = geo.narrow ? 0 : 3;
     const launch = { x: spots[0].x + (goal.x - spots[0].x) * 0.45, y: spots[0].y };
     const path: Pose[] = [];
@@ -255,14 +293,14 @@ export function createBuddies(parts: BuddyParts, size: number) {
     })();
     await move(leader, path, hops * 230 + 620);
 
-    // 6. Đáp xuống, bẹp một nhịp, rồi phồng ra cho bằng nét chữ.
+    // 7. Đáp xuống, bẹp một nhịp, rồi phồng ra cho bằng nét chữ.
     const k = dot.stem / size;
     await move(leader, [{ ...goal }, { ...goal, sx: 1.3, sy: 0.65 }, { ...goal, sx: k * 0.9, sy: k * 1.1 }, { ...goal, sx: k, sy: k }], 420, "ease-out");
     look(eyes[0], ["translate(-30%, -30%)", "translate(0, 0)"], 200);
     leader.dataset.settled = "true";
     await follow;
 
-    // 7. Trùng và Lệch nhảy cổ vũ rồi đứng lại dưới sàn.
+    // 8. Trùng và Lệch nhảy cổ vũ rồi đứng lại dưới sàn.
     await Promise.all(bodies.slice(1).map(async (el, i) => {
       const p = spots[i + 1];
       await wait(i * 120, signal);

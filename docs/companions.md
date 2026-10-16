@@ -30,10 +30,12 @@ Nhà của chúng là logo 3×3 — logo có đúng 3 ô sáng. Cuối trang ch�
 
 ### Trang chủ
 
-1. **Hero — ra đời** *(đã dựng)*. Biểu đồ xếp xong vẫn còn 3 ô nằm sai chỗ: Chấm nằm
-   nghiêng trên cột 4, Trùng chồng lệch lên Chấm như bản sao, Lệch là ô xanh lạc trên
-   cột đen 6. Chúng hé mắt nghe ngóng thì ô đỉnh của cột bên phải lấy đà và đá văng
-   chúng xuống sàn bên trái biểu đồ (Lệch văng xa nhất). Đứng dậy, ngó nghiêng, "?".
+1. **Hero — ra đời** *(đã dựng; đoạn mở đổi 2026-10-16 cho khớp intro mới, `docs/intro-motion.md`)*.
+   Trước màn chào, ô của Trùng trong logo trên nav đã trống (`absent` trong store) — nó lẻn
+   vào biểu đồ, nằm thẳng hàng như một ô thừa trên đỉnh cột 4. Biểu đồ xếp xong thì Chấm
+   rồi Lệch nhảy từ logo xuống sàn bên trái (Lệch lộn vòng, đáp quá đà rồi lùi lại). Đếm
+   quân, ngước lên logo, "?", ngó nghiêng. Trùng hé mắt trong biểu đồ, Lệch thấy trước
+   ("!"), ô đỉnh cột bên phải lấy đà đá Trùng văng xuống sàn.
    Chấm thấy chữ I ("!"), nhảy lên làm dấu chấm → "THİNGS". Trùng chạy theo vài bước
    rồi khựng lại. Trùng và Lệch nhảy cổ vũ rồi đứng lại dưới sàn. Sau đó cả ba **nhìn
    theo con trỏ** khi người xem còn ở hero — Lệch quay nhanh, Trùng chậm nửa nhịp.

@@ -594,9 +594,20 @@ export interface PortfolioPrototype {
     headlineLines: [string, string, string, string];
   };
   labels: { skip: string; navigation: string };
-  /** Video intro phủ toàn màn hình khi mở trang chủ (một lần mỗi phiên). `countdown` chứa {s} = số giây còn lại. */
+  /** Intro motion phủ toàn màn hình khi mở trang chủ (một lần mỗi phiên). Kịch bản: docs/intro-motion.md. */
   intro: {
-    src: string; label: string; skip: string; soundOn: string; soundOff: string;
-    play: string; enter: string; countdown: string; replay: string;
+    label: string; skip: string; replay: string; soundOn: string; soundOff: string;
+    /** Teaser video cũ — phát trước, cắt ở nhịp đen rồi nối vào phim mới. */
+    video: string;
+    /** Bản trộn tiếng hiệu ứng của phim mới (scripts/motion-sfx.py --film intro). */
+    sfx: string;
+    /** Bong bóng thoại trong phim — tối đa một ký tự hoặc hai từ. */
+    bubbles: { startled: string };
+    /** Chữ lớn dưới sàn, mỗi màn một câu (tiếng Anh như teaser cũ). */
+    captions: { analyze: string; build: string; ship: string };
+    /** Con số cột cuối vọt lên ở màn Phân tích — case 3PL, pickup on-time. */
+    stat: { from: number; to: number; suffix: string };
+    /** Màn ký tên cuối phim: tên và bốn chữ bật lần lượt, nối bằng `sep`. */
+    signature: { name: string; roles: [string, string, string, string]; sep: string };
   };
 }

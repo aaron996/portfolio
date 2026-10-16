@@ -8,9 +8,10 @@ cùng ứng viên của từng chỗ đều ở docs/motion-audio-sources.json.
     python scripts/motion-sfx.py --audition    # ứng viên → output/motion-audio/audition/ (chỉ ở máy)
     python scripts/motion-sfx.py --variants    # mỗi phim × mỗi phong cách → output/motion-audio/variants/
     python scripts/motion-sfx.py               # trộn → public/motion/<phim>-sfx.mp3
+    python scripts/motion-sfx.py --film intro --style mixkit   # một phong cách → variants/ để so
 
 Mỗi slot chọn tiếng theo phong cách (`picks`: "vui" hoạt hình, "gon" hiện đại gọn; thiếu thì dùng
-`chosen`); phim dùng phong cách ghi ở films.<phim>.style. Nhạc nền (Vinh tạo bằng Suno,
+`chosen`); phim dùng phong cách ghi ở films.<phim>.style. `"music": false` thì không trộn nhạc nền. Nhạc nền (Vinh tạo bằng Suno,
 docs/case-motion-music.md): output/motion-audio/music/<phim>.mp3 nếu có, không thì theme.mp3 dùng chung
 — trộn dưới tiếng hiệu ứng và tự nhỏ đi khi có tiếng hiệu ứng. Thêm `--film <phim>` để chỉ trộn một phim.
 
@@ -31,6 +32,9 @@ import numpy as np
 
 ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 SOURCES = os.path.join(ROOT, "output", "motion-audio", "sources")
+# Kho nguồn ~4GB; worktree khác đã tải sẵn thì trỏ MOTION_AUDIO_SOURCES tới đó (nhiều thư mục thì ngăn
+# bằng os.pathsep) — tìm ở đó trước, rồi tới SOURCES của repo này.
+SEARCH = [p for p in os.environ.get("MOTION_AUDIO_SOURCES", "").split(os.pathsep) if p] + [SOURCES]
 MANIFEST = os.path.join(ROOT, "docs", "motion-audio-sources.json")
 SR = 44100
 FFMPEG = imageio_ffmpeg.get_ffmpeg_exe()
@@ -42,6 +46,8 @@ VARIANTS = os.path.join(ROOT, "output", "motion-audio", "variants")
 
 def download(manifest):
     for src in manifest["sources"]:
+        if not src.get("url"):  # nguồn tải từng file (vd. Mixkit) — xem trường "download" của nguồn
+            continue
         folder = os.path.join(SOURCES, src["id"])
         target = os.path.join(folder, src["file"])
         if os.path.exists(target):
@@ -55,10 +61,19 @@ def download(manifest):
 
 
 def find(src_id, name):
-    for base, _, files in os.walk(os.path.join(SOURCES, src_id)):
-        if name in files:
-            return os.path.join(base, name)
+    for root in SEARCH:
+        for base, _, files in os.walk(os.path.join(root, src_id)):
+            if name in files:
+                return os.path.join(base, name)
     raise FileNotFoundError(f"{src_id}/{name}")
+
+
+def soften(sig, spec):
+    """Hạ dải cao (high-shelf) cho phim không có nhạc che — tiếng hiệu ứng trần dễ chói tai."""
+    if not spec:
+        return sig
+    af = f"highshelf=f={spec.get('hz', 3000)}:g={spec.get('db', -6)},lowpass=f={spec.get('lowpass', 9000)}"
+    return ffmpeg_f32(["-f", "f32le", "-ar", str(SR), "-ac", "1", "-i", "-", "-af", af], sig.astype(np.float32).tobytes())
 
 
 def ffmpeg_f32(args, data=None):
@@ -150,6 +165,8 @@ def envelope(sig, seconds=0.05):
 def music_bed(film, spec, sfx):
     """Nhạc nền của phim (nếu có file): cắt từ `start`, mờ vào/ra, nhỏ hơn tiếng hiệu ứng `gain` dB và
     tự né (giảm tới `duck` dB) lúc tiếng hiệu ứng vang lên."""
+    if spec is False:  # phim chỉ có tiếng hiệu ứng (vd. intro)
+        return None
     path = next((p for p in (os.path.join(MUSIC, f"{film}.mp3"), os.path.join(MUSIC, "theme.mp3")) if os.path.exists(p)), None)
     if path is None:
         return None
@@ -197,6 +214,7 @@ def mix(manifest, film, out, style):
             sig, start = sig[-start:], 0
         track[start:start + len(sig)] += sig
     track = fade_out(track[:length], 0.05)
+    track = soften(track, manifest["films"][film].get("soften"))
     before = loudness(track)
     # Nén đỉnh làm bản trộn nhỏ đi một chút, nên chỉnh thêm một lượt cho sát mức đích.
     for _ in range(2):
@@ -241,7 +259,10 @@ def main():
         for film, spec in manifest["films"].items():
             if only and film != only:
                 continue
-            if "--variants" in sys.argv:
+            if "--style" in sys.argv:  # một phong cách → variants/<phim>-<phong cách>.mp3 để nghe so sánh
+                style = sys.argv[sys.argv.index("--style") + 1]
+                mix(manifest, film, os.path.join(VARIANTS, f"{film}-{style}.mp3"), style)
+            elif "--variants" in sys.argv:
                 for style in manifest["styles"]:
                     mix(manifest, film, os.path.join(VARIANTS, f"{film}-{style}.mp3"), style)
             else:

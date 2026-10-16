@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { content } from "@/content/content.vi";
-import { INTRO_STATE_EVENT } from "@/components/portfolio/IntroVideo";
+import { INTRO_STATE_EVENT } from "@/components/portfolio/Intro";
 import { music, PREF_KEY } from "./music";
 import { RadioWidget } from "./RadioWidget";
 

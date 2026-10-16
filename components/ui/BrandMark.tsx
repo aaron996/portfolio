@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useCompanions } from "@/components/companions/store";
+import { LOGO_CELLS, useCompanions } from "@/components/companions/store";
 
 const IDLE = [2, 4, 6];
 /* Bốn thế "đường chéo" mà ô sáng lần lượt chuyển sang — giống một ma trận đang
@@ -25,6 +25,7 @@ export function BrandMark({ className = "", companions = false }: { className?: 
   const svgRef = useRef<SVGSVGElement>(null);
   const state = useCompanions();
   const away = companions && state.enabled && state.place !== "home";
+  const missing = companions && state.enabled ? state.absent.map(i => LOGO_CELLS[i]) : [];
   const awayRef = useRef(away);
   awayRef.current = away;
 
@@ -69,7 +70,7 @@ export function BrandMark({ className = "", companions = false }: { className?: 
   return (
     <svg ref={svgRef} viewBox="0 0 26 26" className={className} aria-hidden="true">
       {CELLS.map((cell) => {
-        const empty = away && IDLE.includes(cell.index);
+        const empty = (away && IDLE.includes(cell.index)) || missing.includes(cell.index);
         return <rect
           key={cell.index}
           x={empty ? cell.x + 0.5 : cell.x}
