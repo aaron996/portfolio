@@ -50,12 +50,19 @@
 .pf-radio :focus-visible { outline: 2px solid var(--radio-accent); outline-offset: -2px; }
 .pf-radio-progress { display: block; height: 3px; background: var(--radio-line); }
 .pf-radio-progress > span { display: block; height: 100%; background: var(--radio-accent); transform: scaleX(var(--pf-radio-progress, 0)); transform-origin: left; }
-.pf-radio[data-collapsed="true"] { width: 164px; }
+
 .pf-radio ::selection { background: var(--radio-accent); color: var(--radio-paper); }
 @keyframes pf-radio-spin { to { transform: rotate(360deg); } }
 @media (max-width: 400px) { .pf-radio { right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); } }
 @media (prefers-reduced-motion: reduce) { .pf-radio-disc { animation: none; } .pf-radio-control { transition: none; } }
 
 .pf-radio[data-multiple="true"] { width: 408px; }
-.pf-radio[data-multiple="true"][data-collapsed="true"] { width: 164px; }
+/* Thu gọn chỉ giữ chiếc đĩa, không vỏ hộp hoặc nút phụ. */
+.pf-radio[data-collapsed="true"] { width: 56px; border: 0; border-radius: 50%; background: transparent; overflow: visible; }
+.pf-radio[data-collapsed="true"] .pf-radio-main { padding: 0; gap: 0; }
+.pf-radio[data-collapsed="true"] .pf-radio-drag { min-height: 56px; border-radius: 50%; }
+.pf-radio[data-collapsed="true"] .pf-radio-disc { flex-basis: 56px; width: 56px; height: 56px; box-shadow: 0 4px 12px rgb(22 22 20 / .16); }
+.pf-radio-dismiss { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); z-index: 57; display: flex; align-items: center; gap: 8px; padding: 12px 18px; border: 1px solid #d9d5c8; border-radius: 999px; background: #fbfaf6; color: #6b6960; font: 13px var(--font-inter), system-ui, sans-serif; white-space: nowrap; pointer-events: none; transform: translateX(-50%); transition: background-color 150ms, color 150ms; }
+.pf-radio-dismiss[data-ready="true"] { background: #161614; color: #fbfaf6; border-color: #161614; }
+@media (prefers-reduced-motion: reduce) { .pf-radio-dismiss { transition: none; } }
 .pf-radio[data-hero="true"] { bottom: max(112px, calc(env(safe-area-inset-bottom) + 112px)); }
