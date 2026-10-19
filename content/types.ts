@@ -525,6 +525,7 @@ export interface HomeContent {
     on: string; off: string; label: string; artist: string;
     playing: string; paused: string; loading: string; blocked: string; error: string; held: string;
     retry: string; previous: string; next: string; move: string; minimize: string; expand: string;
+    dismissHint: string; dismissDrag: string; dismissRelease: string;
     mv: { src: string; poster: string; title: string; meta: string; duration: string; play: string; close: string; label: string };
   };
 }

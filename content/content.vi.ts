@@ -150,6 +150,9 @@ export const content: SiteContent = {
       move: "Di chuyển radio. Kéo hoặc dùng phím mũi tên; Home để về góc dưới.",
       minimize: "Thu gọn radio",
       expand: "Mở rộng radio",
+      dismissHint: "Giữ và kéo xuống để tắt; phím Delete để tắt bằng bàn phím.",
+      dismissDrag: "Kéo xuống để tắt nhạc",
+      dismissRelease: "Thả để tắt nhạc",
       mv: {
         src: "/portfolio/video/how-long-mv.mp4",
         poster: "/portfolio/video/how-long-mv-poster.jpg",
