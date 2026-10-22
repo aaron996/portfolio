@@ -951,10 +951,10 @@ function BuddyShape({ b, color, stage }: { b: Buddy; color: string; stage: numbe
   </g>;
 }
 
-export function IntroFilm({ freeze, sfx, muted, onMuteFallback, onEnd, onTone, trungOut }: {
+export function IntroFilm({ freeze, sfx, muted, onMuteFallback, onUnmute, onEnd, onTone, trungOut }: {
   freeze: number | null; onEnd: () => void; onTone: (tone: "dark" | "light" | "clear") => void;
   /** Tiếng hiệu ứng (một file trộn sẵn, chạy theo giờ thật). Đứng yên một khung thì không phát. */
-  sfx: string; muted: boolean; onMuteFallback: () => void;
+  sfx: string; muted: boolean; onMuteFallback: () => void; onUnmute: () => void;
   /** Trang đang để trống ô của Trùng trong logo nav (Trùng nấp trong biểu đồ hero). */
   trungOut: boolean;
 }) {
@@ -1001,12 +1001,27 @@ export function IntroFilm({ freeze, sfx, muted, onMuteFallback, onEnd, onTone, t
 
   useEffect(() => {
     if (freeze !== null) { setT(freeze); return; }
-    let raf = 0, last = performance.now(), clock = 0, ended = false;
+    let raf = 0, last = performance.now(), clock = 0, ended = false, unlockCleanup = () => {};
     // Trình duyệt chặn phát có tiếng thì báo lên để nút loa hiện "Bật tiếng"; phim vẫn chạy.
     const audio = audioRef.current;
     if (audio && !audio.muted) {
       audio.currentTime = 0;
-      audio.play().catch(() => onMuteFallback());
+      audio.play().catch(() => {
+        onMuteFallback();
+        // Chưa có cú chạm nào nên trình duyệt chặn: chạm/nhấn phím đầu tiên (trừ nút loa, tự lo) thì bật tiếng.
+        const unlock = (e: Event) => {
+          if (e.target instanceof Element && e.target.closest(".pf-intro-icon-btn")) return;
+          cleanup();
+          onUnmute();
+        };
+        const cleanup = () => {
+          window.removeEventListener("pointerdown", unlock, true);
+          window.removeEventListener("keydown", unlock, true);
+        };
+        window.addEventListener("pointerdown", unlock, true);
+        window.addEventListener("keydown", unlock, true);
+        unlockCleanup = cleanup;
+      });
     }
     const tick = (now: number) => {
       // Tab ẩn thì rAF dừng; khi quay lại không nhảy cóc qua đoạn đã lỡ.
@@ -1021,9 +1036,9 @@ export function IntroFilm({ freeze, sfx, muted, onMuteFallback, onEnd, onTone, t
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
-    return () => { cancelAnimationFrame(raf); audio?.pause(); };
+    return () => { cancelAnimationFrame(raf); audio?.pause(); unlockCleanup(); };
     // Chỉ chạy một lần mỗi lượt phim; `muted` đổi giữa chừng do effect riêng lo.
-  }, [freeze, onEnd, onMuteFallback]);
+  }, [freeze, onEnd, onMuteFallback, onUnmute]);
 
   // Mép ngoài hộp thoại (rãnh thanh cuộn) cùng tông với khung hình: tối lúc còn dí sát Chấm, sáng sau đó.
   // Cuối phim nền tan hẳn: hộp thoại trong suốt để trang thật hiện ra sau logo đang bay.
@@ -1141,7 +1156,5 @@ function Scene({ W, H, t, cam, chart, dash, ship: box, logo, sign: signed, stage
         </text>
       </g>}
     </g>
-    {/* Nối từ nhịp đen của teaser cũ (đen tuyền): bắt đầu đen tuyền rồi mới lộ thân Chấm (đen ấm). */}
-    {t < 0.8 && <rect width={W} height={H} fill="#000" opacity={1 - seg(t, 0.15, 0.8)} />}
   </svg>;
 }

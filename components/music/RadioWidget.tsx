@@ -31,7 +31,6 @@ export function RadioWidget() {
   const [collapsed, setCollapsed] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [dismissReady, setDismissReady] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
   const [heroVisible, setHeroVisible] = useState(false);
   const pathname = usePathname();
   const drag = useRef<{ id: number; x: number; y: number; origin: Position; moved: boolean } | null>(null);
@@ -84,9 +83,12 @@ export function RadioWidget() {
     return () => { observer.disconnect(); window.removeEventListener("resize", resize); };
   }, [suppressed]);
 
+  // Radio vừa hiện ra sau MV (nhạc còn tắt) thì lộ dạng đĩa thu nhỏ; hiện do người xem bật nhạc thì giữ nguyên dạng đang lưu.
+  const wasRevealed = useRef(s.revealed);
   useEffect(() => {
-    if (s.enabled) setDismissed(false);
-  }, [s.enabled]);
+    if (s.revealed && !wasRevealed.current && !s.enabled) collapse(true);
+    wasRevealed.current = s.revealed;
+  }, [s.revealed]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function collapse(next: boolean) {
     setCollapsed(next);
@@ -95,7 +97,7 @@ export function RadioWidget() {
 
   function dismiss() {
     music.setEnabled(false);
-    setDismissed(true);
+    music.setRevealed(false);
     setPosition(null);
     try { localStorage.removeItem(POSITION_KEY); } catch { /* Optional storage. */ }
     // Keep a keyboard route back after removing the focused disc.
@@ -183,7 +185,7 @@ export function RadioWidget() {
     s.status === "idle" ? t.blocked : t[s.status];
 
   return <>
-  <aside ref={box} className="pf-radio" aria-label={t.label} hidden={suppressed || (dismissed && !s.enabled)}
+  <aside ref={box} className="pf-radio" aria-label={t.label} hidden={suppressed || !s.revealed}
     data-playing={s.playing} data-collapsed={collapsed} data-dragging={dragging} data-multiple={t.tracks.length > 1} data-hero={heroVisible}
     style={position ? { left: position.x, top: position.y, right: "auto", bottom: "auto" } as CSSProperties : undefined}>
     <div className="pf-radio-main">

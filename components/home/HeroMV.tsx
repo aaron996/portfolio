@@ -8,7 +8,8 @@ import { music } from "@/components/music/music";
 
 /* MV "How Long" ở hero. Khung được đặt sẵn (ẩn) ngay khi sắp xong biểu đồ để Trùng đo chỗ
    đứng; Trùng nhảy lên mép trên và giậm thì `shown` bật, màn hình mở ra như TV cũ.
-   Bấm khung: nhạc nền im, MV phát to có tiếng; đóng lại thì nhạc chạy tiếp. */
+   Bấm khung: MV phát to có tiếng (nhạc nền nếu đang bật thì im); đóng lại thì radio hiện ra
+   dạng đĩa thu nhỏ ở góc — nhạc vẫn tắt cho tới khi người xem tự bấm. */
 export function HeroMV({ done, shown }: { done: boolean; shown: boolean }) {
   const mv = content.home.music.mv;
   const [open, setOpen] = useState(false);
@@ -29,6 +30,7 @@ export function HeroMV({ done, shown }: { done: boolean; shown: boolean }) {
       if (d.open) d.close();
       document.body.style.overflow = prevOverflow;
       music.hold("mv", false);
+      music.setRevealed(true);
       cardRef.current?.focus({ preventScroll: true });
     };
   }, [open]);

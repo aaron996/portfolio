@@ -16,7 +16,11 @@ Vị trí được giữ trong màn hình khi đổi kích thước; reduced mot
 
 - `BackgroundMusic` ở root layout giữ một thẻ audio qua các route. Lần tương tác đầu
   mở khóa phát âm thanh; nếu browser chặn thì nút radio cho phép thử lại trực tiếp.
-- Mặc định cho phép phát, âm lượng 35%. `pf-music=0` nhớ lựa chọn tắt âm trước đó.
+- **Vào app nhạc tắt** (âm lượng 35% khi bật) và **radio chưa hiện**. Radio chỉ hiện sau khi người
+  xem xem MV ở hero và đóng lại — lúc đó nó hiện ở dạng đĩa thu nhỏ ở góc, nhạc vẫn tắt cho tới khi
+  người xem bấm đĩa rồi bấm phát. Bật nhạc bằng nút loa trên nav cũng làm radio hiện (giữ dạng
+  thu gọn/mở đã lưu). Kéo đĩa xuống để tắt thì radio ẩn lại. Không nhớ gì qua lần tải lại trang
+  (`revealed` và `enabled` chỉ nằm trong `music.ts`).
   Tắt âm dừng phần phát; bật lại tiếp tục vị trí đang nghe.
 - Intro, MV, phim case và `/game` xin nhường tiếng bằng `music.hold()`. Tạm dừng ngay
   để không chồng tiếng; hết các lý do giữ thì tiếp tục nếu người xem vẫn bật âm.

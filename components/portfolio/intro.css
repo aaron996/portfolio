@@ -10,14 +10,9 @@ html:has(.pf-intro[open][data-tone="light"]) { background: #f3f1ea; }
 .pf-intro[data-tone="clear"], .pf-intro[data-tone="clear"]::backdrop { background: transparent; }
 html:has(.pf-intro[open][data-tone="clear"]) { background: #f3f1ea; }
 .pf-intro-film { position: absolute; inset: 0; }
-/* Đoạn teaser video cũ: nền đen tuyền như video, khung 16:9 vừa màn hình. */
-.pf-intro[data-stage="video"], .pf-intro[data-stage="video"]::backdrop,
-.pf-intro[data-stage="gap"], .pf-intro[data-stage="gap"]::backdrop { background: #000; }
-html:has(.pf-intro[open][data-stage="video"]), html:has(.pf-intro[open][data-stage="gap"]) { background: #000; }
-/* Hết teaser: khung cuối tối dần về đen tuyền trước nhịp nghỉ. */
-.pf-intro-fade { position: absolute; inset: 0; background: #000; animation: pf-intro-fade ease-in both; }
-@keyframes pf-intro-fade { from { opacity: 0; } to { opacity: 1; } }
-.pf-intro-video { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; background: #000; }
+/* Phim mở thẳng từ màn đen (thân Chấm dí sát ống kính): trang mờ dần sang đen thay vì giật cắt. */
+.pf-intro[open][data-phase="playing"] { animation: pf-intro-in 400ms ease-out both; }
+@keyframes pf-intro-in { from { opacity: 0; } to { opacity: 1; } }
 .pf-intro-icon-btn { display: grid; place-items: center; width: 48px; height: 48px; padding: 0; border-radius: 50%; border: 1px solid rgba(242, 245, 236, .35); background: rgba(7, 13, 10, .6); color: #f2f5ec; cursor: pointer; backdrop-filter: blur(6px); transition: background-color 160ms ease-out, border-color 160ms ease-out, transform 160ms ease-out; }
 .pf-intro-icon-btn:hover { background: rgba(35, 56, 44, .85); border-color: rgba(242, 245, 236, .6); transform: scale(1.06); }
 .pf-intro-icon-btn:focus-visible { outline: 2px solid #d4f236; outline-offset: 4px; }
@@ -36,4 +31,5 @@ html:has(.pf-intro[open][data-stage="video"]), html:has(.pf-intro[open][data-sta
 
 @media (prefers-reduced-motion: reduce) {
   .pf-intro { transition: none; }
+  .pf-intro[open][data-phase="playing"] { animation: none; }
 }

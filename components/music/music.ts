@@ -1,20 +1,20 @@
 /* Một nguồn trạng thái cho nav, widget và audio ở root layout. Các video xin nhường
-   tiếng qua hold(); chỉ BackgroundMusic điều khiển phần phát. */
+   tiếng qua hold(); chỉ BackgroundMusic điều khiển phần phát.
+   Vào app nhạc tắt và radio chưa hiện: radio chỉ hiện (revealed) sau khi người xem xem MV,
+   hoặc khi tự bật nhạc ở nút trên nav. Không nhớ qua lần tải lại trang. */
 export type MusicStatus = "idle" | "loading" | "playing" | "blocked" | "error";
 type State = {
-  enabled: boolean; playing: boolean; holds: string[]; status: MusicStatus;
+  enabled: boolean; revealed: boolean; playing: boolean; holds: string[]; status: MusicStatus;
   trackIndex: number; request: number; elapsed: number; duration: number;
 };
 
 const SERVER: State = {
-  enabled: true, playing: false, holds: [], status: "idle",
+  enabled: false, revealed: false, playing: false, holds: [], status: "idle",
   trackIndex: 0, request: 0, elapsed: 0, duration: 0,
 };
 let state = SERVER;
 const subs = new Set<() => void>();
 const emit = () => subs.forEach((fn) => fn());
-export const PREF_KEY = "pf-music";
-
 export const music = {
   get: () => state,
   subscribe(fn: () => void) {
@@ -22,8 +22,12 @@ export const music = {
     return () => { subs.delete(fn); };
   },
   setEnabled(enabled: boolean) {
-    state = { ...state, enabled, request: state.request + 1 };
-    try { localStorage.setItem(PREF_KEY, enabled ? "1" : "0"); } catch { /* Optional storage. */ }
+    state = { ...state, enabled, revealed: state.revealed || enabled, request: state.request + 1 };
+    emit();
+  },
+  setRevealed(revealed: boolean) {
+    if (state.revealed === revealed) return;
+    state = { ...state, revealed };
     emit();
   },
   setStatus(status: MusicStatus) {

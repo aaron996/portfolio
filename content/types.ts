@@ -598,8 +598,6 @@ export interface PortfolioPrototype {
   /** Intro motion phủ toàn màn hình khi mở trang chủ (một lần mỗi phiên). Kịch bản: docs/intro-motion.md. */
   intro: {
     label: string; skip: string; replay: string; soundOn: string; soundOff: string;
-    /** Teaser video cũ — phát trước, cắt ở nhịp đen rồi nối vào phim mới. */
-    video: string;
     /** Bản trộn tiếng hiệu ứng của phim mới (scripts/motion-sfx.py --film intro). */
     sfx: string;
     /** Bong bóng thoại trong phim — tối đa một ký tự hoặc hai từ. */
