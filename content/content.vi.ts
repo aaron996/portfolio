@@ -28,7 +28,6 @@ export const content: SiteContent = {
       replay: "Xem lại intro",
       soundOn: "Bật tiếng",
       soundOff: "Tắt tiếng",
-      video: "/portfolio/video/intro-teaser.mp4",
       sfx: "/portfolio/intro-sfx.mp3",
       bubbles: { startled: "!" },
       captions: { analyze: "MAKE SENSE OF DATA.", build: "BUILD WITH AI.", ship: "SHIP IT." },

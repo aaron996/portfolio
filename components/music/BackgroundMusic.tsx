@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { content } from "@/content/content.vi";
 import { INTRO_STATE_EVENT } from "@/components/portfolio/Intro";
-import { music, PREF_KEY } from "./music";
+import { music } from "./music";
 import { RadioWidget } from "./RadioWidget";
 
 const tracks = content.home.music.tracks;
@@ -61,7 +61,6 @@ export function BackgroundMusic() {
     };
     const intro = () => music.hold("intro", document.documentElement.dataset.introActive === "1");
 
-    try { if (localStorage.getItem(PREF_KEY) === "0") music.setEnabled(false); } catch { /* Optional storage. */ }
     intro();
     const unsubscribe = music.subscribe(sync);
     sync();

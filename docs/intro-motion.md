@@ -1,17 +1,15 @@
 # Intro motion — kịch bản
 
-Intro motion graphic do ba bạn đồng hành diễn (`docs/companions.md`), nối sau teaser video
-cũ (ảnh chụp app + chữ). Vinh chốt hướng ngày 2026-10-16.
+Intro motion graphic do ba bạn đồng hành diễn (`docs/companions.md`). Vinh chốt hướng ngày
+2026-10-16.
 
 ## Đã chốt
 
-- **Giữ cả intro cũ lẫn mới, chạy nối nhau** (`components/portfolio/Intro.tsx`): teaser video
-  `public/portfolio/video/intro-teaser.mp4` phát **trọn 15s**, giữ cú drop cuối (nền lime, VINH
-  LUONG, tiếng braam). Hết video thì khung cuối tối dần về đen tuyền (0,45s) và lặng một nhịp
-  (tổng `GAP_MS` = 1,3s), rồi phim mới mở ra từ chính màn đen đó (màn đen là Chấm). Bản đầu cắt
-  teaser ở nhịp đen giây 12,8 để nối liền — Vinh muốn giữ cú drop nên đổi lại (2026-10-16).
-  Cả chuỗi ≈ 41s; "Bỏ qua" bỏ cả hai.
-- **Phim mới chỉ có tiếng hiệu ứng, không nhạc.** Tiếng của teaser cũ giữ nguyên trong video.
+- **Chỉ còn phim dựng bằng code** (2026-10-22): teaser video cũ (ảnh chụp app + chữ, 15s) đã bỏ cùng
+  file `intro-teaser.mp4`; `components/portfolio/Intro.tsx` mở thẳng phim. Hộp thoại mờ dần vào
+  (400ms) thay cho nhịp nghỉ đen của teaser; phim vẫn mở từ màn đen — màn đen là Chấm. Mã nguồn
+  dựng teaser còn ở `teaser/` phòng khi cần quay lại.
+- **Phim chỉ có tiếng hiệu ứng, không nhạc.**
 
 - **Dựng live**, không phải file video: vẽ bằng SVG trong trang (`components/portfolio/IntroFilm.tsx`),
   khung hình co theo màn hình, pixel nét ở mọi cỡ. Cuối intro logo bay đúng vào logo
@@ -63,7 +61,7 @@ Chấm thấy chữ I, nhảy lên làm dấu chấm.
 ## Tiếng
 
 Bảng tiếng ở `components/portfolio/introSfx.ts` (giờ phim, tên tiếng, độ to). Bản đầu 86 mốc mượn
-bộ "vui" của phim case bị chê **chói tai** (không có nhạc che, lại quá dày). Bản hiện tại 42 mốc, mỗi
+bộ "vui" của phim case bị chê **chói tai** (không có nhạc che, lại quá dày). Bản thứ hai 42 mốc, mỗi
 mốc là một vai riêng (slot `i-*` trong `docs/motion-audio-sources.json`) với hai bộ tiếng chọn theo độ
 chói đo được: **mem** (Adobe gỗ/lò xo/cao su, trọng tâm phổ ~450 Hz) và **mixkit** (Mixkit Cartoon,
 ~780 Hz; bản cũ ~1.760 Hz). Bản trộn còn hạ dải cao (`soften` của phim intro). **Vinh chọn mixkit**
@@ -82,3 +80,14 @@ Phát: teaser cố mở tiếng; trình duyệt chặn thì phát câm và nút 
 chạm nào thì Chrome chặn cả `<audio>` phát câm, nên tiếng phim mới chỉ chạy khi trang được phép phát
 có tiếng, hoặc khi người xem bấm loa — lúc đó tiếng vào từ đúng giây phim đang chiếu. Tiếng lệch
 đồng hồ phim quá 0,12s (vd. vừa quay lại tab) thì tự kéo về. `?intro=<giây>` (đứng yên) không có tiếng.
+
+### Giảm tần suất tiếng (2026-10-22)
+
+Còn **13 mốc** (từ 42): mỗi màn một đến hai tiếng ở bước ngoặt — Chấm giật mình, Lệch nảy, cột nhân
+đôi, cú đá, 97.5%, búa, AI lấp đầy, bắt lỗi, con dấu, sút thùng, Trùng giẫm đầu, còi rơi + uỵch, chuông cuối.
+Bỏ hết tiếng whoosh, pop, tick, rattle, fold, block và các tiếng đệm.
+
+`public/portfolio/intro-sfx.mp3` đã trộn lại từ bảng 13 mốc (style mixkit, −20 LUFS, đỉnh −5 dBFS); mỗi tiếng
+nhỏ hơn bản 42 mốc cũ khoảng 20% (mức chuẩn trên cả file nên hết tiếng đệm thì mỗi tiếng không to lên).
+Kho nguồn dùng lại từ worktree khác qua `MOTION_AUDIO_SOURCES` (Mixkit ở `intro-motion-graphic-*`, Adobe ở
+`motion-graphic-cases-*`).
